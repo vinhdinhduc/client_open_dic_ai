@@ -1,0 +1,44 @@
+{
+  "common": {
+    "appName": "Specialized Dictionary System",
+    "search": "Search",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "error": "An error occurred"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full Name",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful"
+  },
+  "term": {
+    "searchPlaceholder": "Enter term to search...",
+    "definition": "Definition",
+    "example": "Example",
+    "relatedTerms": "Related Terms",
+    "addToFavorite": "Add to Favorites",
+    "comment": "Comment",
+    "contribute": "Contribute Term"
+  },
+  "navigation": {
+    "home": "Home",
+    "terms": "Terms",
+    "favorites": "Favorites",
+    "contribute": "Contribute",
+    "admin": "Admin"
+  }
+}

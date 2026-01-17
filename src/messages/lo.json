@@ -1,0 +1,44 @@
+{
+  "common": {
+    "appName": "ລະບົບວັດຈະນານຸກົມສະເພາະດ້ານ",
+    "search": "ຄົ້ນຫາ",
+    "login": "ເຂົ້າສູ່ລະບົບ",
+    "logout": "ອອກຈາກລະບົບ",
+    "register": "ລົງທະບຽນ",
+    "save": "ບັນທຶກ",
+    "cancel": "ຍົກເລີກ",
+    "delete": "ລຶບ",
+    "edit": "ແກ້ໄຂ",
+    "submit": "ສົ່ງ",
+    "loading": "ກຳລັງໂຫຼດ...",
+    "noData": "ບໍ່ມີຂໍ້ມູນ",
+    "error": "ມີຂໍ້ຜິດພາດເກີດຂຶ້ນ"
+  },
+  "auth": {
+    "email": "ອີເມວ",
+    "password": "ລະຫັດຜ່ານ",
+    "fullName": "ຊື່ ແລະ ນາມສະກຸນ",
+    "confirmPassword": "ຢືນຢັນລະຫັດຜ່ານ",
+    "forgotPassword": "ລືມລະຫັດຜ່ານ?",
+    "dontHaveAccount": "ຍັງບໍ່ມີບັນຊີ?",
+    "alreadyHaveAccount": "ມີບັນຊີແລ້ວ?",
+    "loginSuccess": "ເຂົ້າສູ່ລະບົບສຳເລັດ",
+    "registerSuccess": "ລົງທະບຽນສຳເລັດ"
+  },
+  "term": {
+    "searchPlaceholder": "ປ້ອນຄຳສັບທີ່ຕ້ອງການຄົ້ນຫາ...",
+    "definition": "ຄວາມໝາຍ",
+    "example": "ຕົວຢ່າງ",
+    "relatedTerms": "ຄຳສັບທີ່ກ່ຽວຂ້ອງ",
+    "addToFavorite": "ເພີ່ມໃສ່ລາຍການທີ່ມັກ",
+    "comment": "ຄຳເຫັນ",
+    "contribute": "ປະກອບສ່ວນຄຳສັບ"
+  },
+  "navigation": {
+    "home": "ໜ້າຫຼັກ",
+    "terms": "ຄຳສັບ",
+    "favorites": "ລາຍການທີ່ມັກ",
+    "contribute": "ປະກອບສ່ວນ",
+    "admin": "ຄຸ້ມຄອງ"
+  }
+}

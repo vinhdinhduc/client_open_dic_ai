@@ -1,0 +1,44 @@
+{
+  "common": {
+    "appName": "Hệ thống Từ điển Chuyên ngành",
+    "search": "Tìm kiếm",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "register": "Đăng ký",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "submit": "Gửi",
+    "loading": "Đang tải...",
+    "noData": "Không có dữ liệu",
+    "error": "Có lỗi xảy ra"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mật khẩu",
+    "fullName": "Họ và tên",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "forgotPassword": "Quên mật khẩu?",
+    "dontHaveAccount": "Chưa có tài khoản?",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "loginSuccess": "Đăng nhập thành công",
+    "registerSuccess": "Đăng ký thành công"
+  },
+  "term": {
+    "searchPlaceholder": "Nhập thuật ngữ cần tra cứu...",
+    "definition": "Định nghĩa",
+    "example": "Ví dụ",
+    "relatedTerms": "Thuật ngữ liên quan",
+    "addToFavorite": "Thêm vào yêu thích",
+    "comment": "Bình luận",
+    "contribute": "Đóng góp thuật ngữ"
+  },
+  "navigation": {
+    "home": "Trang chủ",
+    "terms": "Thuật ngữ",
+    "favorites": "Yêu thích",
+    "contribute": "Đóng góp",
+    "admin": "Quản trị"
+  }
+}
