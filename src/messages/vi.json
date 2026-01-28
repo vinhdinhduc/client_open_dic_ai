@@ -12,7 +12,16 @@
     "submit": "Gửi",
     "loading": "Đang tải...",
     "noData": "Không có dữ liệu",
-    "error": "Có lỗi xảy ra"
+    "error": "Có lỗi xảy ra",
+    "success": "Thành công"
+  },
+  "navigation": {
+    "home": "Trang chủ",
+    "terms": "Thuật ngữ",
+    "favorites": "Yêu thích",
+    "contribute": "Đóng góp",
+    "admin": "Quản trị",
+    "profile": "Hồ sơ"
   },
   "auth": {
     "email": "Email",
@@ -23,7 +32,38 @@
     "dontHaveAccount": "Chưa có tài khoản?",
     "alreadyHaveAccount": "Đã có tài khoản?",
     "loginSuccess": "Đăng nhập thành công",
-    "registerSuccess": "Đăng ký thành công"
+    "registerSuccess": "Đăng ký thành công",
+    "loginTitle": "Đăng nhập vào hệ thống",
+    "registerTitle": "Tạo tài khoản mới"
+  },
+  "home": {
+    "title": "Hệ thống Từ điển Chuyên ngành",
+    "subtitle": "Đa ngôn ngữ",
+    "description": "Tra cứu thuật ngữ chuyên ngành nhanh chóng, chính xác với hỗ trợ đa ngôn ngữ Việt - Lào - Anh",
+    "searchPlaceholder": "Nhập thuật ngữ cần tra cứu...",
+    "searchButton": "Tìm kiếm",
+    "search": {
+      "placeholder": "Nhập thuật ngữ cần tra cứu...",
+      "inputLabel": "Ô tìm kiếm thuật ngữ",
+      "button": "Tìm kiếm",
+      "clear": "Xóa nội dung",
+      "noResults": "Không tìm thấy kết quả"
+    },
+    "feature1Title": "Đa ngôn ngữ",
+    "feature1Desc": "Hỗ trợ tra cứu thuật ngữ bằng tiếng Việt, Lào và Anh",
+    "feature2Title": "Cộng đồng đóng góp",
+    "feature2Desc": "Người dùng có thể đóng góp thuật ngữ mới và chỉnh sửa",
+    "feature3Title": "Cập nhật liên tục",
+    "feature3Desc": "Thuật ngữ được cập nhật thường xuyên với kiến thức mới",
+    "statsTerms": "Thuật ngữ",
+    "statsUsers": "Người dùng",
+    "statsCategories": "Chuyên ngành",
+    "ctaTitle": "Bắt đầu ngay hôm nay",
+    "ctaDescription": "Tham gia cộng đồng để học tập và chia sẻ kiến thức",
+    "ctaRegister": "Đăng ký miễn phí",
+    "ctaExplore": "Khám phá thuật ngữ",
+    "featuresTitle": "Tính năng nổi bật",
+    "featuresSubtitle": "Khám phá các tính năng giúp bạn học tập hiệu quả hơn"
   },
   "term": {
     "searchPlaceholder": "Nhập thuật ngữ cần tra cứu...",
@@ -31,14 +71,18 @@
     "example": "Ví dụ",
     "relatedTerms": "Thuật ngữ liên quan",
     "addToFavorite": "Thêm vào yêu thích",
+    "removeFromFavorite": "Xóa khỏi yêu thích",
     "comment": "Bình luận",
     "contribute": "Đóng góp thuật ngữ"
   },
-  "navigation": {
-    "home": "Trang chủ",
-    "terms": "Thuật ngữ",
-    "favorites": "Yêu thích",
-    "contribute": "Đóng góp",
-    "admin": "Quản trị"
+  "header": {
+    "language": "Ngôn ngữ",
+    "darkMode": "Chế độ tối",
+    "lightMode": "Chế độ sáng",
+    "admin": "Quản trị",
+    "profile": "Hồ sơ",
+    "myContributions": "Đóng góp của tôi",
+    "myFavorites": "Yêu thích của tôi",
+    "searchHistory": "Lịch sử tra cứu"
   }
 }

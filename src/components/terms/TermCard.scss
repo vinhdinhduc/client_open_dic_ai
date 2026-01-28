@@ -1,0 +1,320 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.term-card {
+    display: block;
+    padding: var(--spacing-lg);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    transition: all $transition-base;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px var(--shadow);
+        transform: translateY(-2px);
+
+        .term-card__view-text {
+            color: var(--primary);
+        }
+
+        .term-card__action svg {
+            transform: translateX(4px);
+        }
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    // Compact variant
+    &--compact {
+        padding: var(--spacing-md);
+
+        .term-card__title {
+            font-size: $font-base;
+        }
+
+        .term-card__definition {
+            font-size: $font-sm;
+            margin-top: var(--spacing-sm);
+        }
+    }
+
+    @include mobile {
+        padding: var(--spacing-md);
+    }
+}
+
+// Header
+.term-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.term-card__title-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.term-card__title {
+    font-size: $font-xl;
+    font-weight: $font-semibold;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin: 0;
+
+    @include mobile {
+        font-size: $font-lg;
+    }
+}
+
+// Source Badge
+.term-card__source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-size: $font-xs;
+    font-weight: $font-medium;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+
+    &.source-manual {
+        color: #059669;
+        background-color: rgba(5, 150, 105, 0.1);
+    }
+
+    &.source-ai {
+        color: #8b5cf6;
+        background-color: rgba(139, 92, 246, 0.1);
+    }
+
+    &.source-contribution {
+        color: #f59e0b;
+        background-color: rgba(245, 158, 11, 0.1);
+    }
+
+    &.source-import {
+        color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    svg {
+        flex-shrink: 0;
+    }
+}
+
+// Favorite Button
+.term-card__favorite-btn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all $transition-base;
+
+    &:hover {
+        background-color: var(--bg-secondary);
+        color: var(--danger);
+    }
+
+    &.favorited {
+        color: var(--danger);
+    }
+
+    &.animating {
+        animation: term-card-heart-beat 0.3s ease;
+    }
+
+    @include mobile {
+        width: 36px;
+        height: 36px;
+
+        svg {
+            width: 18px;
+            height: 18px;
+        }
+    }
+}
+
+@keyframes term-card-heart-beat {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+// Meta Row
+.term-card__meta-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.term-card__category {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: $font-xs;
+    font-weight: $font-medium;
+    color: var(--primary);
+    background-color: rgba(37, 99, 235, 0.1);
+    border-radius: var(--radius-sm);
+
+    svg {
+        flex-shrink: 0;
+    }
+}
+
+// Level Badge
+.term-card__level {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: $font-xs;
+    font-weight: $font-medium;
+    border-radius: var(--radius-sm);
+
+    &.level-basic {
+        color: #059669;
+        background-color: rgba(5, 150, 105, 0.1);
+    }
+
+    &.level-intermediate {
+        color: #f59e0b;
+        background-color: rgba(245, 158, 11, 0.1);
+    }
+
+    &.level-advanced {
+        color: #dc2626;
+        background-color: rgba(220, 38, 38, 0.1);
+    }
+
+    svg {
+        flex-shrink: 0;
+    }
+}
+
+// Definition
+.term-card__definition {
+    font-size: $font-base;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+
+    @include mobile {
+        font-size: $font-sm;
+    }
+}
+
+// Tags
+.term-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.term-card__tag {
+    padding: 4px 8px;
+    font-size: $font-xs;
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.term-card__tag-more {
+    padding: 4px 8px;
+    font-size: $font-xs;
+    color: var(--text-tertiary);
+    font-weight: $font-medium;
+}
+
+// Footer
+.term-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.term-card__stats {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+
+    @include mobile {
+        gap: var(--spacing-md);
+    }
+}
+
+.term-card__stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: $font-sm;
+    color: var(--text-tertiary);
+
+    svg {
+        flex-shrink: 0;
+    }
+
+    @include mobile {
+        font-size: $font-xs;
+
+        svg {
+            width: 14px;
+            height: 14px;
+        }
+    }
+}
+
+.term-card__action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: $font-sm;
+    font-weight: $font-medium;
+    color: var(--text-secondary);
+
+    svg {
+        transition: transform $transition-base;
+    }
+
+    @include mobile {
+        .term-card__view-text {
+            display: none;
+        }
+    }
+}
+
+.term-card__view-text {
+    transition: color $transition-base;
+}

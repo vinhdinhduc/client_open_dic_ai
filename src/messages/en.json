@@ -12,7 +12,16 @@
     "submit": "Submit",
     "loading": "Loading...",
     "noData": "No data available",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "navigation": {
+    "home": "Home",
+    "terms": "Terms",
+    "favorites": "Favorites",
+    "contribute": "Contribute",
+    "admin": "Admin",
+    "profile": "Profile"
   },
   "auth": {
     "email": "Email",
@@ -23,7 +32,38 @@
     "dontHaveAccount": "Don't have an account?",
     "alreadyHaveAccount": "Already have an account?",
     "loginSuccess": "Login successful",
-    "registerSuccess": "Registration successful"
+    "registerSuccess": "Registration successful",
+    "loginTitle": "Login to your account",
+    "registerTitle": "Create new account"
+  },
+  "home": {
+    "title": "Specialized Dictionary System",
+    "subtitle": "Multilingual",
+    "description": "Fast and accurate specialized terminology lookup with Vietnamese - Lao - English support",
+    "searchPlaceholder": "Enter term to search...",
+    "searchButton": "Search",
+    "search": {
+      "placeholder": "Enter term to search...",
+      "inputLabel": "Search term input",
+      "button": "Search",
+      "clear": "Clear input",
+      "noResults": "No results found"
+    },
+    "feature1Title": "Multilingual",
+    "feature1Desc": "Support terminology lookup in Vietnamese, Lao and English",
+    "feature2Title": "Community Contribution",
+    "feature2Desc": "Users can contribute new terms and edits",
+    "feature3Title": "Continuous Updates",
+    "feature3Desc": "Terms are regularly updated with new knowledge",
+    "statsTerms": "Terms",
+    "statsUsers": "Users",
+    "statsCategories": "Categories",
+    "ctaTitle": "Get Started Today",
+    "ctaDescription": "Join the community to learn and share knowledge",
+    "ctaRegister": "Register for free",
+    "ctaExplore": "Explore terms",
+    "featuresTitle": "Key Features",
+    "featuresSubtitle": "Discover features that help you learn more effectively"
   },
   "term": {
     "searchPlaceholder": "Enter term to search...",
@@ -31,14 +71,18 @@
     "example": "Example",
     "relatedTerms": "Related Terms",
     "addToFavorite": "Add to Favorites",
+    "removeFromFavorite": "Remove from Favorites",
     "comment": "Comment",
     "contribute": "Contribute Term"
   },
-  "navigation": {
-    "home": "Home",
-    "terms": "Terms",
-    "favorites": "Favorites",
-    "contribute": "Contribute",
-    "admin": "Admin"
+  "header": {
+    "language": "Language",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "admin": "Admin",
+    "profile": "Profile",
+    "myContributions": "My Contributions",
+    "myFavorites": "My Favorites",
+    "searchHistory": "Search History"
   }
 }

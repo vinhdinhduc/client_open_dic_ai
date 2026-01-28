@@ -12,7 +12,16 @@
     "submit": "ສົ່ງ",
     "loading": "ກຳລັງໂຫຼດ...",
     "noData": "ບໍ່ມີຂໍ້ມູນ",
-    "error": "ມີຂໍ້ຜິດພາດເກີດຂຶ້ນ"
+    "error": "ມີຂໍ້ຜິດພາດເກີດຂຶ້ນ",
+    "success": "ສຳເລັດ"
+  },
+  "navigation": {
+    "home": "ໜ້າຫຼັກ",
+    "terms": "ຄຳສັບ",
+    "favorites": "ລາຍການທີ່ມັກ",
+    "contribute": "ປະກອບສ່ວນ",
+    "admin": "ຄຸ້ມຄອງ",
+    "profile": "ໂປຣໄຟລ໌"
   },
   "auth": {
     "email": "ອີເມວ",
@@ -23,7 +32,38 @@
     "dontHaveAccount": "ຍັງບໍ່ມີບັນຊີ?",
     "alreadyHaveAccount": "ມີບັນຊີແລ້ວ?",
     "loginSuccess": "ເຂົ້າສູ່ລະບົບສຳເລັດ",
-    "registerSuccess": "ລົງທະບຽນສຳເລັດ"
+    "registerSuccess": "ລົງທະບຽນສຳເລັດ",
+    "loginTitle": "ເຂົ້າສູ່ລະບົບ",
+    "registerTitle": "ສ້າງບັນຊີໃໝ່"
+  },
+  "home": {
+    "title": "ລະບົບວັດຈະນານຸກົມສະເພາະດ້ານ",
+    "subtitle": "ຫຼາຍພາສາ",
+    "description": "ຄົ້ນຫາຄຳສັບສະເພາະດ້ານໄດ້ໄວ ແລະ ຖືກຕ້ອງ ດ້ວຍການສະໜັບສະໜູນພາສາລາວ - ຫວຽດນາມ - ອັງກິດ",
+    "searchPlaceholder": "ປ້ອນຄຳສັບທີ່ຕ້ອງການຄົ້ນຫາ...",
+    "searchButton": "ຄົ້ນຫາ",
+    "search": {
+      "placeholder": "ປ້ອນຄຳສັບທີ່ຕ້ອງການຄົ້ນຫາ...",
+      "inputLabel": "ປ້ອນຄຳສັບເພື່ອຄົ້ນຫາ",
+      "button": "ຄົ້ນຫາ",
+      "clear": "ລຶບຂໍ້ຄວາມ",
+      "noResults": "ບໍ່ພົບຜົນການຄົ້ນຫາ"
+    },
+    "feature1Title": "ຫຼາຍພາສາ",
+    "feature1Desc": "ສະໜັບສະໜູນການຄົ້ນຫາຄຳສັບເປັນພາສາລາວ, ຫວຽດນາມ ແລະ ອັງກິດ",
+    "feature2Title": "ການປະກອບສ່ວນຂອງຊຸມຊົນ",
+    "feature2Desc": "ຜູ້ໃຊ້ສາມາດປະກອບສ່ວນຄຳສັບໃໝ່ ແລະ ແກ້ໄຂ",
+    "feature3Title": "ອັບເດດຕໍ່ເນື່ອງ",
+    "feature3Desc": "ຄຳສັບຖືກອັບເດດເປັນປົກກະຕິດ້ວຍຄວາມຮູ້ໃໝ່",
+    "statsTerms": "ຄຳສັບ",
+    "statsUsers": "ຜູ້ໃຊ້",
+    "statsCategories": "ໝວດໝູ່",
+    "ctaTitle": "ເລີ່ມຕົ້ນວັນນີ້",
+    "ctaDescription": "ເຂົ້າຮ່ວມຊຸມຊົນເພື່ອຮຽນຮູ້ ແລະ ແບ່ງປັນຄວາມຮູ້",
+    "ctaRegister": "ລົງທະບຽນຟຣີ",
+    "ctaExplore": "ສຳຫຼວດຄຳສັບ",
+    "featuresTitle": "ຄຸນສົມບັດພິເສດ",
+    "featuresSubtitle": "ຄົ້ນພົບຄຸນສົມບັດທີ່ຊ່ວຍໃຫ້ທ່ານຮຽນຮູ້ໄດ້ດີຂຶ້ນ"
   },
   "term": {
     "searchPlaceholder": "ປ້ອນຄຳສັບທີ່ຕ້ອງການຄົ້ນຫາ...",
@@ -31,14 +71,18 @@
     "example": "ຕົວຢ່າງ",
     "relatedTerms": "ຄຳສັບທີ່ກ່ຽວຂ້ອງ",
     "addToFavorite": "ເພີ່ມໃສ່ລາຍການທີ່ມັກ",
+    "removeFromFavorite": "ລຶບອອກຈາກລາຍການທີ່ມັກ",
     "comment": "ຄຳເຫັນ",
     "contribute": "ປະກອບສ່ວນຄຳສັບ"
   },
-  "navigation": {
-    "home": "ໜ້າຫຼັກ",
-    "terms": "ຄຳສັບ",
-    "favorites": "ລາຍການທີ່ມັກ",
-    "contribute": "ປະກອບສ່ວນ",
-    "admin": "ຄຸ້ມຄອງ"
+  "header": {
+    "language": "ພາສາ",
+    "darkMode": "ໂໝດມືດ",
+    "lightMode": "ໂໝດແສງ",
+    "admin": "ຜູ້ຄຸ້ມຄອງ",
+    "profile": "ໂປຣໄຟລ໌",
+    "myContributions": "ການປະກອບສ່ວນຂອງຂ້ອຍ",
+    "myFavorites": "ລາຍການທີ່ມັກ",
+    "searchHistory": "ປະຫວັດການຄົ້ນຫາ"
   }
 }

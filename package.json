@@ -9,12 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/free-regular-svg-icons": "^7.1.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/react-fontawesome": "^3.1.1",
     "axios": "^1.13.2",
+    "lucide-react": "^0.562.0",
     "next": "14.2.35",
     "next-intl": "^4.7.0",
+    "next-themes": "^0.4.6",
     "react": "^18",
     "react-dom": "^18",
-    "react-hot-toast": "^2.6.0"
+    "react-hot-toast": "^2.6.0",
+    "react-loader-spinner": "^8.0.2",
+    "sass": "^1.97.3"
   },
   "devDependencies": {
     "@types/node": "^20",

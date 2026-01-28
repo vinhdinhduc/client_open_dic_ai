@@ -1,0 +1,709 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.search-bar {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+
+    // Input wrapper với các buttons
+    &__input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: var(--bg-primary);
+        border: 2px solid transparent;
+        border-radius: 24px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06),
+            0 0 0 1px var(--border-color);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        transform: translateY(0);
+
+        // Gradient border effect
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--primary) 0%, #60a5fa 50%, var(--primary) 100%);
+            -webkit-mask:
+                linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+            mask:
+                linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        // Floating effect on hover
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04),
+                0 0 0 1px rgba(37, 99, 235, 0.1);
+
+            &::before {
+                opacity: 0.5;
+            }
+        }
+
+        // Focus state với glow effect
+        &:focus-within {
+            transform: translateY(-6px);
+            border-color: transparent;
+            box-shadow:
+                0 25px 50px -12px rgba(37, 99, 235, 0.25),
+                0 0 30px rgba(37, 99, 235, 0.15),
+                0 0 0 1px var(--primary);
+
+            &::before {
+                opacity: 1;
+                background: linear-gradient(
+                    135deg,
+                    var(--primary) 0%,
+                    #60a5fa 25%,
+                    #a78bfa 50%,
+                    #60a5fa 75%,
+                    var(--primary) 100%
+                );
+                background-size: 200% 200%;
+                animation: gradientFlow 3s ease infinite;
+            }
+
+            [data-theme="dark"] & {
+                box-shadow:
+                    0 25px 50px -12px rgba(59, 130, 246, 0.3),
+                    0 0 40px rgba(59, 130, 246, 0.2),
+                    0 0 0 1px var(--primary);
+            }
+        }
+
+        // Active/pressed state
+        &:active {
+            transform: translateY(-2px);
+            transition: all 0.1s ease;
+        }
+    }
+
+    // Input field
+    &__input {
+        flex: 1;
+        padding: 18px 24px;
+        padding-right: 130px;
+        font-size: $font-base;
+        font-weight: $font-normal;
+        color: var(--text-primary);
+        background: transparent;
+        border: none;
+        outline: none;
+        line-height: 1.5;
+        transition: all 0.3s ease;
+
+        &::placeholder {
+            color: var(--text-tertiary);
+            font-weight: $font-normal;
+            transition: all 0.3s ease;
+        }
+
+        &:focus::placeholder {
+            opacity: 0.5;
+            transform: translateX(4px);
+        }
+
+        @include mobile {
+            padding: 14px 16px;
+            padding-right: 110px;
+            font-size: $font-sm;
+        }
+    }
+
+    // Search button với gradient và shine effect
+    &__search-btn {
+        position: absolute;
+        right: 12px;
+        @include flex-center;
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow:
+            0 4px 12px rgba(37, 99, 235, 0.3),
+            0 2px 4px rgba(37, 99, 235, 0.2);
+        overflow: hidden;
+        position: relative;
+
+        // Shine effect
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+            transition: transform 0.3s ease;
+        }
+
+        &:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow:
+                0 8px 20px rgba(37, 99, 235, 0.4),
+                0 4px 8px rgba(37, 99, 235, 0.3);
+
+            &::before {
+                left: 100%;
+            }
+
+            svg {
+                transform: scale(1.1) rotate(-5deg);
+            }
+        }
+
+        &:active {
+            transform: scale(0.95) rotate(0deg);
+            box-shadow:
+                0 2px 8px rgba(37, 99, 235, 0.3),
+                0 1px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        @include mobile {
+            width: 40px;
+            height: 40px;
+            right: 10px;
+            border-radius: 12px;
+
+            svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    }
+
+    // Loading spinner với gradient
+    &__loading {
+        position: absolute;
+        right: 76px;
+        @include flex-center;
+        animation: float 2s ease-in-out infinite;
+
+        @include mobile {
+            right: 66px;
+        }
+    }
+
+    &__spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid transparent;
+        border-top-color: var(--primary);
+        border-right-color: #60a5fa;
+        border-radius: 50%;
+        animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+
+        @include mobile {
+            width: 20px;
+            height: 20px;
+            border-width: 2.5px;
+        }
+    }
+
+    // Clear button với ripple effect
+    &__clear-btn {
+        position: absolute;
+        right: 76px;
+        @include flex-center;
+        width: 36px;
+        height: 36px;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0.7;
+        overflow: hidden;
+
+        // Ripple effect
+        &::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 50%;
+            transform: scale(0);
+            opacity: 0.3;
+            transition:
+                transform 0.4s ease,
+                opacity 0.4s ease;
+        }
+
+        svg {
+            width: 16px;
+            height: 16px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
+
+        &:hover {
+            opacity: 1;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+
+            svg {
+                transform: rotate(-90deg);
+            }
+        }
+
+        &:active {
+            transform: scale(0.9) rotate(90deg);
+
+            &::after {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @include mobile {
+            width: 32px;
+            height: 32px;
+            right: 66px;
+            border-radius: 10px;
+
+            svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
+
+    // Suggestions dropdown với glassmorphism
+    &__suggestion {
+        position: absolute;
+        top: calc(100% + 12px);
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        box-shadow:
+            0 20px 25px -5px rgba(0, 0, 0, 0.1),
+            0 10px 10px -5px rgba(0, 0, 0, 0.04),
+            0 0 0 1px rgba(0, 0, 0, 0.05);
+        max-height: 400px;
+        overflow: hidden;
+        z-index: $z-dropdown;
+        animation: slideDownFade 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: top;
+
+        [data-theme="dark"] & {
+            background: rgba(26, 26, 26, 0.95);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        // Scrollable content wrapper
+        &-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        // Custom scrollbar với gradient
+        &::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 0 20px 20px 0;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary) 0%, #60a5fa 100%);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background: linear-gradient(180deg, var(--primary-hover) 0%, var(--primary) 100%);
+                background-clip: padding-box;
+            }
+        }
+
+        @include mobile {
+            max-height: 300px;
+            border-radius: 16px;
+        }
+    }
+
+    // Suggestion item với wave effect
+    &__suggestion-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-md;
+        padding: 16px 20px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+
+        [data-theme="dark"] & {
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+
+        // Wave effect background
+        &::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(37, 99, 235, 0.05) 0%,
+                rgba(37, 99, 235, 0.1) 50%,
+                rgba(37, 99, 235, 0.05) 100%
+            );
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover,
+        &--selected {
+            background: rgba(37, 99, 235, 0.05);
+            transform: translateX(4px);
+            padding-left: 24px;
+
+            &::before {
+                width: 100%;
+            }
+
+            .search-bar__term-name {
+                color: var(--primary);
+                font-weight: $font-semibold;
+                transform: translateX(2px);
+            }
+
+            .search-bar__category-badge {
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            }
+
+            [data-theme="dark"] & {
+                background: rgba(59, 130, 246, 0.1);
+            }
+        }
+
+        &:active {
+            transform: translateX(2px) scale(0.98);
+        }
+
+        @include mobile {
+            padding: 12px 16px;
+            gap: $spacing-sm;
+        }
+
+        & > * {
+            position: relative;
+            z-index: 1;
+        }
+    }
+
+    // Term name với typing effect
+    &__term-name {
+        flex: 1;
+        font-size: $font-base;
+        color: var(--text-primary);
+        font-weight: $font-normal;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        @include truncate;
+
+        @include mobile {
+            font-size: $font-sm;
+        }
+    }
+
+    // Category badge với 3D effect
+    &__category-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+        color: white;
+        font-size: $font-xs;
+        font-weight: $font-semibold;
+        border-radius: 20px;
+        white-space: nowrap;
+        box-shadow:
+            0 4px 8px rgba(37, 99, 235, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+
+        // Shimmer effect
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .search-bar__suggestion-item:hover &,
+        .search-bar__suggestion-item--selected & {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            transform: translateY(-2px);
+
+            &::before {
+                left: 100%;
+                transition: left 0.6s ease;
+            }
+        }
+
+        @include mobile {
+            padding: 4px 10px;
+            font-size: 10px;
+        }
+    }
+
+    // No results với bounce animation
+    &__no-results {
+        padding: $spacing-xl;
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: $font-sm;
+        font-style: italic;
+        animation: fadeInBounce 0.5s ease;
+
+        @include mobile {
+            padding: $spacing-lg;
+            font-size: $font-xs;
+        }
+    }
+}
+
+// Animations
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes fadeInBounce {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(5px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+// Variations for different contexts
+.search-bar {
+    // Compact version
+    &--compact {
+        max-width: 500px;
+
+        .search-bar__input {
+            padding: 14px 18px;
+            padding-right: 110px;
+            font-size: $font-sm;
+        }
+
+        .search-bar__search-btn {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    // Large version for hero sections
+    &--large {
+        max-width: 900px;
+
+        .search-bar__input-wrapper {
+            border-radius: 28px;
+
+            &:focus-within {
+                transform: translateY(-8px);
+            }
+        }
+
+        .search-bar__input {
+            padding: 22px 28px;
+            padding-right: 150px;
+            font-size: $font-lg;
+        }
+
+        .search-bar__search-btn {
+            width: 56px;
+            height: 56px;
+            right: 14px;
+            border-radius: 18px;
+
+            svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        .search-bar__clear-btn {
+            right: 110px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .search-bar__loading {
+            right: 110px;
+        }
+    }
+}
+
+// Accessibility improvements
+.search-bar__input:focus {
+    outline: none;
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+    .search-bar {
+        &__input-wrapper {
+            border-width: 3px;
+
+            &::before {
+                opacity: 0;
+            }
+        }
+
+        &__search-btn {
+            font-weight: $font-bold;
+        }
+    }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+    .search-bar {
+        &__input-wrapper,
+        &__search-btn,
+        &__clear-btn,
+        &__suggestion-item,
+        &__term-name,
+        &__category-badge {
+            transition: none;
+            animation: none;
+
+            &::before,
+            &::after {
+                animation: none;
+            }
+        }
+
+        &__input-wrapper:hover,
+        &__input-wrapper:focus-within {
+            transform: none;
+        }
+
+        &__spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        &__suggestion {
+            animation: none;
+        }
+
+        &__loading {
+            animation: none;
+        }
+    }
+}
