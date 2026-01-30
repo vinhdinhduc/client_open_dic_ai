@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "@/navigation"; // ← Thêm useRouter
+import { usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
-import { useSearchParams } from "next/navigation"; // ← Thêm để giữ query params
+import { useSearchParams } from "next/navigation";
 
 type Language = "vi" | "en" | "lo";
 const SUPPORTED_LANGUAGES: Language[] = ["vi", "en", "lo"];
 
 export function useLanguage() {
   const pathname = usePathname();
-  const router = useRouter(); // ← Thêm router
-  const searchParams = useSearchParams(); // ← Lấy query params
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const [currentLanguage, setCurrentLanguage] = useState<Language>(locale as Language);
 
@@ -20,20 +20,20 @@ export function useLanguage() {
   }, [locale]);
 
   const changeLanguage = (lang: Language) => {
-    console.log("Current language:", currentLanguage);
-    console.log("Changing to:", lang);
-    console.log("Current pathname:", pathname);
-    
     if (lang === currentLanguage) return;
     localStorage.setItem("language", lang);
 
-    const newUrl = `/${lang}${pathname === "/" ? "" : pathname}`;
-    console.log("Navigating to:", newUrl);
-    window.location.href = newUrl;
+
+    const queryString = searchParams.toString();
+    const fullPath = queryString ? `${pathname}?${queryString}` : pathname;
+
+
+    router.replace(fullPath, { locale: lang });
   };
 
   return {
     currentLanguage,
     changeLanguage,
+    supportedLanguages: SUPPORTED_LANGUAGES,
   };
 }

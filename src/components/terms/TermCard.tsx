@@ -2,22 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useLanguage } from "@/hooks";
-import { TermCardData, TermCardProps } from "./types";
-import {
-  Heart,
-  Eye,
-  MessageCircle,
-  BookOpen,
-  Star,
-  Sparkles,
-  FileText,
-  Users,
-  ChevronRight,
-  Tag,
-} from "lucide-react";
+import { useAuth, useLanguage } from "@/hooks";
+import { TermCardProps } from "./types";
+import { Heart, Eye, ChevronRight, Tag } from "lucide-react";
 import "./TermCard.scss";
+import toast from "react-hot-toast";
 
 export default function TermCard({
   term,
@@ -31,6 +22,8 @@ export default function TermCard({
 }: TermCardProps) {
   const { currentLanguage } = useLanguage();
   const t = useTranslations();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const [favorited, setFavorited] = useState(isFavorited);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -43,44 +36,38 @@ export default function TermCard({
   };
 
   const getDefinitionText = (): string => {
-    const definition =
-      term.definitions.find((def) => def.language === currentLanguage) ||
-      term.definitions.find((def) => def.language === "vi");
-
-    return definition?.content || "";
+    return (
+      term.definition[currentLanguage] ||
+      term.definition["en"] ||
+      term.definition["vi"] ||
+      ""
+    );
   };
-  const getSourceIcon = (source: string) => {
-    switch (source) {
-      case "ai":
-        return <Sparkles size={14} />;
-      case "manual":
-        return <BookOpen size={14} />;
-      case "contribution":
-        return <Users size={14} />;
-      case "import":
-        return <FileText size={14} />;
-      default:
-        return <BookOpen size={14} />;
-    }
-  };
-
-  // Lấy level badge color
-  const getLevelClass = (level: string): string => {
-    switch (level) {
-      case "basic":
-        return "level-basic";
-      case "intermediate":
-        return "level-intermediate";
-      case "advanced":
-        return "level-advanced";
-      default:
-        return "level-basic";
-    }
+  // Get category name by language
+  const getCategoryName = (): string => {
+    if (!term.category) return "";
+    return (
+      term.category.name[currentLanguage] ||
+      term.category.name["en"] ||
+      term.category.name["vi"] ||
+      ""
+    );
   };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error(
+        t("common.loginRequired") || "Vui lòng đăng nhập để lưu yêu thích",
+      );
+      // Lưu URL hiện tại để redirect về sau khi login
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
     setFavorited(!favorited);
     setIsAnimating(true);
 
@@ -111,11 +98,8 @@ export default function TermCard({
     return text.slice(0, maxLength) + "...";
   };
 
-  const definition = getDefinitionText();
+  const definitions = getDefinitionText();
 
-  const definitionSource =
-    term.definitions.find((def) => def.language === currentLanguage) ||
-    term.definitions.find((def) => def.language === "vi");
   return (
     <Link
       href={`/terms/${term._id}`}
@@ -125,16 +109,6 @@ export default function TermCard({
       <div className="term-card__header">
         <div className="term-card__title-wrapper">
           <h3 className="term-card__title">{getTermText()}</h3>
-
-          {/* Source Badge */}
-          {definitionSource && (
-            <div
-              className={`term-card__source-badge source-${definitionSource.source}`}
-            >
-              {getSourceIcon(definitionSource.source)}
-              <span>{t(`term.source.${definitionSource.source}`)}</span>
-            </div>
-          )}
         </div>
 
         {/* Favorite Button */}
@@ -151,45 +125,22 @@ export default function TermCard({
         )}
       </div>
 
-      {/* Category & Level */}
-      {showCategory && term.categoryName && (
+      {/* Category */}
+      {showCategory && term.category && (
         <div className="term-card__meta-row">
           <div className="term-card__category">
             <Tag size={14} />
-            <span>{term.categoryName}</span>
+            <span>{getCategoryName()}</span>
           </div>
-
-          {definitionSource && (
-            <div
-              className={`term-card__level ${getLevelClass(definitionSource.level)}`}
-            >
-              <Star size={14} />
-              <span>{t(`term.level.${definitionSource.level}`)}</span>
-            </div>
-          )}
         </div>
       )}
 
       {/* Definition */}
       <div className="term-card__definition">
         {compact
-          ? truncateText(definition, 120)
-          : truncateText(definition, 200)}
+          ? truncateText(definitions, 120)
+          : truncateText(definitions, 200)}
       </div>
-
-      {/* Tags */}
-      {!compact && term.tags && term.tags.length > 0 && (
-        <div className="term-card__tags">
-          {term.tags.slice(0, 3).map((tag, index) => (
-            <span key={index} className="term-card__tag">
-              {tag}
-            </span>
-          ))}
-          {term.tags.length > 3 && (
-            <span className="term-card__tag-more">+{term.tags.length - 3}</span>
-          )}
-        </div>
-      )}
 
       {/* Metadata Footer */}
       {showMetadata && (
@@ -197,18 +148,13 @@ export default function TermCard({
           <div className="term-card__stats">
             <div className="term-card__stat">
               <Eye size={16} />
-              <span>{formatCount(term.metadata.views)}</span>
+              <span>{formatCount(term.viewCount)}</span>
             </div>
 
-            <div className="term-card__stat">
-              <Heart size={16} />
-              <span>{formatCount(term.metadata.favorites)}</span>
-            </div>
-
-            {term.metadata.searchCount > 0 && (
+            {term.favoritesCount !== undefined && term.favoritesCount > 0 && (
               <div className="term-card__stat">
-                <MessageCircle size={16} />
-                <span>{formatCount(term.metadata.searchCount)}</span>
+                <Heart size={16} />
+                <span>{formatCount(term.favoritesCount)}</span>
               </div>
             )}
           </div>

@@ -1,0 +1,793 @@
+@import "@/styles/variables.scss";
+
+// Color palette
+$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+$gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+$gradient-warning: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+$gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+$gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+
+$color-favorite: #ff6b6b;
+$color-share: #4facfe;
+$color-edit: #667eea;
+$color-report: #f7971e;
+
+// TermDetailView Component Styles
+.term-detail {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 $spacing-md;
+
+    // Breadcrumb - Modern Style
+    &__breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        font-size: $font-sm;
+        margin-bottom: $spacing-lg;
+        padding: $spacing-sm $spacing-md;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        border-radius: $radius-full;
+        flex-wrap: wrap;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+
+        .breadcrumb-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $radius-full;
+            transition: all $transition-fast;
+            font-weight: $font-medium;
+
+            &:hover {
+                background: $gradient-primary;
+                color: white;
+                transform: translateY(-1px);
+            }
+        }
+
+        .breadcrumb-current {
+            color: #667eea;
+            font-weight: $font-semibold;
+            padding: $spacing-xs $spacing-sm;
+            background: rgba(102, 126, 234, 0.15);
+            border-radius: $radius-full;
+        }
+
+        svg {
+            color: #667eea;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+    }
+
+    // Back button - Gradient Style
+    &__back {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-sm;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: $font-sm;
+        font-weight: $font-medium;
+        margin-bottom: $spacing-lg;
+        padding: $spacing-sm $spacing-md;
+        border-radius: $radius-full;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        transition: all $transition-base;
+
+        svg {
+            transition: transform $transition-fast;
+        }
+
+        &:hover {
+            background: $gradient-primary;
+            color: white;
+            border-color: transparent;
+            transform: translateX(-4px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+            svg {
+                transform: translateX(-3px);
+            }
+        }
+    }
+
+    // Main Content Card
+    &__content {
+        background: var(--bg-card);
+        border-radius: $radius-xl;
+        box-shadow: $shadow-lg;
+        padding: $spacing-xl $spacing-2xl;
+        margin-bottom: $spacing-xl;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+
+        // Decorative gradient line at top
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: $gradient-primary;
+        }
+    }
+
+    // Header
+    &__header {
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-lg;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    &__title-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: $spacing-md;
+        margin-bottom: $spacing-md;
+    }
+
+    &__title {
+        font-size: clamp($font-2xl, 5vw, $font-3xl);
+        font-weight: $font-bold;
+        color: var(--text-primary);
+        line-height: 1.2;
+        margin: 0;
+        background: $gradient-primary;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    // Action Buttons - Beautiful Circular Buttons
+    &__actions {
+        display: flex;
+        gap: $spacing-sm;
+        flex-shrink: 0;
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border: 2px solid var(--border-color);
+            border-radius: $radius-full;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all $transition-base;
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+                transition: opacity $transition-fast;
+                border-radius: $radius-full;
+            }
+
+            &:hover {
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            // Favorite button
+            &--favorite {
+                &::before {
+                    background: $gradient-danger;
+                }
+
+                &:hover {
+                    border-color: $color-favorite;
+                    color: $color-favorite;
+                }
+
+                &.active {
+                    border-color: transparent;
+                    color: white;
+
+                    &::before {
+                        opacity: 1;
+                    }
+
+                    svg {
+                        position: relative;
+                        z-index: 1;
+                        animation: heartBeat 0.6s ease-in-out;
+                    }
+                }
+            }
+
+            // Share button hover
+            &:not(.action-btn--favorite):hover {
+                border-color: $color-share;
+                color: $color-share;
+                background: rgba($color-share, 0.1);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+        }
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        flex-wrap: wrap;
+    }
+
+    // Category Badge - Gradient
+    &__category {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-xs;
+        padding: $spacing-xs $spacing-md;
+        background: $gradient-primary;
+        color: white;
+        border-radius: $radius-full;
+        font-size: $font-sm;
+        font-weight: $font-semibold;
+        text-decoration: none;
+        transition: all $transition-base;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+    }
+
+    &__pos,
+    &__views {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-xs;
+        font-size: $font-sm;
+        color: var(--text-secondary);
+        padding: $spacing-xs $spacing-sm;
+        background: var(--bg-secondary);
+        border-radius: $radius-full;
+
+        svg {
+            color: #667eea;
+        }
+    }
+
+    // Translations - Flag Style
+    &__translations {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-md;
+        padding: $spacing-lg;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: $radius-lg;
+        margin-bottom: $spacing-lg;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+
+        .translation-item {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            padding: $spacing-sm $spacing-md;
+            background: var(--bg-card);
+            border-radius: $radius-md;
+            box-shadow: $shadow-sm;
+            border: 1px solid var(--border-color);
+            transition: all $transition-fast;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: $shadow-md;
+            }
+
+            .lang-label {
+                font-size: $font-xl;
+                cursor: help;
+            }
+
+            .lang-value {
+                font-weight: $font-semibold;
+                color: var(--text-primary);
+                font-size: $font-base;
+            }
+        }
+    }
+
+    // Sections
+    &__section {
+        margin-bottom: $spacing-xl;
+
+        &:last-of-type {
+            margin-bottom: 0;
+        }
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        font-size: $font-lg;
+        font-weight: $font-bold;
+        color: var(--text-primary);
+        margin-bottom: $spacing-md;
+        padding-bottom: $spacing-sm;
+        border-bottom: 2px solid transparent;
+        border-image: $gradient-primary 1;
+
+        svg {
+            color: #667eea;
+        }
+    }
+
+    &__definition {
+        font-size: $font-lg;
+        line-height: 1.8;
+        color: var(--text-primary);
+        padding: $spacing-md;
+        background: var(--bg-secondary);
+        border-radius: $radius-md;
+        border-left: 4px solid #667eea;
+    }
+
+    &__explanation {
+        font-size: $font-base;
+        line-height: 1.9;
+        color: var(--text-secondary);
+        white-space: pre-wrap;
+        padding: $spacing-md;
+        background: var(--bg-secondary);
+        border-radius: $radius-md;
+    }
+
+    // Examples
+    &__examples {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+
+        .example-item {
+            position: relative;
+            padding: $spacing-md $spacing-lg;
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.05) 0%, rgba(56, 239, 125, 0.05) 100%);
+            border-left: 4px solid;
+            border-image: $gradient-success 1;
+            border-radius: 0 $radius-md $radius-md 0;
+            font-style: italic;
+            color: var(--text-secondary);
+            transition: all $transition-fast;
+
+            &:hover {
+                background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+                transform: translateX(4px);
+            }
+
+            &::before {
+                content: '"';
+                font-size: $font-2xl;
+                color: #11998e;
+                opacity: 0.5;
+                margin-right: $spacing-xs;
+            }
+        }
+    }
+
+    // Related Terms
+    &__related {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-sm;
+
+        .related-term {
+            display: inline-flex;
+            align-items: center;
+            gap: $spacing-xs;
+            padding: $spacing-sm $spacing-md;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: $radius-full;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: $font-sm;
+            font-weight: $font-medium;
+            transition: all $transition-base;
+
+            &:hover {
+                background: $gradient-primary;
+                border-color: transparent;
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+                svg {
+                    transform: translateX(3px);
+                }
+            }
+
+            svg {
+                opacity: 0.7;
+                transition: transform $transition-fast;
+            }
+        }
+    }
+
+    // Tags
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-sm;
+        margin-top: $spacing-lg;
+        padding-top: $spacing-lg;
+        border-top: 2px dashed var(--border-color);
+
+        .tag {
+            display: inline-block;
+            padding: $spacing-xs $spacing-md;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+            color: #4facfe;
+            border-radius: $radius-full;
+            font-size: $font-sm;
+            font-weight: $font-medium;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            transition: all $transition-fast;
+
+            &:hover {
+                background: $gradient-info;
+                color: white;
+                border-color: transparent;
+            }
+        }
+    }
+
+    // Footer
+    &__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: $spacing-md;
+        margin-top: $spacing-xl;
+        padding-top: $spacing-lg;
+        border-top: 2px solid var(--border-color);
+
+        .footer-info {
+            display: flex;
+            align-items: center;
+            gap: $spacing-lg;
+            flex-wrap: wrap;
+        }
+
+        .footer-item {
+            display: inline-flex;
+            align-items: center;
+            gap: $spacing-xs;
+            font-size: $font-sm;
+            color: var(--text-secondary);
+            padding: $spacing-xs $spacing-sm;
+            background: var(--bg-secondary);
+            border-radius: $radius-md;
+
+            svg {
+                color: #667eea;
+            }
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: $spacing-sm;
+        }
+
+        // Footer Buttons - Gradient Outline Style
+        .footer-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: $spacing-xs;
+            padding: $spacing-sm $spacing-lg;
+            border: 2px solid transparent;
+            border-radius: $radius-full;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: $font-sm;
+            font-weight: $font-semibold;
+            cursor: pointer;
+            transition: all $transition-base;
+            position: relative;
+            overflow: hidden;
+
+            // Gradient border effect
+            &::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: $radius-full;
+                padding: 2px;
+                background: var(--border-color);
+                -webkit-mask:
+                    linear-gradient(#fff 0 0) content-box,
+                    linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+            }
+
+            &:hover {
+                transform: translateY(-2px);
+            }
+
+            // Edit button - Purple gradient
+            &--edit {
+                &::before {
+                    background: $gradient-primary;
+                }
+
+                &:hover {
+                    background: $gradient-primary;
+                    color: white;
+                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+
+                    &::before {
+                        opacity: 0;
+                    }
+                }
+            }
+
+            // Report button - Orange/Warning gradient
+            &--report {
+                &::before {
+                    background: $gradient-warning;
+                }
+
+                &:hover {
+                    background: $gradient-warning;
+                    color: white;
+                    box-shadow: 0 6px 20px rgba(247, 151, 30, 0.4);
+
+                    &::before {
+                        opacity: 0;
+                    }
+                }
+            }
+        }
+    }
+
+    // Comments Section
+    &__comments {
+        background: var(--bg-card);
+        border-radius: $radius-xl;
+        box-shadow: $shadow-lg;
+        padding: $spacing-xl $spacing-2xl;
+        border: 1px solid var(--border-color);
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: $gradient-info;
+            border-radius: $radius-xl $radius-xl 0 0;
+        }
+
+        .section-title {
+            margin-bottom: $spacing-lg;
+            border-image: $gradient-info 1;
+        }
+    }
+}
+
+// Animations
+@keyframes heartBeat {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.3);
+    }
+    50% {
+        transform: scale(1);
+    }
+    75% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+// Responsive - Tablet
+@media (max-width: $tablet) {
+    .term-detail {
+        &__content,
+        &__comments {
+            padding: $spacing-lg;
+        }
+
+        &__translations {
+            flex-direction: column;
+        }
+
+        &__footer {
+            .footer-actions {
+                width: 100%;
+            }
+
+            .footer-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    }
+}
+
+// Responsive - Mobile
+@media (max-width: $mobile) {
+    .term-detail {
+        padding: 0 $spacing-sm;
+
+        &__breadcrumb {
+            padding: $spacing-xs $spacing-sm;
+            font-size: $font-xs;
+            gap: 2px;
+
+            .breadcrumb-link {
+                padding: $spacing-xs;
+            }
+
+            .breadcrumb-current {
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        &__back {
+            font-size: $font-xs;
+            padding: $spacing-xs $spacing-sm;
+        }
+
+        &__content,
+        &__comments {
+            padding: $spacing-md;
+            border-radius: $radius-lg;
+        }
+
+        &__title {
+            font-size: $font-xl;
+        }
+
+        &__title-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__actions {
+            justify-content: flex-end;
+            margin-top: $spacing-sm;
+
+            .action-btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        &__meta {
+            gap: $spacing-xs;
+        }
+
+        &__category {
+            font-size: $font-xs;
+            padding: $spacing-xs $spacing-sm;
+        }
+
+        &__translations {
+            padding: $spacing-sm;
+            gap: $spacing-sm;
+
+            .translation-item {
+                padding: $spacing-xs $spacing-sm;
+                width: 100%;
+
+                .lang-label {
+                    font-size: $font-lg;
+                }
+
+                .lang-value {
+                    font-size: $font-sm;
+                }
+            }
+        }
+
+        &__definition {
+            font-size: $font-base;
+            padding: $spacing-sm;
+        }
+
+        &__examples {
+            .example-item {
+                padding: $spacing-sm $spacing-md;
+                font-size: $font-sm;
+
+                &::before {
+                    font-size: $font-lg;
+                }
+            }
+        }
+
+        &__related {
+            .related-term {
+                font-size: $font-xs;
+                padding: $spacing-xs $spacing-sm;
+            }
+        }
+
+        &__tags {
+            .tag {
+                font-size: $font-xs;
+                padding: 2px $spacing-sm;
+            }
+        }
+
+        &__footer {
+            flex-direction: column;
+            align-items: stretch;
+            gap: $spacing-md;
+
+            .footer-info {
+                gap: $spacing-sm;
+                justify-content: center;
+            }
+
+            .footer-item {
+                font-size: $font-xs;
+            }
+
+            .footer-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .footer-btn {
+                width: 100%;
+                justify-content: center;
+                padding: $spacing-md;
+            }
+        }
+    }
+}
+
+// Dark mode enhancements
+@media (prefers-color-scheme: dark) {
+    .term-detail {
+        &__breadcrumb {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%);
+            border-color: rgba(102, 126, 234, 0.25);
+        }
+
+        &__translations {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        }
+
+        &__examples {
+            .example-item {
+                background: linear-gradient(135deg, rgba(17, 153, 142, 0.08) 0%, rgba(56, 239, 125, 0.08) 100%);
+            }
+        }
+    }
+}

@@ -73,7 +73,8 @@
     "addToFavorite": "Add to Favorites",
     "removeFromFavorite": "Remove from Favorites",
     "comment": "Comment",
-    "contribute": "Contribute Term"
+    "contribute": "Contribute Term",
+    "viewDetails": "View Details"
   },
   "header": {
     "language": "Language",

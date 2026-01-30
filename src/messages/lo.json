@@ -73,7 +73,8 @@
     "addToFavorite": "ເພີ່ມໃສ່ລາຍການທີ່ມັກ",
     "removeFromFavorite": "ລຶບອອກຈາກລາຍການທີ່ມັກ",
     "comment": "ຄຳເຫັນ",
-    "contribute": "ປະກອບສ່ວນຄຳສັບ"
+    "contribute": "ປະກອບສ່ວນຄຳສັບ",
+    "viewDetails": "ເບິ່ງລາຍລະອຽດ"
   },
   "header": {
     "language": "ພາສາ",

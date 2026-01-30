@@ -29,6 +29,7 @@ import "./Header.scss";
 const Header = () => {
   const t = useTranslations();
   const { user, isAuthenticated, isAdmin, isModerator, logout } = useAuth();
+
   const { theme, toggleTheme, mounted } = useTheme();
   const { currentLanguage, changeLanguage } = useLanguage();
 
@@ -105,9 +106,7 @@ const Header = () => {
               onClick={() => setLangMenuOpen(!langMenuOpen)}
               aria-label={t("header.language")}
             >
-              <span className="header__language-flag">
-                {currentLang?.flag}
-              </span>
+              <span className="header__language-flag">{currentLang?.flag}</span>
               <span className="header__language-code">
                 {currentLang?.code.toUpperCase()}
               </span>
@@ -158,10 +157,7 @@ const Header = () => {
             <>
               {/* Admin Link - Only for Admin/Moderator */}
               {isModerator && (
-                <Link
-                  href="/admin"
-                  className="header__admin-link"
-                >
+                <Link href="/admin" className="header__admin-link">
                   <FontAwesomeIcon icon={faShield} />
                   <span>{t("header.admin")}</span>
                 </Link>

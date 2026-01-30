@@ -1,34 +1,114 @@
-// components/term/TermCard/types.ts
+// components/term/types.ts
+
+export interface MultiLangText {
+  vi?: string;
+  en?: string;
+  lo?: string;
+}
+
+export interface Category {
+  _id: string;
+  name: MultiLangText;
+  slug: string;
+  description?: MultiLangText;
+  icon?: string;
+}
+
+export interface User {
+  _id: string;
+  fullName: string;
+  email?: string;
+}
+
+export interface Example {
+  vi?: string;
+  en?: string;
+  lo?: string;
+}
 
 export interface TermCardData {
   _id: string;
-  term: {
-    vi?: string;
-    en?: string;
-    lo?: string;
-  };
-  definitions: Array<{
-    _id: string;
-    language: string;
-    content: string;
-    level: 'basic' | 'intermediate' | 'advanced';
-    source: 'manual' | 'ai' | 'contribution' | 'import';
-  }>;
-  categoryId: string;
-  categoryName?: string;
-  categorySlug?: string;
-  metadata: {
-    views: number;
-    favorites: number;
-    searchCount: number;
-  };
-  tags?: string[];
+  term: MultiLangText;
+  definition: MultiLangText;
+  category: Category | null;
+  createdBy: User | null;
+  viewCount: number;
+  favoritesCount?: number;
   createdAt?: string;
   updatedAt?: string;
 }
 
+// Chi tiết thuật ngữ đầy đủ
+export interface TermDetail extends TermCardData {
+  detailedExplanation?: MultiLangText;
+  examples?: Example[];
+  partOfSpeech?: string;
+  relatedTerms?: RelatedTerm[];
+  tags?: string[];
+  commentCount?: number;
+  lastModifiedBy?: User | null;
+}
+
+export interface RelatedTerm {
+  _id: string;
+  term: MultiLangText;
+  definition: MultiLangText;
+}
+
+// Comment types
+export interface Comment {
+  _id: string;
+  term: string;
+  author: User;
+  content: string;
+  parentComment?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+  replies?: Comment[];
+}
+
+// Report types
+export interface ReportData {
+  reason: 'incorrect' | 'spam' | 'inappropriate' | 'duplicate' | 'other';
+  description?: string;
+}
+
+// Contribution/Suggest Edit types
+export interface SuggestEditData {
+  type: 'edit_term';
+  targetTerm: string;
+  term: MultiLangText;
+  definition: MultiLangText;
+  detailedExplanation?: MultiLangText;
+  examples?: Example[];
+  category: string;
+  contributorNote?: string;
+}
+
+// Response types cho API
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+export interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
+export interface SearchTermsResponse {
+  terms: TermCardData[];
+  pagination: PaginationInfo;
+
+}
+
 export interface TermCardProps {
   term: TermCardData;
+  language?: 'vi' | 'en' | 'lo';
   onFavoriteToggle?: (termId: string, isFavorited: boolean) => void;
   isFavorited?: boolean;
   showCategory?: boolean;

@@ -1,202 +1,315 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { SearchBarProps, SearchSuggestion } from "./types"
-import { useLanguage } from "@/hooks"
-import { ChangeEvent, useEffect, useRef, useState } from "react"
-import { getSearchSuggestions } from "@/services/termService"
-import { useTranslations } from "next-intl"
-import "./SearchBar.scss"
+import { useRouter } from "next/navigation";
+import { SearchBarProps } from "./types";
+import { useLanguage } from "@/hooks";
+import {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { getSearchSuggestions } from "@/services/termService";
+import { useTranslations } from "next-intl";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSearch,
+  faTimes,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
+import "./SearchBar.scss";
 
-export default function SearchBar ({
-    onSearch,
-    placeholder,
-    autoFocus = false,
-    className = ""
+/**
+ * TikTok-style SearchBar với Ghost Text Autocomplete
+ *
+ * Cách hoạt động:
+ * 1. Input thật (transparent background) nằm phía trên
+ * 2. Ghost layer nằm phía dưới hiển thị gợi ý hoàn chỉnh với màu nhạt
+ * 3. Chỉ phần text còn lại (chưa gõ) được hiển thị mờ
+ * 4. Nhấn Tab để autocomplete, Enter để search, Escape để ẩn
+ */
+export default function SearchBar({
+  onSearch,
+  placeholder,
+  autoFocus = false,
+  className = "",
+}: SearchBarProps) {
+  const router = useRouter();
+  const { currentLanguage } = useLanguage();
+  const t = useTranslations("home");
 
-}: SearchBarProps){
-    const router = useRouter()
-    const {currentLanguage, changeLanguage} = useLanguage();
-    const [keyword, setKeyword] = useState("")
+  // State chính
+  const [keyword, setKeyword] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isFocused, setIsFocused] = useState(false);
 
-    const [suggestion, setSuggestion] = useState<SearchSuggestion[]>([])
-    const [isLoading, setIsLoading] = useState(false)
+  // Refs
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const debounceTimer = useRef<NodeJS.Timeout>();
 
-    const [showSuggestions, setShowSuggestions] = useState(false)
+  // Tính toán ghost text - gợi ý phù hợp nhất bắt đầu bằng keyword
+  const ghostSuggestion = useMemo(() => {
+    if (!keyword.trim() || suggestions.length === 0) return null;
 
-    const [selectedIndex, setSelectedIndex] = useState(-1)
+    const keywordLower = keyword.toLowerCase();
 
-    const inputRef = useRef<HTMLInputElement>(null)
-    const suggestionRef = useRef<HTMLDivElement>(null)
-    const debounceTimer = useRef<NodeJS.Timeout>();
-      const t = useTranslations('home');
+    // Tìm suggestion phù hợp nhất (startsWith, case-insensitive)
+    const match = suggestions.find((s) =>
+      s.toLowerCase().startsWith(keywordLower),
+    );
 
-    //Auto focus 
+    return match || null;
+  }, [keyword, suggestions]);
 
-    useEffect(() => {
-        if(autoFocus && inputRef.current){
-            inputRef.current.focus()
-        }
-    },[autoFocus])
+  // Ghost text = phần còn lại của suggestion (chưa được gõ)
+  const ghostText = useMemo(() => {
+    if (!ghostSuggestion || !keyword.trim()) return "";
 
-    //Get suggestion
+    // Giữ nguyên case của suggestion, chỉ lấy phần còn lại
+    return ghostSuggestion.slice(keyword.length);
+  }, [ghostSuggestion, keyword]);
 
+  // Auto focus
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
 
-    useEffect(() => {
-        if(keyword.trim().length < 2) {
-            setSuggestion([])
-            setShowSuggestions(false)
-            return;
-        }
-
-        if(debounceTimer.current){
-            clearTimeout(debounceTimer.current)
-        }
-
-        debounceTimer.current = setTimeout(async() => {
-            setIsLoading(true)
-            try {
-                const result = await getSearchSuggestions(keyword, currentLanguage)
-                setSuggestion(result)
-                setShowSuggestions(true)
-                setSelectedIndex(-1)
-            } catch (error) {
-                console.error("Error fetching search suggestion:", error)
-                setSuggestion([])
-            }finally {
-                setIsLoading(false)
-            }
-
-        }, 300)
-
-        return () => {
-            if(debounceTimer.current){
-                clearTimeout(debounceTimer.current)
-            }
-        }
-    },[keyword, currentLanguage])
-
-    // Click outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if(suggestionRef.current && 
-                !suggestionRef.current.contains(event.target as Node) && inputRef.current && !inputRef.current.contains(event.target as Node)
-            ){
-                setShowSuggestions(false)
-            }
-        }
-
-        document.addEventListener("mousedown", handleClickOutside)
-        return () => document.removeEventListener("mousedown", handleClickOutside)
-    }, [])
-
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setKeyword(e.target.value)
+  // Fetch suggestions với debounce
+  useEffect(() => {
+    if (keyword.trim().length < 2) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
     }
 
-    const handleOnKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if(!showSuggestions || suggestion.length === 0) {
-          if(e.key === "Enter"){
-            handleSearch()
-        }
-        return;
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const result = await getSearchSuggestions(keyword, currentLanguage);
+        setSuggestions(result);
+        setShowDropdown(result.length > 0);
+        setSelectedIndex(-1);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        setSuggestions([]);
+      } finally {
+        setIsLoading(false);
       }
+    }, 200); // Giảm debounce để responsive hơn
 
-      switch(e.key){
-        case "ArrowDown": 
-        e.preventDefault();
-        setSelectedIndex((prev) => 
-        prev < suggestion.length - 1 ? prev + 1 : 0
-        )
-        break;
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [keyword, currentLanguage]);
+
+  // Click outside để đóng dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target) &&
+        inputRef.current &&
+        !inputRef.current.contains(target)
+      ) {
+        setShowDropdown(false);
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Xử lý thay đổi input
+  const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setKeyword(e.target.value);
+    setSelectedIndex(-1);
+  }, []);
+
+  // Xử lý phím bấm
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      switch (e.key) {
+        case "Tab":
+          // Autocomplete ghost text
+          if (ghostSuggestion && ghostText) {
+            e.preventDefault();
+            setKeyword(ghostSuggestion);
+            setShowDropdown(false);
+          }
+          break;
+
+        case "ArrowDown":
+          e.preventDefault();
+          if (showDropdown && suggestions.length > 0) {
+            setSelectedIndex((prev) =>
+              prev < suggestions.length - 1 ? prev + 1 : 0,
+            );
+          }
+          break;
+
         case "ArrowUp":
-            e.preventDefault();
-            setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-            break;
+          e.preventDefault();
+          if (showDropdown && suggestions.length > 0) {
+            setSelectedIndex((prev) =>
+              prev > 0 ? prev - 1 : suggestions.length - 1,
+            );
+          }
+          break;
+
         case "Enter":
-            e.preventDefault();
-            if(selectedIndex >= 0 ){
-                handleSelectSuggestion(suggestion[selectedIndex])
-            }else{
-                handleSearch()
+          e.preventDefault();
+          if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+            handleSelectSuggestion(suggestions[selectedIndex]);
+          } else if (ghostSuggestion) {
+            // Nếu có ghost suggestion, search với ghost suggestion
+            handleSearch(ghostSuggestion);
+          } else {
+            handleSearch(keyword);
+          }
+          break;
+
+        case "Escape":
+          e.preventDefault();
+          setShowDropdown(false);
+          setSelectedIndex(-1);
+          inputRef.current?.blur();
+          break;
+
+        case "ArrowRight":
+          // Autocomplete khi cursor ở cuối và có ghost text
+          if (ghostText && inputRef.current) {
+            const cursorAtEnd =
+              inputRef.current.selectionStart === keyword.length;
+            if (cursorAtEnd) {
+              e.preventDefault();
+              setKeyword(ghostSuggestion!);
             }
-            break;
-            case "Escape":
-                e.preventDefault();
-                setShowSuggestions(false)
-                setSelectedIndex(-1)
-                break;
-        
-        }
-    }
+          }
+          break;
+      }
+    },
+    [
+      ghostSuggestion,
+      ghostText,
+      showDropdown,
+      suggestions,
+      selectedIndex,
+      keyword,
+    ],
+  );
 
-    const handleSearch = () => {
-        if(keyword.trim()){
-            setShowSuggestions(false)
-            if(onSearch){
-                onSearch(keyword.trim())
-            }else {
-                router.push(`/terms?q=${encodeURIComponent(keyword.trim())}`)
-            }
-        }
-    }
+  // Thực hiện tìm kiếm
+  const handleSearch = useCallback(
+    (searchTerm?: string) => {
+      const term = (searchTerm || keyword).trim();
+      if (!term) return;
 
-    const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
-        setShowSuggestions(false)
-        setKeyword("")
-        router.push(`/terms/${suggestion._id}`)
-    }
+      setShowDropdown(false);
+      setIsFocused(false);
 
-    const getTermText = (suggestion: SearchSuggestion): string => {
-        return suggestion.term[currentLanguage] || suggestion.term.en || suggestion.term.vi || suggestion.term.lo || ""
-    }
+      if (onSearch) {
+        onSearch(term);
+      } else {
+        router.push(`/terms?q=${encodeURIComponent(term)}`);
+      }
+    },
+    [keyword, onSearch, router],
+  );
 
-    return (
+  // Chọn suggestion từ dropdown
+  const handleSelectSuggestion = useCallback(
+    (term: string) => {
+      setKeyword(term);
+      setShowDropdown(false);
+      router.push(`/terms?q=${encodeURIComponent(term)}`);
+    },
+    [router],
+  );
+
+  // Xóa input
+  const handleClear = useCallback(() => {
+    setKeyword("");
+    setSuggestions([]);
+    setShowDropdown(false);
+    setSelectedIndex(-1);
+    inputRef.current?.focus();
+  }, []);
+
+  // Focus handlers
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+    if (suggestions.length > 0) {
+      setShowDropdown(true);
+    }
+  }, [suggestions.length]);
+
+  const handleBlur = useCallback(() => {
+    // Delay để cho phép click vào dropdown
+    setTimeout(() => {
+      if (!dropdownRef.current?.contains(document.activeElement)) {
+        setIsFocused(false);
+      }
+    }, 150);
+  }, []);
+
+  return (
     <div className={`search-bar ${className}`}>
-      <div className="search-bar__input-wrapper">
+      <div
+        className={`search-bar__input-wrapper ${isFocused ? "search-bar__input-wrapper--focused" : ""}`}
+      >
+        <div className="search-bar__ghost-layer" aria-hidden="true">
+          <span className="search-bar__ghost-typed">{keyword}</span>
+          <span className="search-bar__ghost-suggestion">{ghostText}</span>
+        </div>
+
         <input
           ref={inputRef}
           type="text"
           value={keyword}
           onChange={handleInputChange}
-          onKeyDown={handleOnKeyDown}
-          onFocus={() => suggestion.length > 0 && setShowSuggestions(true)}
-          placeholder={placeholder || t('search.placeholder')}
-          className="search-bar__input"
-          aria-label={t('search.inputLabel')}
-          aria-autocomplete="list"
-          aria-controls="search-suggestion"
-          aria-expanded={showSuggestions}
+          onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          placeholder={!keyword ? placeholder || t("search.placeholder") : ""}
+          className="search-bar__input search-bar__input--transparent"
+          aria-label={t("search.inputLabel")}
+          aria-autocomplete="both"
+          aria-controls="search-dropdown"
+          aria-expanded={showDropdown}
+          autoComplete="off"
+          spellCheck={false}
         />
 
-        {/* Search Icon Button */}
+        {/* Search Button */}
         <button
           type="button"
-          onClick={handleSearch}
+          onClick={() => handleSearch()}
           className="search-bar__search-btn"
-          aria-label={t('search.button')}
+          aria-label={t("search.button")}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16ZM19 19l-4.35-4.35"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <FontAwesomeIcon icon={faSearch} />
         </button>
 
         {/* Loading Spinner */}
         {isLoading && (
           <div className="search-bar__loading">
-            <div className="search-bar__spinner"></div>
+            <FontAwesomeIcon icon={faSpinner} spin />
           </div>
         )}
 
@@ -204,73 +317,73 @@ export default function SearchBar ({
         {keyword && !isLoading && (
           <button
             type="button"
-            onClick={() => {
-              setKeyword('');
-              setSuggestion([]);
-              setShowSuggestions(false);
-              inputRef.current?.focus();
-            }}
+            onClick={handleClear}
             className="search-bar__clear-btn"
-            aria-label={t('search.clear')}
+            aria-label={t("search.clear")}
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 4L4 12M4 4l8 8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
+            <FontAwesomeIcon icon={faTimes} />
           </button>
+        )}
+
+        {/* Tab hint - hiển thị khi có ghost text */}
+        {ghostText && isFocused && (
+          <div className="search-bar__tab-hint">
+            <kbd>Tab</kbd> để hoàn thành
+          </div>
         )}
       </div>
 
-      {/* Suggestions Dropdown */}
-      {showSuggestions && suggestion.length > 0 && (
+      {/* Dropdown Suggestions */}
+      {showDropdown && suggestions.length > 0 && (
         <div
-          ref={suggestionRef}
-          id="search-suggestion"
+          ref={dropdownRef}
+          id="search-dropdown"
           className="search-bar__suggestion"
           role="listbox"
         >
-          {suggestion.map((suggestion, index) => (
+          {suggestions.map((term, index) => (
             <div
-              key={suggestion._id}
+              key={`${term}-${index}`}
               className={`search-bar__suggestion-item ${
-                index === selectedIndex ? 'search-bar__suggestion-item--selected' : ''
+                index === selectedIndex
+                  ? "search-bar__suggestion-item--selected"
+                  : ""
               }`}
-              onClick={() => handleSelectSuggestion(suggestion)}
+              onClick={() => handleSelectSuggestion(term)}
               onMouseEnter={() => setSelectedIndex(index)}
               role="option"
               aria-selected={index === selectedIndex}
             >
-              <div className="search-bar__term-name">
-                {getTermText(suggestion)}
-              </div>
-              {suggestion.categoryName && (
-                <div className="search-bar__category-badge">
-                  {suggestion.categoryName}
-                </div>
-              )}
+              <FontAwesomeIcon
+                icon={faSearch}
+                className="search-bar__suggestion-icon"
+              />
+              <span className="search-bar__term-name">
+                {/* Highlight phần match */}
+                <span className="search-bar__term-match">
+                  {term.slice(0, keyword.length)}
+                </span>
+                <span className="search-bar__term-rest">
+                  {term.slice(keyword.length)}
+                </span>
+              </span>
             </div>
           ))}
         </div>
       )}
 
       {/* No Results */}
-      {showSuggestions && !isLoading && keyword.length >= 2 && suggestion.length === 0 && (
-        <div ref={suggestionRef} className="search-bar__suggestion">
-          <div className="search-bar__no-results">
-            {t('search.noResults')}
+      {showDropdown &&
+        !isLoading &&
+        keyword.length >= 2 &&
+        suggestions.length === 0 && (
+          <div ref={dropdownRef} className="search-bar__suggestion">
+            <div className="search-bar__no-results">
+              <FontAwesomeIcon icon={faSearch} />
+              <span>{t("search.noResults")}</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }

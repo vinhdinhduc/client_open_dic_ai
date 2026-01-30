@@ -96,8 +96,52 @@
         }
     }
 
+    // Ghost Text Layer - Nằm phía dưới input thật
+    &__ghost-layer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        padding: 18px 24px;
+        padding-right: 130px;
+        font-size: $font-base;
+        font-weight: $font-normal;
+        line-height: 1.5;
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
+        overflow: hidden;
+
+        @include mobile {
+            padding: 14px 16px;
+            padding-right: 110px;
+            font-size: $font-sm;
+        }
+    }
+
+    // Phần text người dùng đã gõ (trong ghost layer) - transparent để không bị chồng
+    &__ghost-typed {
+        color: transparent;
+    }
+
+    // Phần gợi ý còn lại - hiển thị mờ
+    &__ghost-suggestion {
+        color: var(--text-tertiary);
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+
+        [data-theme="dark"] & {
+            opacity: 0.4;
+        }
+    }
+
     // Input field
     &__input {
+        position: relative;
+        z-index: 1;
         flex: 1;
         padding: 18px 24px;
         padding-right: 130px;
@@ -109,6 +153,12 @@
         outline: none;
         line-height: 1.5;
         transition: all 0.3s ease;
+        caret-color: var(--primary);
+
+        // Transparent variant cho ghost text overlay
+        &--transparent {
+            background: transparent !important;
+        }
 
         &::placeholder {
             color: var(--text-tertiary);
@@ -128,10 +178,44 @@
         }
     }
 
+    // Tab hint badge
+    &__tab-hint {
+        position: absolute;
+        right: 140px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: var(--text-tertiary);
+        opacity: 0.8;
+        pointer-events: none;
+        animation: fadeIn 0.2s ease;
+
+        kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 6px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        @include mobile {
+            display: none;
+        }
+    }
+
     // Search button với gradient và shine effect
     &__search-btn {
         position: absolute;
         right: 12px;
+        z-index: 10;
         @include flex-center;
         width: 48px;
         height: 48px;
@@ -207,6 +291,7 @@
     &__loading {
         position: absolute;
         right: 76px;
+        z-index: 10;
         @include flex-center;
         animation: float 2s ease-in-out infinite;
 
@@ -236,6 +321,7 @@
     &__clear-btn {
         position: absolute;
         right: 76px;
+        z-index: 10;
         @include flex-center;
         width: 36px;
         height: 36px;
@@ -370,9 +456,8 @@
     &__suggestion-item {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: $spacing-md;
-        padding: 16px 20px;
+        padding: 14px 20px;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -408,31 +493,18 @@
         &:hover,
         &--selected {
             background: rgba(37, 99, 235, 0.05);
-            transform: translateX(4px);
-            padding-left: 24px;
 
             &::before {
                 width: 100%;
             }
 
             .search-bar__term-name {
-                color: var(--primary);
-                font-weight: $font-semibold;
-                transform: translateX(2px);
-            }
-
-            .search-bar__category-badge {
-                transform: scale(1.05);
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+                color: var(--text-primary);
             }
 
             [data-theme="dark"] & {
                 background: rgba(59, 130, 246, 0.1);
             }
-        }
-
-        &:active {
-            transform: translateX(2px) scale(0.98);
         }
 
         @include mobile {
@@ -446,7 +518,20 @@
         }
     }
 
-    // Term name với typing effect
+    // Search icon trong suggestion item
+    &__suggestion-icon {
+        color: var(--text-tertiary);
+        font-size: 14px;
+        flex-shrink: 0;
+        transition: color 0.2s ease;
+
+        .search-bar__suggestion-item:hover &,
+        .search-bar__suggestion-item--selected & {
+            color: var(--primary);
+        }
+    }
+
+    // Term name với highlight cho phần match
     &__term-name {
         flex: 1;
         font-size: $font-base;
@@ -454,10 +539,24 @@
         font-weight: $font-normal;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         @include truncate;
+        display: flex;
+        align-items: center;
 
         @include mobile {
             font-size: $font-sm;
         }
+    }
+
+    // Phần text khớp với keyword - in đậm
+    &__term-match {
+        font-weight: $font-semibold;
+        color: var(--text-primary);
+    }
+
+    // Phần text còn lại - bình thường
+    &__term-rest {
+        font-weight: $font-normal;
+        color: var(--text-secondary);
     }
 
     // Category badge với 3D effect
@@ -506,14 +605,24 @@
         }
     }
 
-    // No results với bounce animation
+    // No results với icon và styling đẹp hơn
     &__no-results {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-sm;
         padding: $spacing-xl;
         text-align: center;
         color: var(--text-secondary);
         font-size: $font-sm;
-        font-style: italic;
-        animation: fadeInBounce 0.5s ease;
+        animation: fadeIn 0.3s ease;
+
+        svg {
+            font-size: 24px;
+            color: var(--text-tertiary);
+            opacity: 0.5;
+        }
 
         @include mobile {
             padding: $spacing-lg;
@@ -540,6 +649,15 @@
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }
 

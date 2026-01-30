@@ -73,7 +73,9 @@
     "addToFavorite": "Thêm vào yêu thích",
     "removeFromFavorite": "Xóa khỏi yêu thích",
     "comment": "Bình luận",
-    "contribute": "Đóng góp thuật ngữ"
+    "contribute": "Đóng góp thuật ngữ",
+    "viewDetails": "Xem chi tiết"
+
   },
   "header": {
     "language": "Ngôn ngữ",

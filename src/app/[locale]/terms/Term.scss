@@ -1,0 +1,54 @@
+@import "@/styles/variables.scss";
+@import "@/styles/mixins.scss";
+
+.search-results-page {
+    min-height: 100vh;
+    padding: var(--spacing-xl) 0;
+
+    @include mobile {
+        padding: var(--spacing-lg) 0;
+    }
+}
+
+.search-results-page__title {
+    font-size: $font-3xl;
+    font-weight: $font-bold;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+
+    @include mobile {
+        font-size: $font-2xl;
+    }
+}
+
+.search-results-page__count {
+    font-size: $font-base;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+.search-results-page__list {
+    display: grid;
+    gap: var(--spacing-lg);
+
+    @include mobile {
+        gap: var(--spacing-md);
+    }
+}
+
+.search-results-page__empty {
+    text-align: center;
+    padding: var(--spacing-2xl) 0;
+    font-size: $font-lg;
+    color: var(--text-tertiary);
+}
+
+.container {
+    max-width: $desktop;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+
+    @include mobile {
+        padding: 0 var(--spacing-md);
+    }
+}

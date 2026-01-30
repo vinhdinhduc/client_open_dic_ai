@@ -1,0 +1,41 @@
+@import "@/styles/variables.scss";
+
+// Term Detail Page Styles
+.term-detail-page {
+    min-height: 100vh;
+    padding: $spacing-lg 0;
+
+    &--loading,
+    &--error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+    }
+
+    .error-container {
+        text-align: center;
+        padding: $spacing-2xl;
+
+        h2 {
+            font-size: $font-2xl;
+            margin-bottom: $spacing-md;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: $spacing-lg;
+        }
+
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: $font-medium;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
