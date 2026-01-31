@@ -18,142 +18,86 @@ import {
   ChevronRight,
   Eye,
   X,
+  Flag,
+  Lightbulb,
+  BookPlus,
+  MessageSquare,
+  Globe,
 } from "lucide-react";
+import userService from "@/services/userService";
+import categoryService, { Category } from "@/services/categoryService";
+import {
+  User,
+  GetUsersParams,
+  UserRole,
+  UserStatus,
+} from "@/components/types/userTypes";
+import "./page.scss";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AddUser } from "@/components/forms/manage_users/AddUser";
+import { EditUser } from "@/components/forms/manage_users/EditUser";
+import toast from "react-hot-toast";
+
+// Constants
+const permissionOptions = [
+  { value: "reports", label: "Kiểm duyệt báo xấu", icon: <Flag size={18} /> },
+  { value: "suggestions", label: "Gợi ý sửa", icon: <Lightbulb size={18} /> },
+  {
+    value: "contributions",
+    label: "Đóng góp từ",
+    icon: <BookPlus size={18} />,
+  },
+  { value: "comments", label: "Bình luận", icon: <MessageSquare size={18} /> },
+];
+
+const getLanguageFlag = (lang: string) => {
+  switch (lang) {
+    case "vi":
+      return "🇻🇳";
+    case "en":
+      return "🇬🇧";
+    case "lo":
+      return "🇱🇦";
+    default:
+      return <Globe size={16} />;
+  }
+};
 
 // Types
 interface ModerationPermissions {
   categories: string[];
-  permissions: ("terms" | "contributions" | "comments" | "suggestions")[];
+  permissions: ("reports" | "suggestions" | "contributions" | "comments")[];
 }
-
-interface User {
-  _id: string;
-  fullName: string;
-  email: string;
-  role: "user" | "moderator" | "admin";
-  status: "active" | "inactive" | "banned";
-  preferredLanguage: string;
-  createdAt: string;
-  lastLogin?: string;
-  contributionCount: number;
-  commentCount: number;
-  moderationPermissions?: ModerationPermissions;
-}
-
-// Mock categories for assignment
-const mockCategories = [
-  { _id: "cat1", name: "Công nghệ thông tin" },
-  { _id: "cat2", name: "Kinh tế - Tài chính" },
-  { _id: "cat3", name: "Y học - Sức khỏe" },
-  { _id: "cat4", name: "Nông nghiệp" },
-  { _id: "cat5", name: "Luật - Pháp lý" },
-  { _id: "cat6", name: "Sinh học" },
-];
-
-const permissionOptions = [
-  { value: "terms", label: "Thuật ngữ", icon: "📚" },
-  { value: "contributions", label: "Đóng góp", icon: "✍️" },
-  { value: "comments", label: "Bình luận", icon: "💬" },
-  { value: "suggestions", label: "Gợi ý sửa", icon: "📝" },
-];
-
-// Mock data
-const mockUsers: User[] = [
-  {
-    _id: "1",
-    fullName: "Nguyễn Văn A",
-    email: "nguyenvana@email.com",
-    role: "user",
-    status: "active",
-    preferredLanguage: "vi",
-    createdAt: "2025-10-15",
-    lastLogin: "2026-01-30",
-    contributionCount: 12,
-    commentCount: 45,
-  },
-  {
-    _id: "2",
-    fullName: "Trần Thị B",
-    email: "tranthib@email.com",
-    role: "moderator",
-    status: "active",
-    preferredLanguage: "vi",
-    createdAt: "2025-08-20",
-    lastLogin: "2026-01-29",
-    contributionCount: 56,
-    commentCount: 123,
-    moderationPermissions: {
-      categories: ["cat1", "cat2"],
-      permissions: ["terms", "contributions", "comments"],
-    },
-  },
-  {
-    _id: "3",
-    fullName: "Boupha Sisouk",
-    email: "boupha@email.com",
-    role: "user",
-    status: "active",
-    preferredLanguage: "lo",
-    createdAt: "2025-11-10",
-    lastLogin: "2026-01-28",
-    contributionCount: 8,
-    commentCount: 32,
-  },
-  {
-    _id: "4",
-    fullName: "Lê Văn C",
-    email: "levanc@email.com",
-    role: "user",
-    status: "banned",
-    preferredLanguage: "vi",
-    createdAt: "2025-09-05",
-    lastLogin: "2026-01-15",
-    contributionCount: 2,
-    commentCount: 5,
-  },
-  {
-    _id: "5",
-    fullName: "Admin System",
-    email: "admin@tbu.edu.vn",
-    role: "admin",
-    status: "active",
-    preferredLanguage: "vi",
-    createdAt: "2025-01-01",
-    lastLogin: "2026-01-30",
-    contributionCount: 0,
-    commentCount: 0,
-  },
-  {
-    _id: "6",
-    fullName: "Moderator Lào",
-    email: "mod.lao@email.com",
-    role: "moderator",
-    status: "active",
-    preferredLanguage: "lo",
-    createdAt: "2025-06-15",
-    lastLogin: "2026-01-30",
-    contributionCount: 34,
-    commentCount: 89,
-    moderationPermissions: {
-      categories: ["cat3", "cat4"],
-      permissions: ["terms", "suggestions"],
-    },
-  },
-];
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLockConfirm, setShowLockConfirm] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+
+  // New user form state
+  const [newUser, setNewUser] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "user" as "user" | "moderator" | "admin",
+    status: "active" as "active" | "inactive",
+    preferredLanguage: "vi" as "vi" | "en" | "lo",
+  });
 
   // Permissions editing state
   const [editingPermissions, setEditingPermissions] =
@@ -161,28 +105,135 @@ export default function UsersPage() {
       categories: [],
       permissions: [],
     });
+  const [savingPermissions, setSavingPermissions] = useState(false);
 
   const itemsPerPage = 10;
 
+  // Debounce search query
   useEffect(() => {
-    setTimeout(() => setLoading(false), 500);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch categories once on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoriesResult = await categoryService.getCategories();
+        setCategories(categoriesResult);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  // Filter users
-  const filteredUsers = users.filter((user) => {
-    const matchSearch =
-      user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchRole = roleFilter === "all" || user.role === roleFilter;
-    const matchStatus = statusFilter === "all" || user.status === statusFilter;
-    return matchSearch && matchRole && matchStatus;
-  });
+  // Fetch users when page or filters change
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const params: GetUsersParams = {
+          page: currentPage,
+          limit: itemsPerPage,
+        };
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+        if (roleFilter !== "all") {
+          params.role = roleFilter as UserRole;
+        }
+        if (statusFilter !== "all") {
+          params.status = statusFilter as UserStatus;
+        }
+        if (debouncedSearch.trim()) {
+          params.search = debouncedSearch.trim();
+        }
+
+        const usersResult = await userService.getUsers(params);
+        setUsers(usersResult.data.users || []);
+        setTotalUsers(usersResult.data.pagination?.total || 0);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, [currentPage, roleFilter, statusFilter, debouncedSearch]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [roleFilter, statusFilter, debouncedSearch]);
+
+  const totalPages = Math.ceil(totalUsers / itemsPerPage);
+
+  // Function to refresh users list
+  const refreshUsers = async () => {
+    setLoading(true);
+    try {
+      const params: GetUsersParams = {
+        page: currentPage,
+        limit: itemsPerPage,
+      };
+
+      if (roleFilter !== "all") {
+        params.role = roleFilter as UserRole;
+      }
+      if (statusFilter !== "all") {
+        params.status = statusFilter as UserStatus;
+      }
+      if (debouncedSearch.trim()) {
+        params.search = debouncedSearch.trim();
+      }
+
+      const usersResult = await userService.getUsers(params);
+      setUsers(usersResult.data.users || []);
+      setTotalUsers(usersResult.data.pagination?.total || 0);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Generate page numbers with ellipsis for large page counts
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push("...");
+      }
+
+      // Show pages around current page
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push("...");
+      }
+
+      // Always show last page
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -216,25 +267,36 @@ export default function UsersPage() {
     }
   };
 
-  const getLanguageFlag = (lang: string) => {
-    switch (lang) {
-      case "vi":
-        return "🇻🇳";
-      case "lo":
-        return "🇱🇦";
-      case "en":
-        return "🇬🇧";
-      default:
-        return "🌐";
-    }
+  const handleToggleStatus = (user: User) => {
+    setSelectedUser(user);
+    setShowLockConfirm(true);
+    setActionMenuOpen(null);
   };
 
-  const handleToggleStatus = (user: User) => {
-    const newStatus = user.status === "banned" ? "active" : "banned";
-    setUsers((prev) =>
-      prev.map((u) => (u._id === user._id ? { ...u, status: newStatus } : u)),
-    );
-    setActionMenuOpen(null);
+  const confirmToggleStatus = async () => {
+    if (selectedUser) {
+      const newStatus = selectedUser.status === "banned" ? "active" : "banned";
+      setLoading(true);
+      try {
+        const res = await userService.updateUser(selectedUser._id, {
+          status: newStatus,
+        });
+        if (res.success) {
+          toast.success(
+            newStatus === "banned"
+              ? "Đã khóa tài khoản"
+              : "Đã mở khóa tài khoản",
+          );
+          refreshUsers();
+        }
+      } catch (error) {
+        toast.error("Có lỗi xảy ra khi cập nhật trạng thái");
+      } finally {
+        setLoading(false);
+        setShowLockConfirm(false);
+        setSelectedUser(null);
+      }
+    }
   };
 
   const handleChangeRole = (
@@ -246,11 +308,22 @@ export default function UsersPage() {
     );
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedUser) {
-      setUsers((prev) => prev.filter((u) => u._id !== selectedUser._id));
       setShowDeleteConfirm(false);
-      setSelectedUser(null);
+      setLoading(true);
+      try {
+        const res = await userService.deleteUser(selectedUser._id);
+        if (res.success) {
+          toast.success("Xóa người dùng thành công");
+          refreshUsers();
+        }
+      } catch (error) {
+        toast.error("Có lỗi xảy ra khi xóa người dùng");
+      } finally {
+        setLoading(false);
+        setSelectedUser(null);
+      }
     }
   };
 
@@ -258,7 +331,12 @@ export default function UsersPage() {
     setSelectedUser(user);
     setEditingPermissions({
       categories: user.moderationPermissions?.categories || [],
-      permissions: user.moderationPermissions?.permissions || [],
+      permissions: (user.moderationPermissions?.permissions || []) as (
+        | "reports"
+        | "suggestions"
+        | "contributions"
+        | "comments"
+      )[],
     });
     setShowPermissionsModal(true);
   };
@@ -273,7 +351,7 @@ export default function UsersPage() {
   };
 
   const handleTogglePermission = (
-    permission: "terms" | "contributions" | "comments" | "suggestions",
+    permission: "reports" | "suggestions" | "contributions" | "comments",
   ) => {
     setEditingPermissions((prev) => ({
       ...prev,
@@ -283,18 +361,73 @@ export default function UsersPage() {
     }));
   };
 
-  const handleSavePermissions = () => {
+  const handleSelectAllPermissions = () => {
+    setEditingPermissions((prev) => ({
+      ...prev,
+      permissions: permissionOptions.map((o) => o.value) as (
+        | "reports"
+        | "suggestions"
+        | "contributions"
+        | "comments"
+      )[],
+    }));
+  };
+
+  const handleClearAllPermissions = () => {
+    setEditingPermissions((prev) => ({
+      ...prev,
+      permissions: [],
+    }));
+  };
+
+  const handleSelectAllCategories = () => {
+    setEditingPermissions((prev) => ({
+      ...prev,
+      categories: categories.map((c) => c.id),
+    }));
+  };
+
+  const handleClearAllCategories = () => {
+    setEditingPermissions((prev) => ({
+      ...prev,
+      categories: [],
+    }));
+  };
+
+  const handleSavePermissions = async () => {
     if (selectedUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u._id === selectedUser._id
-            ? { ...u, moderationPermissions: editingPermissions }
-            : u,
-        ),
-      );
-      setShowPermissionsModal(false);
-      setSelectedUser(null);
+      setSavingPermissions(true);
+      try {
+        const res = await userService.updateUser(selectedUser._id, {
+          moderationPermissions: {
+            categories: editingPermissions.categories,
+            permissions: editingPermissions.permissions,
+          },
+        });
+        if (res.success) {
+          toast.success("Cập nhật quyền kiểm duyệt thành công");
+          refreshUsers();
+          setShowPermissionsModal(false);
+          setSelectedUser(null);
+        }
+      } catch (error) {
+        toast.error("Có lỗi xảy ra khi cập nhật quyền");
+      } finally {
+        setSavingPermissions(false);
+      }
     }
+  };
+  const handleShowModalAddUser = () => {
+    setNewUser({
+      fullName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "user",
+      status: "active",
+      preferredLanguage: "vi",
+    });
+    setShowAddModal(true);
   };
 
   if (loading) {
@@ -307,1086 +440,725 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="users-page">
-      {/* Page Header */}
-      <div className="admin-page-header">
-        <div>
-          <h1 className="admin-page-header__title">Quản lý người dùng</h1>
-          <p className="admin-page-header__subtitle">
-            Quản lý tài khoản và phân quyền người dùng hệ thống
-          </p>
+    <>
+      <div className="users-page">
+        {/* Page Header */}
+        <div className="admin-page-header">
+          <div>
+            <h1 className="admin-page-header__title">Quản lý người dùng</h1>
+            <p className="admin-page-header__subtitle">
+              Quản lý tài khoản và phân quyền người dùng hệ thống
+            </p>
+          </div>
+          <div className="admin-page-header__actions">
+            <button className="admin-btn admin-btn--secondary">
+              <Download size={16} />
+              Xuất Excel
+            </button>
+            <button
+              className="admin-btn admin-btn--primary"
+              onClick={handleShowModalAddUser}
+            >
+              <Plus size={16} />
+              Thêm người dùng
+            </button>
+          </div>
         </div>
-        <div className="admin-page-header__actions">
-          <button className="admin-btn admin-btn--secondary">
-            <Download size={16} />
-            Xuất Excel
-          </button>
-          <button className="admin-btn admin-btn--primary">
-            <Plus size={16} />
-            Thêm người dùng
-          </button>
-        </div>
-      </div>
 
-      {/* Main Card */}
-      <div className="admin-card">
-        {/* Filters */}
-        <div className="admin-filters">
-          <div className="admin-filters__search">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Tìm theo tên hoặc email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+        {/* Main Card */}
+        <div className="admin-card">
+          {/* Filters */}
+          <div className="admin-filters">
+            <div className="admin-filters__search">
+              <Search size={18} />
+              <input
+                type="text"
+                placeholder="Tìm theo tên hoặc email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <select
+              className="admin-filters__select"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+            >
+              <option value="all">Tất cả vai trò</option>
+              <option value="user">User</option>
+              <option value="moderator">Moderator</option>
+              <option value="admin">Admin</option>
+            </select>
+
+            <select
+              className="admin-filters__select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+              <option value="banned">Bị khóa</option>
+            </select>
           </div>
 
-          <select
-            className="admin-filters__select"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-          >
-            <option value="all">Tất cả vai trò</option>
-            <option value="user">User</option>
-            <option value="moderator">Moderator</option>
-            <option value="admin">Admin</option>
-          </select>
+          {/* Table */}
+          <div className="table-container">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Người dùng</th>
+                  <th>Vai trò</th>
+                  <th>Trạng thái</th>
 
-          <select
-            className="admin-filters__select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="active">Hoạt động</option>
-            <option value="inactive">Không hoạt động</option>
-            <option value="banned">Bị khóa</option>
-          </select>
-        </div>
-
-        {/* Table */}
-        <div className="table-container">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Người dùng</th>
-                <th>Vai trò</th>
-                <th>Trạng thái</th>
-                <th>Ngôn ngữ</th>
-                <th>Đóng góp</th>
-                <th>Đăng nhập cuối</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedUsers.map((user) => (
-                <tr key={user._id}>
-                  <td>
-                    <div className="user-cell">
-                      <div className="user-cell__avatar">
-                        {user.fullName.charAt(0)}
-                      </div>
-                      <div className="user-cell__info">
-                        <span className="user-cell__name">{user.fullName}</span>
-                        <span className="user-cell__email">{user.email}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{getRoleBadge(user.role)}</td>
-                  <td>{getStatusBadge(user.status)}</td>
-                  <td>
-                    <span className="language-cell">
-                      {getLanguageFlag(user.preferredLanguage)}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="contribution-cell">
-                      <span>{user.contributionCount} thuật ngữ</span>
-                      <span>{user.commentCount} bình luận</span>
-                    </div>
-                  </td>
-                  <td>
-                    {user.lastLogin
-                      ? new Date(user.lastLogin).toLocaleDateString("vi-VN")
-                      : "Chưa đăng nhập"}
-                  </td>
-                  <td>
-                    <div className="action-cell">
-                      <button
-                        className="action-btn"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowDetailModal(true);
-                        }}
-                        title="Xem chi tiết"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        className="action-btn"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowEditModal(true);
-                        }}
-                        title="Chỉnh sửa"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      {user.role === "moderator" && (
-                        <button
-                          className="action-btn action-btn--primary"
-                          onClick={() => openPermissionsModal(user)}
-                          title="Phân quyền kiểm duyệt"
-                        >
-                          <Shield size={16} />
-                        </button>
-                      )}
-                      <button
-                        className="action-btn"
-                        onClick={() => handleToggleStatus(user)}
-                        title={user.status === "banned" ? "Mở khóa" : "Khóa"}
-                      >
-                        {user.status === "banned" ? (
-                          <Unlock size={16} />
-                        ) : (
-                          <Lock size={16} />
-                        )}
-                      </button>
-                      <button
-                        className="action-btn action-btn--danger"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowDeleteConfirm(true);
-                        }}
-                        title="Xóa"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+                  <th>Đóng góp</th>
+                  <th>Đăng nhập cuối</th>
+                  <th>Thao tác</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="admin-pagination">
-          <div className="admin-pagination__info">
-            Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-            {Math.min(currentPage * itemsPerPage, filteredUsers.length)} trong{" "}
-            {filteredUsers.length} người dùng
-          </div>
-          <div className="admin-pagination__controls">
-            <button
-              className="admin-pagination__btn"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                className={`admin-pagination__btn ${
-                  page === currentPage ? "active" : ""
-                }`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              className="admin-pagination__btn"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* View Detail Modal */}
-      {showDetailModal && selectedUser && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowDetailModal(false)}
-        >
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2>Chi tiết người dùng</h2>
-              <button
-                className="modal__close"
-                onClick={() => setShowDetailModal(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal__body">
-              <div className="user-detail">
-                <div className="user-detail__avatar">
-                  {selectedUser.fullName.charAt(0)}
-                </div>
-                <h3>{selectedUser.fullName}</h3>
-                <p>{selectedUser.email}</p>
-                <div className="user-detail__badges">
-                  {getRoleBadge(selectedUser.role)}
-                  {getStatusBadge(selectedUser.status)}
-                </div>
-              </div>
-              <div className="user-detail__stats">
-                <div className="stat-item">
-                  <span className="stat-label">Ngày tham gia</span>
-                  <span className="stat-value">
-                    {new Date(selectedUser.createdAt).toLocaleDateString(
-                      "vi-VN",
-                    )}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Đăng nhập cuối</span>
-                  <span className="stat-value">
-                    {selectedUser.lastLogin
-                      ? new Date(selectedUser.lastLogin).toLocaleDateString(
-                          "vi-VN",
-                        )
-                      : "Chưa đăng nhập"}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Thuật ngữ đóng góp</span>
-                  <span className="stat-value">
-                    {selectedUser.contributionCount}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Bình luận</span>
-                  <span className="stat-value">
-                    {selectedUser.commentCount}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Ngôn ngữ ưa thích</span>
-                  <span className="stat-value">
-                    {getLanguageFlag(selectedUser.preferredLanguage)}{" "}
-                    {selectedUser.preferredLanguage.toUpperCase()}
-                  </span>
-                </div>
-              </div>
-
-              {/* Moderation Permissions (for moderators) */}
-              {selectedUser.role === "moderator" && (
-                <div className="moderation-permissions-detail">
-                  <h4>
-                    <Shield size={16} />
-                    Quyền kiểm duyệt
-                  </h4>
-                  <div className="permissions-tags">
-                    {selectedUser.moderationPermissions?.permissions?.length ? (
-                      selectedUser.moderationPermissions.permissions.map(
-                        (p) => (
-                          <span key={p} className="permission-tag">
-                            {permissionOptions.find((o) => o.value === p)?.icon}{" "}
-                            {
-                              permissionOptions.find((o) => o.value === p)
-                                ?.label
-                            }
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user._id}>
+                    <td>
+                      <div className="user-cell">
+                        <div className="user-cell__avatar">
+                          {user.fullName.charAt(0)}
+                        </div>
+                        <div className="user-cell__info">
+                          <span className="user-cell__name">
+                            {user.fullName}
                           </span>
-                        ),
-                      )
-                    ) : (
-                      <span className="no-permissions">
-                        Chưa được phân quyền
-                      </span>
-                    )}
+                          <span className="user-cell__email">{user.email}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{getRoleBadge(user.role)}</td>
+                    <td>{getStatusBadge(user.status)}</td>
+
+                    <td>
+                      <div className="contribution-cell">
+                        <span>{user.contributionCount} thuật ngữ</span>
+                        <span>{user.commentCount} bình luận</span>
+                      </div>
+                    </td>
+                    <td>
+                      {user.lastLogin
+                        ? new Date(user.lastLogin).toLocaleDateString("vi-VN")
+                        : "Chưa đăng nhập"}
+                    </td>
+                    <td>
+                      <div className="action-cell">
+                        <button
+                          className="action-btn"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowDetailModal(true);
+                          }}
+                          title="Xem chi tiết"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          className="action-btn"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowEditModal(true);
+                          }}
+                          title="Chỉnh sửa"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        {user.role === "moderator" && (
+                          <button
+                            className="action-btn action-btn--primary"
+                            onClick={() => openPermissionsModal(user)}
+                            title="Phân quyền kiểm duyệt"
+                          >
+                            <Shield size={16} />
+                          </button>
+                        )}
+                        <button
+                          className="action-btn"
+                          onClick={() => handleToggleStatus(user)}
+                          title={user.status === "banned" ? "Mở khóa" : "Khóa"}
+                        >
+                          {user.status === "banned" ? (
+                            <Unlock size={16} />
+                          ) : (
+                            <Lock size={16} />
+                          )}
+                        </button>
+                        <button
+                          className="action-btn action-btn--danger"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowDeleteConfirm(true);
+                          }}
+                          title="Xóa"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalUsers > 0 && (
+            <div className="admin-pagination">
+              <div className="admin-pagination__info">
+                Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                {Math.min(currentPage * itemsPerPage, totalUsers)} trong{" "}
+                {totalUsers} người dùng
+              </div>
+              <div className="admin-pagination__controls">
+                <button
+                  className="admin-pagination__btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(1)}
+                  title="Trang đầu"
+                >
+                  <ChevronLeft size={16} />
+                  <ChevronLeft size={16} style={{ marginLeft: -8 }} />
+                </button>
+                <button
+                  className="admin-pagination__btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  title="Trang trước"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                {getPageNumbers().map((page, index) =>
+                  page === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="admin-pagination__ellipsis"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page}
+                      className={`admin-pagination__btn ${
+                        page === currentPage ? "active" : ""
+                      }`}
+                      onClick={() => setCurrentPage(page as number)}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+                <button
+                  className="admin-pagination__btn"
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  title="Trang sau"
+                >
+                  <ChevronRight size={16} />
+                </button>
+                <button
+                  className="admin-pagination__btn"
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  onClick={() => setCurrentPage(totalPages)}
+                  title="Trang cuối"
+                >
+                  <ChevronRight size={16} />
+                  <ChevronRight size={16} style={{ marginLeft: -8 }} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {users.length === 0 && !loading && (
+            <div className="admin-empty-state">
+              <UserIcon size={48} />
+              <h3>Không tìm thấy người dùng</h3>
+              <p>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+            </div>
+          )}
+        </div>
+
+        {/* View Detail Modal */}
+        {showDetailModal && selectedUser && (
+          <div
+            className="modal-overlay"
+            onClick={() => setShowDetailModal(false)}
+          >
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal__header">
+                <h2>Chi tiết người dùng</h2>
+                <button
+                  className="modal__close"
+                  onClick={() => setShowDetailModal(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal__body">
+                <div className="user-detail">
+                  <div className="user-detail__avatar">
+                    {selectedUser.fullName.charAt(0)}
                   </div>
-                  <div className="categories-tags">
-                    <span className="categories-label">Danh mục:</span>
-                    {selectedUser.moderationPermissions?.categories?.length ? (
-                      selectedUser.moderationPermissions.categories.map(
-                        (catId) => {
-                          const cat = mockCategories.find(
-                            (c) => c._id === catId,
-                          );
-                          return cat ? (
-                            <span key={catId} className="category-tag">
-                              {cat.name}
-                            </span>
-                          ) : null;
-                        },
-                      )
-                    ) : (
-                      <span className="all-categories">Tất cả danh mục</span>
-                    )}
+                  <h3>{selectedUser.fullName}</h3>
+                  <p>{selectedUser.email}</p>
+                  <div className="user-detail__badges">
+                    {getRoleBadge(selectedUser.role)}
+                    {getStatusBadge(selectedUser.status)}
                   </div>
                 </div>
-              )}
-            </div>
-            <div className="modal__footer">
-              <button
-                className="admin-btn admin-btn--secondary"
-                onClick={() => setShowDetailModal(false)}
-              >
-                Đóng
-              </button>
-              {selectedUser.role === "moderator" && (
+                <div className="user-detail__stats">
+                  <div className="stat-item">
+                    <span className="stat-label">Ngày tham gia</span>
+                    <span className="stat-value">
+                      {new Date(selectedUser.createdAt).toLocaleDateString(
+                        "vi-VN",
+                      )}
+                    </span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Đăng nhập cuối</span>
+                    <span className="stat-value">
+                      {selectedUser.lastLogin
+                        ? new Date(selectedUser.lastLogin).toLocaleDateString(
+                            "vi-VN",
+                          )
+                        : "Chưa đăng nhập"}
+                    </span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Thuật ngữ đóng góp</span>
+                    <span className="stat-value">
+                      {selectedUser.contributionCount}
+                    </span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Bình luận</span>
+                    <span className="stat-value">
+                      {selectedUser.commentCount}
+                    </span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Ngôn ngữ ưa thích</span>
+                    <span className="stat-value">
+                      {getLanguageFlag(selectedUser.preferredLanguage)}{" "}
+                      {selectedUser.preferredLanguage.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Moderation Permissions (for moderators) */}
+                {selectedUser.role === "moderator" && (
+                  <div className="moderation-permissions-detail">
+                    <h4>
+                      <Shield size={16} />
+                      Quyền kiểm duyệt
+                    </h4>
+                    <div className="permissions-tags">
+                      {selectedUser.moderationPermissions?.permissions
+                        ?.length ? (
+                        selectedUser.moderationPermissions.permissions.map(
+                          (p) => (
+                            <span key={p} className="permission-tag">
+                              {
+                                permissionOptions.find((o) => o.value === p)
+                                  ?.icon
+                              }{" "}
+                              {
+                                permissionOptions.find((o) => o.value === p)
+                                  ?.label
+                              }
+                            </span>
+                          ),
+                        )
+                      ) : (
+                        <span className="no-permissions">
+                          Chưa được phân quyền
+                        </span>
+                      )}
+                    </div>
+                    <div className="categories-tags">
+                      <span className="categories-label">Danh mục:</span>
+                      {selectedUser.moderationPermissions?.categories
+                        ?.length ? (
+                        selectedUser.moderationPermissions.categories.map(
+                          (catId) => {
+                            const cat = categories.find((c) => c._id === catId);
+                            return cat ? (
+                              <span key={catId} className="category-tag">
+                                {cat.name}
+                              </span>
+                            ) : null;
+                          },
+                        )
+                      ) : (
+                        <span className="all-categories">Tất cả danh mục</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="modal__footer">
                 <button
-                  className="admin-btn admin-btn--warning"
+                  className="admin-btn admin-btn--secondary"
+                  onClick={() => setShowDetailModal(false)}
+                >
+                  Đóng
+                </button>
+                {selectedUser.role === "moderator" && (
+                  <button
+                    className="admin-btn admin-btn--warning"
+                    onClick={() => {
+                      setShowDetailModal(false);
+                      openPermissionsModal(selectedUser);
+                    }}
+                  >
+                    <Shield size={16} />
+                    Phân quyền
+                  </button>
+                )}
+                <button
+                  className="admin-btn admin-btn--primary"
                   onClick={() => {
                     setShowDetailModal(false);
-                    openPermissionsModal(selectedUser);
+                    setShowEditModal(true);
                   }}
                 >
-                  <Shield size={16} />
-                  Phân quyền
+                  Chỉnh sửa
                 </button>
-              )}
-              <button
-                className="admin-btn admin-btn--primary"
-                onClick={() => {
-                  setShowDetailModal(false);
-                  setShowEditModal(true);
-                }}
-              >
-                Chỉnh sửa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Modal */}
-      {showEditModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2>Chỉnh sửa người dùng</h2>
-              <button
-                className="modal__close"
-                onClick={() => setShowEditModal(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal__body">
-              <div className="admin-form">
-                <div className="admin-form__group">
-                  <label className="admin-form__label">Họ tên</label>
-                  <input
-                    type="text"
-                    className="admin-form__input"
-                    defaultValue={selectedUser.fullName}
-                  />
-                </div>
-                <div className="admin-form__group">
-                  <label className="admin-form__label">Email</label>
-                  <input
-                    type="email"
-                    className="admin-form__input"
-                    defaultValue={selectedUser.email}
-                  />
-                </div>
-                <div className="admin-form__group">
-                  <label className="admin-form__label">Vai trò</label>
-                  <select
-                    className="admin-form__select"
-                    defaultValue={selectedUser.role}
-                    onChange={(e) =>
-                      handleChangeRole(
-                        selectedUser._id,
-                        e.target.value as "user" | "moderator" | "admin",
-                      )
-                    }
-                  >
-                    <option value="user">User</option>
-                    <option value="moderator">Moderator</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-                <div className="admin-form__group">
-                  <label className="admin-form__label">Trạng thái</label>
-                  <select
-                    className="admin-form__select"
-                    defaultValue={selectedUser.status}
-                  >
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Không hoạt động</option>
-                    <option value="banned">Bị khóa</option>
-                  </select>
-                </div>
               </div>
             </div>
-            <div className="modal__footer">
-              <button
-                className="admin-btn admin-btn--secondary"
-                onClick={() => setShowEditModal(false)}
-              >
-                Hủy
-              </button>
-              <button
-                className="admin-btn admin-btn--primary"
-                onClick={() => {
-                  // Save logic
-                  setShowEditModal(false);
-                }}
-              >
-                Lưu thay đổi
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Delete Confirm Modal */}
-      {showDeleteConfirm && selectedUser && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowDeleteConfirm(false)}
-        >
-          <div className="modal modal--sm" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2>Xác nhận xóa</h2>
-              <button
-                className="modal__close"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal__body">
-              <p>
-                Bạn có chắc chắn muốn xóa người dùng{" "}
-                <strong>{selectedUser.fullName}</strong>?
-              </p>
-              <p className="text-danger">Hành động này không thể hoàn tác.</p>
-            </div>
-            <div className="modal__footer">
-              <button
-                className="admin-btn admin-btn--secondary"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                Hủy
-              </button>
-              <button
-                className="admin-btn admin-btn--danger"
-                onClick={handleDelete}
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Permissions Modal */}
-      {showPermissionsModal && selectedUser && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowPermissionsModal(false)}
-        >
-          <div className="modal modal--lg" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2>
-                <Shield size={20} />
-                Phân quyền kiểm duyệt
-              </h2>
-              <button
-                className="modal__close"
-                onClick={() => setShowPermissionsModal(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal__body">
-              {/* User Info */}
-              <div className="permissions-user-info">
-                <div className="user-cell__avatar">
-                  {selectedUser.fullName.charAt(0)}
-                </div>
-                <div>
-                  <h4>{selectedUser.fullName}</h4>
-                  <p>{selectedUser.email}</p>
-                </div>
-                {getRoleBadge(selectedUser.role)}
+        {/* Lock Confirm Modal */}
+        {showLockConfirm && selectedUser && (
+          <div
+            className="modal-overlay"
+            onClick={() => setShowLockConfirm(false)}
+          >
+            <div
+              className="modal modal--sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal__header">
+                <h2>
+                  {selectedUser.status === "banned"
+                    ? "Xác nhận mở khóa"
+                    : "Xác nhận khóa tài khoản"}
+                </h2>
+                <button
+                  className="modal__close"
+                  onClick={() => setShowLockConfirm(false)}
+                >
+                  <X size={20} />
+                </button>
               </div>
-
-              {/* Permission Types */}
-              <div className="permissions-section">
-                <h4>Loại kiểm duyệt được phép</h4>
-                <p className="permissions-section__desc">
-                  Chọn các loại nội dung mà kiểm duyệt viên được phép xem xét
+              <div className="modal__body">
+                <p>
+                  Bạn có chắc chắn muốn{" "}
+                  {selectedUser.status === "banned" ? "mở khóa" : "khóa"} tài
+                  khoản <strong>{selectedUser.fullName}</strong>?
                 </p>
-                <div className="permissions-grid">
-                  {permissionOptions.map((option) => (
-                    <label
-                      key={option.value}
-                      className={`permission-item ${
-                        editingPermissions.permissions.includes(
-                          option.value as any,
-                        )
-                          ? "permission-item--active"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={editingPermissions.permissions.includes(
-                          option.value as any,
-                        )}
-                        onChange={() =>
-                          handleTogglePermission(option.value as any)
-                        }
-                      />
-                      <span className="permission-item__icon">
-                        {option.icon}
-                      </span>
-                      <span className="permission-item__label">
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                {selectedUser.status !== "banned" && (
+                  <p className="text-warning">
+                    Người dùng sẽ không thể đăng nhập khi tài khoản bị khóa.
+                  </p>
+                )}
               </div>
+              <div className="modal__footer">
+                <button
+                  className="admin-btn admin-btn--secondary"
+                  onClick={() => setShowLockConfirm(false)}
+                >
+                  Hủy
+                </button>
+                <button
+                  className={`admin-btn ${
+                    selectedUser.status === "banned"
+                      ? "admin-btn--success"
+                      : "admin-btn--warning"
+                  }`}
+                  onClick={confirmToggleStatus}
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Đang xử lý..."
+                    : selectedUser.status === "banned"
+                      ? "Mở khóa"
+                      : "Khóa tài khoản"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-              {/* Category Assignment */}
-              <div className="permissions-section">
-                <h4>Danh mục được phân công</h4>
-                <p className="permissions-section__desc">
-                  Kiểm duyệt viên chỉ được kiểm duyệt nội dung trong các danh
-                  mục được chọn
+        {/* Delete Confirm Modal */}
+        {showDeleteConfirm && selectedUser && (
+          <div
+            className="modal-overlay"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <div
+              className="modal modal--sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal__header">
+                <h2>Xác nhận xóa</h2>
+                <button
+                  className="modal__close"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal__body">
+                <p>
+                  Bạn có chắc chắn muốn xóa người dùng{" "}
+                  <strong>{selectedUser.fullName}</strong>?
                 </p>
-                <div className="categories-grid">
-                  {mockCategories.map((category) => (
-                    <label
-                      key={category._id}
-                      className={`category-item ${
-                        editingPermissions.categories.includes(category._id)
-                          ? "category-item--active"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={editingPermissions.categories.includes(
-                          category._id,
-                        )}
-                        onChange={() => handleToggleCategory(category._id)}
-                      />
-                      <span className="category-item__name">
-                        {category.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                <p className="text-danger">Hành động này không thể hoàn tác.</p>
               </div>
+              <div className="modal__footer">
+                <button
+                  className="admin-btn admin-btn--secondary"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  Hủy
+                </button>
+                <button
+                  className="admin-btn admin-btn--danger"
+                  onClick={handleDelete}
+                  disabled={loading}
+                >
+                  {loading ? "Đang xóa..." : "Xóa người dùng"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-              {/* Summary */}
-              <div className="permissions-summary">
-                <div className="summary-item">
-                  <span className="summary-label">Quyền:</span>
-                  <span className="summary-value">
-                    {editingPermissions.permissions.length === 0
-                      ? "Chưa chọn"
-                      : editingPermissions.permissions
-                          .map(
-                            (p) =>
-                              permissionOptions.find((o) => o.value === p)
-                                ?.label,
+        {/* Permissions Modal */}
+        {showPermissionsModal && selectedUser && (
+          <div
+            className="modal-overlay"
+            onClick={() => setShowPermissionsModal(false)}
+          >
+            <div
+              className="modal modal--lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal__header">
+                <h2>
+                  <Shield size={20} />
+                  Phân quyền kiểm duyệt
+                </h2>
+                <button
+                  className="modal__close"
+                  onClick={() => setShowPermissionsModal(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal__body">
+                {/* User Info */}
+                <div className="permissions-user-info">
+                  <div className="user-cell__avatar">
+                    {selectedUser.fullName.charAt(0)}
+                  </div>
+                  <div>
+                    <h4>{selectedUser.fullName}</h4>
+                    <p>{selectedUser.email}</p>
+                  </div>
+                  {getRoleBadge(selectedUser.role)}
+                </div>
+
+                {/* Permission Types */}
+                <div className="permissions-section">
+                  <div className="permissions-section__header">
+                    <div>
+                      <h4>Loại kiểm duyệt được phép</h4>
+                      <p className="permissions-section__desc">
+                        Chọn các loại nội dung mà kiểm duyệt viên được phép xem
+                        xét
+                      </p>
+                    </div>
+                    <div className="permissions-section__actions">
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--sm admin-btn--ghost"
+                        onClick={handleSelectAllPermissions}
+                      >
+                        Chọn tất cả
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--sm admin-btn--ghost"
+                        onClick={handleClearAllPermissions}
+                      >
+                        Bỏ chọn
+                      </button>
+                    </div>
+                  </div>
+                  <div className="permissions-grid">
+                    {permissionOptions.map((option) => (
+                      <label
+                        key={option.value}
+                        className={`permission-item ${
+                          editingPermissions.permissions.includes(
+                            option.value as any,
                           )
-                          .join(", ")}
-                  </span>
+                            ? "permission-item--active"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={editingPermissions.permissions.includes(
+                            option.value as any,
+                          )}
+                          onChange={() =>
+                            handleTogglePermission(option.value as any)
+                          }
+                        />
+                        <span className="permission-item__icon">
+                          {option.icon}
+                        </span>
+                        <span className="permission-item__label">
+                          {option.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-                <div className="summary-item">
-                  <span className="summary-label">Danh mục:</span>
-                  <span className="summary-value">
-                    {editingPermissions.categories.length === 0
-                      ? "Tất cả danh mục"
-                      : `${editingPermissions.categories.length} danh mục`}
-                  </span>
+
+                {/* Category Assignment */}
+                <div className="permissions-section">
+                  <div className="permissions-section__header">
+                    <div>
+                      <h4>Danh mục được phân công</h4>
+                      <p className="permissions-section__desc">
+                        Kiểm duyệt viên chỉ được kiểm duyệt nội dung trong các
+                        danh mục được chọn
+                      </p>
+                    </div>
+                    <div className="permissions-section__actions">
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--sm admin-btn--ghost"
+                        onClick={handleSelectAllCategories}
+                      >
+                        Chọn tất cả
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--sm admin-btn--ghost"
+                        onClick={handleClearAllCategories}
+                      >
+                        Bỏ chọn
+                      </button>
+                    </div>
+                  </div>
+                  <div className="categories-grid">
+                    {categories.map((category) => (
+                      <label
+                        key={category.id}
+                        className={`category-item ${
+                          editingPermissions.categories.includes(category.id)
+                            ? "category-item--active"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={editingPermissions.categories.includes(
+                            category.id,
+                          )}
+                          onChange={() => handleToggleCategory(category.id)}
+                        />
+                        <span className="category-item__name">
+                          <i></i>
+                          {category.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="permissions-summary">
+                  <div className="summary-item">
+                    <span className="summary-label">Quyền:</span>
+                    <span className="summary-value">
+                      {editingPermissions.permissions.length === 0
+                        ? "Chưa chọn"
+                        : editingPermissions.permissions
+                            .map(
+                              (p) =>
+                                permissionOptions.find((o) => o.value === p)
+                                  ?.label,
+                            )
+                            .join(", ")}
+                    </span>
+                  </div>
+                  <div className="summary-item">
+                    <span className="summary-label">Danh mục:</span>
+                    <span className="summary-value">
+                      {editingPermissions.categories.length === 0
+                        ? "Tất cả danh mục"
+                        : `${editingPermissions.categories.length} danh mục`}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="modal__footer">
-              <button
-                className="admin-btn admin-btn--secondary"
-                onClick={() => setShowPermissionsModal(false)}
-              >
-                Hủy
-              </button>
-              <button
-                className="admin-btn admin-btn--primary"
-                onClick={handleSavePermissions}
-              >
-                <Shield size={16} />
-                Lưu phân quyền
-              </button>
+              <div className="modal__footer">
+                <button
+                  className="admin-btn admin-btn--secondary"
+                  onClick={() => setShowPermissionsModal(false)}
+                >
+                  Hủy
+                </button>
+                <button
+                  className="admin-btn admin-btn--primary"
+                  onClick={handleSavePermissions}
+                  disabled={savingPermissions}
+                >
+                  {savingPermissions ? (
+                    <>Đang lưu...</>
+                  ) : (
+                    <>
+                      <Shield size={16} />
+                      Lưu phân quyền
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        .table-container {
-          overflow-x: auto;
-        }
-
-        .user-cell {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .user-cell__avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: 16px;
-          flex-shrink: 0;
-        }
-
-        .user-cell__info {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .user-cell__name {
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .user-cell__email {
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        .language-cell {
-          font-size: 20px;
-        }
-
-        .contribution-cell {
-          display: flex;
-          flex-direction: column;
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        .action-cell {
-          display: flex;
-          gap: 4px;
-        }
-
-        .action-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          border: none;
-          border-radius: 6px;
-          background: transparent;
-          color: var(--text-secondary);
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-        }
-
-        .action-btn--danger:hover {
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444;
-        }
-
-        .modal-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1050;
-          padding: 20px;
-        }
-
-        .modal {
-          background: var(--bg-card);
-          border-radius: 16px;
-          width: 100%;
-          max-width: 500px;
-          max-height: 90vh;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .modal--sm {
-          max-width: 400px;
-        }
-
-        .modal__header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 16px 24px;
-          border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal__header h2 {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 600;
-        }
-
-        .modal__close {
-          background: none;
-          border: none;
-          color: var(--text-secondary);
-          cursor: pointer;
-          padding: 4px;
-          border-radius: 6px;
-          display: flex;
-        }
-
-        .modal__close:hover {
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-        }
-
-        .modal__body {
-          padding: 24px;
-          overflow-y: auto;
-        }
-
-        .modal__footer {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          padding: 16px 24px;
-          border-top: 1px solid var(--border-color);
-        }
-
-        .user-detail {
-          text-align: center;
-          margin-bottom: 24px;
-        }
-
-        .user-detail__avatar {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 32px;
-          margin: 0 auto 16px;
-        }
-
-        .user-detail h3 {
-          margin: 0 0 4px;
-          font-size: 20px;
-        }
-
-        .user-detail p {
-          margin: 0 0 12px;
-          color: var(--text-secondary);
-          font-size: 14px;
-        }
-
-        .user-detail__badges {
-          display: flex;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .user-detail__stats {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
-        }
-
-        .stat-item {
-          padding: 12px;
-          background: var(--bg-secondary);
-          border-radius: 8px;
-        }
-
-        .stat-label {
-          display: block;
-          font-size: 12px;
-          color: var(--text-secondary);
-          margin-bottom: 4px;
-        }
-
-        .stat-value {
-          display: block;
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .text-danger {
-          color: #ef4444;
-          font-size: 14px;
-        }
-
-        /* Permissions Modal Styles */
-        .action-btn--primary:hover {
-          background: rgba(102, 126, 234, 0.1);
-          color: #667eea;
-        }
-
-        .modal--lg {
-          max-width: 600px;
-        }
-
-        .modal__header h2 {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .permissions-user-info {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px;
-          background: var(--bg-secondary);
-          border-radius: 12px;
-          margin-bottom: 24px;
-        }
-
-        .permissions-user-info h4 {
-          margin: 0;
-          font-size: 16px;
-          color: var(--text-primary);
-        }
-
-        .permissions-user-info p {
-          margin: 0;
-          font-size: 13px;
-          color: var(--text-secondary);
-        }
-
-        .permissions-section {
-          margin-bottom: 24px;
-        }
-
-        .permissions-section h4 {
-          margin: 0 0 4px;
-          font-size: 15px;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .permissions-section__desc {
-          margin: 0 0 12px;
-          font-size: 13px;
-          color: var(--text-secondary);
-        }
-
-        .permissions-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 8px;
-        }
-
-        .permission-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 12px 16px;
-          border: 2px solid var(--border-color);
-          border-radius: 10px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .permission-item input {
-          display: none;
-        }
-
-        .permission-item:hover {
-          border-color: #667eea;
-        }
-
-        .permission-item--active {
-          border-color: #667eea;
-          background: rgba(102, 126, 234, 0.1);
-        }
-
-        .permission-item__icon {
-          font-size: 20px;
-        }
-
-        .permission-item__label {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .categories-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 8px;
-        }
-
-        .category-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 10px 14px;
-          border: 2px solid var(--border-color);
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .category-item input {
-          display: none;
-        }
-
-        .category-item:hover {
-          border-color: #10b981;
-        }
-
-        .category-item--active {
-          border-color: #10b981;
-          background: rgba(16, 185, 129, 0.1);
-        }
-
-        .category-item__name {
-          font-size: 13px;
-          color: var(--text-primary);
-        }
-
-        .permissions-summary {
-          padding: 16px;
-          background: linear-gradient(
-            135deg,
-            rgba(102, 126, 234, 0.1) 0%,
-            rgba(118, 75, 162, 0.1) 100%
-          );
-          border-radius: 12px;
-          border: 1px solid rgba(102, 126, 234, 0.2);
-        }
-
-        .summary-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 8px;
-        }
-
-        .summary-item:last-child {
-          margin-bottom: 0;
-        }
-
-        .summary-label {
-          font-size: 13px;
-          font-weight: 600;
-          color: var(--text-secondary);
-        }
-
-        .summary-value {
-          font-size: 13px;
-          color: var(--text-primary);
-        }
-
-        /* Moderation permissions in detail modal */
-        .moderation-permissions-detail {
-          margin-top: 20px;
-          padding: 16px;
-          background: linear-gradient(
-            135deg,
-            rgba(102, 126, 234, 0.05) 0%,
-            rgba(118, 75, 162, 0.05) 100%
-          );
-          border: 1px solid rgba(102, 126, 234, 0.2);
-          border-radius: 12px;
-        }
-
-        .moderation-permissions-detail h4 {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin: 0 0 12px;
-          font-size: 14px;
-          font-weight: 600;
-          color: #667eea;
-        }
-
-        .permissions-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-bottom: 12px;
-        }
-
-        .permission-tag {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          padding: 6px 12px;
-          background: rgba(102, 126, 234, 0.1);
-          color: #667eea;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-
-        .no-permissions {
-          font-size: 13px;
-          color: var(--text-secondary);
-          font-style: italic;
-        }
-
-        .categories-tags {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .categories-label {
-          font-size: 12px;
-          font-weight: 600;
-          color: var(--text-secondary);
-        }
-
-        .category-tag {
-          display: inline-block;
-          padding: 4px 10px;
-          background: rgba(16, 185, 129, 0.1);
-          color: #10b981;
-          border-radius: 16px;
-          font-size: 12px;
-        }
-
-        .all-categories {
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        @media (max-width: 768px) {
-          .permissions-grid,
-          .categories-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-    </div>
+        )}
+      </div>
+      <AddUser
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onUserAdded={() => {
+          refreshUsers();
+        }}
+      />
+      <EditUser
+        isOpen={showEditModal}
+        user={selectedUser}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedUser(null);
+        }}
+        onUserUpdated={() => {
+          refreshUsers();
+        }}
+      />
+    </>
   );
 }
