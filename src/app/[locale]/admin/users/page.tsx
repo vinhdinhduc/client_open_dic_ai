@@ -33,7 +33,6 @@ import {
   UserStatus,
 } from "@/components/types/userTypes";
 import "./page.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AddUser } from "@/components/forms/manage_users/AddUser";
 import { EditUser } from "@/components/forms/manage_users/EditUser";
 import toast from "react-hot-toast";
@@ -72,7 +71,8 @@ interface ModerationPermissions {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -86,18 +86,7 @@ export default function UsersPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
-
-  // New user form state
-  const [newUser, setNewUser] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "user" as "user" | "moderator" | "admin",
-    status: "active" as "active" | "inactive",
-    preferredLanguage: "vi" as "vi" | "en" | "lo",
-  });
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Permissions editing state
   const [editingPermissions, setEditingPermissions] =
@@ -106,8 +95,6 @@ export default function UsersPage() {
       permissions: [],
     });
   const [savingPermissions, setSavingPermissions] = useState(false);
-
-  const itemsPerPage = 10;
 
   // Debounce search query
   useEffect(() => {
@@ -133,7 +120,10 @@ export default function UsersPage() {
   // Fetch users when page or filters change
   useEffect(() => {
     const fetchUsers = async () => {
-      setLoading(true);
+      // Chỉ set tableLoading nếu không phải lần load đầu tiên
+      if (!initialLoading) {
+        setTableLoading(true);
+      }
       try {
         const params: GetUsersParams = {
           page: currentPage,
@@ -156,22 +146,23 @@ export default function UsersPage() {
       } catch (error) {
         console.error("Error fetching users:", error);
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
+        setTableLoading(false);
       }
     };
     fetchUsers();
-  }, [currentPage, roleFilter, statusFilter, debouncedSearch]);
+  }, [currentPage, roleFilter, statusFilter, debouncedSearch, itemsPerPage]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [roleFilter, statusFilter, debouncedSearch]);
+  }, [roleFilter, statusFilter, debouncedSearch, itemsPerPage]);
 
   const totalPages = Math.ceil(totalUsers / itemsPerPage);
 
   // Function to refresh users list
   const refreshUsers = async () => {
-    setLoading(true);
+    setTableLoading(true);
     try {
       const params: GetUsersParams = {
         page: currentPage,
@@ -194,29 +185,29 @@ export default function UsersPage() {
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
-      setLoading(false);
+      setTableLoading(false);
     }
   };
 
-  // Generate page numbers with ellipsis for large page counts
+  // Tạo danh sách số trang cho phân trang
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total is small
+      // Hiển thị tất cả các trang nếu tổng số trang nhỏ hơn hoặc bằng giới hạn
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
+      //Luôn hiển thị trang đầu tiên khi số trang lớn hơn giới hạn
       pages.push(1);
 
       if (currentPage > 3) {
         pages.push("...");
       }
 
-      // Show pages around current page
+      // Luôn luôn hiển thị các trang xung quanh trang hiện tại
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
 
@@ -270,13 +261,12 @@ export default function UsersPage() {
   const handleToggleStatus = (user: User) => {
     setSelectedUser(user);
     setShowLockConfirm(true);
-    setActionMenuOpen(null);
   };
 
   const confirmToggleStatus = async () => {
     if (selectedUser) {
       const newStatus = selectedUser.status === "banned" ? "active" : "banned";
-      setLoading(true);
+      setTableLoading(true);
       try {
         const res = await userService.updateUser(selectedUser._id, {
           status: newStatus,
@@ -292,26 +282,17 @@ export default function UsersPage() {
       } catch (error) {
         toast.error("Có lỗi xảy ra khi cập nhật trạng thái");
       } finally {
-        setLoading(false);
+        setTableLoading(false);
         setShowLockConfirm(false);
         setSelectedUser(null);
       }
     }
   };
 
-  const handleChangeRole = (
-    userId: string,
-    newRole: "user" | "moderator" | "admin",
-  ) => {
-    setUsers((prev) =>
-      prev.map((u) => (u._id === userId ? { ...u, role: newRole } : u)),
-    );
-  };
-
   const handleDelete = async () => {
     if (selectedUser) {
       setShowDeleteConfirm(false);
-      setLoading(true);
+      setTableLoading(true);
       try {
         const res = await userService.deleteUser(selectedUser._id);
         if (res.success) {
@@ -321,7 +302,7 @@ export default function UsersPage() {
       } catch (error) {
         toast.error("Có lỗi xảy ra khi xóa người dùng");
       } finally {
-        setLoading(false);
+        setTableLoading(false);
         setSelectedUser(null);
       }
     }
@@ -418,19 +399,11 @@ export default function UsersPage() {
     }
   };
   const handleShowModalAddUser = () => {
-    setNewUser({
-      fullName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      role: "user",
-      status: "active",
-      preferredLanguage: "vi",
-    });
     setShowAddModal(true);
   };
 
-  if (loading) {
+  // Chỉ hiển thị full page loading khi load lần đầu
+  if (initialLoading) {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
@@ -503,14 +476,20 @@ export default function UsersPage() {
           </div>
 
           {/* Table */}
-          <div className="table-container">
+          <div
+            className={`table-container ${tableLoading ? "table-container--loading" : ""}`}
+          >
+            {tableLoading && (
+              <div className="table-loading-overlay">
+                <div className="admin-loading__spinner"></div>
+              </div>
+            )}
             <table className="admin-table">
               <thead>
                 <tr>
                   <th>Người dùng</th>
                   <th>Vai trò</th>
                   <th>Trạng thái</th>
-
                   <th>Đóng góp</th>
                   <th>Đăng nhập cuối</th>
                   <th>Thao tác</th>
@@ -556,7 +535,7 @@ export default function UsersPage() {
                           }}
                           title="Xem chi tiết"
                         >
-                          <Eye size={16} />
+                          <Eye size={16} color="blue" />
                         </button>
                         <button
                           className="action-btn"
@@ -566,7 +545,7 @@ export default function UsersPage() {
                           }}
                           title="Chỉnh sửa"
                         >
-                          <Edit size={16} />
+                          <Edit size={16} color="orange" />
                         </button>
                         {user.role === "moderator" && (
                           <button
@@ -574,7 +553,7 @@ export default function UsersPage() {
                             onClick={() => openPermissionsModal(user)}
                             title="Phân quyền kiểm duyệt"
                           >
-                            <Shield size={16} />
+                            <Shield size={16} color="#11998e" />
                           </button>
                         )}
                         <button
@@ -583,9 +562,9 @@ export default function UsersPage() {
                           title={user.status === "banned" ? "Mở khóa" : "Khóa"}
                         >
                           {user.status === "banned" ? (
-                            <Unlock size={16} />
+                            <Unlock size={16} color="green" />
                           ) : (
-                            <Lock size={16} />
+                            <Lock size={16} color="red" />
                           )}
                         </button>
                         <button
@@ -596,7 +575,7 @@ export default function UsersPage() {
                           }}
                           title="Xóa"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={16} color="red" />
                         </button>
                       </div>
                     </td>
@@ -610,9 +589,23 @@ export default function UsersPage() {
           {totalUsers > 0 && (
             <div className="admin-pagination">
               <div className="admin-pagination__info">
-                Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                {Math.min(currentPage * itemsPerPage, totalUsers)} trong{" "}
-                {totalUsers} người dùng
+                <label htmlFor="itemsPerPage">Số lượng mỗi trang</label>
+                <select
+                  name="itemsPerPage"
+                  id="itemsPerPage"
+                  className="admin-pagination__options"
+                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                  value={itemsPerPage}
+                >
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                </select>
+                <p>
+                  Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                  {Math.min(currentPage * itemsPerPage, totalUsers)} trong{" "}
+                  {totalUsers} người dùng
+                </p>
               </div>
               <div className="admin-pagination__controls">
                 <button
@@ -621,8 +614,12 @@ export default function UsersPage() {
                   onClick={() => setCurrentPage(1)}
                   title="Trang đầu"
                 >
-                  <ChevronLeft size={16} />
-                  <ChevronLeft size={16} style={{ marginLeft: -8 }} />
+                  <ChevronLeft size={16} color="blue" />
+                  <ChevronLeft
+                    size={16}
+                    style={{ marginLeft: -8 }}
+                    color="blue"
+                  />
                 </button>
                 <button
                   className="admin-pagination__btn"
@@ -630,7 +627,7 @@ export default function UsersPage() {
                   onClick={() => setCurrentPage((p) => p - 1)}
                   title="Trang trước"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={16} color="blue" />
                 </button>
                 {getPageNumbers().map((page, index) =>
                   page === "..." ? (
@@ -658,7 +655,7 @@ export default function UsersPage() {
                   onClick={() => setCurrentPage((p) => p + 1)}
                   title="Trang sau"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} color="blue" />
                 </button>
                 <button
                   className="admin-pagination__btn"
@@ -666,15 +663,19 @@ export default function UsersPage() {
                   onClick={() => setCurrentPage(totalPages)}
                   title="Trang cuối"
                 >
-                  <ChevronRight size={16} />
-                  <ChevronRight size={16} style={{ marginLeft: -8 }} />
+                  <ChevronRight size={16} color="blue" />
+                  <ChevronRight
+                    size={16}
+                    style={{ marginLeft: -8 }}
+                    color="blue"
+                  />
                 </button>
               </div>
             </div>
           )}
 
           {/* Empty State */}
-          {users.length === 0 && !loading && (
+          {users.length === 0 && !tableLoading && (
             <div className="admin-empty-state">
               <UserIcon size={48} />
               <h3>Không tìm thấy người dùng</h3>
@@ -884,9 +885,9 @@ export default function UsersPage() {
                       : "admin-btn--warning"
                   }`}
                   onClick={confirmToggleStatus}
-                  disabled={loading}
+                  disabled={tableLoading}
                 >
-                  {loading
+                  {tableLoading
                     ? "Đang xử lý..."
                     : selectedUser.status === "banned"
                       ? "Mở khóa"
@@ -933,9 +934,9 @@ export default function UsersPage() {
                 <button
                   className="admin-btn admin-btn--danger"
                   onClick={handleDelete}
-                  disabled={loading}
+                  disabled={tableLoading}
                 >
-                  {loading ? "Đang xóa..." : "Xóa người dùng"}
+                  {tableLoading ? "Đang xóa..." : "Xóa người dùng"}
                 </button>
               </div>
             </div>

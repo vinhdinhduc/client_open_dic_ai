@@ -22,7 +22,6 @@ interface ApiResponse<T> {
 const getCategories = async (): Promise<Category[]> => {
     try {
         const res = await axiosInstance.get<ApiResponse<Category[]>>("/categories");
-        console.log("ckeck", res);
 
         return res.data.data;
     } catch (error) {

@@ -3,24 +3,23 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@/navigation";
 import { useTranslations } from "next-intl";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBook,
-  faSun,
-  faMoon,
-  faShield,
-  faUser,
-  faPlus,
-  faStar,
-  faClock,
-  faSignOutAlt,
-  faSignInAlt,
-  faUserPlus,
-  faBars,
-  faTimes,
-  faChevronDown,
-  faGlobe,
-} from "@fortawesome/free-solid-svg-icons";
+  BookOpen,
+  Sun,
+  Moon,
+  Shield,
+  User,
+  Plus,
+  Star,
+  Clock,
+  LogOut,
+  LogIn,
+  UserPlus,
+  Menu,
+  X,
+  ChevronDown,
+  Globe,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -110,10 +109,7 @@ const Header = () => {
               <span className="header__language-code">
                 {currentLang?.code.toUpperCase()}
               </span>
-              <FontAwesomeIcon
-                icon={faChevronDown}
-                className="header__language-arrow"
-              />
+              <ChevronDown size={14} className="header__language-arrow" />
             </button>
 
             {langMenuOpen && (
@@ -148,7 +144,7 @@ const Header = () => {
                 theme === "dark" ? t("header.lightMode") : t("header.darkMode")
               }
             >
-              <FontAwesomeIcon icon={theme === "dark" ? faSun : faMoon} />
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           )}
 
@@ -158,7 +154,7 @@ const Header = () => {
               {/* Admin Link - Only for Admin/Moderator */}
               {isModerator && (
                 <Link href="/admin" className="header__admin-link">
-                  <FontAwesomeIcon icon={faShield} />
+                  <Shield size={16} />
                   <span>{t("header.admin")}</span>
                 </Link>
               )}
@@ -181,10 +177,7 @@ const Header = () => {
                     </div>
                   )}
                   <span className="header__user-name">{user?.fullName}</span>
-                  <FontAwesomeIcon
-                    icon={faChevronDown}
-                    className="header__user-arrow"
-                  />
+                  <ChevronDown size={14} className="header__user-arrow" />
                 </button>
 
                 {userMenuOpen && (
@@ -194,7 +187,7 @@ const Header = () => {
                       className="header__user-item"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      <FontAwesomeIcon icon={faUser} />
+                      <User size={16} />
                       <span>{t("header.profile")}</span>
                     </Link>
 
@@ -203,7 +196,7 @@ const Header = () => {
                       className="header__user-item"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      <FontAwesomeIcon icon={faPlus} />
+                      <Plus size={16} />
                       <span>{t("header.myContributions")}</span>
                     </Link>
 
@@ -212,7 +205,7 @@ const Header = () => {
                       className="header__user-item"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      <FontAwesomeIcon icon={faStar} />
+                      <Star size={16} />
                       <span>{t("header.myFavorites")}</span>
                     </Link>
 
@@ -221,7 +214,7 @@ const Header = () => {
                       className="header__user-item"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      <FontAwesomeIcon icon={faClock} />
+                      <Clock size={16} />
                       <span>{t("header.searchHistory")}</span>
                     </Link>
 
@@ -231,7 +224,7 @@ const Header = () => {
                       className="header__user-item header__user-item--logout"
                       onClick={handleLogout}
                     >
-                      <FontAwesomeIcon icon={faSignOutAlt} />
+                      <LogOut size={16} />
                       <span>{t("common.logout")}</span>
                     </button>
                   </div>
@@ -244,14 +237,14 @@ const Header = () => {
                 href="/login"
                 className="header__button header__button--login"
               >
-                <FontAwesomeIcon icon={faSignInAlt} />
+                <LogIn size={16} />
                 <span>{t("common.login")}</span>
               </Link>
               <Link
                 href="/register"
                 className="header__button header__button--register"
               >
-                <FontAwesomeIcon icon={faUserPlus} />
+                <UserPlus size={16} />
                 <span>{t("common.register")}</span>
               </Link>
             </div>
@@ -264,7 +257,7 @@ const Header = () => {
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
-          <FontAwesomeIcon icon={mobileMenuOpen ? faTimes : faBars} />
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 

@@ -128,7 +128,6 @@ export const authService = {
         );
 
         const { data } = response.data;
-        console.log("Check data", data);
 
 
         // Lưu token và user info

@@ -22,7 +22,6 @@ export default function SearchResultsPage() {
 
       try {
         const res = await searchTerms(query, currentLanguage);
-        console.log("Search results: page", res);
         setTerms(res.terms || []);
       } catch (error) {
         console.error("Error fetching search results:", error);

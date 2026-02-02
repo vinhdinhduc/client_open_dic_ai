@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Search,
   Plus,
@@ -17,129 +17,30 @@ import {
   Filter,
   BookOpen,
   Tag,
+  Heart,
+  MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { getAllTerms, getTermStats, deleteTerm } from "@/services/termService";
+import categoryService, { Category } from "@/services/categoryService";
+import { useLanguage } from "@/hooks";
+import {
+  ApiResponse,
+  GetTermsAdminResponse,
+  TermCardData,
+  TermStats,
+} from "@/components/terms/types";
+import { ExportModal } from "@/components/forms/manage_terms/ExportModal";
+import "./terms.scss";
+import { useRouter } from "next/navigation";
 
-// Types
-interface Term {
-  _id: string;
-  term: {
-    vi: string;
-    en?: string;
-    lo?: string;
-  };
-  definition: {
-    vi: string;
-    en?: string;
-    lo?: string;
-  };
-  category: {
-    _id: string;
-    name: { vi: string };
-  };
-  status: "pending" | "approved" | "rejected";
-  createdBy: {
-    fullName: string;
-    email: string;
-  };
-  viewCount: number;
-  favoriteCount: number;
-  commentCount: number;
-  createdAt: string;
-}
-
-// Mock data
-const mockTerms: Term[] = [
-  {
-    _id: "1",
-    term: {
-      vi: "Trí tuệ nhân tạo",
-      en: "Artificial Intelligence",
-      lo: "ປັນຍາປະດິດ",
-    },
-    definition: {
-      vi: "Là ngành khoa học máy tính nghiên cứu việc tạo ra các máy móc có khả năng thực hiện các nhiệm vụ thường đòi hỏi trí tuệ của con người.",
-      en: "A branch of computer science dealing with the simulation of intelligent behavior in computers.",
-    },
-    category: { _id: "1", name: { vi: "Công nghệ thông tin" } },
-    status: "approved",
-    createdBy: { fullName: "Nguyễn Văn A", email: "nguyenvana@email.com" },
-    viewCount: 5420,
-    favoriteCount: 234,
-    commentCount: 56,
-    createdAt: "2025-10-15",
-  },
-  {
-    _id: "2",
-    term: {
-      vi: "Machine Learning",
-      en: "Machine Learning",
-      lo: "ການຮຽນຮູ້ເຄື່ອງຈັກ",
-    },
-    definition: {
-      vi: "Một nhánh của trí tuệ nhân tạo cho phép máy tính học từ dữ liệu mà không cần lập trình rõ ràng.",
-    },
-    category: { _id: "1", name: { vi: "Công nghệ thông tin" } },
-    status: "approved",
-    createdBy: { fullName: "Trần Thị B", email: "tranthib@email.com" },
-    viewCount: 4380,
-    favoriteCount: 189,
-    commentCount: 42,
-    createdAt: "2025-11-20",
-  },
-  {
-    _id: "3",
-    term: { vi: "Blockchain", en: "Blockchain" },
-    definition: {
-      vi: "Công nghệ sổ cái phân tán, lưu trữ dữ liệu trong các khối được liên kết với nhau bằng mật mã.",
-    },
-    category: { _id: "1", name: { vi: "Công nghệ thông tin" } },
-    status: "pending",
-    createdBy: { fullName: "Lê Văn C", email: "levanc@email.com" },
-    viewCount: 0,
-    favoriteCount: 0,
-    commentCount: 0,
-    createdAt: "2026-01-28",
-  },
-  {
-    _id: "4",
-    term: { vi: "Kinh tế vĩ mô", en: "Macroeconomics" },
-    definition: {
-      vi: "Ngành kinh tế học nghiên cứu hoạt động của nền kinh tế ở phạm vi quốc gia và quốc tế.",
-    },
-    category: { _id: "2", name: { vi: "Kinh tế" } },
-    status: "approved",
-    createdBy: { fullName: "Phạm Văn D", email: "phamvand@email.com" },
-    viewCount: 2150,
-    favoriteCount: 87,
-    commentCount: 23,
-    createdAt: "2025-09-10",
-  },
-  {
-    _id: "5",
-    term: { vi: "Quang hợp", en: "Photosynthesis" },
-    definition: {
-      vi: "Quá trình sinh hóa mà thực vật sử dụng ánh sáng mặt trời để tổng hợp chất hữu cơ từ CO2 và nước.",
-    },
-    category: { _id: "3", name: { vi: "Sinh học" } },
-    status: "rejected",
-    createdBy: { fullName: "Hoàng Thị E", email: "hoangthie@email.com" },
-    viewCount: 0,
-    favoriteCount: 0,
-    commentCount: 0,
-    createdAt: "2026-01-25",
-  },
-];
-
-const mockCategories = [
-  { _id: "1", name: "Công nghệ thông tin" },
-  { _id: "2", name: "Kinh tế" },
-  { _id: "3", name: "Sinh học" },
-  { _id: "4", name: "Nông nghiệp" },
-];
+// Type alias cho admin page
+type Term = TermCardData;
 
 export default function TermsPage() {
-  const [terms, setTerms] = useState<Term[]>(mockTerms);
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -148,30 +49,145 @@ export default function TermsPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [stats, setStats] = useState<TermStats>({
+    total: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  });
+  const { currentLanguage } = useLanguage();
+  const router = useRouter();
 
+  // Debounce search
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Fetch categories once on mount
   useEffect(() => {
-    setTimeout(() => setLoading(false), 500);
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryService.getCategories();
+        setCategories(result);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  // Filter terms
-  const filteredTerms = terms.filter((term) => {
-    const matchSearch =
-      term.term.vi.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (term.term.en &&
-        term.term.en.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchCategory =
-      categoryFilter === "all" || term.category._id === categoryFilter;
-    const matchStatus = statusFilter === "all" || term.status === statusFilter;
-    return matchSearch && matchCategory && matchStatus;
-  });
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const result = await getTermStats();
+        if (result.success) {
+          setStats(result.data.stats);
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+    fetchStats();
+  }, []);
 
-  const totalPages = Math.ceil(filteredTerms.length / itemsPerPage);
-  const paginatedTerms = filteredTerms.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  // Debounce search input
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      // Reset to page 1 when search changes
+      if (searchQuery !== debouncedSearch) {
+        setCurrentPage(1);
+      }
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter, statusFilter, itemsPerPage]);
+
+  useEffect(() => {
+    fetchTerms();
+  }, [
+    categoryFilter,
+    statusFilter,
+    currentPage,
+    itemsPerPage,
+    debouncedSearch,
+  ]);
+
+  const fetchTerms = async () => {
+    setLoading(true);
+    try {
+      const resultTerm: ApiResponse<GetTermsAdminResponse> = await getAllTerms(
+        categoryFilter,
+        statusFilter,
+        currentPage,
+        itemsPerPage,
+        debouncedSearch,
+      );
+
+      if (resultTerm.success) {
+        setTerms(resultTerm.data.terms as Term[]);
+        setTotalPages(resultTerm.data.pagination.pages);
+        setTotalItems(resultTerm.data.pagination.total);
+      } else {
+        toast.error(
+          resultTerm.message || "Đã xảy ra lỗi khi tải danh sách thuật ngữ.",
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching terms:", error);
+      toast.error("Đã xảy ra lỗi khi tải danh sách thuật ngữ.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Dữ liệu đã được filter và phân trang từ API
+  const paginatedTerms = terms;
+  const getPageNum = () => {
+    const pages: (string | number)[] = [];
+    const maxPagesToShow = 5;
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      //Luôn hiện thị trang 1 nếu số trang quá giới hạn
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push("...");
+      }
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) {
+        pages.push("...");
+      }
+
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -199,12 +215,34 @@ export default function TermsPage() {
     );
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedTerm) {
       setTerms((prev) => prev.filter((t) => t._id !== selectedTerm._id));
       setShowDeleteConfirm(false);
       setSelectedTerm(null);
+      setLoading(true);
+      try {
+        const res = await deleteTerm(selectedTerm._id);
+        if (res.success) {
+          toast.success("Đã xóa thuật ngữ thành công.");
+
+          fetchTerms();
+        } else {
+          toast.error(res.message || "Đã xảy ra lỗi khi xóa thuật ngữ.");
+        }
+      } catch (error) {
+        toast.error("Đã xảy ra lỗi khi xóa thuật ngữ.");
+      } finally {
+        setLoading(false);
+      }
     }
+  };
+  const handleEditTerm = (term: Term) => {
+    router.push(`/admin/terms/edit/${term._id}`);
+  };
+
+  const handleViewTerm = (term: Term) => {
+    router.push(`/admin/terms/${term._id}`);
   };
 
   if (loading) {
@@ -227,7 +265,10 @@ export default function TermsPage() {
           </p>
         </div>
         <div className="admin-page-header__actions">
-          <button className="admin-btn admin-btn--secondary">
+          <button
+            className="admin-btn admin-btn--secondary"
+            onClick={() => setShowExportModal(true)}
+          >
             <Download size={16} />
             Xuất Excel
           </button>
@@ -248,24 +289,24 @@ export default function TermsPage() {
       {/* Stats Summary */}
       <div className="terms-stats">
         <div className="terms-stat">
-          <span className="terms-stat__value">{terms.length}</span>
+          <span className="terms-stat__value">{stats.total}</span>
           <span className="terms-stat__label">Tổng thuật ngữ</span>
         </div>
         <div className="terms-stat">
           <span className="terms-stat__value terms-stat__value--success">
-            {terms.filter((t) => t.status === "approved").length}
+            {stats.approved}
           </span>
           <span className="terms-stat__label">Đã duyệt</span>
         </div>
         <div className="terms-stat">
           <span className="terms-stat__value terms-stat__value--warning">
-            {terms.filter((t) => t.status === "pending").length}
+            {stats.pending}
           </span>
           <span className="terms-stat__label">Chờ duyệt</span>
         </div>
         <div className="terms-stat">
           <span className="terms-stat__value terms-stat__value--danger">
-            {terms.filter((t) => t.status === "rejected").length}
+            {stats.rejected}
           </span>
           <span className="terms-stat__label">Từ chối</span>
         </div>
@@ -286,20 +327,20 @@ export default function TermsPage() {
           </div>
 
           <select
-            className="admin-filters__select"
+            className={`admin-filters__select ${categoryFilter !== "all" ? "has-value" : ""}`}
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value="all">Tất cả danh mục</option>
-            {mockCategories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}
           </select>
 
           <select
-            className="admin-filters__select"
+            className={`admin-filters__select ${statusFilter !== "all" ? "has-value" : ""}`}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -329,7 +370,9 @@ export default function TermsPage() {
                 <tr key={term._id}>
                   <td>
                     <div className="term-cell">
-                      <span className="term-cell__vi">{term.term.vi}</span>
+                      <span className="term-cell__vi">
+                        {term.term.vi || ""}
+                      </span>
                       {term.term.en && (
                         <span className="term-cell__en">{term.term.en}</span>
                       )}
@@ -338,46 +381,48 @@ export default function TermsPage() {
                   <td>
                     <span className="category-cell">
                       <Tag size={14} />
-                      {term.category.name.vi}
+                      {term.category?.name?.vi || "Không có danh mục"}
                     </span>
                   </td>
-                  <td>{getStatusBadge(term.status)}</td>
+                  <td>{getStatusBadge(term.status || "pending")}</td>
                   <td>
                     <div className="creator-cell">
-                      <span>{term.createdBy.fullName}</span>
+                      <span>{term.createdBy?.fullName || "Ẩn danh"}</span>
                     </div>
                   </td>
                   <td>
                     <div className="stats-cell">
-                      <span>👁 {term.viewCount}</span>
-                      <span>❤️ {term.favoriteCount}</span>
-                      <span>💬 {term.commentCount}</span>
+                      <span className="stats-cell__item stats-cell__item--view">
+                        <Eye size={14} /> {term.viewCount}
+                      </span>
+                      <span className="stats-cell__item stats-cell__item--favorite">
+                        <Heart size={14} /> {term.favoriteCount || 0}
+                      </span>
+                      <span className="stats-cell__item stats-cell__item--comment">
+                        <MessageCircle size={14} /> {term.commentCount || 0}
+                      </span>
                     </div>
                   </td>
                   <td>
-                    {new Date(term.createdAt).toLocaleDateString("vi-VN")}
+                    {term.createdAt
+                      ? new Date(term.createdAt).toLocaleDateString("vi-VN")
+                      : "-"}
                   </td>
                   <td>
                     <div className="action-cell">
                       <button
-                        className="action-btn"
-                        onClick={() => {
-                          setSelectedTerm(term);
-                          setShowDetailModal(true);
-                        }}
+                        className="action-btn action-btn--view"
+                        onClick={() => handleViewTerm(term)}
                         title="Xem chi tiết"
                       >
-                        <Eye size={16} />
+                        <Eye size={16} color="blue" />
                       </button>
                       <button
-                        className="action-btn"
-                        onClick={() => {
-                          setSelectedTerm(term);
-                          setShowEditModal(true);
-                        }}
+                        className="action-btn action-btn--edit"
+                        onClick={() => handleEditTerm(term)}
                         title="Chỉnh sửa"
                       >
-                        <Edit size={16} />
+                        <Edit size={16} color="orange" />
                       </button>
                       {term.status === "pending" && (
                         <>
@@ -388,7 +433,7 @@ export default function TermsPage() {
                             }
                             title="Duyệt"
                           >
-                            <Check size={16} />
+                            <Check size={16} color="green" />
                           </button>
                           <button
                             className="action-btn action-btn--danger"
@@ -409,7 +454,7 @@ export default function TermsPage() {
                         }}
                         title="Xóa"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={16} color="red" />
                       </button>
                     </div>
                   </td>
@@ -422,9 +467,22 @@ export default function TermsPage() {
         {/* Pagination */}
         <div className="admin-pagination">
           <div className="admin-pagination__info">
-            Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-            {Math.min(currentPage * itemsPerPage, filteredTerms.length)} trong{" "}
-            {filteredTerms.length} thuật ngữ
+            <label htmlFor="itemsPerPage">Số lượng mỗi trang </label>
+            <select
+              name="itemsPerPage"
+              id="itemsPerPage"
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+            <p>
+              Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
+              {Math.min(currentPage * itemsPerPage, totalItems)} trong{" "}
+              {totalItems} thuật ngữ
+            </p>
           </div>
           <div className="admin-pagination__controls">
             <button
@@ -432,168 +490,72 @@ export default function TermsPage() {
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft
+                size={16}
+                color={currentPage === 1 ? "gray" : "blue"}
+              />
+              <ChevronLeft
+                size={16}
+                color={currentPage === 1 ? "gray" : "blue"}
+              />
             </button>
-            {Array.from(
-              { length: Math.min(totalPages, 5) },
-              (_, i) => i + 1,
-            ).map((page) => (
-              <button
-                key={page}
-                className={`admin-pagination__btn ${
-                  page === currentPage ? "active" : ""
-                }`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
+            <button
+              className="admin-pagination__btn"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              title="Trang trước"
+            >
+              <ChevronLeft
+                size={16}
+                color={currentPage === 1 ? "gray" : "blue"}
+              />
+            </button>
+            {getPageNum().map((page, index) =>
+              page === "..." ? (
+                <span key={index} className="admin-pagination__ellipsis">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={page}
+                  className={`admin-pagination__btn ${
+                    currentPage === page ? "admin-pagination__btn--active" : ""
+                  }`}
+                  onClick={() => setCurrentPage(Number(page))}
+                >
+                  {page}
+                </button>
+              ),
+            )}
             <button
               className="admin-pagination__btn"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
+              title="Trang sau"
             >
-              <ChevronRight size={16} />
+              <ChevronRight
+                size={16}
+                color={currentPage === totalPages ? "gray" : "blue"}
+              />
+            </button>
+            <button
+              className="admin-pagination__btn"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+              title="Trang cuối"
+            >
+              <ChevronRight
+                size={16}
+                color={currentPage === totalPages ? "gray" : "blue"}
+              />
+              <ChevronRight
+                size={16}
+                color={currentPage === totalPages ? "gray" : "blue"}
+              />
             </button>
           </div>
         </div>
       </div>
-
-      {/* Detail Modal */}
-      {showDetailModal && selectedTerm && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowDetailModal(false)}
-        >
-          <div className="modal modal--lg" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2>Chi tiết thuật ngữ</h2>
-              <button
-                className="modal__close"
-                onClick={() => setShowDetailModal(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal__body">
-              <div className="term-detail-modal">
-                <div className="term-detail-modal__header">
-                  <h3>{selectedTerm.term.vi}</h3>
-                  {getStatusBadge(selectedTerm.status)}
-                </div>
-
-                <div className="term-detail-modal__translations">
-                  {selectedTerm.term.en && (
-                    <div className="translation-row">
-                      <span className="flag">🇬🇧</span>
-                      <span>{selectedTerm.term.en}</span>
-                    </div>
-                  )}
-                  {selectedTerm.term.lo && (
-                    <div className="translation-row">
-                      <span className="flag">🇱🇦</span>
-                      <span>{selectedTerm.term.lo}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="term-detail-modal__section">
-                  <h4>Định nghĩa (Tiếng Việt)</h4>
-                  <p>{selectedTerm.definition.vi}</p>
-                </div>
-
-                {selectedTerm.definition.en && (
-                  <div className="term-detail-modal__section">
-                    <h4>Định nghĩa (English)</h4>
-                    <p>{selectedTerm.definition.en}</p>
-                  </div>
-                )}
-
-                <div className="term-detail-modal__meta">
-                  <div className="meta-item">
-                    <span className="meta-label">Danh mục</span>
-                    <span className="meta-value">
-                      {selectedTerm.category.name.vi}
-                    </span>
-                  </div>
-                  <div className="meta-item">
-                    <span className="meta-label">Người tạo</span>
-                    <span className="meta-value">
-                      {selectedTerm.createdBy.fullName}
-                    </span>
-                  </div>
-                  <div className="meta-item">
-                    <span className="meta-label">Ngày tạo</span>
-                    <span className="meta-value">
-                      {new Date(selectedTerm.createdAt).toLocaleDateString(
-                        "vi-VN",
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="term-detail-modal__stats">
-                  <div className="stat-box">
-                    <span className="stat-value">{selectedTerm.viewCount}</span>
-                    <span className="stat-label">Lượt xem</span>
-                  </div>
-                  <div className="stat-box">
-                    <span className="stat-value">
-                      {selectedTerm.favoriteCount}
-                    </span>
-                    <span className="stat-label">Yêu thích</span>
-                  </div>
-                  <div className="stat-box">
-                    <span className="stat-value">
-                      {selectedTerm.commentCount}
-                    </span>
-                    <span className="stat-label">Bình luận</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="modal__footer">
-              <button
-                className="admin-btn admin-btn--secondary"
-                onClick={() => setShowDetailModal(false)}
-              >
-                Đóng
-              </button>
-              {selectedTerm.status === "pending" && (
-                <>
-                  <button
-                    className="admin-btn admin-btn--danger"
-                    onClick={() => {
-                      handleStatusChange(selectedTerm._id, "rejected");
-                      setShowDetailModal(false);
-                    }}
-                  >
-                    Từ chối
-                  </button>
-                  <button
-                    className="admin-btn admin-btn--success"
-                    onClick={() => {
-                      handleStatusChange(selectedTerm._id, "approved");
-                      setShowDetailModal(false);
-                    }}
-                  >
-                    Duyệt
-                  </button>
-                </>
-              )}
-              <button
-                className="admin-btn admin-btn--primary"
-                onClick={() => {
-                  setShowDetailModal(false);
-                  setShowEditModal(true);
-                }}
-              >
-                Chỉnh sửa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirm Modal */}
       {showDeleteConfirm && selectedTerm && (
@@ -636,316 +598,17 @@ export default function TermsPage() {
         </div>
       )}
 
-      <style jsx>{`
-        .terms-stats {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
-        }
-
-        .terms-stat {
-          flex: 1;
-          min-width: 150px;
-          background: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: 12px;
-          padding: 16px 20px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .terms-stat__value {
-          font-size: 28px;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-
-        .terms-stat__value--success {
-          color: #10b981;
-        }
-
-        .terms-stat__value--warning {
-          color: #f59e0b;
-        }
-
-        .terms-stat__value--danger {
-          color: #ef4444;
-        }
-
-        .terms-stat__label {
-          font-size: 13px;
-          color: var(--text-secondary);
-        }
-
-        .table-container {
-          overflow-x: auto;
-        }
-
-        .term-cell {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .term-cell__vi {
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .term-cell__en {
-          font-size: 12px;
-          color: var(--text-secondary);
-          font-style: italic;
-        }
-
-        .category-cell {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 13px;
-          color: #667eea;
-        }
-
-        .creator-cell {
-          font-size: 13px;
-        }
-
-        .stats-cell {
-          display: flex;
-          gap: 12px;
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        .action-cell {
-          display: flex;
-          gap: 4px;
-        }
-
-        .action-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          border: none;
-          border-radius: 6px;
-          background: transparent;
-          color: var(--text-secondary);
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-        }
-
-        .action-btn--success:hover {
-          background: rgba(16, 185, 129, 0.1);
-          color: #10b981;
-        }
-
-        .action-btn--danger:hover {
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444;
-        }
-
-        .modal-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1050;
-          padding: 20px;
-        }
-
-        .modal {
-          background: var(--bg-card);
-          border-radius: 16px;
-          width: 100%;
-          max-width: 500px;
-          max-height: 90vh;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .modal--sm {
-          max-width: 400px;
-        }
-
-        .modal--lg {
-          max-width: 700px;
-        }
-
-        .modal__header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 16px 24px;
-          border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal__header h2 {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 600;
-        }
-
-        .modal__close {
-          background: none;
-          border: none;
-          color: var(--text-secondary);
-          cursor: pointer;
-          padding: 4px;
-          border-radius: 6px;
-          display: flex;
-        }
-
-        .modal__close:hover {
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-        }
-
-        .modal__body {
-          padding: 24px;
-          overflow-y: auto;
-        }
-
-        .modal__footer {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          padding: 16px 24px;
-          border-top: 1px solid var(--border-color);
-        }
-
-        .term-detail-modal__header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-
-        .term-detail-modal__header h3 {
-          margin: 0;
-          font-size: 24px;
-          color: var(--text-primary);
-        }
-
-        .term-detail-modal__translations {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-bottom: 20px;
-        }
-
-        .translation-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 12px;
-          background: var(--bg-secondary);
-          border-radius: 8px;
-        }
-
-        .translation-row .flag {
-          font-size: 18px;
-        }
-
-        .term-detail-modal__section {
-          margin-bottom: 16px;
-        }
-
-        .term-detail-modal__section h4 {
-          font-size: 14px;
-          font-weight: 600;
-          color: var(--text-secondary);
-          margin: 0 0 8px;
-        }
-
-        .term-detail-modal__section p {
-          margin: 0;
-          line-height: 1.6;
-          color: var(--text-primary);
-        }
-
-        .term-detail-modal__meta {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-          margin-bottom: 20px;
-          padding: 16px;
-          background: var(--bg-secondary);
-          border-radius: 12px;
-        }
-
-        .meta-item {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .meta-label {
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        .meta-value {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .term-detail-modal__stats {
-          display: flex;
-          gap: 16px;
-        }
-
-        .stat-box {
-          flex: 1;
-          text-align: center;
-          padding: 16px;
-          background: linear-gradient(
-            135deg,
-            rgba(102, 126, 234, 0.1) 0%,
-            rgba(118, 75, 162, 0.1) 100%
-          );
-          border-radius: 12px;
-        }
-
-        .stat-box .stat-value {
-          display: block;
-          font-size: 24px;
-          font-weight: 700;
-          color: #667eea;
-        }
-
-        .stat-box .stat-label {
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        .text-danger {
-          color: #ef4444;
-          font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-          .terms-stats {
-            flex-direction: column;
-          }
-
-          .term-detail-modal__meta {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        currentFilters={{
+          category: categoryFilter,
+          status: statusFilter,
+          search: debouncedSearch,
+        }}
+        categoryName={categories.find((c) => c.id === categoryFilter)?.name}
+      />
     </div>
   );
 }

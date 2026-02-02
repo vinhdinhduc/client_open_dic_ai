@@ -13,23 +13,9 @@ import {
 } from "react";
 import { getSearchSuggestions } from "@/services/termService";
 import { useTranslations } from "next-intl";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSearch,
-  faTimes,
-  faSpinner,
-} from "@fortawesome/free-solid-svg-icons";
+import { Search, X, Loader2 } from "lucide-react";
 import "./SearchBar.scss";
 
-/**
- * TikTok-style SearchBar với Ghost Text Autocomplete
- *
- * Cách hoạt động:
- * 1. Input thật (transparent background) nằm phía trên
- * 2. Ghost layer nằm phía dưới hiển thị gợi ý hoàn chỉnh với màu nhạt
- * 3. Chỉ phần text còn lại (chưa gõ) được hiển thị mờ
- * 4. Nhấn Tab để autocomplete, Enter để search, Escape để ẩn
- */
 export default function SearchBar({
   onSearch,
   placeholder,
@@ -303,13 +289,13 @@ export default function SearchBar({
           className="search-bar__search-btn"
           aria-label={t("search.button")}
         >
-          <FontAwesomeIcon icon={faSearch} />
+          <Search size={18} />
         </button>
 
         {/* Loading Spinner */}
         {isLoading && (
           <div className="search-bar__loading">
-            <FontAwesomeIcon icon={faSpinner} spin />
+            <Loader2 size={18} className="animate-spin" />
           </div>
         )}
 
@@ -321,7 +307,7 @@ export default function SearchBar({
             className="search-bar__clear-btn"
             aria-label={t("search.clear")}
           >
-            <FontAwesomeIcon icon={faTimes} />
+            <X size={16} />
           </button>
         )}
 
@@ -354,10 +340,7 @@ export default function SearchBar({
               role="option"
               aria-selected={index === selectedIndex}
             >
-              <FontAwesomeIcon
-                icon={faSearch}
-                className="search-bar__suggestion-icon"
-              />
+              <Search size={14} className="search-bar__suggestion-icon" />
               <span className="search-bar__term-name">
                 {/* Highlight phần match */}
                 <span className="search-bar__term-match">
@@ -379,7 +362,7 @@ export default function SearchBar({
         suggestions.length === 0 && (
           <div ref={dropdownRef} className="search-bar__suggestion">
             <div className="search-bar__no-results">
-              <FontAwesomeIcon icon={faSearch} />
+              <Search size={16} />
               <span>{t("search.noResults")}</span>
             </div>
           </div>

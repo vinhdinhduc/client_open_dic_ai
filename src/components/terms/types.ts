@@ -1,4 +1,4 @@
-// components/term/types.ts
+
 
 export interface MultiLangText {
   vi?: string;
@@ -33,7 +33,10 @@ export interface TermCardData {
   category: Category | null;
   createdBy: User | null;
   viewCount: number;
-  favoritesCount?: number;
+  favoriteCount?: number;
+  favoritesCount?: number; // Alias for backward compatibility
+  commentCount?: number;
+  status?: "pending" | "approved" | "rejected";
   createdAt?: string;
   updatedAt?: string;
 }
@@ -101,6 +104,24 @@ export interface PaginationInfo {
 }
 
 export interface SearchTermsResponse {
+  terms: TermCardData[];
+  pagination: PaginationInfo;
+
+}
+export interface GetTermsResponse {
+  terms: TermCardData[];
+  pagination: PaginationInfo;
+}
+
+// Stats cho admin
+export interface TermStats {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+}
+
+export interface GetTermsAdminResponse {
   terms: TermCardData[];
   pagination: PaginationInfo;
 
