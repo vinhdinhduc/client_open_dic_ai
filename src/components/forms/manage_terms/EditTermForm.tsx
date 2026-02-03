@@ -37,6 +37,12 @@ const LANG_TABS: { key: LangKey; label: string; flag: string }[] = [
   { key: "lo", label: "ພາສາລາວ", flag: "🇱🇦" },
 ];
 
+const getCategoryName = (name: string | MultiLangText | undefined): string => {
+  if (!name) return "";
+  if (typeof name === "string") return name;
+  return name.vi || name.en || name.lo || "";
+};
+
 const PART_OF_SPEECH_OPTIONS = [
   { value: "", label: "Chọn từ loại" },
   { value: "noun", label: "Danh từ (Noun)" },
@@ -103,7 +109,7 @@ export function EditTermForm({
           getTermById(termId),
         ]);
 
-        setCategories(categoriesResult);
+        setCategories(categoriesResult.data);
         setLoadingCategories(false);
 
         if (termData) {
@@ -551,7 +557,7 @@ export function EditTermForm({
                 <option value="">Chọn danh mục</option>
                 {categories.map((cat) => (
                   <option key={cat.id || cat._id} value={cat.id || cat._id}>
-                    {cat.name}
+                    {getCategoryName(cat.name)}
                   </option>
                 ))}
               </select>

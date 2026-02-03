@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Edit, Loader2 } from "lucide-react";
 import userService from "@/services/userService";
-import { User, UpdateUserData } from "@/components/types/userTypes";
+import { User, UpdateUserData } from "@/types";
 import { toast } from "react-hot-toast";
 
 interface EditUserFormData {
@@ -43,7 +43,7 @@ export const EditUser: React.FC<EditUserProps> = ({
         fullName: user.fullName,
         role: user.role,
         status: user.status,
-        preferredLanguage: user.preferredLanguage,
+        preferredLanguage: user.preferredLanguage || "vi",
       });
       setErrors({});
     }

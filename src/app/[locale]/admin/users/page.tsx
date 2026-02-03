@@ -26,12 +26,7 @@ import {
 } from "lucide-react";
 import userService from "@/services/userService";
 import categoryService, { Category } from "@/services/categoryService";
-import {
-  User,
-  GetUsersParams,
-  UserRole,
-  UserStatus,
-} from "@/components/types/userTypes";
+import { User, GetUsersParams, UserRole, UserStatus } from "@/types";
 import "./page.scss";
 import { AddUser } from "@/components/forms/manage_users/AddUser";
 import { EditUser } from "@/components/forms/manage_users/EditUser";
@@ -109,7 +104,9 @@ export default function UsersPage() {
     const fetchCategories = async () => {
       try {
         const categoriesResult = await categoryService.getCategories();
-        setCategories(categoriesResult);
+        if (categoriesResult.success && Array.isArray(categoriesResult.data)) {
+          setCategories(categoriesResult.data);
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -236,6 +233,37 @@ export default function UsersPage() {
         );
       default:
         return <span className="admin-badge admin-badge--info">User</span>;
+    }
+  };
+  const handleExportUser = async () => {
+    if (
+      !confirm("Bạn có chắc chắn muốn xuất tất cả người dùng ra file Excel?")
+    ) {
+      return;
+    }
+    setTableLoading(true);
+    try {
+      const blob = await userService.exportUsersToExcel();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Generate filename with current date
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+      link.download = `nguoi-dung-${dateStr}.xlsx`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Xuất người dùng thành công");
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi xuất người dùng");
+    } finally {
+      setTableLoading(false);
     }
   };
 
@@ -424,7 +452,10 @@ export default function UsersPage() {
             </p>
           </div>
           <div className="admin-page-header__actions">
-            <button className="admin-btn admin-btn--secondary">
+            <button
+              className="admin-btn admin-btn--secondary"
+              onClick={handleExportUser}
+            >
               <Download size={16} />
               Xuất Excel
             </button>
@@ -746,8 +777,8 @@ export default function UsersPage() {
                   <div className="stat-item">
                     <span className="stat-label">Ngôn ngữ ưa thích</span>
                     <span className="stat-value">
-                      {getLanguageFlag(selectedUser.preferredLanguage)}{" "}
-                      {selectedUser.preferredLanguage.toUpperCase()}
+                      {getLanguageFlag(selectedUser.preferredLanguage || "vi")}{" "}
+                      {(selectedUser.preferredLanguage || "vi").toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -791,7 +822,9 @@ export default function UsersPage() {
                             const cat = categories.find((c) => c._id === catId);
                             return cat ? (
                               <span key={catId} className="category-tag">
-                                {cat.name}
+                                {typeof cat.name === "string"
+                                  ? cat.name
+                                  : cat.name.vi}
                               </span>
                             ) : null;
                           },
@@ -1083,7 +1116,9 @@ export default function UsersPage() {
                         />
                         <span className="category-item__name">
                           <i></i>
-                          {category.name}
+                          {typeof category.name === "string"
+                            ? category.name
+                            : category.name.vi}
                         </span>
                       </label>
                     ))}

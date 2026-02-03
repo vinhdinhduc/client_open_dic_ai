@@ -1,15 +1,14 @@
 import axiosInstance from "@/lib/axios";
-import { User, GetUsersParams, ApiResponse, PaginatedData, UpdateUserData, PreferredLanguage, UserStats, ToggleStatusData, } from "@/components/types/userTypes";
-
-// Types for create user
-export interface CreateUserData {
-    fullName: string;
-    email: string;
-    password: string;
-    role?: "user" | "moderator" | "admin";
-    status?: "active" | "inactive";
-    preferredLanguage?: "vi" | "en" | "lo";
-}
+import {
+    User,
+    GetUsersParams,
+    UpdateUserData,
+    UserStats,
+    ToggleStatusData,
+    CreateUserData,
+    PaginatedData
+} from "@/types";
+import { ApiResponse } from "@/types/api.types";
 
 export const getUsers = async (
     params: GetUsersParams = {}
@@ -73,6 +72,13 @@ export const getUserStats = async (): Promise<ApiResponse<UserStats>> => {
     return response.data;
 };
 
+export const exportUsersToExcel = async (): Promise<Blob> => {
+    const response = await axiosInstance.get("/users/export/excel", {
+        responseType: "blob",
+    });
+    return response.data;
+}
+
 // Default export
 const userService = {
     getUsers,
@@ -82,6 +88,7 @@ const userService = {
     toggleUserStatus,
     deleteUser,
     getUserStats,
+    exportUsersToExcel
 };
 
 export default userService;

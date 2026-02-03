@@ -1,91 +1,69 @@
-"use client";
-import { TermCardData } from "@/components/terms/types";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { searchTerms } from "@/services/termService";
-import { SearchLoading } from "@/components/common";
-import TermCard from "@/components/terms/TermCard";
-import "./Term.scss";
-import { useLanguage } from "@/hooks/useLanguage";
+import { Suspense } from "react";
 import { Layout } from "@/components/layouts";
-export default function SearchResultsPage() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q") || "";
-  const { currentLanguage } = useLanguage();
-  const [terms, setTerms] = useState<TermCardData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+import { SearchLoading } from "@/components/common";
+import { searchTermsServer } from "@/lib/serverAxios";
+import SearchResultsClient from "./SearchResults";
+import "./Term.scss";
 
-  useEffect(() => {
-    async function fetchResults() {
-      setLoading(true);
+// Enable ISR - revalidate every 60 seconds
+export const revalidate = 60;
 
-      try {
-        const res = await searchTerms(query, currentLanguage);
-        setTerms(res.terms || []);
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (query) {
-      fetchResults();
-    }
-  }, [query, currentLanguage]);
-
-  const handleFavoriteToggle = (termId: string, isFavorited: boolean) => {
-    const newFavorites = new Set(favoriteIds);
-    if (isFavorited) {
-      newFavorites.add(termId);
-    } else {
-      newFavorites.delete(termId);
-    }
-    setFavoriteIds(newFavorites);
+// Generate metadata for SEO
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; lang?: string }>;
+}) {
+  const { q: query } = await searchParams;
+  return {
+    title: query
+      ? `Tìm kiếm: ${query} - Từ Điển Chuyên Ngành`
+      : "Tìm kiếm thuật ngữ - Từ Điển Chuyên Ngành",
+    description: query
+      ? `Kết quả tìm kiếm cho "${query}" trong từ điển chuyên ngành`
+      : "Tìm kiếm thuật ngữ chuyên ngành bằng tiếng Việt, Anh và Lào",
   };
+}
 
-  if (loading) {
+// Server Component to fetch search results
+async function SearchResultsServer({
+  query,
+  language,
+}: {
+  query: string;
+  language: string;
+}) {
+  if (!query) {
     return (
-      <Layout>
-        <SearchLoading text="Đang tìm kiếm..." />
-      </Layout>
+      <div className="search-results-page">
+        <div className="container">
+          <div className="search-results-page__empty">
+            Vui lòng nhập từ khóa để tìm kiếm
+          </div>
+        </div>
+      </div>
     );
   }
 
+  const result = await searchTermsServer(query, language);
+  const terms = result?.data?.terms || [];
+
+  return <SearchResultsClient initialTerms={terms} query={query} />;
+}
+
+// Main page component with Suspense for streaming
+export default async function SearchResultsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; lang?: string }>;
+}) {
+  const { q: query = "", lang: language = "vi" } = await searchParams;
+
   return (
     <Layout>
-      <div className="search-results-page">
-        <div className="container">
-          <h1 className="search-results-page__title">
-            Kết quả tìm kiếm cho "{query}"
-          </h1>
-
-          <div className="search-results-page__count">
-            Tìm thấy {terms?.length} kết quả
-          </div>
-
-          <div className="search-results-page__list">
-            {terms?.map((term) => (
-              <TermCard
-                key={term._id}
-                term={term}
-                isFavorited={favoriteIds.has(term._id)}
-                onFavoriteToggle={handleFavoriteToggle}
-                showCategory={true}
-                showMetadata={true}
-                showActions={true}
-              />
-            ))}
-          </div>
-
-          {terms?.length === 0 && (
-            <div className="search-results-page__empty">
-              Không tìm thấy kết quả phù hợp
-            </div>
-          )}
-        </div>
-      </div>
+      <Suspense fallback={<SearchLoading text="Đang tìm kiếm..." />}>
+        <SearchResultsServer query={query} language={language} />
+      </Suspense>
     </Layout>
   );
 }

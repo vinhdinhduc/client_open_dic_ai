@@ -215,6 +215,15 @@ export function withAuth<P extends object>(
       }
     }, [isLoading, isAuthenticated, isAdmin, isModerator, router]);
 
+    if (!isLoading && !isAuthenticated) {
+      return null; // Or a redirect component
+    }
+    if (!isLoading && requiredRole === "admin" && !isAdmin) {
+      return null;
+    }
+    if (!isLoading && requiredRole === "moderator" && !isModerator) {
+      return null;
+    }
     if (isLoading) {
       return (
         <div className="auth-loading">
@@ -222,10 +231,6 @@ export function withAuth<P extends object>(
           <span>Đang tải...</span>
         </div>
       );
-    }
-
-    if (!isAuthenticated) {
-      return null;
     }
 
     return <WrappedComponent {...props} />;

@@ -38,6 +38,15 @@ import { useRouter } from "next/navigation";
 // Type alias cho admin page
 type Term = TermCardData;
 
+// Helper function to get category name as string
+const getCategoryName = (
+  name: string | { vi: string; en?: string; lo?: string } | undefined,
+): string => {
+  if (!name) return "";
+  if (typeof name === "string") return name;
+  return name.vi || name.en || "";
+};
+
 export default function TermsPage() {
   const [terms, setTerms] = useState<Term[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -72,7 +81,7 @@ export default function TermsPage() {
     const fetchCategories = async () => {
       try {
         const result = await categoryService.getCategories();
-        setCategories(result);
+        setCategories(result.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -334,7 +343,7 @@ export default function TermsPage() {
             <option value="all">Tất cả danh mục</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
-                {cat.name}
+                {getCategoryName(cat.name)}
               </option>
             ))}
           </select>
@@ -381,7 +390,8 @@ export default function TermsPage() {
                   <td>
                     <span className="category-cell">
                       <Tag size={14} />
-                      {term.category?.name?.vi || "Không có danh mục"}
+                      {term.category?.name?.[currentLanguage] ||
+                        "Không có danh mục"}
                     </span>
                   </td>
                   <td>{getStatusBadge(term.status || "pending")}</td>
@@ -607,7 +617,9 @@ export default function TermsPage() {
           status: statusFilter,
           search: debouncedSearch,
         }}
-        categoryName={categories.find((c) => c.id === categoryFilter)?.name}
+        categoryName={getCategoryName(
+          categories.find((c) => c.id === categoryFilter)?.name,
+        )}
       />
     </div>
   );

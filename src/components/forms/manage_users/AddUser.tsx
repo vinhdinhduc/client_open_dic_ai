@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { Plus, X, Loader2 } from "lucide-react";
-import userService, { CreateUserData } from "@/services/userService";
-import { User } from "@/components/types/userTypes";
+import userService from "@/services/userService";
+import { User, CreateUserData } from "@/types";
 import { toast } from "react-hot-toast";
 
 interface NewUserFormData {

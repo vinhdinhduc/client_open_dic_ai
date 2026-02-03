@@ -12,7 +12,7 @@ import "../Auth.scss";
 export default function LoginPage() {
   const t = useTranslations();
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -34,10 +34,12 @@ export default function LoginPage() {
 
   // Check if already logged in
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.role === "admin") {
+      router.push("/admin");
+    } else if (isAuthenticated) {
       router.push("/");
     }
-  }, [router, isAuthenticated]);
+  }, [router, isAuthenticated, user]);
 
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +93,11 @@ export default function LoginPage() {
 
       if (success) {
         toast.success("Đăng nhập thành công!");
-        router.push("/");
+        if (user?.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };

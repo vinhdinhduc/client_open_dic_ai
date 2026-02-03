@@ -42,6 +42,15 @@ const PART_OF_SPEECH_OPTIONS = [
   { value: "abbreviation", label: "Từ viết tắt (Abbreviation)" },
 ];
 
+// Helper function to get category name as string
+const getCategoryName = (
+  name: string | { vi: string; en?: string; lo?: string } | undefined,
+): string => {
+  if (!name) return "";
+  if (typeof name === "string") return name;
+  return name.vi || name.en || "";
+};
+
 export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
   const router = useRouter();
 
@@ -73,7 +82,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     const fetchCategories = async () => {
       try {
         const result = await categoryService.getCategories();
-        setCategories(result);
+        setCategories(result.data);
       } catch (error) {
         console.error("Error fetching categories: ", error);
         toast.error("Không thể tải danh mục");
@@ -399,7 +408,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                 <option value="">Chọn danh mục</option>
                 {categories.map((cat) => (
                   <option key={cat.id || cat._id} value={cat.id || cat._id}>
-                    {cat.name}
+                    {getCategoryName(cat.name)}
                   </option>
                 ))}
               </select>
