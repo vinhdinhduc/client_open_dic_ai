@@ -3,8 +3,17 @@
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { reportTerm } from "@/services/termService";
-import { ReportData } from "./types";
-import { X, Flag, AlertTriangle, Loader2 } from "lucide-react";
+import { ApiResponse, ReportData } from "./types";
+import {
+  X,
+  Flag,
+  AlertTriangle,
+  Loader2,
+  XCircle,
+  ShieldX,
+  Copy,
+  MessageSquare,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import "./ReportModal.scss";
 
@@ -15,11 +24,15 @@ interface ReportModalProps {
 }
 
 const REPORT_REASONS = [
-  { value: "incorrect", label: "Thông tin không chính xác", icon: "❌" },
-  { value: "spam", label: "Spam hoặc quảng cáo", icon: "🚫" },
-  { value: "inappropriate", label: "Nội dung không phù hợp", icon: "⚠️" },
-  { value: "duplicate", label: "Thuật ngữ trùng lặp", icon: "📋" },
-  { value: "other", label: "Lý do khác", icon: "💬" },
+  { value: "incorrect", label: "Thông tin không chính xác", Icon: XCircle },
+  { value: "spam", label: "Spam hoặc quảng cáo", Icon: ShieldX },
+  {
+    value: "inappropriate",
+    label: "Nội dung không phù hợp",
+    Icon: AlertTriangle,
+  },
+  { value: "duplicate", label: "Thuật ngữ trùng lặp", Icon: Copy },
+  { value: "other", label: "Lý do khác", Icon: MessageSquare },
 ] as const;
 
 export default function ReportModal({
@@ -45,11 +58,14 @@ export default function ReportModal({
 
     setSubmitting(true);
     try {
-      await reportTerm(termId, {
+      const res: ApiResponse<null> = await reportTerm(termId, {
         reason: selectedReason,
         description: description.trim() || undefined,
       });
-      toast.success("Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét sớm nhất.");
+      console.log("Report response:", res);
+      if (res.success) {
+        toast.success("Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét sớm nhất.");
+      }
       onClose();
     } catch (error) {
       toast.error("Không thể gửi báo cáo. Vui lòng thử lại.");
@@ -92,23 +108,28 @@ export default function ReportModal({
           <div className="form-group">
             <label className="form-label">Lý do báo cáo *</label>
             <div className="reason-list">
-              {REPORT_REASONS.map((reason) => (
-                <label
-                  key={reason.value}
-                  className={`reason-item ${selectedReason === reason.value ? "selected" : ""}`}
-                >
-                  <input
-                    type="radio"
-                    name="reason"
-                    value={reason.value}
-                    checked={selectedReason === reason.value}
-                    onChange={() => setSelectedReason(reason.value)}
-                    className="reason-radio"
-                  />
-                  <span className="reason-icon">{reason.icon}</span>
-                  <span className="reason-label">{reason.label}</span>
-                </label>
-              ))}
+              {REPORT_REASONS.map((reason) => {
+                const IconComponent = reason.Icon;
+                return (
+                  <label
+                    key={reason.value}
+                    className={`reason-item ${selectedReason === reason.value ? "selected" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="reason"
+                      value={reason.value}
+                      checked={selectedReason === reason.value}
+                      onChange={() => setSelectedReason(reason.value)}
+                      className="reason-radio"
+                    />
+                    <span className="reason-icon">
+                      <IconComponent size={18} />
+                    </span>
+                    <span className="reason-label">{reason.label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 

@@ -1,0 +1,196 @@
+import axiosInstance from "@/lib/axios";
+import { ApiResponse, PaginatedResponse } from "@/types/api.types";
+
+export interface Contribution {
+    _id: string;
+    type: "new_term" | "edit_term";
+    targetTerm?: {
+        _id: string;
+        term: {
+            vi: string;
+            lo?: string;
+            en?: string;
+        };
+        slug: string;
+    };
+    term: {
+        vi: string;
+        lo?: string;
+        en?: string;
+    };
+    definition: {
+        vi: string;
+        lo?: string;
+        en?: string;
+    };
+    detailedExplanation?: {
+        vi?: string;
+        lo?: string;
+        en?: string;
+    };
+    examples?: Array<{
+        vi?: string;
+        lo?: string;
+        en?: string;
+    }>;
+    category: {
+        _id: string;
+        name: {
+            vi: string;
+            lo?: string;
+            en?: string;
+        };
+        slug: string;
+    };
+    contributor: {
+        _id: string;
+        fullName: string;
+        email: string;
+        avatar?: string;
+    };
+    contributorNote?: string;
+    status: "pending" | "approved" | "rejected";
+    moderator?: {
+        _id: string;
+        fullName: string;
+    };
+    moderatorNote?: string;
+    moderatedAt?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ContributionStats {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+}
+
+export interface CreateContributionData {
+    type: "new_term" | "edit_term";
+    targetTerm?: string; // ObjectId of existing term (for edit_term)
+    term: {
+        vi: string;
+        lo?: string;
+        en?: string;
+    };
+    definition: {
+        vi: string;
+        lo?: string;
+        en?: string;
+    };
+    detailedExplanation?: {
+        vi?: string;
+        lo?: string;
+        en?: string;
+    };
+    examples?: Array<{
+        vi?: string;
+        lo?: string;
+        en?: string;
+    }>;
+    category: string; // ObjectId
+    contributorNote?: string;
+}
+
+export interface GetContributionsParams {
+    page?: number;
+    limit?: number;
+    status?: string;
+    type?: string;
+    category?: string;
+}
+
+export interface ModerateContributionData {
+    moderatorNote?: string;
+}
+
+// Response type for getContributions - matches backend response
+export interface ContributionsResponse {
+    contributions: Contribution[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+    };
+}
+
+class ContributionService {
+    /**
+     * Tạo đóng góp mới
+     */
+    async createContribution(
+        data: CreateContributionData
+    ): Promise<ApiResponse<Contribution>> {
+        const response = await axiosInstance.post<ApiResponse<Contribution>>(
+            "/contributions",
+            data
+        );
+        return response.data;
+    }
+
+    /**
+     * Lấy danh sách đóng góp
+     */
+    async getContributions(
+        params: GetContributionsParams = {}
+    ): Promise<ApiResponse<ContributionsResponse>> {
+        const response = await axiosInstance.get<
+            ApiResponse<ContributionsResponse>
+        >("/contributions", { params });
+        return response.data;
+    }
+
+    /**
+     * Lấy chi tiết đóng góp
+     */
+    async getContributionById(id: string): Promise<ApiResponse<Contribution>> {
+        const response = await axiosInstance.get<ApiResponse<Contribution>>(
+            `/contributions/${id}`
+        );
+        return response.data;
+    }
+
+    /**
+     * Phê duyệt đóng góp
+     */
+    async approveContribution(
+        id: string,
+        data: ModerateContributionData = {}
+    ): Promise<ApiResponse<Contribution>> {
+        const response = await axiosInstance.post<ApiResponse<Contribution>>(
+            `/contributions/${id}/approve`,
+            data
+        );
+        return response.data;
+    }
+
+    /**
+     * Từ chối đóng góp
+     */
+    async rejectContribution(
+        id: string,
+        data: ModerateContributionData
+    ): Promise<ApiResponse<Contribution>> {
+        const response = await axiosInstance.post<ApiResponse<Contribution>>(
+            `/contributions/${id}/reject`,
+            data
+        );
+        return response.data;
+    }
+
+    /**
+     * Xóa đóng góp
+     */
+    async deleteContribution(id: string): Promise<ApiResponse<void>> {
+        const response = await axiosInstance.delete<ApiResponse<void>>(
+            `/contributions/${id}`
+        );
+        return response.data;
+    }
+}
+
+export const contributionService = new ContributionService();
+export default contributionService;

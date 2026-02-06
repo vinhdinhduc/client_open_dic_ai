@@ -159,6 +159,11 @@ $admin-info: #3b82f6;
         transition: all $transition-fast;
         font-size: $font-sm;
         font-weight: $font-medium;
+        width: 100%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-align: left;
 
         .menu-icon {
             flex-shrink: 0;
@@ -174,6 +179,22 @@ $admin-info: #3b82f6;
             border-radius: $radius-full;
             min-width: 20px;
             text-align: center;
+
+            &--small {
+                padding: 1px 6px;
+                font-size: 10px;
+                min-width: 16px;
+            }
+        }
+
+        .menu-arrow {
+            margin-left: auto;
+            transition: transform $transition-fast;
+            flex-shrink: 0;
+
+            &.expanded {
+                transform: rotate(90deg);
+            }
         }
 
         &:hover {
@@ -188,6 +209,44 @@ $admin-info: #3b82f6;
             .menu-badge {
                 background: rgba(255, 255, 255, 0.3);
             }
+        }
+
+        &--parent {
+            &.active {
+                background: rgba($admin-primary, 0.1);
+                color: $admin-primary;
+
+                .menu-badge {
+                    background: $admin-danger;
+                }
+            }
+        }
+
+        &--child {
+            padding-left: $spacing-xl;
+            font-size: $font-xs;
+
+            .menu-icon {
+                width: 16px;
+                height: 16px;
+            }
+        }
+    }
+
+    &__submenu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+
+        &.expanded {
+            max-height: 200px;
+        }
+
+        li {
+            padding: 0;
         }
     }
 

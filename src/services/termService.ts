@@ -136,10 +136,13 @@ const createComment = async (termId: string, content: string, parentCommentId?: 
 }
 
 // Báo xấu thuật ngữ
-const reportTerm = async (termId: string, data: ReportData): Promise<boolean> => {
+const reportTerm = async (termId: string, data: ReportData): Promise<ApiResponse<null>> => {
   try {
-    await axiosInstance.post<ApiResponse<null>>(`/terms/${termId}/report`, data);
-    return true;
+    const res = await axiosInstance.post<ApiResponse<null>>(`/reports/`, {
+      targetId: termId,
+      ...data
+    });
+    return res.data;
   } catch (error) {
     console.error("Error reporting term:", error);
     throw error;

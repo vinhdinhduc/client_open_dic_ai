@@ -1,7 +1,7 @@
 
-
 import { BaseEntity } from "./common.types";
 import { UserRef } from "./user.types";
+import { PaginationInfo } from "./api.types";
 
 // Report reason
 export type ReportReason =
@@ -12,27 +12,25 @@ export type ReportReason =
     | "other";
 
 // Report status
-export type ReportStatus = "pending" | "resolved" | "dismissed";
+export type ReportStatus = "pending" | "resolved" | "rejected";
 
-// Report target type
-export type ReportTargetType = "term" | "comment" | "user";
-
-// Report interface
+// Report interface (chỉ hỗ trợ báo xấu thuật ngữ)
 export interface Report extends BaseEntity {
-    targetType: ReportTargetType;
-    targetId: string;
+    type: "term";
+    targetTerm: string;
+    category: string;
     reporter: UserRef;
     reason: ReportReason;
     description?: string;
     status: ReportStatus;
-    resolvedBy?: UserRef;
+    moderator?: UserRef;
+    moderatorNote?: string;
+    actionTaken?: "none" | "warning" | "edit" | "delete" | "ban_user";
     resolvedAt?: string;
-    resolveNote?: string;
 }
 
-// Create report data
+// Create report data (chỉ cần targetId, reason, description)
 export interface CreateReportData {
-    targetType: ReportTargetType;
     targetId: string;
     reason: ReportReason;
     description?: string;
@@ -46,15 +44,19 @@ export interface ReportTermData {
 
 // Resolve report data
 export interface ResolveReportData {
-    status: "resolved" | "dismissed";
-    resolveNote?: string;
+    status: "resolved" | "rejected";
+    actionTaken?: "none" | "warning" | "edit" | "delete" | "ban_user";
+    moderatorNote?: string;
 }
 
 // API Parameters
 export interface GetReportsParams {
-    targetType?: ReportTargetType;
     status?: ReportStatus;
-    reason?: ReportReason;
+    category?: string;
     page?: number;
     limit?: number;
+}
+export interface PaginatedResponseReport<T> {
+    reports: T[];
+    pagination: PaginationInfo;
 }

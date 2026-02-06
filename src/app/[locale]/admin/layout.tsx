@@ -19,11 +19,15 @@ import {
   Bell,
   Search,
   ChevronDown,
+  ChevronRight,
   Sun,
   Moon,
   Upload,
   BarChart3,
   Shield,
+  Flag,
+  GitPullRequest,
+  LucideIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import "./admin.scss";
@@ -32,7 +36,24 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const menuItems = [
+interface SubMenuItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  badge?: boolean;
+}
+
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  href?: string;
+  badge?: boolean;
+  children?: SubMenuItem[];
+}
+
+const menuItems: MenuItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
@@ -58,11 +79,26 @@ const menuItems = [
     href: "/admin/categories",
   },
   {
-    id: "contributions",
-    label: "Kiểm duyệt đóng góp",
+    id: "moderation",
+    label: "Kiểm duyệt",
     icon: FileCheck,
-    href: "/admin/contributions",
     badge: true,
+    children: [
+      {
+        id: "moderation-contributions",
+        label: "Kiểm duyệt đóng góp",
+        href: "/admin/moderation/contributions",
+        icon: GitPullRequest,
+        badge: true,
+      },
+      {
+        id: "reports-moderation",
+        label: "Kiểm duyệt báo xấu",
+        href: "/admin/moderation/reports",
+        icon: Flag,
+        badge: true,
+      },
+    ],
   },
   {
     id: "comments",
@@ -98,7 +134,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(["moderation"]);
   const [pendingCount, setPendingCount] = useState(5); // Mock data
+  const [reportCount, setReportCount] = useState(3); // Mock data
+  const [contributionCount, setContributionCount] = useState(2); // Mock data
 
   // Check admin access
   useEffect(() => {
@@ -117,6 +156,38 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       return pathname.endsWith("/admin");
     }
     return pathname.includes(href);
+  };
+
+  const isMenuExpanded = (menuId: string) => {
+    return expandedMenus.includes(menuId);
+  };
+
+  const toggleMenu = (menuId: string) => {
+    setExpandedMenus((prev) =>
+      prev.includes(menuId)
+        ? prev.filter((id) => id !== menuId)
+        : [...prev, menuId],
+    );
+  };
+
+  const isParentActive = (item: MenuItem) => {
+    if (item.children) {
+      return item.children.some((child) => isActiveRoute(child.href));
+    }
+    return false;
+  };
+
+  const getBadgeCount = (itemId: string) => {
+    switch (itemId) {
+      case "moderation":
+        return pendingCount;
+      case "reports-moderation":
+        return reportCount;
+      case "suggest_edits-moderation":
+        return contributionCount;
+      default:
+        return 0;
+    }
   };
 
   const handleLogout = () => {
@@ -163,20 +234,70 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <nav className="admin-sidebar__nav">
           <ul className="admin-sidebar__menu">
             {menuItems.map((item) => (
-              <li key={item.id}>
-                <Link
-                  href={item.href}
-                  className={`admin-sidebar__link ${
-                    isActiveRoute(item.href) ? "active" : ""
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <item.icon className="menu-icon" size={20} />
-                  <span className="menu-text">{item.label}</span>
-                  {item.badge && pendingCount > 0 && (
-                    <span className="menu-badge">{pendingCount}</span>
-                  )}
-                </Link>
+              <li key={item.id} className={item.children ? "has-submenu" : ""}>
+                {item.children ? (
+                  <>
+                    <button
+                      className={`admin-sidebar__link admin-sidebar__link--parent ${
+                        isParentActive(item) ? "active" : ""
+                      }`}
+                      onClick={() => toggleMenu(item.id)}
+                    >
+                      <item.icon className="menu-icon" size={20} />
+                      <span className="menu-text">{item.label}</span>
+                      {item.badge && getBadgeCount(item.id) > 0 && (
+                        <span className="menu-badge">
+                          {getBadgeCount(item.id)}
+                        </span>
+                      )}
+                      <ChevronRight
+                        className={`menu-arrow ${isMenuExpanded(item.id) ? "expanded" : ""}`}
+                        size={16}
+                      />
+                    </button>
+                    <ul
+                      className={`admin-sidebar__submenu ${
+                        isMenuExpanded(item.id) ? "expanded" : ""
+                      }`}
+                    >
+                      {item.children.map((child) => (
+                        <li key={child.id}>
+                          <Link
+                            href={child.href}
+                            className={`admin-sidebar__link admin-sidebar__link--child ${
+                              isActiveRoute(child.href) ? "active" : ""
+                            }`}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <child.icon className="menu-icon" size={16} />
+                            <span className="menu-text">{child.label}</span>
+                            {child.badge && getBadgeCount(child.id) > 0 && (
+                              <span className="menu-badge menu-badge--small">
+                                {getBadgeCount(child.id)}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <Link
+                    href={item.href!}
+                    className={`admin-sidebar__link ${
+                      isActiveRoute(item.href!) ? "active" : ""
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <item.icon className="menu-icon" size={20} />
+                    <span className="menu-text">{item.label}</span>
+                    {item.badge && getBadgeCount(item.id) > 0 && (
+                      <span className="menu-badge">
+                        {getBadgeCount(item.id)}
+                      </span>
+                    )}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
