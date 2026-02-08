@@ -14,3 +14,6 @@ export {
 } from "./Loading";
 
 export type { LoaderVariant, LoaderSize } from "./Loading";
+
+// AI Components
+export { default as AIChat } from "./AIChat";

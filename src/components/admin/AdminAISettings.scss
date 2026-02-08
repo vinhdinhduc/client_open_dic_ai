@@ -1,0 +1,45 @@
+@import "@/styles/variables.scss";
+@import "@/styles/mixins.scss";
+
+// Import shared settings styles
+@import "./AdminSystemSettings.scss";
+
+// Additional specific styles for AI Settings
+.api-key-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    font-size: $font-xs;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: $font-medium;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+// Status badge specific to AI settings
+.admin-settings-section__status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border: 1px solid #6ee7b7;
+    border-radius: 10px;
+    color: #065f46;
+    font-size: $font-sm;
+    font-weight: $font-semibold;
+    margin-bottom: 2rem;
+}
+
+// Dark theme support for status badge
+[data-theme="dark"] {
+    .admin-settings-section__status {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%);
+        border-color: rgba(110, 231, 183, 0.3);
+        color: #6ee7b7;
+    }
+}
