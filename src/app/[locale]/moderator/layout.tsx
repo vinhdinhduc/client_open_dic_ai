@@ -28,9 +28,6 @@ import {
   Flag,
   GitPullRequest,
   LucideIcon,
-  KeyRound,
-  Mail,
-  Gauge,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import NotificationBell from "@/components/common/NotificationBell";
@@ -110,7 +107,6 @@ const adminMenuItems: MenuItem[] = [
     label: "Quản lý bình luận",
     icon: MessageSquare,
     href: "/admin/comments",
-    badge: true,
   },
   {
     id: "import",
@@ -128,29 +124,52 @@ const adminMenuItems: MenuItem[] = [
     id: "settings",
     label: "Cấu hình hệ thống",
     icon: Settings,
+    href: "/admin/settings",
+  },
+];
+
+// Menu items cho Moderator (chỉ hiển thị các mục liên quan đến kiểm duyệt)
+const moderatorMenuItems: MenuItem[] = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/admin/moderator",
+  },
+  {
+    id: "moderator-categories",
+    label: "Danh mục phụ trách",
+    icon: FolderTree,
+    href: "/admin/moderator/categories",
+  },
+  {
+    id: "moderation",
+    label: "Kiểm duyệt",
+    icon: FileCheck,
+    badge: true,
     children: [
       {
-        id: "setting-api-keys",
-        label: "Cấu hình API Key",
-        href: "/admin/settings/api-keys",
-        icon: KeyRound,
+        id: "moderation-contributions",
+        label: "Kiểm duyệt đóng góp",
+        href: "/admin/moderation/contributions",
+        icon: GitPullRequest,
         badge: true,
       },
       {
-        id: "setting-email",
-        label: "Cấu hình Email",
-        href: "/admin/settings/email",
-        icon: Mail,
-        badge: true,
-      },
-      {
-        id: "setting-rate-limit",
-        label: "Cấu hình Rate Limit",
-        href: "/admin/settings/rate-limit",
-        icon: Gauge,
+        id: "reports-moderation",
+        label: "Kiểm duyệt báo xấu",
+        href: "/admin/moderation/reports",
+        icon: Flag,
         badge: true,
       },
     ],
+  },
+  {
+    id: "comments",
+    label: "Kiểm duyệt bình luận",
+    icon: MessageSquare,
+    href: "/admin/comments",
+    badge: true,
   },
 ];
 
@@ -167,6 +186,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [reportCount, setReportCount] = useState(0);
   const [contributionCount, setContributionCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
+
+  // Chọn menu items dựa theo role
+  const menuItems =
+    user?.role === "admin" ? adminMenuItems : moderatorMenuItems;
 
   // Fetch pending counts
   useEffect(() => {
@@ -208,6 +231,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     };
 
     fetchPendingCounts();
+    // Refresh every 60 seconds
     const interval = setInterval(fetchPendingCounts, 60000);
     return () => clearInterval(interval);
   }, [isAuthenticated, user?.role]);
@@ -226,7 +250,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const isActiveRoute = (href: string) => {
     if (href === "/admin") {
-      return pathname.endsWith("/admin");
+      return pathname.endsWith("/admin") || pathname.endsWith("/admin/");
+    }
+    if (href === "/admin/moderator") {
+      return (
+        pathname.endsWith("/moderator") || pathname.endsWith("/moderator/")
+      );
     }
     return pathname.includes(href);
   };
@@ -308,7 +337,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Navigation */}
         <nav className="admin-sidebar__nav">
           <ul className="admin-sidebar__menu">
-            {adminMenuItems.map((item) => (
+            {menuItems.map((item) => (
               <li key={item.id} className={item.children ? "has-submenu" : ""}>
                 {item.children ? (
                   <>

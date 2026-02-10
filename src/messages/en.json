@@ -89,6 +89,12 @@
     "myFavorites": "My Favorites",
     "searchHistory": "Search History"
   },
+   "footer": {
+      "appName": "Specialized Dictionary System",
+      "quickLinks": "Quick Links",
+      "about": "About",
+      "contact": "Contact"
+    },
   "aiChat": {
     "assistant": "AI Assistant",
     "about": "Learn about",

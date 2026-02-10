@@ -90,6 +90,14 @@
     "myFavorites": "Yêu thích của tôi",
     "searchHistory": "Lịch sử tra cứu"
   },
+  
+    "footer": {
+      "appName": "Hệ thống Từ điển Chuyên ngành",
+      "quickLinks": "Liên kết nhanh",
+      "about": "Giới thiệu",
+      "contact": "Liên hệ"
+    },
+  
   "aiChat": {
     "assistant": "Trợ lý AI",
     "about": "Tìm hiểu về",

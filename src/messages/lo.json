@@ -89,6 +89,12 @@
     "myFavorites": "ລາຍການທີ່ມັກ",
     "searchHistory": "ປະຫວັດການຄົ້ນຫາ"
   },
+   "footer": {
+      "appName": "ລະບົບວັດຈະນານຸກົມສະເພາະດ້ານ",
+      "quickLinks": "ລາຍການດ່ວນ",
+      "about": "ກ່ຽວກັບ",
+      "contact": "ຕິດຕໍ່"
+    },
   "aiChat": {
     "assistant": "ຜູ້ຊ່ວຍ AI",
     "about": "ຮຽນຮູ້ກ່ຽວກັບ",

@@ -31,8 +31,7 @@ export default function AdminAISettings() {
   const [formData, setFormData] = useState({
     apiKey: "",
     provider: "gemini",
-    model: "gemini-pro",
-    temperature: 0.7,
+    model: "Gemini 2.5 Flash",
     maxTokens: 1000,
   });
 
@@ -44,16 +43,16 @@ export default function AdminAISettings() {
     try {
       setIsLoading(true);
       const data = await aiService.getConfig();
+      console.log("check config", data);
+
       setConfig(data);
 
-      // Check if API key is masked (starts with characters and contains ***)
       const isMaskedApiKey = data.apiKey && data.apiKey.includes("***");
 
       setFormData({
         apiKey: isMaskedApiKey ? "" : data.apiKey || "",
         provider: data.provider || "gemini",
-        model: data.model || "gemini-pro",
-        temperature: data.temperature || 0.7,
+        model: data.model || "Gemini 2.5 Flash",
         maxTokens: data.maxTokens || 1000,
       });
 
@@ -74,11 +73,6 @@ export default function AdminAISettings() {
       // Validation
       if (formData.apiKey && formData.apiKey.length < 10) {
         toast.error("API Key không hợp lệ");
-        return;
-      }
-
-      if (formData.temperature < 0 || formData.temperature > 2) {
-        toast.error("Temperature phải từ 0 đến 2");
         return;
       }
 
@@ -152,6 +146,10 @@ export default function AdminAISettings() {
 
   return (
     <div className="admin-settings-section">
+      <div className="admin-settings-section__header">
+        <Bot size={28} />
+        <h2>Cài đặt AI</h2>
+      </div>
       {/* Status Badge */}
       {config?.hasApiKey && (
         <div className="admin-settings-section__status">
@@ -226,8 +224,8 @@ export default function AdminAISettings() {
           <small className="form-text">
             {config?.hasApiKey && !formData.apiKey ? (
               <span className="text-success">
-                ✓ API key đã được mã hóa AES-256 và lưu trữ an toàn. Để thay
-                đổi, nhập API key mới.
+                <CheckCircle size={18} /> API key đã được mã hóa AES-256 và lưu
+                trữ an toàn. Để thay đổi, nhập API key mới.
               </span>
             ) : (
               <span>
@@ -248,13 +246,15 @@ export default function AdminAISettings() {
           >
             {formData.provider === "gemini" && (
               <>
-                <option value="gemini-pro">Gemini Pro</option>
-                <option value="gemini-1.5-flash">
-                  Gemini 1.5 Flash (Fastest)
+                <option value="Gemini 2.5 Flash">Gemini 2.5 Flash</option>
+                <option value="Gemini 2.5 Flash Lite">
+                  Gemini 2.5 Flash Lite
                 </option>
-                <option value="gemini-1.5-pro">
-                  Gemini 1.5 Pro (Most capable)
+                <option value="Gemini 2.5 Flash TTS">
+                  Gemini 2.5 Flash TTS
                 </option>
+                <option value="Gemini 3 Flash">Gemini 3 Flash</option>
+                <option value="Gemma 3 12B">Gemma 3 12B</option>
               </>
             )}
             {formData.provider === "openai" && (
@@ -265,7 +265,7 @@ export default function AdminAISettings() {
             )}
           </select>
           <small className="form-text">
-            ✨ Sử dụng Google Generative AI SDK - Hỗ trợ tất cả models mới nhất
+            Sử dụng Google Generative AI SDK - Hỗ trợ tất cả models mới nhất
           </small>
         </div>
       </div>
@@ -273,27 +273,6 @@ export default function AdminAISettings() {
       {/* Advanced Settings */}
       <div className="admin-settings-section__group">
         <h3>Cài đặt nâng cao</h3>
-
-        <div className="form-group">
-          <label htmlFor="temperature">
-            Temperature: <strong>{formData.temperature}</strong>
-          </label>
-          <input
-            type="range"
-            id="temperature"
-            name="temperature"
-            min="0"
-            max="2"
-            step="0.1"
-            value={formData.temperature}
-            onChange={handleInputChange}
-            className="form-range"
-          />
-          <small className="form-text">
-            Độ sáng tạo của AI (0-2). Giá trị cao hơn tạo ra câu trả lời đa dạng
-            hơn.
-          </small>
-        </div>
 
         <div className="form-group">
           <label htmlFor="maxTokens">Max Tokens</label>
@@ -381,14 +360,7 @@ export default function AdminAISettings() {
               <strong>SDK:</strong> Sử dụng @google/generative-ai SDK chính thức
               - Hỗ trợ đầy đủ models mới nhất
             </li>
-            <li>
-              <strong>Models khả dụng:</strong>
-              <ul>
-                <li>gemini-pro - Cân bằng tốc độ & chất lượng</li>
-                <li>gemini-1.5-flash - Nhanh nhất, tiết kiệm chi phí</li>
-                <li>gemini-1.5-pro - Mạnh nhất, context 2M tokens</li>
-              </ul>
-            </li>
+
             <li>
               Lấy API key miễn phí tại{" "}
               <a
