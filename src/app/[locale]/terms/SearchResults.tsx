@@ -8,7 +8,8 @@ import { AIChat } from "@/components/common";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "react-hot-toast";
-import { Bot, LogIn } from "lucide-react";
+import { Bot, LogIn, PlusCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface SearchResultsClientProps {
   initialTerms: TermCardData[];
@@ -22,6 +23,8 @@ export default function SearchResultsClient({
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { currentLanguage } = useLanguage();
+  const t = useTranslations("searchResults");
+  const tCommon = useTranslations("common");
   const [terms] = useState<TermCardData[]>(initialTerms);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [showAIChat, setShowAIChat] = useState(false);
@@ -38,13 +41,26 @@ export default function SearchResultsClient({
 
   const handleAskAI = () => {
     if (!isAuthenticated) {
-      toast.error("Bạn cần đăng nhập để sử dụng tính năng AI");
+      toast.error(t("needLoginAI"));
       // Điều hướng đến trang đăng nhập với returnUrl
       router.push(`/login?returnUrl=/terms?q=${encodeURIComponent(query)}`);
       return;
     }
 
     setShowAIChat(true);
+  };
+
+  const handleSuggestTerm = () => {
+    if (!isAuthenticated) {
+      toast.error(t("loginToContribute"));
+      router.push(
+        `/login?returnUrl=/contribute?term=${encodeURIComponent(query)}`,
+      );
+      return;
+    }
+
+    // Chuyển đến trang contribute với term từ query
+    router.push(`/contribute?term=${encodeURIComponent(query)}`);
   };
 
   const handleCloseAIChat = () => {
@@ -57,36 +73,57 @@ export default function SearchResultsClient({
         {!terms || terms.length === 0 ? (
           <div className="search-results-page__count">
             <div className="search-results-page__empty-content">
-              <h3>Không tìm thấy thuật ngữ trong hệ thống</h3>
+              <h3>{t("noResultsTitle")}</h3>
               <p>
-                Chúng tôi không tìm thấy thuật ngữ{" "}
-                <strong>&quot;{query}&quot;</strong> trong từ điển.
+                {t("noResultsMessage")} <strong>&quot;{query}&quot;</strong>{" "}
+                {t("noResultsInDictionary")}
               </p>
               <p className="search-results-page__empty-suggestion">
-                Bạn có thể hỏi AI để tìm hiểu thêm về thuật ngữ này.
+                {t("suggestAI")}
               </p>
-              <button
-                className="search-results-page__ai-btn"
-                onClick={handleAskAI}
-              >
-                {isAuthenticated ? (
-                  <>
-                    <Bot size={20} />
-                    Hỏi AI về thuật ngữ này
-                  </>
-                ) : (
-                  <>
-                    <LogIn size={20} />
-                    Đăng nhập để sử dụng AI
-                  </>
-                )}
-              </button>
+              <div className="search-results-page__actions">
+                <button
+                  className="search-results-page__ai-btn"
+                  onClick={handleAskAI}
+                >
+                  {isAuthenticated ? (
+                    <>
+                      <Bot size={20} />
+                      {t("askAI")}
+                    </>
+                  ) : (
+                    <>
+                      <LogIn size={20} />
+                      {t("loginToUseAI")}
+                    </>
+                  )}
+                </button>
+                <button
+                  className="search-results-page__suggest-btn"
+                  onClick={handleSuggestTerm}
+                >
+                  {isAuthenticated ? (
+                    <>
+                      <PlusCircle size={20} />
+                      {t("suggestTerm")}
+                    </>
+                  ) : (
+                    <>
+                      <LogIn size={20} />
+                      {t("loginToContribute")}
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="search-results-page__empty-help">
+                {t("contributeDescription")}
+              </p>
             </div>
           </div>
         ) : (
           <>
             <h1 className="search-results-page__title">
-              Kết quả tìm kiếm cho &quot;{query}&quot;
+              {t("title")} &quot;{query}&quot;
             </h1>
             <div className="search-results-page__list">
               {terms?.map((term) => (
@@ -115,7 +152,7 @@ export default function SearchResultsClient({
 
         {(!terms || terms.length === 0) && (
           <div className="search-results-page__empty">
-            Không tìm thấy kết quả phù hợp
+            {t("noMatchingResults")}
           </div>
         )}
       </div>

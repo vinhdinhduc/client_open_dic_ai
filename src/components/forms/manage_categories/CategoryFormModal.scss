@@ -25,15 +25,15 @@
             color: var(--text-secondary);
 
             &:hover {
-                border-color: #667eea;
-                color: #667eea;
+                border-color: var(--primary);
+                color: var(--primary);
                 background: rgba(102, 126, 234, 0.05);
             }
 
             &.active {
-                border-color: #667eea;
+                border-color: var(--primary);
                 background: rgba(102, 126, 234, 0.1);
-                color: #667eea;
+                color: var(--primary);
             }
 
             svg {
@@ -88,7 +88,7 @@
 
         &:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
     }
@@ -154,7 +154,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow);
     animation: modalSlideIn 0.2s ease-out;
 
     &--sm {
@@ -234,12 +234,13 @@
     }
 
     &--primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary);
         color: white;
 
         &:hover:not(:disabled) {
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
             transform: translateY(-1px);
+            filter: brightness(1.1);
         }
     }
 

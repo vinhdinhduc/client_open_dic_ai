@@ -117,80 +117,87 @@ export interface ContributionsResponse {
     };
 }
 
-class ContributionService {
-    /**
-     * Tạo đóng góp mới
-     */
-    async createContribution(
-        data: CreateContributionData
-    ): Promise<ApiResponse<Contribution>> {
-        const response = await axiosInstance.post<ApiResponse<Contribution>>(
-            "/contributions",
-            data
-        );
-        return response.data;
-    }
 
-    /**
-     * Lấy danh sách đóng góp
-     */
-    async getContributions(
-        params: GetContributionsParams = {}
-    ): Promise<ApiResponse<ContributionsResponse>> {
-        const response = await axiosInstance.get<
-            ApiResponse<ContributionsResponse>
-        >("/contributions", { params });
-        return response.data;
-    }
-
-    /**
-     * Lấy chi tiết đóng góp
-     */
-    async getContributionById(id: string): Promise<ApiResponse<Contribution>> {
-        const response = await axiosInstance.get<ApiResponse<Contribution>>(
-            `/contributions/${id}`
-        );
-        return response.data;
-    }
-
-    /**
-     * Phê duyệt đóng góp
-     */
-    async approveContribution(
-        id: string,
-        data: ModerateContributionData = {}
-    ): Promise<ApiResponse<Contribution>> {
-        const response = await axiosInstance.post<ApiResponse<Contribution>>(
-            `/contributions/${id}/approve`,
-            data
-        );
-        return response.data;
-    }
-
-    /**
-     * Từ chối đóng góp
-     */
-    async rejectContribution(
-        id: string,
-        data: ModerateContributionData
-    ): Promise<ApiResponse<Contribution>> {
-        const response = await axiosInstance.post<ApiResponse<Contribution>>(
-            `/contributions/${id}/reject`,
-            data
-        );
-        return response.data;
-    }
-
-    /**
-     * Xóa đóng góp
-     */
-    async deleteContribution(id: string): Promise<ApiResponse<void>> {
-        const response = await axiosInstance.delete<ApiResponse<void>>(
-            `/contributions/${id}`
-        );
-        return response.data;
-    }
+/**
+ * Tạo đóng góp mới
+ */
+const createContribution = async (
+    data: CreateContributionData
+): Promise<ApiResponse<Contribution>> => {
+    const response = await axiosInstance.post<ApiResponse<Contribution>>(
+        "/contributions",
+        data
+    );
+    return response.data;
 }
 
-export const contributionService = new ContributionService();
+/**
+ * Lấy danh sách đóng góp
+ */
+const getContributions = async (
+    params: GetContributionsParams = {}
+): Promise<ApiResponse<ContributionsResponse>> => {
+    const response = await axiosInstance.get<
+        ApiResponse<ContributionsResponse>
+    >("/contributions", { params });
+    return response.data;
+}
+
+/**
+ * Lấy chi tiết đóng góp
+ */
+const getContributionById = async (id: string): Promise<ApiResponse<Contribution>> => {
+    const response = await axiosInstance.get<ApiResponse<Contribution>>(
+        `/contributions/${id}`
+    );
+    return response.data;
+}
+
+/**
+ * Phê duyệt đóng góp
+ */
+const approveContribution = async (
+    id: string,
+    data: ModerateContributionData = {}
+): Promise<ApiResponse<Contribution>> => {
+    const response = await axiosInstance.post<ApiResponse<Contribution>>(
+        `/contributions/${id}/approve`,
+        data
+    );
+    return response.data;
+}
+
+/**
+ * Từ chối đóng góp
+ */
+const rejectContribution = async (
+    id: string,
+    data: ModerateContributionData
+): Promise<ApiResponse<Contribution>> => {
+    const response = await axiosInstance.post<ApiResponse<Contribution>>(
+        `/contributions/${id}/reject`,
+        data
+    );
+    return response.data;
+}
+
+/**
+ * Xóa đóng góp
+ */
+const deleteContribution = async (id: string): Promise<ApiResponse<void>> => {
+    const response = await axiosInstance.delete<ApiResponse<void>>(
+        `/contributions/${id}`
+    );
+    return response.data;
+}
+
+
+export const contributionService = {
+    createContribution,
+    getContributions,
+    getContributionById,
+    approveContribution,
+    rejectContribution,
+    deleteContribution,
+};
 export default contributionService;

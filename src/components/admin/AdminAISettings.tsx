@@ -44,8 +44,6 @@ export default function AdminAISettings() {
     try {
       setIsLoading(true);
       const data = await aiService.getConfig();
-      console.log("Check config", data);
-
       setConfig(data);
 
       // Check if API key is masked (starts with characters and contains ***)
@@ -59,10 +57,7 @@ export default function AdminAISettings() {
         maxTokens: data.maxTokens || 1000,
       });
 
-      // If masked, show the masked value as placeholder
-      if (isMaskedApiKey) {
-        console.log("API key is encrypted and masked for security");
-      }
+      // If API key is masked, the form field is left empty (placeholder shows masked value)
     } catch (error: any) {
       console.error("Load config error:", error);
       toast.error(error.message);

@@ -1,0 +1,234 @@
+@import "@/styles/variables.scss";
+
+// Reports Page
+.reports-page {
+    .admin-page-header__title {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+    }
+}
+
+.reports-select {
+    min-width: 120px;
+    padding: $spacing-sm $spacing-md !important;
+}
+
+// Charts Grid
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+
+    @media (max-width: $tablet) {
+        grid-template-columns: 1fr;
+        gap: $spacing-md;
+    }
+}
+
+.reports-chart {
+    &--wide {
+        grid-column: 1 / -1;
+    }
+
+    .admin-card__title {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        font-size: $font-base;
+    }
+}
+
+// Chart Container
+.chart-container {
+    width: 100%;
+    min-height: 250px;
+
+    @media (max-width: $mobile) {
+        min-height: 200px;
+
+        .recharts-wrapper {
+            font-size: $font-xs;
+        }
+    }
+}
+
+// Top List
+.top-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        padding: $spacing-sm $spacing-md;
+        background: var(--bg-secondary);
+        border-radius: $radius-md;
+        transition: background 0.2s;
+
+        &:hover {
+            background: var(--bg-tertiary);
+        }
+
+        @media (max-width: $mobile) {
+            flex-wrap: wrap;
+            gap: $spacing-sm;
+            padding: $spacing-sm;
+        }
+    }
+
+    &__rank {
+        font-size: $font-sm;
+        font-weight: $font-bold;
+        color: var(--text-secondary);
+        min-width: 30px;
+        text-align: center;
+
+        &--top {
+            color: #667eea;
+            font-size: $font-base;
+        }
+    }
+
+    &__info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__name {
+        display: block;
+        font-size: $font-sm;
+        font-weight: $font-medium;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__meta {
+        display: block;
+        font-size: $font-xs;
+        color: var(--text-secondary);
+    }
+
+    &__value {
+        font-size: $font-sm;
+        font-weight: $font-semibold;
+        color: #667eea;
+        white-space: nowrap;
+    }
+
+    &__stats {
+        display: flex;
+        gap: $spacing-md;
+        font-size: $font-xs;
+        color: var(--text-secondary);
+
+        span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: $mobile) {
+            width: 100%;
+            justify-content: flex-start;
+            gap: $spacing-sm;
+            padding-left: 42px;
+        }
+    }
+}
+
+// Activity Timeline
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+
+    &__item {
+        display: flex;
+        gap: $spacing-md;
+        padding: $spacing-sm 0;
+        border-bottom: 1px solid var(--border-color);
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    &__dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-top: 6px;
+        flex-shrink: 0;
+
+        &--term {
+            background: #10b981;
+        }
+        &--contribution {
+            background: #3b82f6;
+        }
+        &--comment {
+            background: #f59e0b;
+        }
+        &--new_user {
+            background: #667eea;
+        }
+    }
+
+    &__content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+    }
+
+    &__type {
+        font-size: $font-xs;
+        font-weight: $font-semibold;
+        color: var(--text-secondary);
+    }
+
+    &__title {
+        font-size: $font-sm;
+        color: var(--text-primary);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__meta {
+        font-size: $font-xs;
+        color: var(--text-secondary);
+    }
+}
+
+// Responsive for stats header
+@media (max-width: $mobile) {
+    .reports-page {
+        .admin-page-header__actions {
+            flex-direction: column;
+            width: 100%;
+
+            .reports-select {
+                width: 100%;
+            }
+
+            .admin-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    }
+}

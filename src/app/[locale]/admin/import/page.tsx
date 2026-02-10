@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Upload,
   FileSpreadsheet,
@@ -16,6 +16,8 @@ import {
   BookOpen,
   HelpCircle,
 } from "lucide-react";
+import axiosInstance from "@/lib/axios";
+import { toast } from "react-hot-toast";
 
 // Types
 interface ImportFile {
@@ -29,8 +31,14 @@ interface ImportFile {
     total: number;
     success: number;
     failed: number;
-    errors?: string[];
+    errors?: Array<{ row: number; error: string }>;
   };
+}
+
+interface CategoryOption {
+  _id: string;
+  name: { vi: string; en?: string; lo?: string };
+  slug: string;
 }
 
 export default function ImportPage() {
@@ -38,6 +46,20 @@ export default function ImportPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showGuide, setShowGuide] = useState(true);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+
+  // Load categories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await axiosInstance.get("/categories");
+        setCategories(res.data.data?.categories || res.data.data || []);
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
@@ -98,57 +120,87 @@ export default function ImportPage() {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  const simulateImport = async (fileId: string) => {
+  const importFile = async (fileItem: ImportFile) => {
     // Update status to processing
     setFiles((prev) =>
       prev.map((f) =>
-        f.id === fileId ? { ...f, status: "processing" as const } : f,
-      ),
-    );
-
-    // Simulate progress
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      setFiles((prev) =>
-        prev.map((f) => (f.id === fileId ? { ...f, progress: i } : f)),
-      );
-    }
-
-    // Simulate result (random success/failure)
-    const isSuccess = Math.random() > 0.3;
-    const total = Math.floor(Math.random() * 100) + 20;
-    const success = isSuccess ? total : Math.floor(total * 0.8);
-    const failed = total - success;
-
-    setFiles((prev) =>
-      prev.map((f) =>
-        f.id === fileId
-          ? {
-              ...f,
-              status: isSuccess ? ("success" as const) : ("error" as const),
-              progress: 100,
-              result: {
-                total,
-                success,
-                failed,
-                errors: !isSuccess
-                  ? [
-                      "Dòng 15: Thiếu trường 'term_vi'",
-                      "Dòng 23: Danh mục không hợp lệ",
-                      "Dòng 45: Định nghĩa quá ngắn",
-                    ]
-                  : undefined,
-              },
-            }
+        f.id === fileItem.id
+          ? { ...f, status: "processing" as const, progress: 30 }
           : f,
       ),
     );
+
+    try {
+      const formData = new FormData();
+      formData.append("file", fileItem.file);
+      if (selectedCategory) {
+        formData.append("category", selectedCategory);
+      }
+
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileItem.id ? { ...f, progress: 60 } : f)),
+      );
+
+      const response = await axiosInstance.post("/terms/import", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const result = response.data.data;
+
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileItem.id
+            ? {
+                ...f,
+                status:
+                  result.failed === 0
+                    ? ("success" as const)
+                    : ("error" as const),
+                progress: 100,
+                result: {
+                  total: result.total || result.success + result.failed,
+                  success: result.success,
+                  failed: result.failed,
+                  errors: result.errors,
+                },
+              }
+            : f,
+        ),
+      );
+
+      if (result.success > 0) {
+        toast.success(`Nhập thành công ${result.success} thuật ngữ`);
+      }
+      if (result.failed > 0) {
+        toast.error(`${result.failed} bản ghi bị lỗi`);
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Lỗi nhập dữ liệu";
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileItem.id
+            ? {
+                ...f,
+                status: "error" as const,
+                progress: 100,
+                result: {
+                  total: 0,
+                  success: 0,
+                  failed: 1,
+                  errors: [{ row: 0, error: message }],
+                },
+              }
+            : f,
+        ),
+      );
+      toast.error(message);
+    }
   };
 
   const handleImport = async () => {
     const pendingFiles = files.filter((f) => f.status === "pending");
     for (const file of pendingFiles) {
-      await simulateImport(file.id);
+      await importFile(file);
     }
   };
 
@@ -286,10 +338,11 @@ export default function ImportPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
                 <option value="">-- Chọn danh mục --</option>
-                <option value="1">Công nghệ thông tin</option>
-                <option value="2">Kinh tế - Tài chính</option>
-                <option value="3">Y học - Sức khỏe</option>
-                <option value="4">Nông nghiệp</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name.vi}
+                  </option>
+                ))}
               </select>
               <span className="option-hint">
                 Áp dụng cho các thuật ngữ không có danh mục trong file
@@ -375,7 +428,11 @@ export default function ImportPage() {
                         <span className="error-file__name">{file.name}</span>
                         <ul>
                           {file.result?.errors?.map((error, idx) => (
-                            <li key={idx}>{error}</li>
+                            <li key={idx}>
+                              {typeof error === "string"
+                                ? error
+                                : `Dòng ${error.row}: ${error.error}`}
+                            </li>
                           ))}
                         </ul>
                       </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { aiService, AIResponse } from "@/services/aiService";
+import { saveContributionData } from "@/utils/contributionStorage";
 import { toast } from "react-hot-toast";
 import {
   X,
@@ -20,64 +21,13 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import "./AIChat.scss";
+import { useTranslations } from "next-intl";
 
 interface AIChatProps {
   term: string;
   language?: string;
   onClose: () => void;
 }
-
-// Labels theo ngôn ngữ
-const labels: Record<string, Record<string, string>> = {
-  vi: {
-    assistant: "Trợ lý AI",
-    about: "Tìm hiểu về",
-    close: "Đóng",
-    loading: "Đang hỏi AI về thuật ngữ...",
-    retry: "Thử lại",
-    askAgain: "Hỏi lại",
-    definition: "Định nghĩa",
-    explanation: "Giải thích chi tiết",
-    examples: "Ví dụ",
-    relatedTerms: "Thuật ngữ liên quan",
-    tags: "Từ khóa",
-    field: "Lĩnh vực",
-    disclaimer:
-      "💡 Thông tin được cung cấp bởi AI có thể không chính xác 100%. Vui lòng kiểm chứng từ các nguồn đáng tin cậy.",
-  },
-  en: {
-    assistant: "AI Assistant",
-    about: "Learn about",
-    close: "Close",
-    loading: "Asking AI about the term...",
-    retry: "Retry",
-    askAgain: "Ask again",
-    definition: "Definition",
-    explanation: "Detailed Explanation",
-    examples: "Examples",
-    relatedTerms: "Related Terms",
-    tags: "Tags",
-    field: "Field",
-    disclaimer:
-      "💡 Information provided by AI may not be 100% accurate. Please verify from reliable sources.",
-  },
-  lo: {
-    assistant: "ຜູ້ຊ່ວຍ AI",
-    about: "ຮຽນຮູ້ກ່ຽວກັບ",
-    close: "ປິດ",
-    loading: "ກຳລັງຖາມ AI ກ່ຽວກັບຄຳສັບ...",
-    retry: "ລອງໃໝ່",
-    askAgain: "ຖາມອີກ",
-    definition: "ຄວາມໝາຍ",
-    explanation: "ຄຳອະທິບາຍລະອຽດ",
-    examples: "ຕົວຢ່າງ",
-    relatedTerms: "ຄຳສັບທີ່ກ່ຽວຂ້ອງ",
-    tags: "ແທັກ",
-    field: "ຂົງເຂດ",
-    disclaimer:
-      "💡 ຂໍ້ມູນທີ່ສະໜອງໂດຍ AI ອາດບໍ່ຖືກຕ້ອງ 100%. ກະລຸນາກວດສອບຈາກແຫຼ່ງທີ່ເຊື່ອຖືໄດ້.",
-  },
-};
 
 export default function AIChat({
   term,
@@ -89,17 +39,11 @@ export default function AIChat({
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const hasCalledAPI = useRef(false);
 
-  const t = labels[language] || labels.vi;
+  const t = useTranslations("aiChat");
 
-  // Tự động gọi AI khi component mount
-  useEffect(() => {
-    if (isAuthenticated && term) {
-      handleAskAI();
-    }
-  }, [term, language]);
-
-  const handleAskAI = async () => {
+  const handleAskAI = useCallback(async () => {
     if (!term.trim()) {
       return;
     }
@@ -112,31 +56,40 @@ export default function AIChat({
         term: term.trim(),
         language,
       });
-      console.log("AI Response:", result);
       setResponse(result);
     } catch (err: any) {
       console.error("AI Chat Error:", err);
-      setError(err.message || "Đã có lỗi xảy ra khi kết nối với AI");
-      toast.error("Không thể nhận phản hồi từ AI");
+      setError(err.message || t("errorConnection"));
+      toast.error(t("errorNoResponse"));
     } finally {
       setIsLoading(false);
     }
+  }, [term, language, t]);
+
+  // Tự động gọi AI khi component mount (chỉ gọi 1 lần)
+  useEffect(() => {
+    if (isAuthenticated && term && !hasCalledAPI.current) {
+      hasCalledAPI.current = true;
+      handleAskAI();
+    }
+  }, [isAuthenticated, term, handleAskAI]);
+
+  const handleSearchOtherTerms = () => {
+    onClose();
+    router.push("/search");
   };
 
-  /**
-   * Handle contribute - chuyển đến trang đóng góp thuật ngữ với data từ AI
-   */
   const handleContribute = (data: AIResponse) => {
     if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để đóng góp thuật ngữ");
+      toast.error(t("loginToContribute"));
       return;
     }
 
-    // Encode AI data để truyền qua URL
-    const aiData = encodeURIComponent(
-      JSON.stringify({
+    try {
+      // Sử dụng utility function để lưu data
+      const storageKey = saveContributionData({
         term: data.term,
-        definition: data.definition,
+        definition: data.definition || "",
         detailedExplanation: data.detailedExplanation,
         examples: data.examples,
         partOfSpeech: data.partOfSpeech,
@@ -144,17 +97,21 @@ export default function AIChat({
         relatedTerms: data.relatedTerms,
         tags: data.tags,
         language: data.language,
-      }),
-    );
+      });
 
-    // Đóng modal và chuyển đến trang contribute
-    onClose();
-    router.push(`/contribute?aiData=${aiData}`);
+      // Navigate với key ngắn gọn
+      onClose();
+      router.push(`/contribute?from=ai&key=${encodeURIComponent(storageKey)}`);
+    } catch (error) {
+      console.error("Failed to save contribution data:", error);
+      toast.error(t("errorSavingData") || "Failed to save data");
+
+      // Fallback: Chỉ truyền term qua URL
+      onClose();
+      router.push(`/contribute?term=${encodeURIComponent(data.term)}`);
+    }
   };
 
-  /**
-   * Render structured AI response khớp cấu trúc Term model - format như TermDetailView
-   */
   const renderStructuredResponse = (data: AIResponse) => (
     <div className="ai-chat__structured">
       {/* Header với badges */}
@@ -177,7 +134,7 @@ export default function AIChat({
         <section className="ai-chat__section ai-chat__section--definition">
           <h3 className="ai-chat__section-title">
             <BookOpen size={18} />
-            {t.definition}
+            {t("definition")}
           </h3>
           <div className="ai-chat__definition-box">{data.definition}</div>
         </section>
@@ -188,7 +145,7 @@ export default function AIChat({
         <section className="ai-chat__section">
           <h3 className="ai-chat__section-title">
             <FileText size={18} />
-            {t.explanation}
+            {t("explanation")}
           </h3>
           <div className="ai-chat__text-content">
             <ReactMarkdown>{data.detailedExplanation}</ReactMarkdown>
@@ -201,7 +158,7 @@ export default function AIChat({
         <section className="ai-chat__section">
           <h3 className="ai-chat__section-title">
             <Lightbulb size={18} />
-            {t.examples}
+            {t("examples")}
           </h3>
           <ul className="ai-chat__examples-list">
             {data.examples.map((example, index) => (
@@ -218,7 +175,7 @@ export default function AIChat({
         <section className="ai-chat__section">
           <h3 className="ai-chat__section-title">
             <Link2 size={18} />
-            {t.relatedTerms}
+            {t("relatedTerms")}
           </h3>
           <div className="ai-chat__related-terms">
             {data.relatedTerms.map((rt, index) => (
@@ -235,7 +192,7 @@ export default function AIChat({
         <section className="ai-chat__section">
           <h3 className="ai-chat__section-title">
             <Tag size={18} />
-            {t.tags}
+            {t("tags")}
           </h3>
           <div className="ai-chat__tags-wrap">
             {data.tags.map((tag, index) => (
@@ -251,11 +208,11 @@ export default function AIChat({
       <div className="ai-chat__contribute">
         <div className="ai-chat__contribute-content">
           <h4 className="ai-chat__contribute-title">
-            💡 Thông tin này hữu ích?
+            <Lightbulb size={18} /> {t("infoUseful")}
           </h4>
           <p className="ai-chat__contribute-text">
-            Bạn có muốn đóng góp thuật ngữ <strong>"{data.term}"</strong> vào hệ
-            thống từ điển để mọi người cùng tra cứu không?
+            {t("contributeQuestion")} <strong>"{data.term}"</strong>{" "}
+            {t("contributeQuestionSuffix")}
           </p>
           <div className="ai-chat__contribute-actions">
             <button
@@ -263,34 +220,16 @@ export default function AIChat({
               onClick={() => handleContribute(data)}
             >
               <FileText size={16} />
-              Đóng góp thuật ngữ này
+              {t("contributeButton")}
             </button>
             <button
               className="ai-chat__contribute-btn ai-chat__contribute-btn--secondary"
               onClick={onClose}
             >
-              Để sau
+              {t("later")}
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
-
-  /**
-   * Render fallback (raw markdown) khi AI không trả về JSON
-   */
-  const renderFallbackResponse = (data: AIResponse) => (
-    <div className="ai-chat__fallback">
-      <div className="ai-chat__fallback-notice">
-        <AlertCircle size={20} />
-        <p>
-          <strong>Lưu ý:</strong> AI trả về định dạng không chuẩn. Dưới đây là
-          phản hồi gốc:
-        </p>
-      </div>
-      <div className="ai-chat__message-content">
-        <ReactMarkdown>{data.response || ""}</ReactMarkdown>
       </div>
     </div>
   );
@@ -303,16 +242,16 @@ export default function AIChat({
           <div className="ai-chat__header-title">
             <Bot className="ai-chat__icon" size={24} />
             <div>
-              <h3>{t.assistant}</h3>
+              <h3>{t("assistant")}</h3>
               <span className="ai-chat__subtitle">
-                {t.about}: <strong>{term}</strong>
+                {t("about")}: <strong>{term}</strong>
               </span>
             </div>
           </div>
           <button
             className="ai-chat__close-btn"
             onClick={onClose}
-            aria-label={t.close}
+            aria-label={t("close")}
           >
             <X size={20} />
           </button>
@@ -323,7 +262,7 @@ export default function AIChat({
           {isLoading && (
             <div className="ai-chat__loading">
               <Loader2 className="ai-chat__spinner" size={32} />
-              <p>{t.loading}</p>
+              <p>{t("loading")}</p>
             </div>
           )}
 
@@ -332,7 +271,7 @@ export default function AIChat({
               <AlertCircle size={24} />
               <p>{error}</p>
               <button className="ai-chat__retry-btn" onClick={handleAskAI}>
-                {t.retry}
+                {t("retry")}
               </button>
             </div>
           )}
@@ -342,20 +281,18 @@ export default function AIChat({
               <div className="ai-chat__message">
                 <div className="ai-chat__message-header">
                   <Bot size={20} />
-                  <span>{t.assistant}</span>
+                  <span>{t("assistant")}</span>
                   {response.model && (
                     <span className="ai-chat__model">({response.model})</span>
                   )}
                 </div>
 
-                {/* Render structured hoặc fallback */}
-                {response.structured
-                  ? renderStructuredResponse(response)
-                  : renderFallbackResponse(response)}
+                {/* Render structured*/}
+                {response.structured && renderStructuredResponse(response)}
               </div>
 
               <div className="ai-chat__footer-info">
-                <p className="ai-chat__disclaimer">{t.disclaimer}</p>
+                <p className="ai-chat__disclaimer">{t("disclaimer")}</p>
               </div>
             </div>
           )}
@@ -367,16 +304,15 @@ export default function AIChat({
             className="ai-chat__action-btn ai-chat__action-btn--secondary"
             onClick={onClose}
           >
-            {t.close}
+            {t("close")}
           </button>
           {response && (
             <button
               className="ai-chat__action-btn ai-chat__action-btn--primary"
-              onClick={handleAskAI}
-              disabled={isLoading}
+              onClick={handleSearchOtherTerms}
             >
               <Send size={16} />
-              {t.askAgain}
+              {t("searchOtherTerms")}
             </button>
           )}
         </div>

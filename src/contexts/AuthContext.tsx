@@ -26,6 +26,12 @@ interface AuthContextType {
   isModerator: boolean;
   login: (credentials: LoginCredentials) => Promise<boolean>;
   register: (userData: RegisterData) => Promise<boolean>;
+  googleLogin: (googleData: {
+    googleId: string;
+    email: string;
+    fullName: string;
+    avatar?: string;
+  }) => Promise<boolean>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   refreshProfile: () => Promise<void>;
@@ -119,6 +125,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [],
   );
 
+  // Google Login function
+  const googleLogin = useCallback(
+    async (googleData: {
+      googleId: string;
+      email: string;
+      fullName: string;
+      avatar?: string;
+    }): Promise<boolean> => {
+      try {
+        const response = await authService.googleLogin(googleData);
+
+        if (response.success && response.data) {
+          setUser(response.data.user);
+          return true;
+        }
+        return false;
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: { message?: string } } };
+        const message =
+          err.response?.data?.message || "Đăng nhập Google thất bại";
+        toast.error(message);
+        throw error;
+      }
+    },
+    [],
+  );
+
   // Logout function
   const logout = useCallback(() => {
     tokenUtils.clearAuth();
@@ -163,6 +196,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isModerator,
     login,
     register,
+    googleLogin,
     logout,
     updateUser,
     refreshProfile,

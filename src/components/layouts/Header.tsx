@@ -19,6 +19,7 @@ import {
   X,
   ChevronDown,
   Globe,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -72,6 +73,8 @@ const Header = () => {
   ];
 
   const currentLang = languages.find((lang) => lang.code === currentLanguage);
+
+  console.log("Loggg", isModerator, user);
 
   return (
     <header className="header">
@@ -151,13 +154,17 @@ const Header = () => {
           {/* Auth Section */}
           {isAuthenticated ? (
             <>
-              {/* Admin Link - Only for Admin/Moderator */}
-              {isModerator && (
+              {user?.role === "admin" ? (
                 <Link href="/admin" className="header__admin-link">
                   <Shield size={16} />
                   <span>{t("header.admin")}</span>
                 </Link>
-              )}
+              ) : user?.role === "moderator" ? (
+                <Link href="/moderator" className="header__admin-link">
+                  <ShieldCheck size={16} />
+                  <span>{t("header.moderator")}</span>
+                </Link>
+              ) : null}
 
               {/* User Menu */}
               <div className="header__user-menu" ref={userMenuRef}>
@@ -192,7 +199,7 @@ const Header = () => {
                     </Link>
 
                     <Link
-                      href="/contributions"
+                      href="/profile/contributions"
                       className="header__user-item"
                       onClick={() => setUserMenuOpen(false)}
                     >
@@ -201,7 +208,7 @@ const Header = () => {
                     </Link>
 
                     <Link
-                      href="/favorites"
+                      href="/profile/favorites"
                       className="header__user-item"
                       onClick={() => setUserMenuOpen(false)}
                     >
@@ -210,7 +217,7 @@ const Header = () => {
                     </Link>
 
                     <Link
-                      href="/history"
+                      href="/profile/search-history"
                       className="header__user-item"
                       onClick={() => setUserMenuOpen(false)}
                     >
@@ -264,6 +271,57 @@ const Header = () => {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="header__mobile-menu">
+          {/* Mobile Theme & Language Toggle */}
+          <div className="header__mobile-settings">
+            {/* Theme Toggle */}
+            {mounted && (
+              <button
+                className="header__mobile-theme"
+                onClick={toggleTheme}
+                aria-label={
+                  theme === "dark"
+                    ? t("header.lightMode")
+                    : t("header.darkMode")
+                }
+              >
+                {theme === "dark" ? (
+                  <>
+                    <Sun size={18} />
+                    <span>{t("header.lightMode")}</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon size={18} />
+                    <span>{t("header.darkMode")}</span>
+                  </>
+                )}
+              </button>
+            )}
+
+            {/* Language Selector */}
+            <div className="header__mobile-language">
+              <Globe size={18} />
+              <span>{t("header.language")}</span>
+              <div className="header__mobile-language-buttons">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    className={`header__mobile-language-btn ${
+                      currentLanguage === lang.code
+                        ? "header__mobile-language-btn--active"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      changeLanguage(lang.code as "vi" | "en" | "lo");
+                    }}
+                  >
+                    {lang.flag} {lang.code.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {isAuthenticated ? (
             <>
               <div className="header__mobile-user">
@@ -281,7 +339,7 @@ const Header = () => {
                 <span className="header__mobile-name">{user?.fullName}</span>
               </div>
 
-              {isModerator && (
+              {user?.role === "admin" ? (
                 <Link
                   href="/admin"
                   className="header__mobile-link"
@@ -289,7 +347,15 @@ const Header = () => {
                 >
                   {t("header.admin")}
                 </Link>
-              )}
+              ) : user?.role === "moderator" ? (
+                <Link
+                  href="/moderator"
+                  className="header__mobile-link"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {t("header.moderator")}
+                </Link>
+              ) : null}
 
               <Link
                 href="/profile"
@@ -300,7 +366,7 @@ const Header = () => {
               </Link>
 
               <Link
-                href="/contributions"
+                href="/profile/contributions"
                 className="header__mobile-link"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -308,7 +374,7 @@ const Header = () => {
               </Link>
 
               <Link
-                href="/favorites"
+                href="/profile/favorites"
                 className="header__mobile-link"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -316,7 +382,7 @@ const Header = () => {
               </Link>
 
               <Link
-                href="/history"
+                href="/profile/search-history"
                 className="header__mobile-link"
                 onClick={() => setMobileMenuOpen(false)}
               >

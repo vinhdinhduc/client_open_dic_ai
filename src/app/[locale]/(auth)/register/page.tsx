@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import { validateEmail, validatePassword } from "@/services/authService";
 import { useAuth } from "@/hooks/useAuth";
+import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import "../Auth.scss";
 
 export default function RegisterPage() {
@@ -393,13 +394,11 @@ export default function RegisterPage() {
 
           {/* Social Login */}
           <div className="auth-social">
-            <button
-              type="button"
-              className="auth-social__btn auth-social__btn--google"
-            >
-              <i className="fa-brands fa-google"></i>
-              Google
-            </button>
+            <GoogleLoginButton
+              onSuccess={() => {
+                router.push("/");
+              }}
+            />
             <button
               type="button"
               className="auth-social__btn auth-social__btn--facebook"

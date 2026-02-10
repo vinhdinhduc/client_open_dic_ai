@@ -53,7 +53,8 @@ interface MenuItem {
   children?: SubMenuItem[];
 }
 
-const menuItems: MenuItem[] = [
+// Menu items cho Admin
+const adminMenuItems: MenuItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
@@ -126,6 +127,50 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+// Menu items cho Moderator (chỉ hiển thị các mục liên quan đến kiểm duyệt)
+const moderatorMenuItems: MenuItem[] = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/admin",
+  },
+  {
+    id: "moderator-categories",
+    label: "Danh mục phụ trách",
+    icon: FolderTree,
+    href: "/admin/moderator/categories",
+  },
+  {
+    id: "moderation",
+    label: "Kiểm duyệt",
+    icon: FileCheck,
+    badge: true,
+    children: [
+      {
+        id: "moderation-contributions",
+        label: "Kiểm duyệt đóng góp",
+        href: "/admin/moderation/contributions",
+        icon: GitPullRequest,
+        badge: true,
+      },
+      {
+        id: "reports-moderation",
+        label: "Kiểm duyệt báo xấu",
+        href: "/admin/moderation/reports",
+        icon: Flag,
+        badge: true,
+      },
+    ],
+  },
+  {
+    id: "comments",
+    label: "Bình luận",
+    icon: MessageSquare,
+    href: "/admin/comments",
+  },
+];
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -138,6 +183,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [pendingCount, setPendingCount] = useState(5); // Mock data
   const [reportCount, setReportCount] = useState(3); // Mock data
   const [contributionCount, setContributionCount] = useState(2); // Mock data
+
+  // Chọn menu items dựa theo role
+  const menuItems =
+    user?.role === "admin" ? adminMenuItems : moderatorMenuItems;
 
   // Check admin access
   useEffect(() => {

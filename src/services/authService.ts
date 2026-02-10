@@ -228,6 +228,56 @@ export const authService = {
     getCurrentUser: (): User | null => {
         return tokenUtils.getUser();
     },
+
+    /**
+     * Quên mật khẩu - gửi email reset
+     */
+    forgotPassword: async (
+        email: string
+    ): Promise<{ success: boolean; message: string }> => {
+        const response = await axiosInstance.post("/auth/forgot-password", {
+            email,
+        });
+        return response.data;
+    },
+
+    /**
+     * Đặt lại mật khẩu bằng token
+     */
+    resetPassword: async (
+        token: string,
+        password: string
+    ): Promise<{ success: boolean; message: string }> => {
+        const response = await axiosInstance.post("/auth/reset-password", {
+            token,
+            password,
+        });
+        return response.data;
+    },
+
+    /**
+     * Đăng nhập bằng Google
+     */
+    googleLogin: async (googleData: {
+        googleId: string;
+        email: string;
+        fullName: string;
+        avatar?: string;
+    }): Promise<AuthResponse> => {
+        const response = await axiosInstance.post<AuthResponse>(
+            "/auth/google",
+            googleData
+        );
+
+        const { data } = response.data;
+
+        if (data.accessToken) {
+            tokenUtils.setToken(data.accessToken);
+            tokenUtils.setUser(data.user);
+        }
+
+        return response.data;
+    },
 };
 
 export default authService;

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import { authService, validateEmail } from "@/services/authService";
 import { useAuth } from "@/hooks/useAuth";
+import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import "../Auth.scss";
 
 export default function LoginPage() {
@@ -251,13 +252,15 @@ export default function LoginPage() {
 
           {/* Social Login */}
           <div className="auth-social">
-            <button
-              type="button"
-              className="auth-social__btn auth-social__btn--google"
-            >
-              <i className="fa-brands fa-google"></i>
-              Google
-            </button>
+            <GoogleLoginButton
+              onSuccess={() => {
+                if (user?.role === "admin") {
+                  router.push("/admin");
+                } else {
+                  router.push("/");
+                }
+              }}
+            />
             <button
               type="button"
               className="auth-social__btn auth-social__btn--facebook"

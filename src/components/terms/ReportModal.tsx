@@ -62,7 +62,6 @@ export default function ReportModal({
         reason: selectedReason,
         description: description.trim() || undefined,
       });
-      console.log("Report response:", res);
       if (res.success) {
         toast.success("Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét sớm nhất.");
       }

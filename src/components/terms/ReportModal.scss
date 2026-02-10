@@ -89,8 +89,13 @@
         gap: $spacing-sm;
         padding: $spacing-md $spacing-lg;
         background: rgba(245, 158, 11, 0.1);
-        color: #b45309;
+        color: #d97706;
         font-size: $font-sm;
+
+        [data-theme="dark"] & {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+        }
 
         strong {
             color: var(--text-primary);

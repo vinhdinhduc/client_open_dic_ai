@@ -73,7 +73,6 @@ export const EditUser: React.FC<EditUserProps> = ({
       };
 
       const response = await userService.updateUser(user._id, updateData);
-      console.log("Check res", response);
 
       if (response.success && response.data) {
         toast.success("Cập nhật người dùng thành công");

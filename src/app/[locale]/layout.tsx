@@ -5,6 +5,7 @@ import { locales } from "@/i18n";
 import "@/styles/globals.scss";
 import { Header } from "@/components/layouts";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import GoogleProvider from "@/components/providers/GoogleProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 
@@ -63,20 +64,22 @@ export default async function LocaleLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <NextIntlClientProvider messages={messages} locale={locale}>
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 3000,
-                  style: {
-                    background: "var(--bg-secondary)",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border-color)",
-                  },
-                }}
-              />
-              {children}
-            </NextIntlClientProvider>
+            <GoogleProvider>
+              <NextIntlClientProvider messages={messages} locale={locale}>
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 3000,
+                    style: {
+                      background: "var(--bg-secondary)",
+                      color: "var(--text-primary)",
+                      border: "1px solid var(--border-color)",
+                    },
+                  }}
+                />
+                {children}
+              </NextIntlClientProvider>
+            </GoogleProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

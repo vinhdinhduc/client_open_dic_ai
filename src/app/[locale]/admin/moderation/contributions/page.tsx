@@ -71,7 +71,6 @@ export default function ContributionsModerationPage() {
       const response = await contributionService.getContributions(
         params as any,
       );
-      console.log("Check res", response);
 
       if (response.success) {
         setContributions(response.data.contributions || []);

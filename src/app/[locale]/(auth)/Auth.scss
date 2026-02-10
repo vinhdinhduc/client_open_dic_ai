@@ -500,6 +500,66 @@
     i {
         font-size: $font-lg;
     }
+
+    &--secondary {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+
+        &:hover:not(:disabled) {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+// ============================================
+// SUCCESS MESSAGE
+// ============================================
+
+.auth-success-message {
+    text-align: center;
+    padding: $spacing-lg 0;
+
+    &__icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto $spacing-lg;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        border-radius: 50%;
+
+        i {
+            font-size: 32px;
+            color: #10b981;
+        }
+    }
+
+    h3 {
+        font-size: $font-lg;
+        font-weight: $font-bold;
+        color: var(--text-primary);
+        margin: 0 0 $spacing-sm;
+    }
+
+    p {
+        font-size: $font-sm;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0 0 $spacing-sm;
+
+        strong {
+            color: var(--text-primary);
+        }
+    }
+
+    &__note {
+        font-size: $font-xs !important;
+        color: var(--text-tertiary) !important;
+        font-style: italic;
+        margin-bottom: $spacing-lg !important;
+    }
 }
 
 // ============================================
