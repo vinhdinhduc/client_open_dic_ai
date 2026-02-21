@@ -22,6 +22,8 @@ import {
   Save,
   Loader2,
   ChevronRight,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import "./page.scss";
 import { Layout } from "@/components/layouts";
@@ -42,6 +44,9 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [fullName, setFullName] = useState("");
   const [preferredLanguage, setPreferredLanguage] = useState("vi");
+  const [isShowCurrentPassword, setIsShowCurrentPassword] = useState(false);
+  const [isShowNewPassword, setIsShowNewPassword] = useState(false);
+  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -414,17 +419,31 @@ export default function ProfilePage() {
                     <label className="form-label">
                       {t("currentPassword") || "Mật khẩu hiện tại"}
                     </label>
-                    <input
-                      type="password"
-                      className="form-input"
-                      value={passwordData.currentPassword}
-                      onChange={(e) =>
-                        setPasswordData((prev) => ({
-                          ...prev,
-                          currentPassword: e.target.value,
-                        }))
-                      }
-                    />
+                    <div className="password-input-wrapper">
+                      <input
+                        type={isShowCurrentPassword ? "text" : "password"}
+                        className="form-input"
+                        value={passwordData.currentPassword}
+                        onChange={(e) =>
+                          setPasswordData((prev) => ({
+                            ...prev,
+                            currentPassword: e.target.value,
+                          }))
+                        }
+                      />
+                      <span
+                        className="password-toggle"
+                        onClick={() =>
+                          setIsShowCurrentPassword((prev) => !prev)
+                        }
+                      >
+                        {isShowCurrentPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="form-row">
@@ -432,34 +451,60 @@ export default function ProfilePage() {
                       <label className="form-label">
                         {t("newPassword") || "Mật khẩu mới"}
                       </label>
-                      <input
-                        type="password"
-                        className="form-input"
-                        value={passwordData.newPassword}
-                        onChange={(e) =>
-                          setPasswordData((prev) => ({
-                            ...prev,
-                            newPassword: e.target.value,
-                          }))
-                        }
-                      />
+                      <div className="password-input-wrapper">
+                        <input
+                          type={isShowNewPassword ? "text" : "password"}
+                          className="form-input"
+                          value={passwordData.newPassword}
+                          onChange={(e) =>
+                            setPasswordData((prev) => ({
+                              ...prev,
+                              newPassword: e.target.value,
+                            }))
+                          }
+                        />
+                        <span
+                          className="password-toggle"
+                          onClick={() => setIsShowNewPassword((prev) => !prev)}
+                        >
+                          {isShowNewPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="form-group">
                       <label className="form-label">
                         {t("confirmNewPassword") || "Xác nhận mật khẩu mới"}
                       </label>
-                      <input
-                        type="password"
-                        className="form-input"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) =>
-                          setPasswordData((prev) => ({
-                            ...prev,
-                            confirmPassword: e.target.value,
-                          }))
-                        }
-                      />
+                      <div className="password-input-wrapper">
+                        <input
+                          type={isShowConfirmPassword ? "text" : "password"}
+                          className="form-input"
+                          value={passwordData.confirmPassword}
+                          onChange={(e) =>
+                            setPasswordData((prev) => ({
+                              ...prev,
+                              confirmPassword: e.target.value,
+                            }))
+                          }
+                        />
+                        <span
+                          className="password-toggle"
+                          onClick={() =>
+                            setIsShowConfirmPassword((prev) => !prev)
+                          }
+                        >
+                          {isShowConfirmPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

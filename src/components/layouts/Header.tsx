@@ -24,6 +24,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/hooks/useLanguage";
+import BackToHome from "@/components/common/BackToHome";
 import "./Header.scss";
 
 const Header = () => {
@@ -97,6 +98,7 @@ const Header = () => {
             </div>
             <span className="header__app-name">{t("common.appName")}</span>
           </Link>
+          <BackToHome />
         </div>
 
         {/* Right Section */}

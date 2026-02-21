@@ -15,7 +15,9 @@
     "error": "Có lỗi xảy ra",
     "success": "Thành công",
     "previous": "Trước",
-    "next": "Tiếp"
+    "next": "Sau",
+    "home": "Trang chủ",
+    "backToHome": "Quay về trang chủ"
   },
   "navigation": {
     "home": "Trang chủ",
@@ -36,7 +38,14 @@
     "loginSuccess": "Đăng nhập thành công",
     "registerSuccess": "Đăng ký thành công",
     "loginTitle": "Đăng nhập vào hệ thống",
-    "registerTitle": "Tạo tài khoản mới"
+    "registerTitle": "Tạo tài khoản mới",
+    "verifyEmail": "Xác thực Email",
+    "emailNotVerified": "Email chưa được xác thực",
+    "verifyEmailMessage": "Vui lòng xác thực email để sử dụng đầy đủ tính năng",
+    "resendVerificationEmail": "Gửi lại email xác thực",
+    "verificationSuccess": "Xác thực email thành công",
+    "verificationFailed": "Xác thực email thất bại",
+    "checkEmailForVerification": "Vui lòng kiểm tra email để xác thực tài khoản"
   },
   "home": {
     "title": "Hệ thống Từ điển Chuyên ngành",
@@ -127,6 +136,9 @@
   },
   "searchResults": {
     "title": "Kết quả tìm kiếm cho",
+    "backToSearch": "Quay lại tìm kiếm",
+    "exactMatch": "Kết quả chính xác",
+    "relatedTerms": "Từ liên quan",
     "noResultsTitle": "Không tìm thấy thuật ngữ trong hệ thống",
     "noResultsMessage": "Chúng tôi không tìm thấy thuật ngữ",
     "noResultsInDictionary": "trong từ điển.",

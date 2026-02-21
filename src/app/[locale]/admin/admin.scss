@@ -1,6 +1,5 @@
 @import "@/styles/variables.scss";
 
-// Color variables for admin
 $admin-sidebar-width: 260px;
 $admin-sidebar-collapsed: 80px;
 $admin-header-height: 64px;
@@ -173,17 +172,37 @@ $admin-info: #3b82f6;
             margin-left: auto;
             background: $admin-danger;
             color: white;
-            font-size: $font-xs;
+            font-size: 11px;
             font-weight: $font-bold;
-            padding: 2px 8px;
+            padding: 3px 7px;
             border-radius: $radius-full;
-            min-width: 20px;
+            min-width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba($admin-danger, 0.3);
+            animation: badge-pulse 2s ease-in-out infinite;
 
             &--small {
-                padding: 1px 6px;
+                padding: 2px 6px;
                 font-size: 10px;
-                min-width: 16px;
+                min-width: 18px;
+                height: 18px;
+            }
+        }
+
+        @keyframes badge-pulse {
+            0%,
+            100% {
+                box-shadow: 0 2px 4px rgba($admin-danger, 0.3);
+            }
+            50% {
+                box-shadow:
+                    0 2px 8px rgba($admin-danger, 0.5),
+                    0 0 12px rgba($admin-danger, 0.3);
             }
         }
 
@@ -261,6 +280,7 @@ $admin-info: #3b82f6;
         color: var(--text-secondary);
         text-decoration: none;
         font-size: $font-sm;
+        border: 1px solid var(--border-color);
         border-radius: $radius-md;
         transition: all $transition-fast;
         text-align: center;

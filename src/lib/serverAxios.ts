@@ -77,6 +77,7 @@ export async function searchTermsServer(
             next: { revalidate: 60 }, // Cache 60 seconds
         });
 
+
         return result;
     } catch (error) {
         console.error("Error searching terms on server:", error);

@@ -157,15 +157,6 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         <span className="breadcrumb-current">{getText(term.term)}</span>
       </nav>
 
-      {/* Back button */}
-      <Link
-        href={`/terms?q=${encodeURIComponent(getText(term.term))}`}
-        className="term-detail__back"
-      >
-        <ArrowLeft size={20} />
-        <span>Quay lại kết quả tìm kiếm</span>
-      </Link>
-
       {/* Main Content */}
       <article className="term-detail__content">
         {/* Header */}

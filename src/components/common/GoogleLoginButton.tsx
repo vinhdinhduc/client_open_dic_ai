@@ -1,9 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "react-hot-toast";
+import React from "react";
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
@@ -11,72 +8,24 @@ interface GoogleLoginButtonProps {
 }
 
 export default function GoogleLoginButton({
-  onSuccess,
   className,
 }: GoogleLoginButtonProps) {
-  const { googleLogin } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setIsLoading(true);
-      try {
-        // Get user info from Google using the access token
-        const userInfoResponse = await fetch(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${tokenResponse.access_token}`,
-            },
-          },
-        );
-
-        if (!userInfoResponse.ok) {
-          throw new Error("Không thể lấy thông tin từ Google");
-        }
-
-        const userInfo = await userInfoResponse.json();
-
-        const success = await googleLogin({
-          googleId: userInfo.sub,
-          email: userInfo.email,
-          fullName: userInfo.name,
-          avatar: userInfo.picture,
-        });
-
-        if (success) {
-          toast.success("Đăng nhập Google thành công!");
-          onSuccess?.();
-        }
-      } catch (error) {
-        console.error("Google login error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    onError: () => {
-      toast.error("Đăng nhập Google thất bại");
-    },
-  });
+  const handleGoogleLogin = () => {
+    // Redirect to backend Passport.js OAuth endpoint
+    window.location.href = `${API_URL}/auth/google/passport`;
+  };
 
   return (
     <button
       type="button"
       className={`auth-social__btn auth-social__btn--google ${className || ""}`}
-      onClick={() => handleGoogleLogin()}
-      disabled={isLoading}
+      onClick={handleGoogleLogin}
     >
-      {isLoading ? (
-        <>
-          <i className="fa-solid fa-spinner fa-spin"></i>
-          Đang xử lý...
-        </>
-      ) : (
-        <>
-          <i className="fa-brands fa-google"></i>
-          Google
-        </>
-      )}
+      <i className="fa-brands fa-google"></i>
+      Google
     </button>
   );
 }

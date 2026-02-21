@@ -15,6 +15,17 @@ export function useLanguage() {
   const locale = useLocale();
   const [currentLanguage, setCurrentLanguage] = useState<Language>(locale as Language);
 
+
+
+  useEffect(() => {
+    const storedLanguage = localStorage.getItem("language") as Language;
+
+    if (storedLanguage && storedLanguage !== locale && SUPPORTED_LANGUAGES.includes(storedLanguage)) {
+      const queryString = searchParams.toString();
+      const fullPath = queryString ? `${pathname}?${queryString}` : pathname;
+      router.replace(fullPath, { locale: storedLanguage });
+    }
+  })
   useEffect(() => {
     setCurrentLanguage(locale as Language);
   }, [locale]);

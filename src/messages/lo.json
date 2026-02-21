@@ -15,7 +15,9 @@
     "error": "ມີຂໍ້ຜິດພາດເກີດຂຶ້ນ",
     "success": "ສຳເລັດ",
     "previous": "ກ່ອນໜ້າ",
-    "next": "ຖັດໄປ"
+    "next": "ຖັດໄປ",
+    "home": "ໜ້າຫຼັກ",
+    "backToHome": "ກັບໄປໜ້າຫຼັກ"
   },
   "navigation": {
     "home": "ໜ້າຫຼັກ",
@@ -36,7 +38,14 @@
     "loginSuccess": "ເຂົ້າສູ່ລະບົບສຳເລັດ",
     "registerSuccess": "ລົງທະບຽນສຳເລັດ",
     "loginTitle": "ເຂົ້າສູ່ລະບົບ",
-    "registerTitle": "ສ້າງບັນຊີໃໝ່"
+    "registerTitle": "ສ້າງບັນຊີໃໝ່",
+    "verifyEmail": "ຢືນຢັນອີເມລ",
+    "emailNotVerified": "ອີເມລຍັງບໍ່ໄດ້ຮັບການຢືນຢັນ",
+    "verifyEmailMessage": "ກະລຸນາຢືນຢັນອີເມລເພື່ອໃຊ້ຄຸນສົມບັດທັງໝົດ",
+    "resendVerificationEmail": "ສົ່ງອີເມລຢືນຢັນອີກຄັ້ງ",
+    "verificationSuccess": "ຢືນຢັນອີເມລສຳເລັດ",
+    "verificationFailed": "ການຢືນຢັນອີເມລລົ້ມເຫລວ",
+    "checkEmailForVerification": "ກະລຸນາກວດສອບອີເມລເພື່ອຢືນຢັນບັນຊີ"
   },
   "home": {
     "title": "ລະບົບວັດຈະນານຸກົມສະເພາະດ້ານ",
@@ -124,6 +133,9 @@
   },
   "searchResults": {
     "title": "ຜົນການຄົ້ນຫາສຳລັບ",
+    "backToSearch": "ກັບໄປຫາການຄົ້ນຫາ",
+    "exactMatch": "ຜົນການຄົ້ນຫາທີ່ຖືກຕ້ອງ",
+    "relatedTerms": "ຄຳສັບທີ່ກ່ຽວຂ້ອງ",
     "noResultsTitle": "ບໍ່ພົບຄຳສັບໃນລະບົບ",
     "noResultsMessage": "ພວກເຮົາບໍ່ພົບຄຳສັບ",
     "noResultsInDictionary": "ໃນວັດຈະນານຸກົມ.",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TermCardData } from "@/components/terms/types";
 import TermCard from "@/components/terms/TermCard";
@@ -8,8 +8,17 @@ import { AIChat } from "@/components/common";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "react-hot-toast";
-import { Bot, LogIn, PlusCircle } from "lucide-react";
+import {
+  Bot,
+  LogIn,
+  PlusCircle,
+  ChevronRight,
+  BookOpen,
+  Search,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { saveSearchHistory } from "@/services/termService";
+import Link from "next/link";
 
 interface SearchResultsClientProps {
   initialTerms: TermCardData[];
@@ -29,6 +38,47 @@ export default function SearchResultsClient({
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [showAIChat, setShowAIChat] = useState(false);
 
+  // Track saved queries to prevent duplicate saves
+  const savedQueryRef = useRef<string>("");
+
+  // Lưu lịch sử tìm kiếm khi component mount (chỉ 1 lần per query)
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      query &&
+      query.trim() &&
+      savedQueryRef.current !== query
+    ) {
+      savedQueryRef.current = query;
+      saveSearchHistory(query, initialTerms.length);
+    }
+  }, [isAuthenticated, query, initialTerms.length]);
+
+  const exactMatch = useMemo(() => {
+    if (!query) return null;
+    const queryLower = query.toLowerCase().trim();
+    return terms.find(
+      (term) =>
+        term.term.vi?.toLowerCase().trim() === queryLower ||
+        term.term.en?.toLowerCase().trim() === queryLower ||
+        term.term.lo?.toLowerCase().trim() === queryLower,
+    );
+  }, [terms, query]);
+
+  // Tập hợp tất cả các related terms từ exact match
+  const allRelatedTerms = useMemo(() => {
+    if (!exactMatch || !exactMatch.relatedTerms) return [];
+
+    const uniqueTerms = new Map();
+    exactMatch.relatedTerms.forEach((related) => {
+      if (!uniqueTerms.has(related._id)) {
+        uniqueTerms.set(related._id, related);
+      }
+    });
+
+    return Array.from(uniqueTerms.values());
+  }, [exactMatch]);
+
   const handleFavoriteToggle = (termId: string, isFavorited: boolean) => {
     const newFavorites = new Set(favoriteIds);
     if (isFavorited) {
@@ -42,11 +92,9 @@ export default function SearchResultsClient({
   const handleAskAI = () => {
     if (!isAuthenticated) {
       toast.error(t("needLoginAI"));
-      // Điều hướng đến trang đăng nhập với returnUrl
       router.push(`/login?returnUrl=/terms?q=${encodeURIComponent(query)}`);
       return;
     }
-
     setShowAIChat(true);
   };
 
@@ -58,8 +106,6 @@ export default function SearchResultsClient({
       );
       return;
     }
-
-    // Chuyển đến trang contribute với term từ query
     router.push(`/contribute?term=${encodeURIComponent(query)}`);
   };
 
@@ -67,77 +113,131 @@ export default function SearchResultsClient({
     setShowAIChat(false);
   };
 
+  const getText = (
+    multiLang: { vi?: string; en?: string; lo?: string } | undefined,
+  ): string => {
+    if (!multiLang) return "";
+    return multiLang[currentLanguage] || multiLang.vi || multiLang.en || "";
+  };
+
+  const truncateText = (text: string, maxLength: number): string => {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "...";
+  };
+
   return (
     <div className="search-results-page">
       <div className="container">
-        {!terms || terms.length === 0 ? (
-          <div className="search-results-page__count">
-            <div className="search-results-page__empty-content">
-              <h3>{t("noResultsTitle")}</h3>
-              <p>
-                {t("noResultsMessage")} <strong>&quot;{query}&quot;</strong>{" "}
-                {t("noResultsInDictionary")}
-              </p>
-              <p className="search-results-page__empty-suggestion">
-                {t("suggestAI")}
-              </p>
-              <div className="search-results-page__actions">
-                <button
-                  className="search-results-page__ai-btn"
-                  onClick={handleAskAI}
-                >
-                  {isAuthenticated ? (
-                    <>
-                      <Bot size={20} />
-                      {t("askAI")}
-                    </>
-                  ) : (
-                    <>
-                      <LogIn size={20} />
-                      {t("loginToUseAI")}
-                    </>
-                  )}
-                </button>
-                <button
-                  className="search-results-page__suggest-btn"
-                  onClick={handleSuggestTerm}
-                >
-                  {isAuthenticated ? (
-                    <>
-                      <PlusCircle size={20} />
-                      {t("suggestTerm")}
-                    </>
-                  ) : (
-                    <>
-                      <LogIn size={20} />
-                      {t("loginToContribute")}
-                    </>
-                  )}
-                </button>
-              </div>
-              <p className="search-results-page__empty-help">
-                {t("contributeDescription")}
-              </p>
+        {!exactMatch ? (
+          /* =========== NO RESULTS =========== */
+          <div className="search-results-page__no-results">
+            <div className="search-results-page__no-results-icon">
+              <Search size={48} />
             </div>
+            <h2 className="search-results-page__no-results-title">
+              {t("noResultsTitle")}
+            </h2>
+            <p className="search-results-page__no-results-desc">
+              {t("noResultsMessage")} <strong>&quot;{query}&quot;</strong>{" "}
+              {t("noResultsInDictionary")}
+            </p>
+            <p className="search-results-page__no-results-hint">
+              {t("suggestAI")}
+            </p>
+            <div className="search-results-page__actions">
+              <button
+                className="search-results-page__ai-btn"
+                onClick={handleAskAI}
+              >
+                {isAuthenticated ? (
+                  <>
+                    <Bot size={20} />
+                    {t("askAI")}
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={20} />
+                    {t("loginToUseAI")}
+                  </>
+                )}
+              </button>
+              <button
+                className="search-results-page__suggest-btn"
+                onClick={handleSuggestTerm}
+              >
+                {isAuthenticated ? (
+                  <>
+                    <PlusCircle size={20} />
+                    {t("suggestTerm")}
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={20} />
+                    {t("loginToContribute")}
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="search-results-page__no-results-footer">
+              {t("contributeDescription")}
+            </p>
           </div>
         ) : (
+          /* =========== HAS RESULTS =========== */
           <>
-            <h1 className="search-results-page__title">
-              {t("title")} &quot;{query}&quot;
-            </h1>
-            <div className="search-results-page__list">
-              {terms?.map((term) => (
-                <TermCard
-                  key={term._id}
-                  term={term}
-                  isFavorited={favoriteIds.has(term._id)}
-                  onFavoriteToggle={handleFavoriteToggle}
-                  showCategory={true}
-                  showMetadata={true}
-                  showActions={true}
-                />
-              ))}
+            {/* Title */}
+            <div className="search-results-page__header">
+              <h1 className="search-results-page__title">
+                {t("title")} &quot;{query}&quot;
+              </h1>
             </div>
+
+            {/* Exact Match Section */}
+            <section className="search-results-page__exact-match">
+              <TermCard
+                term={exactMatch}
+                isFavorited={favoriteIds.has(exactMatch._id)}
+                onFavoriteToggle={handleFavoriteToggle}
+                showCategory={true}
+                showMetadata={true}
+                showActions={true}
+              />
+            </section>
+
+            {/* Related Terms Section */}
+            {allRelatedTerms.length > 0 && (
+              <section className="search-results-page__related-terms">
+                <h2 className="search-results-page__section-title">
+                  <BookOpen size={20} />
+                  {t("relatedTerms")} ({allRelatedTerms.length})
+                </h2>
+                <div className="search-results-page__related-grid">
+                  {allRelatedTerms.map((related) => (
+                    <Link
+                      key={related._id}
+                      href={`/terms/${related._id}`}
+                      className="related-term-card"
+                    >
+                      <div className="related-term-card__header">
+                        <h3 className="related-term-card__name">
+                          {getText(related.term)}
+                        </h3>
+                        <ChevronRight
+                          size={18}
+                          className="related-term-card__arrow"
+                        />
+                      </div>
+                      {related.definition && (
+                        <p className="related-term-card__definition">
+                          {truncateText(getText(related.definition), 100)}
+                        </p>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
           </>
         )}
 
@@ -148,12 +248,6 @@ export default function SearchResultsClient({
             language={currentLanguage}
             onClose={handleCloseAIChat}
           />
-        )}
-
-        {(!terms || terms.length === 0) && (
-          <div className="search-results-page__empty">
-            {t("noMatchingResults")}
-          </div>
         )}
       </div>
     </div>

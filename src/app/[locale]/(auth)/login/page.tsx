@@ -37,6 +37,8 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
       router.push("/admin");
+    } else if (isAuthenticated && user?.role === "moderator") {
+      router.push("/moderator");
     } else if (isAuthenticated) {
       router.push("/");
     }
@@ -96,15 +98,28 @@ export default function LoginPage() {
         toast.success("Đăng nhập thành công!");
         if (user?.role === "admin") {
           router.push("/admin");
+        } else if (user?.role === "moderator") {
+          router.push("/moderator");
         } else {
           router.push("/");
         }
       }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+      const err = error as {
+        response?: { data?: { message?: string }; status?: number };
+      };
       const message =
         err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
+
       setAlertMessage({ type: "error", message });
+
+      // Hiển thị thông báo đặc biệt nếu tài khoản chưa kích hoạt
+      if (
+        err.response?.status === 403 &&
+        message.includes("chưa được kích hoạt")
+      ) {
+        toast.error("Vui lòng xác thực email trước khi đăng nhập!");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -261,13 +276,6 @@ export default function LoginPage() {
                 }
               }}
             />
-            <button
-              type="button"
-              className="auth-social__btn auth-social__btn--facebook"
-            >
-              <i className="fa-brands fa-facebook-f"></i>
-              Facebook
-            </button>
           </div>
         </div>
 

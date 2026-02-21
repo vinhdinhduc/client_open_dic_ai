@@ -79,6 +79,54 @@ export const exportUsersToExcel = async (): Promise<Blob> => {
     return response.data;
 }
 
+/**
+ * Reset password cho user (Admin)
+ */
+export const resetUserPassword = async (
+    id: string,
+    newPassword: string
+): Promise<ApiResponse<{ message: string }>> => {
+    const response = await axiosInstance.post(`/users/${id}/reset-password`, {
+        newPassword,
+    });
+    return response.data;
+};
+
+/**
+ * Gửi lại email xác thực
+ */
+export const resendVerificationEmail = async (
+    id: string
+): Promise<ApiResponse<{ message: string }>> => {
+    const response = await axiosInstance.post(`/users/${id}/resend-verification`);
+    return response.data;
+};
+
+/**
+ * Batch update status cho nhiều user
+ */
+export const batchUpdateStatus = async (
+    userIds: string[],
+    status: UserStatus
+): Promise<ApiResponse<{ message: string; updated: number }>> => {
+    const response = await axiosInstance.post("/users/batch-update-status", {
+        userIds,
+        status,
+    });
+    return response.data;
+};
+
+/**
+ * Lấy lịch sử hoạt động của user
+ */
+export const getUserActivity = async (
+    id: string,
+    params?: { page?: number; limit?: number }
+): Promise<ApiResponse<any>> => {
+    const response = await axiosInstance.get(`/users/${id}/activity`, { params });
+    return response.data;
+};
+
 // Default export
 const userService = {
     getUsers,
@@ -88,7 +136,11 @@ const userService = {
     toggleUserStatus,
     deleteUser,
     getUserStats,
-    exportUsersToExcel
+    exportUsersToExcel,
+    resetUserPassword,
+    resendVerificationEmail,
+    batchUpdateStatus,
+    getUserActivity,
 };
 
 export default userService;

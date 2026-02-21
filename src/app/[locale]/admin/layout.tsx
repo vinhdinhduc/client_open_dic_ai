@@ -31,6 +31,7 @@ import {
   KeyRound,
   Mail,
   Gauge,
+  MoveLeft,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import NotificationBell from "@/components/common/NotificationBell";
@@ -250,7 +251,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return false;
   };
 
-  const getBadgeCount = (itemId: string) => {
+  const getRawBadgeCount = (itemId: string): number => {
     switch (itemId) {
       case "moderation":
         return pendingCount;
@@ -263,6 +264,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       default:
         return 0;
     }
+  };
+
+  const getBadgeCount = (itemId: string): string | number => {
+    const count = getRawBadgeCount(itemId);
+    if (count > 99) {
+      return "99+";
+    }
+    return count;
   };
 
   const handleLogout = () => {
@@ -320,7 +329,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     >
                       <item.icon className="menu-icon" size={20} />
                       <span className="menu-text">{item.label}</span>
-                      {item.badge && getBadgeCount(item.id) > 0 && (
+                      {item.badge && getRawBadgeCount(item.id) > 0 && (
                         <span className="menu-badge">
                           {getBadgeCount(item.id)}
                         </span>
@@ -346,7 +355,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                           >
                             <child.icon className="menu-icon" size={16} />
                             <span className="menu-text">{child.label}</span>
-                            {child.badge && getBadgeCount(child.id) > 0 && (
+                            {child.badge && getRawBadgeCount(child.id) > 0 && (
                               <span className="menu-badge menu-badge--small">
                                 {getBadgeCount(child.id)}
                               </span>
@@ -366,7 +375,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   >
                     <item.icon className="menu-icon" size={20} />
                     <span className="menu-text">{item.label}</span>
-                    {item.badge && getBadgeCount(item.id) > 0 && (
+                    {item.badge && getRawBadgeCount(item.id) > 0 && (
                       <span className="menu-badge">
                         {getBadgeCount(item.id)}
                       </span>
@@ -381,7 +390,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Sidebar Footer */}
         <div className="admin-sidebar__footer">
           <Link href="/" className="admin-sidebar__back">
-            ← Về trang chủ
+            <MoveLeft size={16} className="m-3" /> Về trang chủ
           </Link>
         </div>
       </aside>

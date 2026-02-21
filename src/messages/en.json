@@ -15,7 +15,9 @@
     "error": "An error occurred",
     "success": "Success",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "home": "Home",
+    "backToHome": "Back to Home"
   },
   "navigation": {
     "home": "Home",
@@ -36,7 +38,14 @@
     "loginSuccess": "Login successful",
     "registerSuccess": "Registration successful",
     "loginTitle": "Login to your account",
-    "registerTitle": "Create new account"
+    "registerTitle": "Create new account",
+    "verifyEmail": "Verify Email",
+    "emailNotVerified": "Email not verified",
+    "verifyEmailMessage": "Please verify your email to use all features",
+    "resendVerificationEmail": "Resend verification email",
+    "verificationSuccess": "Email verified successfully",
+    "verificationFailed": "Email verification failed",
+    "checkEmailForVerification": "Please check your email to verify your account"
   },
   "home": {
     "title": "Specialized Dictionary System",
@@ -124,6 +133,9 @@
   },
   "searchResults": {
     "title": "Search results for",
+    "backToSearch": "Back to search",
+    "exactMatch": "Exact match",
+    "relatedTerms": "Related terms",
     "noResultsTitle": "Term not found in system",
     "noResultsMessage": "We could not find the term",
     "noResultsInDictionary": "in the dictionary.",

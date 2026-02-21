@@ -146,14 +146,23 @@ export default function RegisterPage() {
       });
 
       if (success) {
-        toast.success("Đăng ký thành công!");
+        toast.success(
+          "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.",
+        );
         setAlertMessage({
           type: "success",
-          message: "Đăng ký thành công! Đang chuyển hướng...",
+          message:
+            "Đăng ký thành công! Chúng tôi đã gửi email xác thực đến địa chỉ email của bạn. Vui lòng kiểm tra hộp thư (bao gồm cả thư mục spam) và click vào link xác thực để kích hoạt tài khoản. Sau khi xác thực, bạn có thể đăng nhập.",
         });
-        setTimeout(() => {
-          router.push("/");
-        }, 1500);
+
+        // Reset form
+        setFormData({
+          fullName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          acceptTerms: false,
+        });
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -203,7 +212,23 @@ export default function RegisterPage() {
               <i
                 className={`fa-solid ${alertMessage.type === "error" ? "fa-circle-exclamation" : "fa-circle-check"}`}
               ></i>
-              {alertMessage.message}
+              <div>
+                {alertMessage.message}
+                {alertMessage.type === "success" && (
+                  <div style={{ marginTop: "12px" }}>
+                    <Link
+                      href="/login"
+                      style={{
+                        color: "#4CAF50",
+                        fontWeight: "600",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Đi đến trang đăng nhập
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

@@ -15,6 +15,7 @@ export type PreferredLanguage = Language;
 export interface User extends BaseEntity {
     fullName: string;
     email: string;
+    emailVerified?: boolean;
     role: UserRole;
     status: UserStatus;
     avatar?: string;

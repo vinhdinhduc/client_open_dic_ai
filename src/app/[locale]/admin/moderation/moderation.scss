@@ -1335,6 +1335,10 @@ $moderation-info: #3b82f6;
     text-align: center;
     animation: confirmModalIn 0.2s ease-out;
 
+    &.confirm-modal--wide {
+        max-width: 550px;
+    }
+
     @keyframes confirmModalIn {
         from {
             opacity: 0;
@@ -1403,6 +1407,105 @@ $moderation-info: #3b82f6;
         color: var(--text-secondary);
         margin: 0;
         line-height: 1.5;
+        text-align: left;
+    }
+
+    &__reason-section {
+        margin-top: $spacing-lg;
+        text-align: left;
+
+        .quick-reasons {
+            margin-bottom: $spacing-md;
+
+            &__label {
+                display: block;
+                font-size: $font-sm;
+                font-weight: $font-medium;
+                color: var(--text-primary);
+                margin-bottom: $spacing-sm;
+            }
+
+            &__buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: $spacing-xs;
+            }
+        }
+
+        .quick-reason-btn {
+            padding: $spacing-xs $spacing-sm;
+            font-size: $font-xs;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-radius: $radius-md;
+            cursor: pointer;
+            transition: all $transition-fast;
+
+            &:hover:not(:disabled) {
+                border-color: $moderation-danger;
+                color: $moderation-danger;
+                background: rgba($moderation-danger, 0.05);
+            }
+
+            &.active {
+                border-color: $moderation-danger;
+                background: $moderation-danger;
+                color: white;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+
+        .form-group {
+            margin: 0;
+
+            label {
+                display: block;
+                font-size: $font-sm;
+                font-weight: $font-medium;
+                color: var(--text-primary);
+                margin-bottom: $spacing-xs;
+
+                .required {
+                    color: $moderation-danger;
+                    margin-left: 2px;
+                }
+            }
+
+            .form-textarea {
+                width: 100%;
+                padding: $spacing-sm;
+                border: 1px solid var(--border-color);
+                border-radius: $radius-md;
+                background: var(--bg-card);
+                color: var(--text-primary);
+                font-size: $font-sm;
+                resize: vertical;
+                transition: all $transition-fast;
+
+                &:focus {
+                    outline: none;
+                    border-color: $moderation-danger;
+                    box-shadow: 0 0 0 3px rgba($moderation-danger, 0.1);
+                }
+
+                &:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+            }
+
+            .error-text {
+                display: block;
+                margin-top: $spacing-xs;
+                font-size: $font-xs;
+                color: $moderation-danger;
+            }
+        }
     }
 
     &__actions {

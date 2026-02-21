@@ -16,6 +16,7 @@ import {
 import systemConfigService, {
   EmailConfig,
 } from "@/services/systemConfigService";
+import "./AdminEmailSettings.scss";
 
 export default function AdminEmailSettings() {
   const [config, setConfig] = useState<any[]>([]);
@@ -49,6 +50,7 @@ export default function AdminEmailSettings() {
     try {
       setIsLoading(true);
       const response = await systemConfigService.getEmailConfig();
+      console.log("Check get config", response);
 
       if (response.success && response.data) {
         setConfig(response.data);
@@ -94,9 +96,18 @@ export default function AdminEmailSettings() {
         return;
       }
 
-      await systemConfigService.updateEmailConfig(formData);
-      toast.success("Đã cập nhật cấu hình Email thành công");
-      await loadConfig();
+      // Gọi API bulk - tự động tạo mới nếu chưa có, cập nhật nếu đã có
+      const result = await systemConfigService.updateEmailConfig(formData);
+
+      if (result.success) {
+        const hasExistingConfig = config.length > 0;
+        toast.success(
+          hasExistingConfig
+            ? "Đã cập nhật cấu hình Email thành công"
+            : "Đã tạo mới cấu hình Email thành công"
+        );
+        await loadConfig();
+      }
     } catch (error: any) {
       console.error("Save config error:", error);
       toast.error(error.message || "Không thể lưu cấu hình");

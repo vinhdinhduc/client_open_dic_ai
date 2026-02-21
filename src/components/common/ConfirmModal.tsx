@@ -16,6 +16,10 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
+  reasonNote?: string;
+  onReasonNoteChange?: (note: string) => void;
+  quickReasons?: string[];
+  requireReason?: boolean;
 }
 
 export default function ConfirmModal({
@@ -28,8 +32,14 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
   loading = false,
+  reasonNote = "",
+  onReasonNoteChange,
+  quickReasons = [],
+  requireReason = false,
 }: ConfirmModalProps) {
   if (!isOpen) return null;
+
+  const isConfirmDisabled = loading || (requireReason && !reasonNote.trim());
 
   const getIcon = () => {
     switch (type) {
@@ -86,7 +96,10 @@ export default function ConfirmModal({
       className="modal-overlay modal-overlay--confirm"
       onClick={handleBackdropClick}
     >
-      <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`confirm-modal ${type === "reject" && onReasonNoteChange ? "confirm-modal--wide" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           className="confirm-modal__close"
           onClick={onCancel}
@@ -100,6 +113,59 @@ export default function ConfirmModal({
         <div className="confirm-modal__content">
           <h3 className="confirm-modal__title">{title}</h3>
           <p className="confirm-modal__message">{message}</p>
+
+          {/* Rejection Reason Section */}
+          {type === "reject" && onReasonNoteChange && (
+            <div className="confirm-modal__reason-section">
+              {quickReasons.length > 0 && (
+                <div className="quick-reasons">
+                  <label className="quick-reasons__label">
+                    Lựa chọn nhanh lý do từ chối:
+                  </label>
+                  <div className="quick-reasons__buttons">
+                    {quickReasons.map((reason, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className={`quick-reason-btn ${
+                          reasonNote === reason ? "active" : ""
+                        }`}
+                        onClick={() => onReasonNoteChange(reason)}
+                        disabled={loading}
+                      >
+                        {reason}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="form-group">
+                <label htmlFor="rejection-reason">
+                  {requireReason ? (
+                    <>
+                      Lý do từ chối <span className="required">*</span>
+                    </>
+                  ) : (
+                    "Lý do từ chối (không bắt buộc)"
+                  )}
+                </label>
+                <textarea
+                  id="rejection-reason"
+                  value={reasonNote}
+                  onChange={(e) => onReasonNoteChange(e.target.value)}
+                  placeholder="Nhập lý do từ chối đóng góp..."
+                  rows={3}
+                  className="form-textarea"
+                  disabled={loading}
+                />
+                {requireReason && !reasonNote.trim() && (
+                  <span className="error-text">
+                    Vui lòng nhập lý do từ chối
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="confirm-modal__actions">
@@ -113,7 +179,7 @@ export default function ConfirmModal({
           <button
             className={getConfirmButtonClass()}
             onClick={onConfirm}
-            disabled={loading}
+            disabled={isConfirmDisabled}
           >
             {loading ? (
               <>

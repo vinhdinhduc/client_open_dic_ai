@@ -1,0 +1,123 @@
+@import "@/styles/variables.scss";
+@import "@/styles/mixins.scss";
+
+// Import shared settings styles
+@import "./AdminSystemSettings.scss";
+
+// Additional specific styles for Email Settings
+.admin-settings-section {
+    // Email service specific styling
+    &__email-provider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 2px solid #93c5fd;
+        border-radius: 10px;
+        margin-top: 1rem;
+
+        svg {
+            color: #1e40af;
+        }
+
+        span {
+            font-size: $font-sm;
+            font-weight: $font-medium;
+            color: #1e3a8a;
+        }
+    }
+
+    // Email test status
+    &__email-test-status {
+        animation: slideIn 0.3s ease-in-out;
+    }
+
+    // SMTP configuration highlight
+    &__smtp-config {
+        position: relative;
+        padding-left: 1rem;
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary-color) 0%, transparent 100%);
+            border-radius: 3px;
+        }
+    }
+}
+
+// Input group for password toggle
+.input-group {
+    &__password-indicator {
+        position: absolute;
+        right: 3.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: $font-xs;
+        color: var(--text-tertiary);
+        pointer-events: none;
+    }
+}
+
+// Email provider logo
+.email-provider-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+
+    &--gmail {
+        background: linear-gradient(135deg, #ea4335 0%, #fbbc04 100%);
+    }
+
+    &--outlook {
+        background: linear-gradient(135deg, #0078d4 0%, #50e6ff 100%);
+    }
+
+    &--smtp {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+}
+
+// Dark theme support
+[data-theme="dark"] {
+    .admin-settings-section {
+        &__email-provider {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.15) 100%);
+            border-color: rgba(147, 197, 253, 0.3);
+
+            svg {
+                color: #93c5fd;
+            }
+
+            span {
+                color: #dbeafe;
+            }
+        }
+    }
+}
+
+// Animation for test results
+@keyframes emailTestPulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.admin-settings-section__test-result {
+    animation:
+        slideIn 0.3s ease,
+        emailTestPulse 2s ease-in-out;
+}

@@ -24,9 +24,9 @@ import ContributionDetailModal from "../../../../../components/forms/manage_cont
 import ConfirmModal, {
   ConfirmType,
 } from "../../../../../components/common/ConfirmModal";
-import "../moderation.scss";
+import "../../../admin/moderation/moderation.scss";
 
-export default function ContributionsModerationPage() {
+export default function ModeratorContributionPage() {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -264,21 +264,6 @@ export default function ContributionsModerationPage() {
     return contribution.contributor?.fullName || "Ẩn danh";
   };
 
-  const getFieldLabel = (key: string) => {
-    const labels: Record<string, string> = {
-      vi: "Tiếng Việt",
-      lo: "Tiếng Lào",
-      en: "Tiếng Anh",
-      term: "Thuật ngữ",
-      definition: "Định nghĩa",
-      detailedExplanation: "Giải thích chi tiết",
-      examples: "Ví dụ",
-      contributorNote: "Ghi chú",
-    };
-    return labels[key] || key;
-  };
-
-  // Filter contributions by search term (client-side)
   const filteredContributions = contributions.filter((contribution) => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
@@ -326,7 +311,7 @@ export default function ContributionsModerationPage() {
             <GitPullRequest size={24} />
           </div>
           <div className="header-text">
-            <h1>Kiểm duyệt gợi ý sửa</h1>
+            <h1>Kiểm duyệt đóng góp</h1>
             <p>Xem xét và phê duyệt các đóng góp chỉnh sửa từ cộng đồng</p>
           </div>
         </div>

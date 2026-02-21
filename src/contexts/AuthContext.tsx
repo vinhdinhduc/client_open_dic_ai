@@ -110,8 +110,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const response = await authService.register(userData);
 
-        if (response.success && response.data) {
-          setUser(response.data.user);
+        // Không set user vào state sau khi đăng ký
+        // User phải verify email trước khi đăng nhập
+        if (response.success) {
           return true;
         }
         return false;
@@ -154,11 +155,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Logout function
   const logout = useCallback(() => {
-    tokenUtils.clearAuth();
+    authService.logout();
     setUser(null);
-    router.push("/");
     toast.success("Đăng xuất thành công");
-  }, [router]);
+  }, []);
 
   // Update user locally
   const updateUser = useCallback((userData: Partial<User>) => {

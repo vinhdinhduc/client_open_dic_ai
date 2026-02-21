@@ -326,7 +326,7 @@ export default function ModeratorDashboardPage() {
             <span className="stat-card__value">{stats.assignedCategories}</span>
             <span className="stat-card__label">Danh mục phụ trách</span>
           </div>
-          <Link href="/admin/moderator/categories" className="stat-card__link">
+          <Link href="/moderator/categories" className="stat-card__link">
             Xem chi tiết <ArrowRight size={14} />
           </Link>
         </div>
@@ -342,7 +342,7 @@ export default function ModeratorDashboardPage() {
             <span className="stat-card__label">Đóng góp chờ duyệt</span>
           </div>
           <Link
-            href="/admin/moderation/contributions"
+            href="/moderator/moderation/contributions"
             className="stat-card__link"
           >
             Kiểm duyệt <ArrowRight size={14} />
@@ -357,7 +357,10 @@ export default function ModeratorDashboardPage() {
             <span className="stat-card__value">{stats.pendingReports}</span>
             <span className="stat-card__label">Báo xấu chờ xử lý</span>
           </div>
-          <Link href="/admin/moderation/reports" className="stat-card__link">
+          <Link
+            href="/moderator/moderation/reports"
+            className="stat-card__link"
+          >
             Xử lý <ArrowRight size={14} />
           </Link>
         </div>
@@ -370,7 +373,7 @@ export default function ModeratorDashboardPage() {
             <span className="stat-card__value">{stats.pendingComments}</span>
             <span className="stat-card__label">Bình luận chờ duyệt</span>
           </div>
-          <Link href="/admin/comments" className="stat-card__link">
+          <Link href="/moderator/comments" className="stat-card__link">
             Kiểm duyệt <ArrowRight size={14} />
           </Link>
         </div>
@@ -394,19 +397,19 @@ export default function ModeratorDashboardPage() {
           <div className="alert-actions">
             {stats.pendingContributions > 0 && (
               <Link
-                href="/admin/moderation/contributions"
+                href="/moderator/moderation/contributions"
                 className="alert-link"
               >
                 {stats.pendingContributions} đóng góp
               </Link>
             )}
             {stats.pendingReports > 0 && (
-              <Link href="/admin/moderation/reports" className="alert-link">
+              <Link href="/moderator/moderation/reports" className="alert-link">
                 {stats.pendingReports} báo xấu
               </Link>
             )}
             {stats.pendingComments > 0 && (
-              <Link href="/admin/comments" className="alert-link">
+              <Link href="/moderator/comments" className="alert-link">
                 {stats.pendingComments} bình luận
               </Link>
             )}
@@ -569,7 +572,7 @@ export default function ModeratorDashboardPage() {
             )}
           </Link>
           <Link
-            href="/admin/moderator/categories"
+            href="/moderator/categories"
             className="quick-action-card quick-action-card--categories"
           >
             <FolderTree size={24} />

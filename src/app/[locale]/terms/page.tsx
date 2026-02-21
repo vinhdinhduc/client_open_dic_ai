@@ -46,6 +46,8 @@ async function SearchResultsServer({
   }
 
   const result = await searchTermsServer(query, language);
+  console.log("Check result", result);
+
   const terms = result?.data?.terms || [];
 
   return <SearchResultsClient initialTerms={terms} query={query} />;

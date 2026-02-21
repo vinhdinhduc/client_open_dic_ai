@@ -12,10 +12,12 @@ import {
   Lock,
 } from "lucide-react";
 import systemConfigService from "@/services/systemConfigService";
+import "./AdminRateLimitSettings.scss";
 
 export default function AdminRateLimitSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasExistingConfig, setHasExistingConfig] = useState(false);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -38,6 +40,8 @@ export default function AdminRateLimitSettings() {
       const response = await systemConfigService.getRateLimitConfig();
 
       if (response.success && response.data) {
+        setHasExistingConfig(response.data.length > 0);
+
         // Convert array to object
         const configObj: any = {};
         response.data.forEach((item: any) => {
@@ -81,7 +85,12 @@ export default function AdminRateLimitSettings() {
       }
 
       await systemConfigService.updateRateLimitConfig(formData);
-      toast.success("Đã cập nhật cấu hình Rate Limit thành công");
+
+      toast.success(
+        hasExistingConfig
+          ? "Đã cập nhật cấu hình Rate Limit thành công"
+          : "Đã tạo mới cấu hình Rate Limit thành công",
+      );
       await loadConfig();
     } catch (error: any) {
       console.error("Save config error:", error);

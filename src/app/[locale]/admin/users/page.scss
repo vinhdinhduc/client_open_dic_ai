@@ -78,6 +78,8 @@
     .action-cell {
         display: flex;
         gap: 4px;
+        align-items: center;
+        position: relative;
     }
 
     .action-btn {
@@ -87,11 +89,12 @@
         width: 32px;
         height: 32px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         background: transparent;
         color: var(--text-secondary);
         cursor: pointer;
         transition: all 0.2s;
+        flex-shrink: 0;
 
         &:hover {
             background: var(--bg-secondary);
@@ -106,6 +109,164 @@
         &--danger:hover {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
+        }
+
+        &--more {
+            border: 1px solid var(--border-color);
+
+            &:hover {
+                border-color: var(--primary, #2563eb);
+                background: rgba(37, 99, 235, 0.05);
+            }
+        }
+    }
+
+    // Action Dropdown
+    .action-dropdown {
+        position: relative;
+
+        &__menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 4px);
+            min-width: 200px;
+            background: var(--bg-card, #ffffff);
+            border: 1px solid var(--border-color, #e5e7eb);
+            border-radius: 12px;
+            box-shadow:
+                0 10px 25px rgba(0, 0, 0, 0.1),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+            overflow: hidden;
+            animation: dropdownSlideIn 0.2s ease-out;
+
+            button {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                padding: 12px 16px;
+                border: none;
+                background: transparent;
+                color: var(--text-primary, #111827);
+                font-size: 14px;
+                font-weight: 500;
+                text-align: left;
+                cursor: pointer;
+                transition: all 0.15s;
+
+                svg {
+                    flex-shrink: 0;
+                    opacity: 0.7;
+                }
+
+                &:hover {
+                    background: var(--bg-secondary, #f9fafb);
+
+                    svg {
+                        opacity: 1;
+                    }
+                }
+
+                &:active {
+                    background: var(--bg-hover, #f3f4f6);
+                }
+
+                &.danger {
+                    color: #ef4444;
+
+                    &:hover {
+                        background: rgba(239, 68, 68, 0.1);
+                    }
+                }
+
+                &:not(:last-child) {
+                    border-bottom: 1px solid var(--border-color, #e5e7eb);
+                }
+            }
+        }
+    }
+
+    // Table action column styling
+    .admin-table {
+        th:last-child {
+            width: 160px;
+            min-width: 160px;
+        }
+
+        td:last-child {
+            width: 160px;
+            min-width: 160px;
+            overflow: visible;
+            position: relative;
+        }
+    }
+
+    @keyframes dropdownSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    // Mobile responsive for action dropdown
+    @media (max-width: 768px) {
+        .action-dropdown__menu {
+            position: fixed;
+            left: 50%;
+            top: auto;
+            bottom: 0;
+            right: auto;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 400px;
+            border-radius: 16px 16px 0 0;
+            animation: bottomSheetSlideUp 0.3s ease-out;
+            box-shadow:
+                0 -4px 20px rgba(0, 0, 0, 0.15),
+                0 -2px 10px rgba(0, 0, 0, 0.1);
+
+            button {
+                padding: 16px 20px;
+                font-size: 15px;
+            }
+        }
+
+        .admin-table {
+            th:last-child,
+            td:last-child {
+                width: 100px;
+                min-width: 100px;
+            }
+        }
+
+        .action-cell {
+            gap: 2px;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+
+            svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
+
+    @keyframes bottomSheetSlideUp {
+        from {
+            opacity: 0;
+            transform: translate(-50%, 100%);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
     }
 }

@@ -302,6 +302,19 @@ const exportTermsToExcel = async (options: ExportTermsOptions = {}): Promise<voi
   }
 }
 
+// Save search history
+const saveSearchHistory = async (query: string, resultCount: number): Promise<void> => {
+  try {
+    await axiosInstance.post('/terms/search-history', {
+      query,
+      resultCount
+    });
+  } catch (error) {
+    console.error("Error saving search history:", error);
+    // Không throw error để không ảnh hưởng đến UX
+  }
+}
+
 export {
   getSearchSuggestions,
   searchTerms,
@@ -317,5 +330,6 @@ export {
   createTerm,
   updateTerm,
   deleteTerm,
-  exportTermsToExcel
+  exportTermsToExcel,
+  saveSearchHistory
 };

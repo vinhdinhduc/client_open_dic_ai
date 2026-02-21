@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import NotificationBell from "@/components/common/NotificationBell";
-import "./admin.scss";
+import "../admin/admin.scss";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -134,13 +134,13 @@ const moderatorMenuItems: MenuItem[] = [
     id: "dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    href: "/admin/moderator",
+    href: "/moderator",
   },
   {
     id: "moderator-categories",
     label: "Danh mục phụ trách",
     icon: FolderTree,
-    href: "/admin/moderator/categories",
+    href: "/moderator/categories",
   },
   {
     id: "moderation",
@@ -151,14 +151,14 @@ const moderatorMenuItems: MenuItem[] = [
       {
         id: "moderation-contributions",
         label: "Kiểm duyệt đóng góp",
-        href: "/admin/moderation/contributions",
+        href: "/moderator/moderation/contributions",
         icon: GitPullRequest,
         badge: true,
       },
       {
         id: "reports-moderation",
         label: "Kiểm duyệt báo xấu",
-        href: "/admin/moderation/reports",
+        href: "/moderator/moderation/reports",
         icon: Flag,
         badge: true,
       },
@@ -168,12 +168,12 @@ const moderatorMenuItems: MenuItem[] = [
     id: "comments",
     label: "Kiểm duyệt bình luận",
     icon: MessageSquare,
-    href: "/admin/comments",
+    href: "/moderator/comments",
     badge: true,
   },
 ];
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default function ModeratorLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
@@ -239,7 +239,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Check admin access
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/login?redirect=/admin");
+      const redirectUrl = user?.role === "moderator" ? "/moderator" : "/admin";
+      router.push(`/login?redirect=${redirectUrl}`);
       return;
     }
     if (user?.role !== "admin" && user?.role !== "moderator") {
@@ -252,7 +253,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     if (href === "/admin") {
       return pathname.endsWith("/admin") || pathname.endsWith("/admin/");
     }
-    if (href === "/admin/moderator") {
+    if (href === "/moderator") {
       return (
         pathname.endsWith("/moderator") || pathname.endsWith("/moderator/")
       );
@@ -279,7 +280,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return false;
   };
 
-  const getBadgeCount = (itemId: string) => {
+  const getRawBadgeCount = (itemId: string): number => {
     switch (itemId) {
       case "moderation":
         return pendingCount;
@@ -292,6 +293,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       default:
         return 0;
     }
+  };
+
+  const getBadgeCount = (itemId: string): string | number => {
+    const count = getRawBadgeCount(itemId);
+    // Format count: if > 99, show "99+"
+    if (count > 99) {
+      return "99+";
+    }
+    return count;
   };
 
   const handleLogout = () => {
@@ -322,9 +332,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       >
         {/* Logo */}
         <div className="admin-sidebar__header">
-          <Link href="/admin" className="admin-sidebar__logo">
+          <Link
+            href={user?.role === "moderator" ? "/moderator" : "/admin"}
+            className="admin-sidebar__logo"
+          >
             <Shield className="logo-icon" />
-            <span className="logo-text">Admin Panel</span>
+            <span className="logo-text">
+              {user?.role === "moderator" ? "Moderator" : "Admin Panel"}
+            </span>
           </Link>
           <button
             className="admin-sidebar__close"
@@ -349,7 +364,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     >
                       <item.icon className="menu-icon" size={20} />
                       <span className="menu-text">{item.label}</span>
-                      {item.badge && getBadgeCount(item.id) > 0 && (
+                      {item.badge && getRawBadgeCount(item.id) > 0 && (
                         <span className="menu-badge">
                           {getBadgeCount(item.id)}
                         </span>
@@ -375,7 +390,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                           >
                             <child.icon className="menu-icon" size={16} />
                             <span className="menu-text">{child.label}</span>
-                            {child.badge && getBadgeCount(child.id) > 0 && (
+                            {child.badge && getRawBadgeCount(child.id) > 0 && (
                               <span className="menu-badge menu-badge--small">
                                 {getBadgeCount(child.id)}
                               </span>
@@ -395,7 +410,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   >
                     <item.icon className="menu-icon" size={20} />
                     <span className="menu-text">{item.label}</span>
-                    {item.badge && getBadgeCount(item.id) > 0 && (
+                    {item.badge && getRawBadgeCount(item.id) > 0 && (
                       <span className="menu-badge">
                         {getBadgeCount(item.id)}
                       </span>

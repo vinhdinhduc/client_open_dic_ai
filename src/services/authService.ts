@@ -19,6 +19,8 @@ export interface User {
     email: string;
     role: "user" | "moderator" | "admin";
     avatar?: string;
+    emailVerified?: boolean;
+    status?: "active" | "inactive" | "banned";
     createdAt?: string;
     updatedAt?: string;
 }
@@ -28,7 +30,7 @@ export interface AuthResponse {
     message: string;
     data: {
         user: User;
-        accessToken: string;
+        accessToken?: string;
         refreshToken?: string;
     };
 }
@@ -39,8 +41,9 @@ export interface ProfileResponse {
     data: User;
 }
 
-// Token management với security best practices
+
 const TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
 const USER_KEY = "user";
 
 export const tokenUtils = {
@@ -57,6 +60,21 @@ export const tokenUtils = {
     removeToken: (): void => {
         if (typeof window === "undefined") return;
         localStorage.removeItem(TOKEN_KEY);
+    },
+
+    getRefreshToken: (): string | null => {
+        if (typeof window === "undefined") return null;
+        return localStorage.getItem(REFRESH_TOKEN_KEY);
+    },
+
+    setRefreshToken: (token: string): void => {
+        if (typeof window === "undefined") return;
+        localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    },
+
+    removeRefreshToken: (): void => {
+        if (typeof window === "undefined") return;
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
     },
 
     getUser: (): User | null => {
@@ -81,6 +99,7 @@ export const tokenUtils = {
 
     clearAuth: (): void => {
         tokenUtils.removeToken();
+        tokenUtils.removeRefreshToken();
         tokenUtils.removeUser();
     },
 };
@@ -129,11 +148,13 @@ export const authService = {
 
         const { data } = response.data;
 
-
         // Lưu token và user info
         if (data.accessToken) {
             tokenUtils.setToken(data.accessToken);
             tokenUtils.setUser(data.user);
+        }
+        if (data.refreshToken) {
+            tokenUtils.setRefreshToken(data.refreshToken);
         }
 
         return response.data;
@@ -151,14 +172,8 @@ export const authService = {
             registerData
         );
 
-        const { data } = response.data;
-
-        // Tự động đăng nhập sau khi đăng ký
-        if (data.accessToken) {
-            tokenUtils.setToken(data.accessToken);
-            tokenUtils.setUser(data.user);
-        }
-
+        // Không tự động đăng nhập sau khi đăng ký
+        // User phải verify email trước
         return response.data;
     },
 
@@ -207,11 +222,19 @@ export const authService = {
     /**
      * Đăng xuất
      */
-    logout: (): void => {
-        tokenUtils.clearAuth();
-        // Redirect to home page
-        if (typeof window !== "undefined") {
-            window.location.href = "/";
+    logout: async (): Promise<void> => {
+        try {
+            // Gọi API logout để xóa refresh token trên server
+            await axiosInstance.post("/auth/logout");
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            // Xóa token và user khỏi localStorage
+            tokenUtils.clearAuth();
+            // Redirect to home page
+            if (typeof window !== "undefined") {
+                window.location.href = "/";
+            }
         }
     },
 
@@ -275,7 +298,64 @@ export const authService = {
             tokenUtils.setToken(data.accessToken);
             tokenUtils.setUser(data.user);
         }
+        if (data.refreshToken) {
+            tokenUtils.setRefreshToken(data.refreshToken);
+        }
 
+        return response.data;
+    },
+
+    /**
+     * Xác thực email bằng token
+     */
+    verifyEmail: async (
+        token: string
+    ): Promise<{ success: boolean; message: string }> => {
+        const response = await axiosInstance.post("/auth/verify-email", {
+            token,
+        });
+        return response.data;
+    },
+
+    /**
+     * Refresh access token
+     */
+    refreshAccessToken: async (): Promise<string | null> => {
+        try {
+            const refreshToken = tokenUtils.getRefreshToken();
+            if (!refreshToken) {
+                throw new Error("No refresh token available");
+            }
+
+            const response = await axiosInstance.post<AuthResponse>(
+                "/auth/refresh-token",
+                { refreshToken }
+            );
+
+            const { data } = response.data;
+            if (data.accessToken) {
+                tokenUtils.setToken(data.accessToken);
+                if (data.user) {
+                    tokenUtils.setUser(data.user);
+                }
+                return data.accessToken;
+            }
+            return null;
+        } catch (error) {
+            console.error("Refresh token error:", error);
+            tokenUtils.clearAuth();
+            return null;
+        }
+    },
+
+    /**
+     * Gửi lại email xác thực
+     */
+    resendVerificationEmail: async (): Promise<{
+        success: boolean;
+        message: string;
+    }> => {
+        const response = await axiosInstance.post("/auth/resend-verification");
         return response.data;
     },
 };

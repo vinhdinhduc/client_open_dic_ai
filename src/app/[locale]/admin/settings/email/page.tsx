@@ -1,4 +1,4 @@
-import AdminEmailSettings from "@/components/admin/AdminEmailSettings";
+import { AdminEmailSettings } from "@/components/admin";
 import { Mail } from "lucide-react";
 
 export default function SettingsEmailPage() {

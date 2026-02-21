@@ -55,12 +55,16 @@ class SystemConfigService {
     }
 
     /**
-     * Cập nhật cấu hình email
+     * Cập nhật hoặc tạo mới cấu hình email
+     * Sử dụng bulk endpoint với upsert để tự động tạo mới nếu chưa có
      */
     async updateEmailConfig(config: Partial<EmailConfig>): Promise<ApiResponse<SystemConfig[]>> {
         const response = await axiosInstance.put<ApiResponse<SystemConfig[]>>(
-            `/users/email-config`,
-            config
+            `/system-config/bulk`,
+            {
+                category: "email",
+                configs: config
+            }
         );
         return response.data;
     }

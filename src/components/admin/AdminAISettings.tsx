@@ -22,6 +22,7 @@ export default function AdminAISettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [hasExistingConfig, setHasExistingConfig] = useState(false);
   const [testResult, setTestResult] = useState<{
     success: boolean;
     message: string;
@@ -46,6 +47,7 @@ export default function AdminAISettings() {
       console.log("check config", data);
 
       setConfig(data);
+      setHasExistingConfig(!!data.apiKey || !!data.hasApiKey);
 
       const isMaskedApiKey = data.apiKey && data.apiKey.includes("***");
 
@@ -82,7 +84,12 @@ export default function AdminAISettings() {
       }
 
       await aiService.updateConfig(formData);
-      toast.success("Đã cập nhật cấu hình AI thành công");
+
+      toast.success(
+        hasExistingConfig
+          ? "Đã cập nhật cấu hình AI thành công"
+          : "Đã tạo mới cấu hình AI thành công",
+      );
       await loadConfig();
     } catch (error: any) {
       console.error("Save config error:", error);

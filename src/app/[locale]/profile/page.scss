@@ -227,6 +227,33 @@
     gap: $spacing-xs;
 }
 
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-toggle {
+    position: absolute;
+    right: $spacing-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: color $transition-base;
+    user-select: none;
+    padding: $spacing-xs;
+
+    &:hover {
+        color: var(--text-secondary);
+    }
+
+    &:active {
+        color: var(--primary);
+    }
+}
+
 .form-label {
     display: flex;
     align-items: center;
@@ -245,6 +272,11 @@
     background: var(--bg-primary);
     color: var(--text-primary);
     transition: border-color $transition-base;
+    width: 100%;
+
+    .password-input-wrapper & {
+        padding-right: 45px; // Make room for the eye icon
+    }
 
     &:focus {
         outline: none;

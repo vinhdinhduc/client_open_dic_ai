@@ -39,6 +39,7 @@ export interface TermCardData {
   status?: "pending" | "approved" | "rejected";
   createdAt?: string;
   updatedAt?: string;
+  relatedTerms?: RelatedTerm[];
 }
 
 // Chi tiết thuật ngữ đầy đủ

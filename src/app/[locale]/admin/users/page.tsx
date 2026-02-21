@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Search,
   Filter,
@@ -23,6 +23,9 @@ import {
   BookPlus,
   MessageSquare,
   Globe,
+  Key,
+  Send,
+  History,
 } from "lucide-react";
 import userService from "@/services/userService";
 import categoryService, { Category } from "@/services/categoryService";
@@ -79,6 +82,15 @@ export default function UsersPage() {
   const [showLockConfirm, setShowLockConfirm] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showBatchActionsModal, setShowBatchActionsModal] = useState(false);
+  const [batchStatus, setBatchStatus] = useState<UserStatus>("active");
+  const [activityData, setActivityData] = useState<any>(null);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -90,6 +102,28 @@ export default function UsersPage() {
       permissions: [],
     });
   const [savingPermissions, setSavingPermissions] = useState(false);
+
+  // Ref for dropdown menu
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowMoreMenu(null);
+      }
+    };
+
+    if (showMoreMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showMoreMenu]);
 
   // Debounce search query
   useEffect(() => {
@@ -430,6 +464,100 @@ export default function UsersPage() {
     setShowAddModal(true);
   };
 
+  // Handle reset password
+  const handleResetPassword = async () => {
+    if (!selectedUser || !newPassword) return;
+
+    try {
+      const res = await userService.resetUserPassword(
+        selectedUser._id,
+        newPassword,
+      );
+      if (res.success) {
+        toast.success("Đặt lại mật khẩu thành công");
+        setShowResetPasswordModal(false);
+        setNewPassword("");
+        setSelectedUser(null);
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi đặt lại mật khẩu");
+    }
+  };
+
+  // Handle resend verification email
+  const handleResendVerification = async (user: User) => {
+    try {
+      const res = await userService.resendVerificationEmail(user._id);
+      if (res.success) {
+        toast.success("Đã gửi lại email xác thực");
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Có lỗi xảy ra");
+    }
+  };
+
+  // Handle batch update status
+  const handleBatchUpdateStatus = async () => {
+    if (selectedUsers.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một người dùng");
+      return;
+    }
+
+    try {
+      const res = await userService.batchUpdateStatus(
+        selectedUsers,
+        batchStatus,
+      );
+      if (res.success) {
+        toast.success(res.message);
+        setShowBatchActionsModal(false);
+        setSelectedUsers([]);
+        refreshUsers();
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Có lỗi xảy ra");
+    }
+  };
+
+  // Handle view activity
+  const handleViewActivity = async (user: User) => {
+    setSelectedUser(user);
+    setShowActivityModal(true);
+    setLoadingActivity(true);
+
+    try {
+      const res = await userService.getUserActivity(user._id, {
+        page: 1,
+        limit: 20,
+      });
+      if (res.success) {
+        setActivityData(res.data);
+      }
+    } catch (error) {
+      toast.error("Không thể tải lịch sử hoạt động");
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
+  // Toggle select user
+  const handleToggleSelectUser = (userId: string) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
+    );
+  };
+
+  // Select all users
+  const handleSelectAllUsers = () => {
+    if (selectedUsers.length === users.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(users.map((u) => u._id));
+    }
+  };
+
   // Chỉ hiển thị full page loading khi load lần đầu
   if (initialLoading) {
     return (
@@ -504,6 +632,15 @@ export default function UsersPage() {
               <option value="inactive">Không hoạt động</option>
               <option value="banned">Bị khóa</option>
             </select>
+
+            {selectedUsers.length > 0 && (
+              <button
+                className="admin-btn admin-btn--warning"
+                onClick={() => setShowBatchActionsModal(true)}
+              >
+                Thao tác ({selectedUsers.length})
+              </button>
+            )}
           </div>
 
           {/* Table */}
@@ -518,6 +655,16 @@ export default function UsersPage() {
             <table className="admin-table">
               <thead>
                 <tr>
+                  <th style={{ width: "50px" }}>
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedUsers.length === users.length &&
+                        users.length > 0
+                      }
+                      onChange={handleSelectAllUsers}
+                    />
+                  </th>
                   <th>Người dùng</th>
                   <th>Vai trò</th>
                   <th>Trạng thái</th>
@@ -529,6 +676,14 @@ export default function UsersPage() {
               <tbody>
                 {users.map((user) => (
                   <tr key={user._id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user._id)}
+                        onChange={() => handleToggleSelectUser(user._id)}
+                        disabled={user.role === "admin"}
+                      />
+                    </td>
                     <td>
                       <div className="user-cell">
                         <div className="user-cell__avatar">
@@ -587,27 +742,84 @@ export default function UsersPage() {
                             <Shield size={16} color="#11998e" />
                           </button>
                         )}
-                        <button
-                          className="action-btn"
-                          onClick={() => handleToggleStatus(user)}
-                          title={user.status === "banned" ? "Mở khóa" : "Khóa"}
-                        >
-                          {user.status === "banned" ? (
-                            <Unlock size={16} color="green" />
-                          ) : (
-                            <Lock size={16} color="red" />
+
+                        {/* More Menu Dropdown */}
+                        <div className="action-dropdown" ref={dropdownRef}>
+                          <button
+                            className="action-btn action-btn--more"
+                            onClick={() =>
+                              setShowMoreMenu(
+                                showMoreMenu === user._id ? null : user._id,
+                              )
+                            }
+                            title="Thêm"
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          {showMoreMenu === user._id && (
+                            <div className="action-dropdown__menu">
+                              <button
+                                onClick={() => {
+                                  handleViewActivity(user);
+                                  setShowMoreMenu(null);
+                                }}
+                              >
+                                <History size={14} />
+                                Xem hoạt động
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setShowResetPasswordModal(true);
+                                  setShowMoreMenu(null);
+                                }}
+                              >
+                                <Key size={14} />
+                                Đặt lại mật khẩu
+                              </button>
+                              {!user.emailVerified && (
+                                <button
+                                  onClick={() => {
+                                    handleResendVerification(user);
+                                    setShowMoreMenu(null);
+                                  }}
+                                >
+                                  <Send size={14} />
+                                  Gửi lại email xác thực
+                                </button>
+                              )}
+                              <button
+                                onClick={() => {
+                                  handleToggleStatus(user);
+                                  setShowMoreMenu(null);
+                                }}
+                              >
+                                {user.status === "banned" ? (
+                                  <>
+                                    <Unlock size={14} />
+                                    Mở khóa
+                                  </>
+                                ) : (
+                                  <>
+                                    <Lock size={14} />
+                                    Khóa tài khoản
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                className="danger"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setShowDeleteConfirm(true);
+                                  setShowMoreMenu(null);
+                                }}
+                              >
+                                <Trash2 size={14} />
+                                Xóa người dùng
+                              </button>
+                            </div>
                           )}
-                        </button>
-                        <button
-                          className="action-btn action-btn--danger"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setShowDeleteConfirm(true);
-                          }}
-                          title="Xóa"
-                        >
-                          <Trash2 size={16} color="red" />
-                        </button>
+                        </div>
                       </div>
                     </td>
                   </tr>

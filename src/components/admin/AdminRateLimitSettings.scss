@@ -1,0 +1,301 @@
+@import "@/styles/variables.scss";
+@import "@/styles/mixins.scss";
+
+// Import shared settings styles
+@import "./AdminSystemSettings.scss";
+
+// Additional specific styles for Rate Limit Settings
+.admin-settings-section {
+    // Rate limit status indicator
+    &__rate-limit-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border: 2px solid #d1d5db;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+
+        &--active {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #6ee7b7;
+
+            .status-text {
+                color: #065f46;
+            }
+        }
+
+        &--inactive {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-color: #fca5a5;
+
+            .status-text {
+                color: #991b1b;
+            }
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            svg {
+                flex-shrink: 0;
+            }
+
+            .status-text {
+                font-weight: $font-semibold;
+                font-size: $font-base;
+            }
+        }
+    }
+
+    // Enhanced rate limit preview
+    &__rate-preview-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+}
+
+// Rate limit preview styles (extend from base)
+.rate-limit-preview {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: currentColor;
+        opacity: 0.3;
+    }
+
+    &--general {
+        border-color: #93c5fd;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e3a8a;
+
+        strong {
+            color: #1e40af;
+        }
+    }
+
+    &--api {
+        border-color: #c4b5fd;
+        background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+        color: #5b21b6;
+
+        strong {
+            color: #6b21a8;
+        }
+    }
+
+    // Enhanced danger state
+    &--danger {
+        border-color: #fca5a5;
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+
+        strong {
+            color: #7f1d1d;
+        }
+
+        &::before {
+            background: #dc2626;
+            animation: dangerPulse 2s ease-in-out infinite;
+        }
+    }
+}
+
+// Rate limit metrics display
+.rate-limit-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+
+    &__card {
+        padding: 1rem;
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        text-align: center;
+        transition: all 0.3s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-value {
+            display: block;
+            font-size: $font-2xl;
+            font-weight: $font-bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            display: block;
+            font-size: $font-xs;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    }
+}
+
+// Form group icons
+.form-group {
+    &--with-icon {
+        position: relative;
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            svg {
+                color: var(--primary-color);
+            }
+        }
+    }
+}
+
+// Switch slider enhancement for rate limit
+.form-checkbox--switch {
+    .switch-slider {
+        &::after {
+            content: "OFF";
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 9px;
+            font-weight: $font-bold;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+        }
+    }
+
+    input[type="checkbox"]:checked + .switch-slider {
+        &::after {
+            content: "ON";
+            left: 8px;
+            right: auto;
+            color: white;
+        }
+    }
+}
+
+// Dark theme support
+[data-theme="dark"] {
+    .admin-settings-section {
+        &__rate-limit-status {
+            background: linear-gradient(135deg, rgba(55, 65, 81, 0.5) 0%, rgba(31, 41, 55, 0.5) 100%);
+            border-color: rgba(75, 85, 99, 0.5);
+
+            &--active {
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%);
+                border-color: rgba(110, 231, 183, 0.3);
+
+                .status-text {
+                    color: #6ee7b7;
+                }
+            }
+
+            &--inactive {
+                background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.15) 100%);
+                border-color: rgba(252, 165, 165, 0.3);
+
+                .status-text {
+                    color: #fca5a5;
+                }
+            }
+        }
+    }
+
+    .rate-limit-preview {
+        &--general {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.15) 100%);
+            border-color: rgba(147, 197, 253, 0.3);
+            color: #bfdbfe;
+
+            strong {
+                color: #dbeafe;
+            }
+        }
+
+        &--api {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border-color: rgba(196, 181, 253, 0.3);
+            color: #ddd6fe;
+
+            strong {
+                color: #ede9fe;
+            }
+        }
+
+        &--danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.15) 100%);
+            border-color: rgba(252, 165, 165, 0.3);
+            color: #fca5a5;
+
+            strong {
+                color: #fecaca;
+            }
+        }
+    }
+
+    .rate-limit-metrics__card {
+        background: rgba(var(--card-bg-rgb), 0.5);
+        border-color: rgba(75, 85, 99, 0.5);
+    }
+}
+
+// Animations
+@keyframes dangerPulse {
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+// Loading state for rate limit settings
+.rate-limit-loading {
+    .rate-limit-preview {
+        position: relative;
+        overflow: hidden;
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+    }
+}
