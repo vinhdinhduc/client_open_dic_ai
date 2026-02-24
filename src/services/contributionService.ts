@@ -12,6 +12,23 @@ export interface Contribution {
             en?: string;
         };
         slug: string;
+        definition?: {
+            vi?: string;
+            lo?: string;
+            en?: string;
+        };
+        detailedExplanation?: {
+            vi?: string;
+            lo?: string;
+            en?: string;
+        };
+        examples?: Array<{
+            vi?: string;
+            lo?: string;
+            en?: string;
+        }>;
+        partOfSpeech?: string;
+        tags?: string[];
     };
     term: {
         vi: string;
@@ -42,6 +59,8 @@ export interface Contribution {
         };
         slug: string;
     };
+    partOfSpeech?: string;
+    tags?: string[];
     contributor: {
         _id: string;
         fullName: string;

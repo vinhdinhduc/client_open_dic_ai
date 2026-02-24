@@ -18,7 +18,14 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { saveSearchHistory } from "@/services/termService";
+import {
+  addFavorite,
+  checkFavorite,
+  getFavorites,
+  removeFavorite,
+} from "@/services/favoriteService";
 import Link from "next/link";
+import "./Term.scss";
 
 interface SearchResultsClientProps {
   initialTerms: TermCardData[];
@@ -35,12 +42,22 @@ export default function SearchResultsClient({
   const t = useTranslations("searchResults");
   const tCommon = useTranslations("common");
   const [terms] = useState<TermCardData[]>(initialTerms);
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
 
   // Track saved queries to prevent duplicate saves
   const savedQueryRef = useRef<string>("");
-
+  const exactMatch = useMemo(() => {
+    if (!query) return null;
+    const queryLower = query.toLowerCase().trim();
+    return terms.find(
+      (term) =>
+        term.term.vi?.toLowerCase().trim() === queryLower ||
+        term.term.en?.toLowerCase().trim() === queryLower ||
+        term.term.lo?.toLowerCase().trim() === queryLower,
+    );
+  }, [terms, query]);
   // Lưu lịch sử tìm kiếm khi component mount (chỉ 1 lần per query)
   useEffect(() => {
     if (
@@ -54,16 +71,25 @@ export default function SearchResultsClient({
     }
   }, [isAuthenticated, query, initialTerms.length]);
 
-  const exactMatch = useMemo(() => {
-    if (!query) return null;
-    const queryLower = query.toLowerCase().trim();
-    return terms.find(
-      (term) =>
-        term.term.vi?.toLowerCase().trim() === queryLower ||
-        term.term.en?.toLowerCase().trim() === queryLower ||
-        term.term.lo?.toLowerCase().trim() === queryLower,
-    );
-  }, [terms, query]);
+  useEffect(() => {
+    if (!isAuthenticated || !exactMatch?._id) {
+      setIsFavorited(false);
+      return;
+    }
+    const checkStatus = async () => {
+      try {
+        const res = await checkFavorite(exactMatch._id);
+        console.log("Check favorite", res);
+
+        if (res.success) {
+          setIsFavorited(res.data.isFavorited);
+        }
+      } catch (error) {
+        setIsFavorited(false);
+      }
+    };
+    checkStatus();
+  }, [isAuthenticated, exactMatch?._id]);
 
   // Tập hợp tất cả các related terms từ exact match
   const allRelatedTerms = useMemo(() => {
@@ -79,20 +105,44 @@ export default function SearchResultsClient({
     return Array.from(uniqueTerms.values());
   }, [exactMatch]);
 
-  const handleFavoriteToggle = (termId: string, isFavorited: boolean) => {
-    const newFavorites = new Set(favoriteIds);
-    if (isFavorited) {
-      newFavorites.add(termId);
-    } else {
-      newFavorites.delete(termId);
+  const handleFavoriteToggle = async (termId: string, isFavorited: boolean) => {
+    if (!isAuthenticated) return;
+    setFavoriteLoading(true);
+    try {
+      if (isFavorited) {
+        await addFavorite(termId);
+      } else {
+        await removeFavorite(termId);
+      }
+      setIsFavorited(!isFavorited);
+    } catch (error) {
+    } finally {
+      setFavoriteLoading(false);
     }
-    setFavoriteIds(newFavorites);
   };
 
   const handleAskAI = () => {
     if (!isAuthenticated) {
       toast.error(t("needLoginAI"));
       router.push(`/login?returnUrl=/terms?q=${encodeURIComponent(query)}`);
+      return;
+    }
+
+    const trimmed = query.trim();
+
+    if (trimmed.length < 2) {
+      toast.error(t("queryTooShort"));
+      return;
+    }
+
+    if (trimmed.length > 100) {
+      toast.error(t("queryTooLong"));
+      return;
+    }
+    const hasValidContent = /[a-zA-ZÀ-ỹ\u0E80-\u0EFF]{2,}/.test(trimmed);
+
+    if (!hasValidContent) {
+      toast.error(t("queryInvalid"));
       return;
     }
     setShowAIChat(true);
@@ -197,7 +247,7 @@ export default function SearchResultsClient({
             <section className="search-results-page__exact-match">
               <TermCard
                 term={exactMatch}
-                isFavorited={favoriteIds.has(exactMatch._id)}
+                isFavorited={isFavorited}
                 onFavoriteToggle={handleFavoriteToggle}
                 showCategory={true}
                 showMetadata={true}

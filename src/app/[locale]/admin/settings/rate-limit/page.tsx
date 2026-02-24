@@ -1,17 +1,11 @@
-import { AdminRateLimitSettings } from "@/components/admin";
-import { Shield } from "lucide-react";
+import { Metadata } from "next";
+import RateLimitClient from "./RateLimitClient";
 
-export default function SettingsRateLimitPage() {
-  return (
-    <div className="admin-settings__rate-limit">
-      <div className="admin-settings__header">
-        <h1>
-          <Shield size={28} />
-          Cấu hình Rate Limit
-        </h1>
-        <p>Quản lý giới hạn số lượng request để bảo vệ hệ thống</p>
-      </div>
-      <AdminRateLimitSettings />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: "Giới hạn tốc độ - Admin | Từ Điển Chuyên Ngành",
+  description: "Cấu hình giới hạn tốc độ API và bảo mật hệ thống từ điển",
+};
+
+export default function RateLimitPage() {
+  return <RateLimitClient />;
 }

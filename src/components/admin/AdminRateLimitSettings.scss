@@ -97,6 +97,16 @@
         }
     }
 
+    &--ai {
+        border-color: #6ee7b7;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+
+        strong {
+            color: #047857;
+        }
+    }
+
     // Enhanced danger state
     &--danger {
         border-color: #fca5a5;

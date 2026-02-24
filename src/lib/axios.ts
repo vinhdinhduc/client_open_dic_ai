@@ -11,6 +11,7 @@ const axiosInstance = axios.create({
 
 // Flag to prevent multiple refresh attempts
 let isRefreshing = false;
+let hasRedirected = false;
 let failedQueue: Array<{
     resolve: (value?: unknown) => void;
     reject: (reason?: any) => void;
@@ -49,16 +50,34 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // Helper: redirect to login once and show session toast (deduped)
+        const redirectToLogin = () => {
+            if (hasRedirected) return;
+            hasRedirected = true;
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("user");
+            toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", {
+                id: "session-expired",
+            });
+            if (typeof window !== "undefined") {
+                window.location.href = "/login";
+            }
+        };
+
         // Handle 401 Unauthorized - Try to refresh token
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (originalRequest.url?.includes('/auth/refresh-token')) {
                 // Refresh token itself failed, logout user
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                localStorage.removeItem("user");
-                if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                }
+                redirectToLogin();
+                return Promise.reject(error);
+            }
+
+            // Skip token refresh for auth endpoints (login, register, etc.)
+            if (
+                originalRequest.url?.includes('/auth/login') ||
+                originalRequest.url?.includes('/auth/register')
+            ) {
                 return Promise.reject(error);
             }
 
@@ -81,12 +100,7 @@ axiosInstance.interceptors.response.use(
 
             if (!refreshToken) {
                 isRefreshing = false;
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("user");
-                toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-                if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                }
+                redirectToLogin();
                 return Promise.reject(error);
             }
 
@@ -107,19 +121,15 @@ axiosInstance.interceptors.response.use(
                     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
                     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
+                    // Reset redirect flag on successful token refresh
+                    hasRedirected = false;
                     processQueue(null, newAccessToken);
 
                     return axiosInstance(originalRequest);
                 }
             } catch (refreshError) {
                 processQueue(refreshError, null);
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                localStorage.removeItem("user");
-                toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-                if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                }
+                redirectToLogin();
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;
@@ -137,12 +147,21 @@ axiosInstance.interceptors.response.use(
                 case 404:
                     toast.error("Tài nguyên không tồn tại.");
                     break;
+                case 429: {
+                    const retryAfter = error.response.headers?.['retry-after'];
+                    const msg = data.error || data.message || "Bạn đã thực hiện quá nhiều yêu cầu. Vui lòng thử lại sau.";
+                    const fullMsg = retryAfter ? `${msg} (thử lại sau ${retryAfter}s)` : msg;
+                    toast.error(fullMsg, { id: "rate-limit" });
+                    (error as any)._toastShown = true;
+                    break;
+                }
                 case 500:
                     toast.error("Lỗi máy chủ. Vui lòng thử lại sau.");
                     break;
                 default:
                     if (!originalRequest._retry) {
-                        toast.error(data.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
+                        toast.error(data.error || data.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
+                        (error as any)._toastShown = true;
                     }
             }
         } else if (error.request) {

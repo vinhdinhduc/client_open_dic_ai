@@ -25,6 +25,8 @@ export interface User extends BaseEntity {
     commentCount?: number;
     lastLogin?: string;
     moderationPermissions?: ModerationPermissions;
+    authProvider?: "local" | "google";
+    hasPassword?: boolean;
 }
 
 // Simplified User for references (in comments, terms, etc.)

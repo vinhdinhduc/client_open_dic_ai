@@ -38,7 +38,25 @@ interface TermDetailViewProps {
 
 export default function TermDetailView({ term }: TermDetailViewProps) {
   const t = useTranslations("term");
+  const tContribute = useTranslations("contribute");
+  const tCommon = useTranslations("common");
   const { currentLanguage } = useLanguage();
+
+  // Map partOfSpeech codes to localised labels
+  const getPartOfSpeechLabel = (pos: string): string => {
+    const validKeys = [
+      "noun",
+      "verb",
+      "adjective",
+      "adverb",
+      "phrase",
+      "abbreviation",
+    ] as const;
+    if (validKeys.includes(pos as any)) {
+      return tContribute(`partOfSpeech.${pos}` as any);
+    }
+    return pos;
+  };
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -89,17 +107,24 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
 
   const formatDate = (dateString?: string): string => {
     if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return new Date(dateString).toLocaleDateString(
+      currentLanguage === "vi"
+        ? "vi-VN"
+        : currentLanguage === "lo"
+          ? "lo-LA"
+          : "en-US",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      },
+    );
   };
 
   // Handlers
   const handleFavoriteToggle = async () => {
     if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để lưu yêu thích");
+      toast.error(t("loginToFavorite"));
       const currentPath = window.location.pathname;
       router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
       return;
@@ -110,10 +135,10 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
       const result = await toggleFavorite(term._id);
       setIsFavorited(result.isFavorited);
       toast.success(
-        result.isFavorited ? "Đã thêm vào yêu thích" : "Đã bỏ khỏi yêu thích",
+        result.isFavorited ? t("addedToFavorite") : t("removedFromFavorite"),
       );
     } catch (error) {
-      toast.error("Có lỗi xảy ra");
+      toast.error(t("favoriteError"));
     } finally {
       setFavoriteLoading(false);
     }
@@ -121,7 +146,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
 
   const handleReportClick = () => {
     if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để báo cáo");
+      toast.error(t("loginToReport"));
       return;
     }
     setShowReportModal(true);
@@ -129,7 +154,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
 
   const handleEditClick = () => {
     if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để gợi ý chỉnh sửa");
+      toast.error(t("loginToSuggestEdit"));
       return;
     }
     setShowEditModal(true);
@@ -144,14 +169,14 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
       {/* Breadcrumb */}
       <nav className="term-detail__breadcrumb">
         <Link href="/" className="breadcrumb-link">
-          Trang chủ
+          {tCommon("home")}
         </Link>
         <ChevronRight size={16} />
         <Link
           href={`/terms?q=${encodeURIComponent(getText(term.term))}`}
           className="breadcrumb-link"
         >
-          Tra cứu
+          {t("searchBreadcrumb")}
         </Link>
         <ChevronRight size={16} />
         <span className="breadcrumb-current">{getText(term.term)}</span>
@@ -170,7 +195,9 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
                 className={`action-btn action-btn--favorite ${isFavorited ? "active" : ""}`}
                 onClick={handleFavoriteToggle}
                 disabled={favoriteLoading}
-                title={isFavorited ? "Bỏ yêu thích" : "Thêm yêu thích"}
+                title={
+                  isFavorited ? t("removeFromFavorite") : t("addToFavorite")
+                }
               >
                 <Heart size={20} fill={isFavorited ? "currentColor" : "none"} />
               </button>
@@ -192,13 +219,13 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
             {term.partOfSpeech && (
               <span className="term-detail__pos">
                 <BookOpen size={16} />
-                {term.partOfSpeech}
+                {getPartOfSpeechLabel(term.partOfSpeech)}
               </span>
             )}
 
             <span className="term-detail__views">
               <Eye size={16} />
-              {term.viewCount} lượt xem
+              {term.viewCount} {t("views")}
             </span>
           </div>
         </header>
@@ -237,7 +264,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         <section className="term-detail__section">
           <h2 className="section-title">
             <BookOpen size={20} />
-            Định nghĩa
+            {t("definition")}
           </h2>
           <div className="term-detail__definition">
             {getText(term.definition)}
@@ -247,7 +274,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         {/* Detailed Explanation */}
         {term.detailedExplanation && getText(term.detailedExplanation) && (
           <section className="term-detail__section">
-            <h2 className="section-title">Giải thích chi tiết</h2>
+            <h2 className="section-title">{t("detailedExplanation")}</h2>
             <div className="term-detail__explanation">
               {getText(term.detailedExplanation)}
             </div>
@@ -257,7 +284,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         {/* Examples */}
         {term.examples && term.examples.length > 0 && (
           <section className="term-detail__section">
-            <h2 className="section-title">Ví dụ</h2>
+            <h2 className="section-title">{t("example")}</h2>
             <ul className="term-detail__examples">
               {term.examples.map((example, index) => (
                 <li key={index} className="example-item">
@@ -271,7 +298,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         {/* Related Terms */}
         {term.relatedTerms && term.relatedTerms.length > 0 && (
           <section className="term-detail__section">
-            <h2 className="section-title">Thuật ngữ liên quan</h2>
+            <h2 className="section-title">{t("relatedTerms")}</h2>
             <div className="term-detail__related">
               {term.relatedTerms.map((related) => (
                 <Link
@@ -306,7 +333,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
             {term.createdBy && (
               <span className="footer-item">
                 <UserIcon size={14} />
-                Đóng góp bởi: {term.createdBy.fullName}
+                {t("contributedBy")}: {term.createdBy.fullName}
               </span>
             )}
             {term.createdAt && (
@@ -324,7 +351,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
               onClick={handleEditClick}
             >
               <Edit3 size={16} />
-              <span>Gợi ý chỉnh sửa</span>
+              <span>{t("suggestEditBtn")}</span>
             </button>
 
             <button
@@ -332,7 +359,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
               onClick={handleReportClick}
             >
               <Flag size={16} />
-              <span>Báo xấu</span>
+              <span>{t("reportBtn")}</span>
             </button>
           </div>
         </footer>
@@ -342,7 +369,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
       <section className="term-detail__comments">
         <h2 className="section-title">
           <MessageCircle size={20} />
-          Bình luận ({comments.length})
+          {t("commentsTitle")} ({comments.length})
         </h2>
 
         <CommentSection

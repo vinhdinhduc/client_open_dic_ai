@@ -109,6 +109,16 @@ const getTermById = async (id: string): Promise<TermDetail | null> => {
   }
 }
 
+// Tăng lượt xem thuật ngữ (gọi riêng để tránh double-count trong StrictMode)
+const incrementTermView = async (id: string): Promise<void> => {
+  try {
+    await axiosInstance.post(`/terms/${id}/view`);
+  } catch (error) {
+    // Không throw để không ảnh hưởng UX
+    console.error("Error incrementing view count:", error);
+  }
+}
+
 // Lấy danh sách comment của thuật ngữ
 const getTermComments = async (termId: string): Promise<Comment[]> => {
   try {
@@ -319,6 +329,7 @@ export {
   getSearchSuggestions,
   searchTerms,
   getTermById,
+  incrementTermView,
   getTermComments,
   createComment,
   reportTerm,

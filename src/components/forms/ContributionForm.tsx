@@ -273,13 +273,16 @@ export default function ContributionForm() {
             }
           : undefined,
         examples: formData.examples
-          ?.filter((ex) => ex.vi?.trim())
+          ?.filter((ex) => ex.vi?.trim() || ex.lo?.trim() || ex.en?.trim())
           .map((ex) => ({
-            vi: ex.vi?.trim() || "",
+            vi: ex.vi?.trim() || undefined,
             lo: ex.lo?.trim() || undefined,
             en: ex.en?.trim() || undefined,
           })),
+
         category: formData.category,
+        partOfSpeech: formData.partOfSpeech || undefined,
+        tags: formData.tags?.filter((tag) => tag.trim()) || undefined,
         contributorNote: formData.contributorNote?.trim() || undefined,
       };
 

@@ -167,8 +167,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    max-width: 560px;
+    // width: 100%;
+    // max-width: 600px;
     margin: var(--spacing-2xl) auto;
     padding: var(--spacing-2xl) var(--spacing-lg);
     background: var(--card-bg, var(--bg-primary));

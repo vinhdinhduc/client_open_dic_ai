@@ -21,6 +21,8 @@ export default function SuggestEditModal({
   onClose,
 }: SuggestEditModalProps) {
   const t = useTranslations("term");
+  const tEdit = useTranslations("suggestEdit");
+  const tCommon = useTranslations("common");
   const { currentLanguage } = useLanguage();
 
   // Form state - pre-fill with existing data
@@ -84,17 +86,17 @@ export default function SuggestEditModal({
 
     // Validation
     if (!termText.vi?.trim()) {
-      toast.error("Thuật ngữ tiếng Việt là bắt buộc");
+      toast.error(tEdit("termViRequired"));
       return;
     }
 
     if (!definition.vi?.trim()) {
-      toast.error("Định nghĩa tiếng Việt là bắt buộc");
+      toast.error(tEdit("definitionViRequired"));
       return;
     }
 
     if (!contributorNote.trim()) {
-      toast.error("Vui lòng ghi chú lý do chỉnh sửa");
+      toast.error(tEdit("noteRequired"));
       return;
     }
 
@@ -114,10 +116,10 @@ export default function SuggestEditModal({
     setSubmitting(true);
     try {
       await suggestEdit(data);
-      toast.success("Đề xuất chỉnh sửa đã được gửi. Cảm ơn đóng góp của bạn!");
+      toast.success(tEdit("success"));
       onClose();
     } catch (error) {
-      toast.error("Không thể gửi đề xuất. Vui lòng thử lại.");
+      toast.error(tEdit("error"));
     } finally {
       setSubmitting(false);
     }
@@ -142,7 +144,7 @@ export default function SuggestEditModal({
         <div className="suggest-edit-modal__header">
           <div className="header-title">
             <Edit3 size={20} />
-            <h2>Gợi ý chỉnh sửa thuật ngữ</h2>
+            <h2>{tEdit("title")}</h2>
           </div>
           <button className="close-btn" onClick={onClose}>
             <X size={20} />
@@ -169,7 +171,7 @@ export default function SuggestEditModal({
           {/* Term Name */}
           <div className="form-group">
             <label className="form-label">
-              Thuật ngữ{" "}
+              {tEdit("termLabel")}{" "}
               {activeTab === "vi" && <span className="required">*</span>}
             </label>
             <input
@@ -186,7 +188,7 @@ export default function SuggestEditModal({
           {/* Definition */}
           <div className="form-group">
             <label className="form-label">
-              Định nghĩa{" "}
+              {tEdit("definitionLabel")}{" "}
               {activeTab === "vi" && <span className="required">*</span>}
             </label>
             <textarea
@@ -203,8 +205,8 @@ export default function SuggestEditModal({
           {/* Detailed Explanation */}
           <div className="form-group">
             <label className="form-label">
-              Giải thích chi tiết
-              <span className="optional">(không bắt buộc)</span>
+              {tEdit("detailedExplanation")}
+              <span className="optional">{tEdit("optional")}</span>
             </label>
             <textarea
               value={detailedExplanation[activeTab] || ""}
@@ -224,8 +226,8 @@ export default function SuggestEditModal({
           {/* Examples */}
           <div className="form-group">
             <label className="form-label">
-              Ví dụ
-              <span className="optional">(không bắt buộc)</span>
+              {tEdit("exampleLabel")}
+              <span className="optional">{tEdit("optional")}</span>
             </label>
             <div className="examples-list">
               {examples.map((example, index) => (
@@ -256,7 +258,7 @@ export default function SuggestEditModal({
                 onClick={addExample}
               >
                 <Plus size={16} />
-                Thêm ví dụ
+                {tEdit("addExample")}
               </button>
             </div>
           </div>
@@ -264,12 +266,12 @@ export default function SuggestEditModal({
           {/* Contributor Note */}
           <div className="form-group form-group--note">
             <label className="form-label">
-              Lý do chỉnh sửa <span className="required">*</span>
+              {tEdit("noteLabel")} <span className="required">*</span>
             </label>
             <textarea
               value={contributorNote}
               onChange={(e) => setContributorNote(e.target.value)}
-              placeholder="Giải thích lý do bạn đề xuất chỉnh sửa này..."
+              placeholder={tEdit("notePlaceholder")}
               rows={3}
               className="form-textarea"
               maxLength={500}
@@ -285,7 +287,7 @@ export default function SuggestEditModal({
               onClick={onClose}
               disabled={submitting}
             >
-              Hủy
+              {tCommon("cancel")}
             </button>
             <button
               type="submit"
@@ -295,12 +297,12 @@ export default function SuggestEditModal({
               {submitting ? (
                 <>
                   <Loader2 size={16} className="spin" />
-                  Đang gửi...
+                  {tEdit("submitting")}
                 </>
               ) : (
                 <>
                   <Edit3 size={16} />
-                  Gửi đề xuất
+                  {tEdit("submit")}
                 </>
               )}
             </button>

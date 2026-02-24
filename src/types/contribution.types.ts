@@ -35,6 +35,8 @@ export interface SuggestEditData {
     definition: MultiLangText;
     detailedExplanation?: MultiLangText;
     examples?: Example[];
+    partOfSpeech?: string;
+    tags?: string[];
     category: string;
     contributorNote?: string;
 }
@@ -46,6 +48,8 @@ export interface NewTermContributionData {
     definition: MultiLangText;
     detailedExplanation?: MultiLangText;
     examples?: Example[];
+    partOfSpeech?: string;
+    tags?: string[];
     category: string;
     contributorNote?: string;
 }

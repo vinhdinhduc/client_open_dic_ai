@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -26,6 +26,11 @@ export default function TermCard({
   const router = useRouter();
   const [favorited, setFavorited] = useState(isFavorited);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    setFavorited(isFavorited);
+  }, [isFavorited]);
+  console.log("Check term", term);
 
   //Get text by language
 
@@ -59,9 +64,7 @@ export default function TermCard({
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error(
-        t("common.loginRequired") || "Vui lòng đăng nhập để lưu yêu thích",
-      );
+      toast.error(t("term.loginToFavorite"));
       // Lưu URL hiện tại để redirect về sau khi login
       const currentPath = window.location.pathname + window.location.search;
       router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
@@ -151,10 +154,10 @@ export default function TermCard({
               <span>{formatCount(term.viewCount)}</span>
             </div>
 
-            {term.favoritesCount !== undefined && term.favoritesCount > 0 && (
+            {term.favoriteCount !== undefined && term.favoriteCount > 0 && (
               <div className="term-card__stat">
                 <Heart size={16} />
-                <span>{formatCount(term.favoritesCount)}</span>
+                <span>{formatCount(term.favoriteCount)}</span>
               </div>
             )}
           </div>

@@ -172,11 +172,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Fetch pending counts
   useEffect(() => {
     const fetchPendingCounts = async () => {
-      if (
-        !isAuthenticated ||
-        (user?.role !== "admin" && user?.role !== "moderator")
-      )
-        return;
+      if (!isAuthenticated || user?.role !== "admin") return;
 
       try {
         const [contribRes, reportRes, commentRes] = await Promise.all([
@@ -202,7 +198,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         setContributionCount(contribCount);
         setReportCount(rptCount);
         setCommentCount(cmtCount);
-        setPendingCount(contribCount + rptCount + cmtCount);
+        setPendingCount(contribCount + rptCount);
       } catch (error) {
         console.error("Error fetching pending counts:", error);
       }
@@ -219,7 +215,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       router.push("/login?redirect=/admin");
       return;
     }
-    if (user?.role !== "admin" && user?.role !== "moderator") {
+    if (user?.role !== "admin") {
       router.push("/");
       return;
     }

@@ -26,6 +26,7 @@ import {
   BarChart3,
   Shield,
   Flag,
+  MoveLeft,
   GitPullRequest,
   LucideIcon,
 } from "lucide-react";
@@ -53,80 +54,6 @@ interface MenuItem {
   badge?: boolean;
   children?: SubMenuItem[];
 }
-
-// Menu items cho Admin
-const adminMenuItems: MenuItem[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/admin",
-  },
-  {
-    id: "users",
-    label: "Quản lý người dùng",
-    icon: Users,
-    href: "/admin/users",
-  },
-  {
-    id: "terms",
-    label: "Quản lý thuật ngữ",
-    icon: BookOpen,
-    href: "/admin/terms",
-  },
-  {
-    id: "categories",
-    label: "Quản lý danh mục",
-    icon: FolderTree,
-    href: "/admin/categories",
-  },
-  {
-    id: "moderation",
-    label: "Kiểm duyệt",
-    icon: FileCheck,
-    badge: true,
-    children: [
-      {
-        id: "moderation-contributions",
-        label: "Kiểm duyệt đóng góp",
-        href: "/admin/moderation/contributions",
-        icon: GitPullRequest,
-        badge: true,
-      },
-      {
-        id: "reports-moderation",
-        label: "Kiểm duyệt báo xấu",
-        href: "/admin/moderation/reports",
-        icon: Flag,
-        badge: true,
-      },
-    ],
-  },
-  {
-    id: "comments",
-    label: "Quản lý bình luận",
-    icon: MessageSquare,
-    href: "/admin/comments",
-  },
-  {
-    id: "import",
-    label: "Nhập dữ liệu",
-    icon: Upload,
-    href: "/admin/import",
-  },
-  {
-    id: "reports",
-    label: "Báo cáo thống kê",
-    icon: BarChart3,
-    href: "/admin/reports",
-  },
-  {
-    id: "settings",
-    label: "Cấu hình hệ thống",
-    icon: Settings,
-    href: "/admin/settings",
-  },
-];
 
 // Menu items cho Moderator (chỉ hiển thị các mục liên quan đến kiểm duyệt)
 const moderatorMenuItems: MenuItem[] = [
@@ -187,18 +114,12 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
   const [contributionCount, setContributionCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
 
-  // Chọn menu items dựa theo role
-  const menuItems =
-    user?.role === "admin" ? adminMenuItems : moderatorMenuItems;
+  const menuItems = moderatorMenuItems;
 
   // Fetch pending counts
   useEffect(() => {
     const fetchPendingCounts = async () => {
-      if (
-        !isAuthenticated ||
-        (user?.role !== "admin" && user?.role !== "moderator")
-      )
-        return;
+      if (!isAuthenticated || user?.role !== "moderator") return;
 
       try {
         const [contribRes, reportRes, commentRes] = await Promise.all([
@@ -236,14 +157,17 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
     return () => clearInterval(interval);
   }, [isAuthenticated, user?.role]);
 
-  // Check admin access
+  // Check moderator access
   useEffect(() => {
     if (!isAuthenticated) {
-      const redirectUrl = user?.role === "moderator" ? "/moderator" : "/admin";
-      router.push(`/login?redirect=${redirectUrl}`);
+      router.push("/login?redirect=/moderator");
       return;
     }
-    if (user?.role !== "admin" && user?.role !== "moderator") {
+    if (user?.role === "admin") {
+      router.push("/admin");
+      return;
+    }
+    if (user?.role !== "moderator") {
       router.push("/");
       return;
     }
@@ -310,10 +234,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
   };
 
   // Show loading if not authorized
-  if (
-    !isAuthenticated ||
-    (user?.role !== "admin" && user?.role !== "moderator")
-  ) {
+  if (!isAuthenticated || user?.role !== "moderator") {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
@@ -337,9 +258,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
             className="admin-sidebar__logo"
           >
             <Shield className="logo-icon" />
-            <span className="logo-text">
-              {user?.role === "moderator" ? "Moderator" : "Admin Panel"}
-            </span>
+            <span className="logo-text">Moderator Panel</span>
           </Link>
           <button
             className="admin-sidebar__close"
@@ -425,7 +344,8 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
         {/* Sidebar Footer */}
         <div className="admin-sidebar__footer">
           <Link href="/" className="admin-sidebar__back">
-            ← Về trang chủ
+            <MoveLeft size={16} />
+            <span>Về trang chủ</span>
           </Link>
         </div>
       </aside>
@@ -487,25 +407,18 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
                 </div>
                 <div className="user-info">
                   <span className="user-name">{user?.fullName || "Admin"}</span>
-                  <span className="user-role">
-                    {user?.role === "admin"
-                      ? "Quản trị viên"
-                      : "Kiểm duyệt viên"}
-                  </span>
+                  <span className="user-role">Kiểm duyệt viên</span>
                 </div>
                 <ChevronDown size={16} />
               </button>
 
               {userMenuOpen && (
                 <div className="admin-header__dropdown">
-                  <Link href="/admin/profile" className="dropdown-item">
+                  <Link href="/profile" className="dropdown-item">
                     <Users size={16} />
                     Tài khoản
                   </Link>
-                  <Link href="/admin/settings" className="dropdown-item">
-                    <Settings size={16} />
-                    Cài đặt
-                  </Link>
+
                   <hr />
                   <button className="dropdown-item" onClick={handleLogout}>
                     <LogOut size={16} />

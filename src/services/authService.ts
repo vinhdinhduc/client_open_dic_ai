@@ -158,6 +158,7 @@ export const authService = {
         }
 
         return response.data;
+
     },
 
     /**
@@ -209,7 +210,7 @@ export const authService = {
      * Đổi mật khẩu
      */
     changePassword: async (
-        currentPassword: string,
+        currentPassword: string | undefined,
         newPassword: string
     ): Promise<{ success: boolean; message: string }> => {
         const response = await axiosInstance.put("/auth/change-password", {

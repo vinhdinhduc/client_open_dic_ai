@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { Comment } from "./types";
 import { createComment } from "@/services/termService";
@@ -30,6 +31,9 @@ export default function CommentSection({
   onCommentAdded,
 }: CommentSectionProps) {
   const t = useTranslations("term");
+  const tComment = useTranslations("comment");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { user, isAuthenticated } = useAuth();
 
   const [newComment, setNewComment] = useState("");
@@ -45,24 +49,24 @@ export default function CommentSection({
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Vừa xong";
-    if (diffMins < 60) return `${diffMins} phút trước`;
-    if (diffHours < 24) return `${diffHours} giờ trước`;
-    if (diffDays < 7) return `${diffDays} ngày trước`;
+    if (diffMins < 1) return tComment("justNow");
+    if (diffMins < 60) return tComment("minutesAgo", { count: diffMins });
+    if (diffHours < 24) return tComment("hoursAgo", { count: diffHours });
+    if (diffDays < 7) return tComment("daysAgo", { count: diffDays });
 
-    return date.toLocaleDateString("vi-VN");
+    return date.toLocaleDateString(locale);
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để bình luận");
+      toast.error(tComment("loginToComment"));
       return;
     }
 
     if (!newComment.trim()) {
-      toast.error("Vui lòng nhập nội dung bình luận");
+      toast.error(tComment("emptyComment"));
       return;
     }
 
@@ -72,10 +76,10 @@ export default function CommentSection({
       if (comment) {
         onCommentAdded(comment);
         setNewComment("");
-        toast.success("Bình luận của bạn đang chờ kiểm duyệt");
+        toast.success(tComment("pending"));
       }
     } catch (error) {
-      toast.error("Không thể gửi bình luận. Vui lòng thử lại.");
+      toast.error(tComment("error"));
     } finally {
       setSubmitting(false);
     }
@@ -83,12 +87,12 @@ export default function CommentSection({
 
   const handleSubmitReply = async (parentId: string) => {
     if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để trả lời");
+      toast.error(tComment("loginToReply"));
       return;
     }
 
     if (!replyContent.trim()) {
-      toast.error("Vui lòng nhập nội dung trả lời");
+      toast.error(tComment("emptyReply"));
       return;
     }
 
@@ -103,10 +107,10 @@ export default function CommentSection({
         onCommentAdded(comment);
         setReplyContent("");
         setReplyingTo(null);
-        toast.success("Trả lời của bạn đang chờ kiểm duyệt");
+        toast.success(tComment("replyPending"));
       }
     } catch (error) {
-      toast.error("Không thể gửi trả lời. Vui lòng thử lại.");
+      toast.error(tComment("replyError"));
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +150,7 @@ export default function CommentSection({
             }
           >
             <Reply size={14} />
-            Trả lời
+            {tComment("reply")}
           </button>
         )}
 
@@ -156,7 +160,7 @@ export default function CommentSection({
             <textarea
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
-              placeholder="Viết trả lời..."
+              placeholder={tComment("replyPlaceholder")}
               rows={2}
               className="reply-input"
             />
@@ -168,7 +172,7 @@ export default function CommentSection({
                   setReplyContent("");
                 }}
               >
-                Hủy
+                {tCommon("cancel")}
               </button>
               <button
                 className="btn btn--submit"
@@ -180,7 +184,7 @@ export default function CommentSection({
                 ) : (
                   <Send size={14} />
                 )}
-                Gửi
+                {tComment("send")}
               </button>
             </div>
           </div>
@@ -208,7 +212,7 @@ export default function CommentSection({
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Viết bình luận của bạn..."
+              placeholder={tComment("placeholder")}
               rows={3}
               className="comment-form__input"
               disabled={submitting}
@@ -223,7 +227,7 @@ export default function CommentSection({
               ) : (
                 <Send size={18} />
               )}
-              <span>Gửi</span>
+              <span>{tComment("send")}</span>
             </button>
           </div>
         </form>
@@ -231,7 +235,8 @@ export default function CommentSection({
         <div className="comment-section__login-prompt">
           <MessageCircle size={24} />
           <p>
-            <a href="/login">Đăng nhập</a> để tham gia bình luận
+            <a href="/login">{tComment("loginLink")}</a>{" "}
+            {tComment("loginPrompt")}
           </p>
         </div>
       )}
@@ -241,7 +246,7 @@ export default function CommentSection({
         {loading ? (
           <div className="comment-list__loading">
             <Loader2 size={24} className="spin" />
-            <span>Đang tải bình luận...</span>
+            <span>{tComment("loading")}</span>
           </div>
         ) : comments.length > 0 ? (
           comments
@@ -250,7 +255,7 @@ export default function CommentSection({
         ) : (
           <div className="comment-list__empty">
             <MessageCircle size={32} />
-            <p>Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+            <p>{tComment("noComments")}</p>
           </div>
         )}
       </div>

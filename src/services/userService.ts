@@ -4,6 +4,7 @@ import {
     GetUsersParams,
     UpdateUserData,
     UserStats,
+    UserStatus,
     ToggleStatusData,
     CreateUserData,
     PaginatedData

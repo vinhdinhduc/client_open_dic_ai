@@ -1,13 +1,11 @@
-"use client";
+import { Metadata } from "next";
+import NewTermClient from "./NewTermClient";
 
-import React from "react";
-import { AddTermForm } from "@/components/forms/manage_terms/AddTermForm";
-import "../terms.scss";
+export const metadata: Metadata = {
+  title: "Thêm thuật ngữ mới - Admin | Từ Điển Chuyên Ngành",
+  description: "Thêm thuật ngữ chuyên ngành mới vào hệ thống từ điển",
+};
 
 export default function NewTermPage() {
-  return (
-    <div className="terms-page">
-      <AddTermForm />
-    </div>
-  );
+  return <NewTermClient />;
 }

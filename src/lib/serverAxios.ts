@@ -74,7 +74,7 @@ export async function searchTermsServer(
                 };
             };
         }>(`/terms/search?${params.toString()}`, {
-            next: { revalidate: 60 }, // Cache 60 seconds
+            next: { revalidate: 60 },
         });
 
 

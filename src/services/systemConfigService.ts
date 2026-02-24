@@ -30,6 +30,10 @@ export interface RateLimitConfig {
     rate_limit_max_requests: number;
     rate_limit_api_window_ms: number;
     rate_limit_api_max_requests: number;
+    rate_limit_login_window_ms: number;
+    rate_limit_login_max_attempts: number;
+    rate_limit_ai_window_ms: number;
+    rate_limit_ai_max_requests: number;
 }
 
 class SystemConfigService {

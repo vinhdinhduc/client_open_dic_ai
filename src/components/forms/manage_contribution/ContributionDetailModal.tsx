@@ -9,6 +9,8 @@ import {
   ExternalLink,
   CheckCircle,
   Loader2,
+  Tag,
+  BookOpen,
 } from "lucide-react";
 import { Contribution } from "@/services/contributionService";
 
@@ -48,6 +50,15 @@ export default function ContributionDetailModal({
     return typeConfig[type] || typeConfig.new_term;
   };
 
+  const PART_OF_SPEECH_LABELS: Record<string, string> = {
+    noun: "Danh từ",
+    verb: "Động từ",
+    adjective: "Tính từ",
+    adverb: "Trạng từ",
+    phrase: "Cụm từ",
+    abbreviation: "Từ viết tắt",
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
       year: "numeric",
@@ -71,6 +82,9 @@ export default function ContributionDetailModal({
   const getContributorName = () => {
     return contribution.contributor?.fullName || "Ẩn danh";
   };
+
+  const isChanged = (oldVal: string | undefined, newVal: string | undefined) =>
+    (oldVal ?? "").trim() !== (newVal ?? "").trim();
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -123,10 +137,133 @@ export default function ContributionDetailModal({
                     <span>Nội dung gốc</span>
                   </div>
                   <div className="diff-content">
-                    <div className="diff-field">
+                    <div
+                      className={`diff-field${
+                        isChanged(
+                          contribution.targetTerm.term?.vi,
+                          contribution.term?.vi,
+                        )
+                          ? " diff-field--changed"
+                          : ""
+                      }`}
+                    >
                       <label>Thuật ngữ (Vi):</label>
                       <p>{contribution.targetTerm.term?.vi || "-"}</p>
                     </div>
+                    {contribution.targetTerm.term?.lo && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.term.lo,
+                            contribution.term?.lo,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
+                        <label>Thuật ngữ (Lo):</label>
+                        <p>{contribution.targetTerm.term.lo}</p>
+                      </div>
+                    )}
+                    {contribution.targetTerm.term?.en && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.term.en,
+                            contribution.term?.en,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
+                        <label>Thuật ngữ (En):</label>
+                        <p>{contribution.targetTerm.term.en}</p>
+                      </div>
+                    )}
+                    <div
+                      className={`diff-field${
+                        isChanged(
+                          contribution.targetTerm.definition?.vi,
+                          contribution.definition?.vi,
+                        )
+                          ? " diff-field--changed"
+                          : ""
+                      }`}
+                    >
+                      <label>Định nghĩa (Vi):</label>
+                      <p>{contribution.targetTerm.definition?.vi || "-"}</p>
+                    </div>
+                    {contribution.targetTerm.definition?.lo && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.definition.lo,
+                            contribution.definition?.lo,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
+                        <label>Định nghĩa (Lo):</label>
+                        <p>{contribution.targetTerm.definition.lo}</p>
+                      </div>
+                    )}
+                    {contribution.targetTerm.detailedExplanation?.vi && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.detailedExplanation.vi,
+                            contribution.detailedExplanation?.vi,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
+                        <label>Giải thích chi tiết:</label>
+                        <p>{contribution.targetTerm.detailedExplanation.vi}</p>
+                      </div>
+                    )}
+                    {contribution.targetTerm.examples &&
+                      contribution.targetTerm.examples.length > 0 && (
+                        <div className="diff-field">
+                          <label>Ví dụ:</label>
+                          {contribution.targetTerm.examples.map((ex, idx) => (
+                            <p key={idx}>{ex.vi || ex.lo || ex.en}</p>
+                          ))}
+                        </div>
+                      )}
+                    {contribution.targetTerm.partOfSpeech && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.partOfSpeech,
+                            contribution.partOfSpeech,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
+                        <label>Từ loại:</label>
+                        <p>
+                          {PART_OF_SPEECH_LABELS[
+                            contribution.targetTerm.partOfSpeech
+                          ] || contribution.targetTerm.partOfSpeech}
+                        </p>
+                      </div>
+                    )}
+                    {contribution.targetTerm.tags &&
+                      contribution.targetTerm.tags.length > 0 && (
+                        <div className="diff-field">
+                          <label>Tags:</label>
+                          <div className="diff-tags">
+                            {contribution.targetTerm.tags.map((tag, idx) => (
+                              <span key={idx} className="badge badge--outline">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 </div>
                 <div className="diff-arrow">
@@ -138,38 +275,242 @@ export default function ContributionDetailModal({
                     <span>Nội dung đề xuất</span>
                   </div>
                   <div className="diff-content">
-                    <div className="diff-field">
+                    {/* term.vi — always show */}
+                    <div
+                      className={`diff-field${
+                        isChanged(
+                          contribution.targetTerm?.term?.vi,
+                          contribution.term?.vi,
+                        )
+                          ? " diff-field--changed"
+                          : ""
+                      }`}
+                    >
                       <label>Thuật ngữ (Vi):</label>
-                      <p>{contribution.term?.vi || "-"}</p>
+                      <p>
+                        {isChanged(
+                          contribution.targetTerm?.term?.vi,
+                          contribution.term?.vi,
+                        )
+                          ? contribution.term?.vi || "-"
+                          : "-"}
+                      </p>
                     </div>
-                    {contribution.term?.lo && (
-                      <div className="diff-field">
+
+                    {/* term.lo — only if original had it */}
+                    {contribution.targetTerm?.term?.lo && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.term.lo,
+                            contribution.term?.lo,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
                         <label>Thuật ngữ (Lo):</label>
-                        <p>{contribution.term.lo}</p>
+                        <p>
+                          {isChanged(
+                            contribution.targetTerm.term.lo,
+                            contribution.term?.lo,
+                          )
+                            ? contribution.term?.lo || "-"
+                            : "-"}
+                        </p>
                       </div>
                     )}
-                    {contribution.term?.en && (
-                      <div className="diff-field">
+
+                    {/* term.en — only if original had it */}
+                    {contribution.targetTerm?.term?.en && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.term.en,
+                            contribution.term?.en,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
                         <label>Thuật ngữ (En):</label>
-                        <p>{contribution.term.en}</p>
+                        <p>
+                          {isChanged(
+                            contribution.targetTerm.term.en,
+                            contribution.term?.en,
+                          )
+                            ? contribution.term?.en || "-"
+                            : "-"}
+                        </p>
                       </div>
                     )}
-                    <div className="diff-field">
+
+                    {/* definition.vi — always show */}
+                    <div
+                      className={`diff-field${
+                        isChanged(
+                          contribution.targetTerm?.definition?.vi,
+                          contribution.definition?.vi,
+                        )
+                          ? " diff-field--changed"
+                          : ""
+                      }`}
+                    >
                       <label>Định nghĩa (Vi):</label>
-                      <p>{contribution.definition?.vi || "-"}</p>
+                      <p>
+                        {isChanged(
+                          contribution.targetTerm?.definition?.vi,
+                          contribution.definition?.vi,
+                        )
+                          ? contribution.definition?.vi || "-"
+                          : "-"}
+                      </p>
                     </div>
-                    {contribution.definition?.lo && (
-                      <div className="diff-field">
+
+                    {/* definition.lo — only if original had it */}
+                    {contribution.targetTerm?.definition?.lo && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.definition.lo,
+                            contribution.definition?.lo,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
                         <label>Định nghĩa (Lo):</label>
-                        <p>{contribution.definition.lo}</p>
+                        <p>
+                          {isChanged(
+                            contribution.targetTerm.definition.lo,
+                            contribution.definition?.lo,
+                          )
+                            ? contribution.definition?.lo || "-"
+                            : "-"}
+                        </p>
                       </div>
                     )}
-                    {contribution.detailedExplanation?.vi && (
-                      <div className="diff-field">
+
+                    {/* detailedExplanation — only if original had it */}
+                    {contribution.targetTerm?.detailedExplanation?.vi && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.detailedExplanation.vi,
+                            contribution.detailedExplanation?.vi,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
                         <label>Giải thích chi tiết:</label>
-                        <p>{contribution.detailedExplanation.vi}</p>
+                        <p>
+                          {isChanged(
+                            contribution.targetTerm.detailedExplanation.vi,
+                            contribution.detailedExplanation?.vi,
+                          )
+                            ? contribution.detailedExplanation?.vi || "-"
+                            : "-"}
+                        </p>
                       </div>
                     )}
+
+                    {/* examples — only if original had them */}
+                    {contribution.targetTerm?.examples &&
+                      contribution.targetTerm.examples.length > 0 &&
+                      (() => {
+                        const origStr = contribution
+                          .targetTerm!.examples!.map(
+                            (e) => e.vi || e.lo || e.en,
+                          )
+                          .join("|");
+                        const newStr = (contribution.examples ?? [])
+                          .map((e) => e.vi || e.lo || e.en)
+                          .join("|");
+                        const changed = origStr !== newStr;
+                        return (
+                          <div
+                            className={`diff-field${changed ? " diff-field--changed" : ""}`}
+                          >
+                            <label>Ví dụ:</label>
+                            {changed ? (
+                              (contribution.examples ?? []).map((ex, idx) => (
+                                <p key={idx}>{ex.vi || ex.lo || ex.en}</p>
+                              ))
+                            ) : (
+                              <p>-</p>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                    {/* contributorNote — always show if present */}
+                    {contribution.contributorNote && (
+                      <div className="diff-field">
+                        <label>Ghi chú người đóng góp:</label>
+                        <p>{contribution.contributorNote}</p>
+                      </div>
+                    )}
+
+                    {/* partOfSpeech — only if original had it */}
+                    {contribution.targetTerm?.partOfSpeech && (
+                      <div
+                        className={`diff-field${
+                          isChanged(
+                            contribution.targetTerm.partOfSpeech,
+                            contribution.partOfSpeech,
+                          )
+                            ? " diff-field--changed"
+                            : ""
+                        }`}
+                      >
+                        <label>Từ loại:</label>
+                        <p>
+                          {isChanged(
+                            contribution.targetTerm.partOfSpeech,
+                            contribution.partOfSpeech,
+                          )
+                            ? PART_OF_SPEECH_LABELS[
+                                contribution.partOfSpeech ?? ""
+                              ] ||
+                              contribution.partOfSpeech ||
+                              "-"
+                            : "-"}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* tags — only if original had them */}
+                    {contribution.targetTerm?.tags &&
+                      contribution.targetTerm.tags.length > 0 &&
+                      (() => {
+                        const origTags = (
+                          contribution.targetTerm!.tags ?? []
+                        ).join(",");
+                        const newTags = (contribution.tags ?? []).join(",");
+                        const changed = origTags !== newTags;
+                        return (
+                          <div
+                            className={`diff-field${changed ? " diff-field--changed" : ""}`}
+                          >
+                            <label>Tags:</label>
+                            {changed ? (
+                              <div className="diff-tags">
+                                {(contribution.tags ?? []).map((tag, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="badge badge--outline"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <p>-</p>
+                            )}
+                          </div>
+                        );
+                      })()}
                   </div>
                 </div>
               </div>
@@ -233,6 +574,27 @@ export default function ContributionDetailModal({
                     <div className="diff-field">
                       <label>Ghi chú người đóng góp:</label>
                       <p>{contribution.contributorNote}</p>
+                    </div>
+                  )}
+                  {contribution.partOfSpeech && (
+                    <div className="diff-field">
+                      <label>Từ loại:</label>
+                      <p>
+                        {PART_OF_SPEECH_LABELS[contribution.partOfSpeech] ||
+                          contribution.partOfSpeech}
+                      </p>
+                    </div>
+                  )}
+                  {contribution.tags && contribution.tags.length > 0 && (
+                    <div className="diff-field">
+                      <label>Tags:</label>
+                      <div className="diff-tags">
+                        {contribution.tags.map((tag, idx) => (
+                          <span key={idx} className="badge badge--outline">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

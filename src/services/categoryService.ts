@@ -61,12 +61,19 @@ const deleteCategory = async (id: string): Promise<ApiResponse<{ message: string
     return res.data;
 };
 
+// Ẩn (vô hiệu hóa) danh mục thay vì xóa
+const deactivateCategory = async (id: string): Promise<ApiResponse<{ message: string }>> => {
+    const res = await axiosInstance.put<ApiResponse<{ message: string }>>(`/categories/${id}/deactivate`);
+    return res.data;
+};
+
 const categoryService = {
     getCategories,
     getCategoryById,
     createCategory,
     updateCategory,
     deleteCategory,
+    deactivateCategory,
 };
 
 export default categoryService;

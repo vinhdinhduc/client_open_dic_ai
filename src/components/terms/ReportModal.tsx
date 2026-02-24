@@ -24,15 +24,11 @@ interface ReportModalProps {
 }
 
 const REPORT_REASONS = [
-  { value: "incorrect", label: "Thông tin không chính xác", Icon: XCircle },
-  { value: "spam", label: "Spam hoặc quảng cáo", Icon: ShieldX },
-  {
-    value: "inappropriate",
-    label: "Nội dung không phù hợp",
-    Icon: AlertTriangle,
-  },
-  { value: "duplicate", label: "Thuật ngữ trùng lặp", Icon: Copy },
-  { value: "other", label: "Lý do khác", Icon: MessageSquare },
+  { value: "incorrect", Icon: XCircle },
+  { value: "spam", Icon: ShieldX },
+  { value: "inappropriate", Icon: AlertTriangle },
+  { value: "duplicate", Icon: Copy },
+  { value: "other", Icon: MessageSquare },
 ] as const;
 
 export default function ReportModal({
@@ -40,7 +36,7 @@ export default function ReportModal({
   termName,
   onClose,
 }: ReportModalProps) {
-  const t = useTranslations("term");
+  const t = useTranslations("report");
 
   const [selectedReason, setSelectedReason] = useState<
     ReportData["reason"] | null
@@ -52,7 +48,7 @@ export default function ReportModal({
     e.preventDefault();
 
     if (!selectedReason) {
-      toast.error("Vui lòng chọn lý do báo cáo");
+      toast.error(t("reasonRequired"));
       return;
     }
 
@@ -63,11 +59,11 @@ export default function ReportModal({
         description: description.trim() || undefined,
       });
       if (res.success) {
-        toast.success("Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét sớm nhất.");
+        toast.success(t("success"));
       }
       onClose();
     } catch (error) {
-      toast.error("Không thể gửi báo cáo. Vui lòng thử lại.");
+      toast.error(t("error"));
     } finally {
       setSubmitting(false);
     }
@@ -86,7 +82,7 @@ export default function ReportModal({
         <div className="report-modal__header">
           <div className="header-title">
             <Flag size={20} />
-            <h2>Báo cáo thuật ngữ</h2>
+            <h2>{t("title")}</h2>
           </div>
           <button className="close-btn" onClick={onClose}>
             <X size={20} />
@@ -97,7 +93,7 @@ export default function ReportModal({
         <div className="report-modal__term-info">
           <AlertTriangle size={18} />
           <span>
-            Bạn đang báo cáo: <strong>{termName}</strong>
+            {t("reporting")} <strong>{termName}</strong>
           </span>
         </div>
 
@@ -105,7 +101,7 @@ export default function ReportModal({
         <form onSubmit={handleSubmit} className="report-modal__form">
           {/* Reason Selection */}
           <div className="form-group">
-            <label className="form-label">Lý do báo cáo *</label>
+            <label className="form-label">{t("reasonLabel")} *</label>
             <div className="reason-list">
               {REPORT_REASONS.map((reason) => {
                 const IconComponent = reason.Icon;
@@ -125,7 +121,9 @@ export default function ReportModal({
                     <span className="reason-icon">
                       <IconComponent size={18} />
                     </span>
-                    <span className="reason-label">{reason.label}</span>
+                    <span className="reason-label">
+                      {t(`reasons.${reason.value}` as any)}
+                    </span>
                   </label>
                 );
               })}
@@ -135,13 +133,13 @@ export default function ReportModal({
           {/* Description */}
           <div className="form-group">
             <label className="form-label">
-              Mô tả chi tiết
-              <span className="optional">(không bắt buộc)</span>
+              {t("descriptionLabel")}
+              <span className="optional">{t("optional")}</span>
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Vui lòng mô tả chi tiết vấn đề bạn gặp phải..."
+              placeholder={t("descriptionPlaceholder")}
               rows={4}
               className="form-textarea"
               maxLength={500}
@@ -157,7 +155,7 @@ export default function ReportModal({
               onClick={onClose}
               disabled={submitting}
             >
-              Hủy
+              {t("cancel")}
             </button>
             <button
               type="submit"
@@ -167,12 +165,12 @@ export default function ReportModal({
               {submitting ? (
                 <>
                   <Loader2 size={16} className="spin" />
-                  Đang gửi...
+                  {t("submitting")}
                 </>
               ) : (
                 <>
                   <Flag size={16} />
-                  Gửi báo cáo
+                  {t("submit")}
                 </>
               )}
             </button>

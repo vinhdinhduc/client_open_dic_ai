@@ -32,7 +32,7 @@ export default function AdminAISettings() {
   const [formData, setFormData] = useState({
     apiKey: "",
     provider: "gemini",
-    model: "Gemini 2.5 Flash",
+    model: "gemini-2.5-flash",
     maxTokens: 1000,
   });
 
@@ -44,7 +44,6 @@ export default function AdminAISettings() {
     try {
       setIsLoading(true);
       const data = await aiService.getConfig();
-      console.log("check config", data);
 
       setConfig(data);
       setHasExistingConfig(!!data.apiKey || !!data.hasApiKey);
@@ -54,7 +53,7 @@ export default function AdminAISettings() {
       setFormData({
         apiKey: isMaskedApiKey ? "" : data.apiKey || "",
         provider: data.provider || "gemini",
-        model: data.model || "Gemini 2.5 Flash",
+        model: data.model || "gemini-2.5-flash",
         maxTokens: data.maxTokens || 1000,
       });
 
@@ -131,6 +130,20 @@ export default function AdminAISettings() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
+    // Reset model when provider changes to avoid stale model
+    if (name === "provider") {
+      const defaultModels: Record<string, string> = {
+        gemini: "gemini-2.5-flash",
+        openai: "gpt-3.5-turbo",
+        grok: "grok-3",
+      };
+      setFormData((prev) => ({
+        ...prev,
+        provider: value,
+        model: defaultModels[value] || "",
+      }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]:
@@ -178,6 +191,7 @@ export default function AdminAISettings() {
             className="form-control"
           >
             <option value="gemini">Google Gemini</option>
+            <option value="grok">xAI Grok</option>
             <option value="openai">OpenAI (Coming soon)</option>
           </select>
           <small className="form-text">
@@ -196,6 +210,28 @@ export default function AdminAISettings() {
             {formData.provider === "gemini" && (
               <a
                 href="https://makersuite.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="api-key-link"
+              >
+                <ExternalLink size={14} />
+                Lấy API key
+              </a>
+            )}
+            {formData.provider === "grok" && (
+              <a
+                href="https://console.x.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="api-key-link"
+              >
+                <ExternalLink size={14} />
+                Lấy API key tại x.ai
+              </a>
+            )}
+            {formData.provider === "openai" && (
+              <a
+                href="https://platform.openai.com/api-keys"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="api-key-link"
@@ -253,26 +289,42 @@ export default function AdminAISettings() {
           >
             {formData.provider === "gemini" && (
               <>
-                <option value="Gemini 2.5 Flash">Gemini 2.5 Flash</option>
-                <option value="Gemini 2.5 Flash Lite">
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-2.5-flash-lite">
                   Gemini 2.5 Flash Lite
                 </option>
-                <option value="Gemini 2.5 Flash TTS">
+                <option value="gemini-2.5-flash-tts">
                   Gemini 2.5 Flash TTS
                 </option>
-                <option value="Gemini 3 Flash">Gemini 3 Flash</option>
-                <option value="Gemma 3 12B">Gemma 3 12B</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                <option value="gemma-3-12b">Gemma 3 12B</option>
+              </>
+            )}
+            {formData.provider === "grok" && (
+              <>
+                <option value="grok-3">Grok 3</option>
+                <option value="grok-3-fast">Grok 3 Fast</option>
+                <option value="grok-3-mini">Grok 3 Mini</option>
+                <option value="grok-3-mini-fast">Grok 3 Mini Fast</option>
+                <option value="grok-2-1212">Grok 2 (1212)</option>
               </>
             )}
             {formData.provider === "openai" && (
               <>
                 <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                 <option value="gpt-4">GPT-4</option>
+                <option value="gpt-4o">GPT-4o</option>
+                <option value="gpt-4o-mini">GPT-4o Mini</option>
               </>
             )}
           </select>
           <small className="form-text">
-            Sử dụng Google Generative AI SDK - Hỗ trợ tất cả models mới nhất
+            {formData.provider === "gemini" &&
+              "Sử dụng Google Generative AI SDK — hỗ trợ đầy đủ các models mới nhất"}
+            {formData.provider === "grok" &&
+              "Sử dụng xAI API — cùng định dạng với OpenAI, base URL: api.x.ai"}
+            {formData.provider === "openai" && "Sử dụng OpenAI API chính thức"}
           </small>
         </div>
       </div>
@@ -376,13 +428,22 @@ export default function AdminAISettings() {
                 rel="noopener noreferrer"
               >
                 Google AI Studio
-              </a>
+              </a>{" "}
+              hoặc mua tại{" "}
+              <a
+                href="https://console.x.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                xAI Console
+              </a>{" "}
+              (Grok)
             </li>
             <li>
               <strong>Bảo mật:</strong> API key được mã hóa AES-256-GCM trước
               khi lưu
             </li>
-            <li>Nhấn "Test kết nối" để kiểm tra trước khi lưu</li>
+            <li>Nhấn &quot;Test kết nối&quot; để kiểm tra trước khi lưu</li>
           </ul>
         </div>
       </div>

@@ -25,6 +25,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/hooks/useLanguage";
 import BackToHome from "@/components/common/BackToHome";
+import { getFavorites } from "@/services/favoriteService";
+import contributionService from "@/services/contributionService";
 import "./Header.scss";
 
 const Header = () => {
@@ -37,6 +39,10 @@ const Header = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [favoritesCount, setFavoritesCount] = useState<number | null>(null);
+  const [contributionsCount, setContributionsCount] = useState<number | null>(
+    null,
+  );
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -62,6 +68,32 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Tải số lượng yêu thích và đóng góp khi đăng nhập
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setFavoritesCount(null);
+      setContributionsCount(null);
+      return;
+    }
+    const loadCounts = async () => {
+      try {
+        const [favRes, contribRes] = await Promise.all([
+          getFavorites(1, 1).catch(() => null),
+          contributionService.getContributions({ limit: 1 }).catch(() => null),
+        ]);
+        if (favRes?.success) {
+          setFavoritesCount(favRes.data?.pagination?.total ?? null);
+        }
+        if (contribRes?.success) {
+          setContributionsCount(contribRes.data?.pagination?.total ?? null);
+        }
+      } catch {
+        // không ảnh hưởng UX
+      }
+    };
+    loadCounts();
+  }, [isAuthenticated]);
+
   const handleLogout = () => {
     logout();
     setUserMenuOpen(false);
@@ -74,8 +106,6 @@ const Header = () => {
   ];
 
   const currentLang = languages.find((lang) => lang.code === currentLanguage);
-
-  console.log("Loggg", isModerator, user);
 
   return (
     <header className="header">
@@ -207,6 +237,11 @@ const Header = () => {
                     >
                       <Plus size={16} />
                       <span>{t("header.myContributions")}</span>
+                      {contributionsCount !== null && (
+                        <span className="header__user-badge">
+                          {contributionsCount}
+                        </span>
+                      )}
                     </Link>
 
                     <Link
@@ -216,6 +251,11 @@ const Header = () => {
                     >
                       <Star size={16} />
                       <span>{t("header.myFavorites")}</span>
+                      {favoritesCount !== null && (
+                        <span className="header__user-badge">
+                          {favoritesCount}
+                        </span>
+                      )}
                     </Link>
 
                     <Link

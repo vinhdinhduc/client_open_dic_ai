@@ -10,6 +10,7 @@ import {
   Clock,
   Activity,
   Lock,
+  Bot,
 } from "lucide-react";
 import systemConfigService from "@/services/systemConfigService";
 import "./AdminRateLimitSettings.scss";
@@ -28,6 +29,8 @@ export default function AdminRateLimitSettings() {
     rate_limit_api_max_requests: 30,
     rate_limit_login_window_ms: 900000, // 15 minutes
     rate_limit_login_max_attempts: 5,
+    rate_limit_ai_window_ms: 60000, // 1 minute
+    rate_limit_ai_max_requests: 5,
   });
 
   useEffect(() => {
@@ -59,6 +62,9 @@ export default function AdminRateLimitSettings() {
             configObj.rate_limit_login_window_ms || 900000,
           rate_limit_login_max_attempts:
             configObj.rate_limit_login_max_attempts || 5,
+          rate_limit_ai_window_ms: configObj.rate_limit_ai_window_ms || 60000,
+          rate_limit_ai_max_requests:
+            configObj.rate_limit_ai_max_requests || 5,
         });
       }
     } catch (error: any) {
@@ -344,6 +350,66 @@ export default function AdminRateLimitSettings() {
         </div>
       </div>
 
+      {/* AI Rate Limit */}
+      <div className="admin-settings-section__group">
+        <h3>
+          <Bot size={20} />
+          Rate Limit Gọi AI
+        </h3>
+
+        <div className="form-group">
+          <label htmlFor="rate_limit_ai_window_ms">
+            Cửa sổ thời gian AI (milliseconds)
+            <span className="label-badge">
+              {formatTime(formData.rate_limit_ai_window_ms)}
+            </span>
+          </label>
+          <input
+            type="number"
+            id="rate_limit_ai_window_ms"
+            name="rate_limit_ai_window_ms"
+            value={formData.rate_limit_ai_window_ms}
+            onChange={handleInputChange}
+            min="1000"
+            step="1000"
+            className="form-control"
+            disabled={!formData.rate_limit_enabled}
+          />
+          <small className="form-text">
+            Thời gian theo dõi số lượt gọi AI từ một người dùng (mặc định: 1 phút = 60000ms)
+          </small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="rate_limit_ai_max_requests">
+            Số lượt gọi AI tối đa
+          </label>
+          <input
+            type="number"
+            id="rate_limit_ai_max_requests"
+            name="rate_limit_ai_max_requests"
+            value={formData.rate_limit_ai_max_requests}
+            onChange={handleInputChange}
+            min="1"
+            max="50"
+            className="form-control"
+            disabled={!formData.rate_limit_enabled}
+          />
+          <small className="form-text">
+            Số lượt gọi AI tối đa trong cửa sổ thời gian (mặc định: 5 lượt / phút)
+          </small>
+        </div>
+
+        <div className="rate-limit-preview rate-limit-preview--ai">
+          <Bot size={16} />
+          <span>
+            Cho phép <strong>{formData.rate_limit_ai_max_requests}</strong> lượt
+            gọi AI trong{" "}
+            <strong>{formatTime(formData.rate_limit_ai_window_ms)}</strong>
+          </span>
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="admin-settings-section__actions">
         <button
@@ -391,6 +457,10 @@ export default function AdminRateLimitSettings() {
             <li>
               <strong>Rate Limit Đăng Nhập:</strong> Bảo vệ khỏi brute-force
               attack
+            </li>
+            <li>
+              <strong>Rate Limit Gọi AI:</strong> Giới hạn số lần gọi AI mỗi
+              phút để kiểm soát chi phí API
             </li>
             <li>
               Khi đạt giới hạn, người dùng sẽ nhận mã lỗi{" "}

@@ -1,17 +1,11 @@
-import { AdminEmailSettings } from "@/components/admin";
-import { Mail } from "lucide-react";
+import { Metadata } from "next";
+import EmailSettingsClient from "./EmailSettingsClient";
 
-export default function SettingsEmailPage() {
-  return (
-    <div className="admin-settings__email">
-      <div className="admin-settings__header">
-        <h1>
-          {" "}
-          <Mail size={28} />
-          Cấu hình Email
-        </h1>
-      </div>
-      <AdminEmailSettings />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: "Cài đặt Email - Admin | Từ Điển Chuyên Ngành",
+  description: "Cấu hình email thông báo cho hệ thống từ điển chuyên ngành",
+};
+
+export default function EmailSettingsPage() {
+  return <EmailSettingsClient />;
 }

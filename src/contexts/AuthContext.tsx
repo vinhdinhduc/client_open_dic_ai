@@ -95,9 +95,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         return false;
       } catch (error: unknown) {
-        const err = error as { response?: { data?: { message?: string } } };
-        const message = err.response?.data?.message || "Đăng nhập thất bại";
-        toast.error(message);
+        const err = error as {
+          response?: { data?: { message?: string; error?: string } };
+          _toastShown?: boolean;
+        };
+        if (!err._toastShown) {
+          const message =
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Đăng nhập thất bại";
+          console.log("Check message", err);
+
+          toast.error(message);
+        }
         throw error;
       }
     },
@@ -109,17 +119,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async (userData: RegisterData): Promise<boolean> => {
       try {
         const response = await authService.register(userData);
-
-        // Không set user vào state sau khi đăng ký
-        // User phải verify email trước khi đăng nhập
         if (response.success) {
           return true;
         }
         return false;
       } catch (error: unknown) {
-        const err = error as { response?: { data?: { message?: string } } };
-        const message = err.response?.data?.message || "Đăng ký thất bại";
-        toast.error(message);
+        const err = error as {
+          response?: { data?: { message?: string; error?: string } };
+          _toastShown?: boolean;
+        };
+        if (!err._toastShown) {
+          const message =
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Đăng ký thất bại";
+          toast.error(message);
+        }
         throw error;
       }
     },
@@ -143,10 +158,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         return false;
       } catch (error: unknown) {
-        const err = error as { response?: { data?: { message?: string } } };
-        const message =
-          err.response?.data?.message || "Đăng nhập Google thất bại";
-        toast.error(message);
+        const err = error as {
+          response?: { data?: { message?: string; error?: string } };
+          _toastShown?: boolean;
+        };
+        if (!err._toastShown) {
+          const message =
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Đăng nhập Google thất bại";
+          toast.error(message);
+        }
         throw error;
       }
     },

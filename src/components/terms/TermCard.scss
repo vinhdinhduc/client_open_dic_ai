@@ -135,6 +135,7 @@
 
     &.favorited {
         color: var(--danger);
+        border: #dc2626 1px solid;
     }
 
     &.animating {
