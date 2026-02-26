@@ -3,11 +3,13 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import { authService } from "@/services/authService";
 import "../Auth.scss";
 
 function ResetPasswordForm() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -39,15 +41,15 @@ function ResetPasswordForm() {
     const newErrors: { password?: string; confirmPassword?: string } = {};
 
     if (!formData.password) {
-      newErrors.password = "Vui lòng nhập mật khẩu mới";
+      newErrors.password = t("errorNewPasswordRequired");
     } else if (formData.password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+      newErrors.password = t("errorPasswordMin");
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
+      newErrors.confirmPassword = t("errorConfirmPasswordRequired");
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu không khớp";
+      newErrors.confirmPassword = t("errorPasswordMismatchReset");
     }
 
     setErrors(newErrors);
@@ -60,9 +62,7 @@ function ResetPasswordForm() {
     if (!validateForm()) return;
 
     if (!token) {
-      setAlertMessage(
-        "Token không hợp lệ. Vui lòng yêu cầu đặt lại mật khẩu mới.",
-      );
+      setAlertMessage(t("invalidTokenMessage"));
       return;
     }
 
@@ -76,16 +76,14 @@ function ResetPasswordForm() {
       );
       if (response.success) {
         setResetSuccess(true);
-        toast.success("Đặt lại mật khẩu thành công!");
+        toast.success(t("resetPasswordSuccess"));
         setTimeout(() => {
           router.push("/login");
         }, 3000);
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      const message =
-        err.response?.data?.message ||
-        "Đặt lại mật khẩu thất bại. Token có thể đã hết hạn.";
+      const message = err.response?.data?.message || t("resetFailed");
       setAlertMessage(message);
       toast.error(message);
     } finally {
@@ -110,12 +108,12 @@ function ResetPasswordForm() {
               <i className="fa-solid fa-book-open"></i>
               OpenDic
             </div>
-            <h1 className="auth-card__title">Liên kết không hợp lệ</h1>
+            <h1 className="auth-card__title">{t("invalidTokenTitle")}</h1>
           </div>
           <div className="auth-card__body">
             <div className="auth-alert auth-alert--error">
               <i className="fa-solid fa-circle-exclamation"></i>
-              Token đặt lại mật khẩu không tồn tại hoặc đã hết hạn.
+              {t("invalidTokenMessage")}
             </div>
             <Link
               href="/forgot-password"
@@ -127,11 +125,11 @@ function ResetPasswordForm() {
               }}
             >
               <i className="fa-solid fa-rotate-left"></i>
-              Yêu cầu đặt lại mật khẩu mới
+              {t("requestNewResetLink")}
             </Link>
           </div>
           <div className="auth-card__footer">
-            <Link href="/login">Quay lại đăng nhập</Link>
+            <Link href="/login">{t("backToLogin")}</Link>
           </div>
         </div>
       </div>
@@ -162,8 +160,8 @@ function ResetPasswordForm() {
             <i className="fa-solid fa-book-open"></i>
             OpenDic
           </div>
-          <h1 className="auth-card__title">Đặt lại mật khẩu</h1>
-          <p className="auth-card__subtitle">Nhập mật khẩu mới cho tài khoản</p>
+          <h1 className="auth-card__title">{t("resetPasswordTitle")}</h1>
+          <p className="auth-card__subtitle">{t("resetPasswordSubtitle")}</p>
         </div>
 
         {/* Body */}
@@ -173,11 +171,8 @@ function ResetPasswordForm() {
               <div className="auth-success-message__icon">
                 <i className="fa-solid fa-circle-check"></i>
               </div>
-              <h3>Đặt lại mật khẩu thành công!</h3>
-              <p>
-                Mật khẩu đã được cập nhật. Bạn sẽ được chuyển đến trang đăng
-                nhập trong giây lát...
-              </p>
+              <h3>{t("resetPasswordSuccess")}</h3>
+              <p>{t("resetSuccessMessage")}</p>
               <Link
                 href="/login"
                 className="auth-submit"
@@ -188,7 +183,7 @@ function ResetPasswordForm() {
                 }}
               >
                 <i className="fa-solid fa-right-to-bracket"></i>
-                Đăng nhập ngay
+                {t("loginNow")}
               </Link>
             </div>
           ) : (
@@ -205,7 +200,7 @@ function ResetPasswordForm() {
                 {/* New Password */}
                 <div className="auth-input-group">
                   <label className="auth-input-group__label" htmlFor="password">
-                    Mật khẩu mới
+                    {t("newPassword")}
                   </label>
                   <div className="auth-input-group__wrapper">
                     <input
@@ -213,7 +208,7 @@ function ResetPasswordForm() {
                       id="password"
                       name="password"
                       className={`auth-input-group__input auth-input-group__input--with-toggle ${errors.password ? "auth-input-group__input--error" : ""}`}
-                      placeholder="Nhập mật khẩu mới"
+                      placeholder={t("newPasswordPlaceholder")}
                       value={formData.password}
                       onChange={handleChange}
                       autoComplete="new-password"
@@ -224,7 +219,7 @@ function ResetPasswordForm() {
                       className="auth-input-group__toggle"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={
-                        showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+                        showPassword ? t("hidePassword") : t("showPassword")
                       }
                     >
                       <i
@@ -246,7 +241,7 @@ function ResetPasswordForm() {
                     className="auth-input-group__label"
                     htmlFor="confirmPassword"
                   >
-                    Xác nhận mật khẩu
+                    {t("confirmPassword")}
                   </label>
                   <div className="auth-input-group__wrapper">
                     <input
@@ -254,7 +249,7 @@ function ResetPasswordForm() {
                       id="confirmPassword"
                       name="confirmPassword"
                       className={`auth-input-group__input auth-input-group__input--with-toggle ${errors.confirmPassword ? "auth-input-group__input--error" : ""}`}
-                      placeholder="Nhập lại mật khẩu mới"
+                      placeholder={t("confirmPasswordPlaceholder")}
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       autoComplete="new-password"
@@ -267,7 +262,9 @@ function ResetPasswordForm() {
                         setShowConfirmPassword(!showConfirmPassword)
                       }
                       aria-label={
-                        showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+                        showConfirmPassword
+                          ? t("hidePassword")
+                          : t("showPassword")
                       }
                     >
                       <i
@@ -292,12 +289,12 @@ function ResetPasswordForm() {
                   {isLoading ? (
                     <>
                       <i className="fa-solid fa-spinner auth-spinner"></i>
-                      Đang xử lý...
+                      {t("resetting")}
                     </>
                   ) : (
                     <>
                       <i className="fa-solid fa-key"></i>
-                      Đặt lại mật khẩu
+                      {t("resetPasswordTitle")}
                     </>
                   )}
                 </button>
@@ -308,7 +305,7 @@ function ResetPasswordForm() {
 
         {/* Footer */}
         <div className="auth-card__footer">
-          <Link href="/login">Quay lại đăng nhập</Link>
+          <Link href="/login">{t("backToLogin")}</Link>
         </div>
       </div>
     </div>

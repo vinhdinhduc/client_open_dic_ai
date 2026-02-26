@@ -156,6 +156,22 @@ export default function ReportsModerationPage() {
     setShowConfirmDismiss(false);
     setReportToDismiss(null);
   };
+  const getReasonText = (reason: string) => {
+    switch (reason) {
+      case "duplicate":
+        return "Thuật ngữ trùng lặp";
+      case "incorrect":
+        return "Thông tin không chính xác";
+      case "spam":
+        return "Spam hoặc quảng cáo";
+      case "inappropriate":
+        return "Nội dung không phù hợp";
+      case "other":
+        return "Lý do khác";
+      default:
+        return reason;
+    }
+  };
 
   const getStatusBadge = (status: Report["status"]) => {
     const statusConfig = {
@@ -351,7 +367,9 @@ export default function ReportsModerationPage() {
                             {getTargetTitle(report)}
                           </span>
                         </td>
-                        <td className="reason-cell">{report.reason}</td>
+                        <td className="reason-cell">
+                          {getReasonText(report.reason)}
+                        </td>
                         <td className="reporter-cell">
                           <div className="reporter">
                             <div className="reporter-avatar">

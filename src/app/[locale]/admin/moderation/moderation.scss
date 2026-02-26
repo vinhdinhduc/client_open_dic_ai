@@ -1311,6 +1311,122 @@ $moderation-info: #3b82f6;
     }
 }
 
+.diff-compare {
+    display: flex;
+    align-items: stretch;
+    gap: $spacing-md;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+    }
+}
+
+// Legend row above the two columns
+.diff-legend {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-sm;
+    font-size: $font-xs;
+    color: var(--text-secondary);
+
+    &__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    &__unchanged {
+        color: var(--text-secondary);
+    }
+}
+
+.diff-inline-text {
+    margin: 0;
+    font-size: $font-sm;
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+.diff-mark {
+    border-radius: 3px;
+    padding: 1px 3px;
+    font-style: normal;
+
+    &--removed {
+        background: rgba(#ef4444, 0.15);
+        color: #b91c1c;
+        text-decoration: line-through;
+        text-decoration-color: #ef4444;
+    }
+
+    &--added {
+        background: rgba(#16a34a, 0.15);
+        color: #15803d;
+    }
+}
+
+.diff-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    padding: 0 4px;
+
+    &__line {
+        flex: 1;
+        width: 1px;
+        background: var(--border-color);
+        min-height: 20px;
+    }
+
+    &__icon {
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    @media (max-width: 768px) {
+        flex-direction: row;
+        padding: 4px 0;
+
+        .diff-divider__line {
+            flex: 1;
+            width: auto;
+            height: 1px;
+            min-height: 0;
+        }
+    }
+}
+
+.diff-field__unchanged {
+    margin: 0;
+    font-size: $font-sm;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.diff-field--note {
+    background: rgba($moderation-info, 0.06);
+    border-left: 3px solid $moderation-info;
+    padding-left: 8px;
+    border-radius: 4px;
+}
+
+// Tag badge variants for diff
+.diff-tag--removed {
+    color: #b91c1c !important;
+    border-color: rgba(#ef4444, 0.5) !important;
+    text-decoration: line-through;
+}
+
+.diff-tag--added {
+    color: #15803d !important;
+    border-color: rgba(#16a34a, 0.5) !important;
+}
+
 // ============ Alert ============
 .alert {
     display: flex;

@@ -14,7 +14,7 @@ export default function HomePage() {
   const t = useTranslations("home");
 
   return (
-    <Layout>
+    <Layout className="layout--home">
       <SearchBar autoFocus={true} />
     </Layout>
   );

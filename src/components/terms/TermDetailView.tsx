@@ -38,9 +38,10 @@ interface TermDetailViewProps {
 
 export default function TermDetailView({ term }: TermDetailViewProps) {
   const t = useTranslations("term");
-  const tContribute = useTranslations("contribute");
+  const tContribute = useTranslations("contribution");
   const tCommon = useTranslations("common");
   const { currentLanguage } = useLanguage();
+  console.log("Check term", term);
 
   // Map partOfSpeech codes to localised labels
   const getPartOfSpeechLabel = (pos: string): string => {
@@ -102,7 +103,13 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     multiLang: { vi?: string; en?: string; lo?: string } | undefined,
   ): string => {
     if (!multiLang) return "";
-    return multiLang[currentLanguage] || multiLang.vi || multiLang.en || "";
+    return (
+      multiLang[currentLanguage as keyof typeof multiLang] ||
+      multiLang.vi ||
+      multiLang.en ||
+      multiLang.lo ||
+      ""
+    );
   };
 
   const formatDate = (dateString?: string): string => {

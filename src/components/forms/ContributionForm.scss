@@ -127,6 +127,20 @@
     }
 }
 
+.lang-required-hint {
+    font-size: $font-sm;
+    color: var(--warning, #d97706);
+    background: var(--warning-bg, rgba(251, 191, 36, 0.1));
+    border: 1px solid var(--warning-border, rgba(217, 119, 6, 0.3));
+    border-radius: $radius-sm;
+    padding: $spacing-sm $spacing-md;
+    margin-bottom: $spacing-md;
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-xs;
+    line-height: 1.5;
+}
+
 // Form Sections
 .form-section {
     background: var(--bg-secondary);

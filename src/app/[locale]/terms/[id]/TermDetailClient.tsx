@@ -31,11 +31,9 @@ export default function TermDetailPage() {
 
       try {
         const data = await getTermById(id);
-        console.log("Check data ", data);
 
         if (data) {
           setTerm(data);
-          // Increment view only once per term id (prevents StrictMode double-fire)
           if (viewIncrementedRef.current !== id) {
             viewIncrementedRef.current = id;
             incrementTermView(id);
@@ -69,10 +67,10 @@ export default function TermDetailPage() {
       <Layout>
         <div className="term-detail-page term-detail-page--error">
           <div className="error-container">
-            <h2>{error || "Không tìm thấy thuật ngữ"}</h2>
-            <p>Thuật ngữ bạn tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+            <h2>{error || t("noTerm")}</h2>
+            <p>{error ? error : t("noTerm")}</p>
             <a href="/terms" className="back-link">
-              <MoveLeft /> Quay lại tìm kiếm
+              <MoveLeft /> {t("backToList")}
             </a>
           </div>
         </div>

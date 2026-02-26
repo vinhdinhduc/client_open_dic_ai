@@ -4,6 +4,8 @@ import { SearchLoading } from "@/components/common";
 import { searchTermsServer } from "@/lib/serverAxios";
 import SearchResultsClient from "./SearchResults";
 import "./Term.scss";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 // Enable ISR - revalidate every 60 seconds
 export const revalidate = 60;
@@ -59,10 +61,10 @@ export default async function SearchResultsPage({
   searchParams: Promise<{ q?: string; lang?: string }>;
 }) {
   const { q: query = "", lang: language = "vi" } = await searchParams;
-
+  const t = await getTranslations("common");
   return (
     <Layout>
-      <Suspense fallback={<SearchLoading text="Đang tìm kiếm..." />}>
+      <Suspense fallback={<SearchLoading text={t("searching")} />}>
         <SearchResultsServer query={query} language={language} />
       </Suspense>
     </Layout>

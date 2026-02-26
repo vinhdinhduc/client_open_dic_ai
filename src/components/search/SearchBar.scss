@@ -112,7 +112,7 @@
         line-height: 1.5;
         pointer-events: none;
         user-select: none;
-        white-space: nowrap;
+        white-space: pre;
         overflow: hidden;
 
         @include mobile {
@@ -131,6 +131,7 @@
     &__ghost-suggestion {
         color: var(--text-tertiary);
         opacity: 0.6;
+
         transition: opacity 0.2s ease;
 
         [data-theme="dark"] & {

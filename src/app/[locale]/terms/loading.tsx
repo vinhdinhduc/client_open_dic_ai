@@ -1,5 +1,8 @@
 import { SearchLoading } from "@/components/common";
+import { getTranslations } from "next-intl/server";
 
-export default function Loading() {
-  return <SearchLoading text="Đang tìm kiếm..." />;
+export default async function Loading() {
+  const t = await getTranslations("common");
+
+  return <SearchLoading text={t("searching")} />;
 }

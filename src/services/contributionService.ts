@@ -90,12 +90,12 @@ export interface CreateContributionData {
     type: "new_term" | "edit_term";
     targetTerm?: string; // ObjectId of existing term (for edit_term)
     term: {
-        vi: string;
+        vi?: string;
         lo?: string;
         en?: string;
     };
     definition: {
-        vi: string;
+        vi?: string;
         lo?: string;
         en?: string;
     };
@@ -110,6 +110,8 @@ export interface CreateContributionData {
         en?: string;
     }>;
     category: string; // ObjectId
+    partOfSpeech?: string;
+    tags?: string[];
     contributorNote?: string;
 }
 

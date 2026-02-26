@@ -248,6 +248,79 @@
                 background: var(--primary-bg);
             }
         }
+
+        .form-select {
+            width: 100%;
+            padding: $spacing-sm $spacing-md;
+            border: 1px solid var(--border-color);
+            border-radius: $radius-md;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: $font-sm;
+            cursor: pointer;
+            transition: border-color $transition-fast;
+
+            &:focus {
+                outline: none;
+                border-color: var(--primary);
+                box-shadow: 0 0 0 2px var(--primary-bg);
+            }
+        }
+
+        .tag-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-sm;
+        }
+
+        .tag-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $spacing-xs;
+
+            &:empty {
+                display: none;
+            }
+        }
+
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px $spacing-sm;
+            background: var(--primary-bg);
+            border: 1px solid var(--primary);
+            border-radius: 999px;
+            color: var(--primary);
+            font-size: $font-xs;
+            font-weight: $font-medium;
+
+            &__remove {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                background: none;
+                border: none;
+                color: inherit;
+                cursor: pointer;
+                opacity: 0.7;
+                transition: opacity $transition-fast;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+
+        .tag-input-row {
+            display: flex;
+            gap: $spacing-sm;
+
+            .form-input {
+                flex: 1;
+            }
+        }
     }
 
     &__actions {

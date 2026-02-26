@@ -50,6 +50,11 @@ export default function SuggestEditModal({
     term.examples?.length ? term.examples : [{ vi: "", en: "", lo: "" }],
   );
 
+  const [partOfSpeech, setPartOfSpeech] = useState<string>(
+    term.partOfSpeech || "",
+  );
+  const [tags, setTags] = useState<string[]>(term.tags ?? []);
+  const [tagInput, setTagInput] = useState("");
   const [contributorNote, setContributorNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<LangKey>("vi");
@@ -81,19 +86,36 @@ export default function SuggestEditModal({
     }
   };
 
+  const addTag = () => {
+    const val = tagInput.trim();
+    if (val && !tags.includes(val)) {
+      setTags((prev) => [...prev, val]);
+    }
+    setTagInput("");
+  };
+
+  const removeTag = (tag: string) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
+  const PART_OF_SPEECH_OPTIONS = [
+    { value: "noun", label: "Danh từ" },
+    { value: "verb", label: "Động từ" },
+    { value: "adjective", label: "Tính từ" },
+    { value: "adverb", label: "Trạng từ" },
+    { value: "phrase", label: "Cụm từ" },
+    { value: "abbreviation", label: "Từ viết tắt" },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validation
-    if (!termText.vi?.trim()) {
-      toast.error(tEdit("termViRequired"));
-      return;
-    }
-
-    if (!definition.vi?.trim()) {
-      toast.error(tEdit("definitionViRequired"));
-      return;
-    }
 
     if (!contributorNote.trim()) {
       toast.error(tEdit("noteRequired"));
@@ -109,6 +131,8 @@ export default function SuggestEditModal({
         ? detailedExplanation
         : undefined,
       examples: examples.filter((ex) => Object.values(ex).some((v) => v)),
+      partOfSpeech: partOfSpeech || undefined,
+      tags: tags.length ? tags : undefined,
       category: term.category?._id || "",
       contributorNote: contributorNote.trim(),
     };
@@ -260,6 +284,68 @@ export default function SuggestEditModal({
                 <Plus size={16} />
                 {tEdit("addExample")}
               </button>
+            </div>
+          </div>
+
+          {/* Part of Speech */}
+          <div className="form-group">
+            <label className="form-label">
+              Từ loại
+              <span className="optional">{tEdit("optional")}</span>
+            </label>
+            <select
+              value={partOfSpeech}
+              onChange={(e) => setPartOfSpeech(e.target.value)}
+              className="form-select"
+            >
+              <option value="">-- Chọn từ loại --</option>
+              {PART_OF_SPEECH_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tags */}
+          <div className="form-group">
+            <label className="form-label">
+              Từ khóa (Tags)
+              <span className="optional">{tEdit("optional")}</span>
+            </label>
+            <div className="tag-input-wrapper">
+              <div className="tag-chips">
+                {tags.map((tag) => (
+                  <span key={tag} className="tag-chip">
+                    {tag}
+                    <button
+                      type="button"
+                      className="tag-chip__remove"
+                      onClick={() => removeTag(tag)}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="tag-input-row">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  placeholder="Nhập từ khóa rồi nhấn Enter hoặc Thêm"
+                  className="form-input"
+                />
+                <button
+                  type="button"
+                  className="add-example-btn"
+                  onClick={addTag}
+                >
+                  <Plus size={16} />
+                  Thêm
+                </button>
+              </div>
             </div>
           </div>
 

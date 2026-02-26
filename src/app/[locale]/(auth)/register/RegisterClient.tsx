@@ -11,7 +11,7 @@ import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import "../Auth.scss";
 
 export default function RegisterPage() {
-  const t = useTranslations();
+  const t = useTranslations("auth");
   const router = useRouter();
   const { register, isAuthenticated } = useAuth();
 
@@ -53,7 +53,14 @@ export default function RegisterPage() {
     if (/[^A-Za-z0-9]/.test(password)) score++;
 
     const levels = ["", "weak", "fair", "good", "strong", "strong"];
-    const texts = ["", "Yếu", "Trung bình", "Khá", "Mạnh", "Rất mạnh"];
+    const texts = [
+      "",
+      t("passwordStrengthWeak"),
+      t("passwordStrengthFair"),
+      t("passwordStrengthGood"),
+      t("passwordStrengthStrong"),
+      t("passwordStrengthVeryStrong"),
+    ];
 
     return {
       level: levels[score],
@@ -90,21 +97,21 @@ export default function RegisterPage() {
 
     // Full name validation
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "Vui lòng nhập họ tên";
+      newErrors.fullName = t("errorFullNameRequired");
     } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = "Họ tên phải có ít nhất 2 ký tự";
+      newErrors.fullName = t("errorFullNameMin");
     }
 
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = "Vui lòng nhập email";
+      newErrors.email = t("errorEmailRequired");
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = t("errorEmailInvalid");
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = "Vui lòng nhập mật khẩu";
+      newErrors.password = t("errorPasswordRequired");
     } else {
       const passwordValidation = validatePassword(formData.password);
       if (!passwordValidation.isValid) {
@@ -114,14 +121,14 @@ export default function RegisterPage() {
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
+      newErrors.confirmPassword = t("errorConfirmPasswordRequired");
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
+      newErrors.confirmPassword = t("errorPasswordMismatch");
     }
 
     // Terms validation
     if (!formData.acceptTerms) {
-      newErrors.acceptTerms = "Vui lòng đồng ý với điều khoản sử dụng";
+      newErrors.acceptTerms = t("errorTermsRequired");
     }
 
     setErrors(newErrors);
@@ -146,13 +153,10 @@ export default function RegisterPage() {
       });
 
       if (success) {
-        toast.success(
-          "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.",
-        );
+        toast.success(t("registerSuccess"));
         setAlertMessage({
           type: "success",
-          message:
-            "Đăng ký thành công! Chúng tôi đã gửi email xác thực đến địa chỉ email của bạn. Vui lòng kiểm tra hộp thư (bao gồm cả thư mục spam) và click vào link xác thực để kích hoạt tài khoản. Sau khi xác thực, bạn có thể đăng nhập.",
+          message: t("checkEmailForVerification"),
         });
 
         // Reset form
@@ -166,8 +170,7 @@ export default function RegisterPage() {
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      const message =
-        err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+      const message = err.response?.data?.message || t("registerFailed");
       setAlertMessage({ type: "error", message });
     } finally {
       setIsLoading(false);
@@ -198,10 +201,8 @@ export default function RegisterPage() {
             <i className="fa-solid fa-book-open"></i>
             OpenDic
           </div>
-          <h1 className="auth-card__title">Tạo tài khoản mới</h1>
-          <p className="auth-card__subtitle">
-            Đăng ký để bắt đầu hành trình học tập
-          </p>
+          <h1 className="auth-card__title">{t("registerTitle")}</h1>
+          <p className="auth-card__subtitle">{t("registerSubtitle")}</p>
         </div>
 
         {/* Body */}
@@ -224,7 +225,7 @@ export default function RegisterPage() {
                         textDecoration: "underline",
                       }}
                     >
-                      Đi đến trang đăng nhập
+                      {t("goToLogin")}
                     </Link>
                   </div>
                 )}
@@ -236,7 +237,7 @@ export default function RegisterPage() {
             {/* Full Name */}
             <div className="auth-input-group">
               <label className="auth-input-group__label" htmlFor="fullName">
-                Họ và tên
+                {t("fullName")}
               </label>
               <div className="auth-input-group__wrapper">
                 <input
@@ -244,7 +245,7 @@ export default function RegisterPage() {
                   id="fullName"
                   name="fullName"
                   className={`auth-input-group__input ${errors.fullName ? "auth-input-group__input--error" : ""}`}
-                  placeholder="Nhập họ tên đầy đủ"
+                  placeholder={t("fullNamePlaceholder")}
                   value={formData.fullName}
                   onChange={handleChange}
                   autoComplete="name"
@@ -262,7 +263,7 @@ export default function RegisterPage() {
             {/* Email */}
             <div className="auth-input-group">
               <label className="auth-input-group__label" htmlFor="email">
-                Email
+                {t("email")}
               </label>
               <div className="auth-input-group__wrapper">
                 <input
@@ -270,7 +271,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   className={`auth-input-group__input ${errors.email ? "auth-input-group__input--error" : ""}`}
-                  placeholder="Nhập email của bạn"
+                  placeholder={t("emailPlaceholder")}
                   value={formData.email}
                   onChange={handleChange}
                   autoComplete="email"
@@ -288,7 +289,7 @@ export default function RegisterPage() {
             {/* Password */}
             <div className="auth-input-group">
               <label className="auth-input-group__label" htmlFor="password">
-                Mật khẩu
+                {t("password")}
               </label>
               <div className="auth-input-group__wrapper">
                 <input
@@ -296,7 +297,7 @@ export default function RegisterPage() {
                   id="password"
                   name="password"
                   className={`auth-input-group__input auth-input-group__input--with-toggle ${errors.password ? "auth-input-group__input--error" : ""}`}
-                  placeholder="Tạo mật khẩu mạnh"
+                  placeholder={t("createPasswordPlaceholder")}
                   value={formData.password}
                   onChange={handleChange}
                   autoComplete="new-password"
@@ -306,7 +307,9 @@ export default function RegisterPage() {
                   type="button"
                   className="auth-input-group__toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  aria-label={
+                    showPassword ? t("hidePassword") : t("showPassword")
+                  }
                 >
                   <i
                     className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
@@ -329,7 +332,7 @@ export default function RegisterPage() {
                     ></div>
                   </div>
                   <span className="auth-password-strength__text">
-                    Độ mạnh: {passwordStrength.text}
+                    {t("passwordStrengthLabel")} {passwordStrength.text}
                   </span>
                 </div>
               )}
@@ -341,7 +344,7 @@ export default function RegisterPage() {
                 className="auth-input-group__label"
                 htmlFor="confirmPassword"
               >
-                Xác nhận mật khẩu
+                {t("confirmPassword")}
               </label>
               <div className="auth-input-group__wrapper">
                 <input
@@ -349,7 +352,7 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   name="confirmPassword"
                   className={`auth-input-group__input auth-input-group__input--with-toggle ${errors.confirmPassword ? "auth-input-group__input--error" : ""}`}
-                  placeholder="Nhập lại mật khẩu"
+                  placeholder={t("confirmPasswordPlaceholder")}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   autoComplete="new-password"
@@ -360,7 +363,7 @@ export default function RegisterPage() {
                   className="auth-input-group__toggle"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label={
-                    showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+                    showConfirmPassword ? t("hidePassword") : t("showPassword")
                   }
                 >
                   <i
@@ -386,8 +389,9 @@ export default function RegisterPage() {
                   onChange={handleChange}
                 />
                 <span>
-                  Tôi đồng ý với <Link href="/terms">Điều khoản sử dụng</Link>{" "}
-                  và <Link href="/privacy">Chính sách bảo mật</Link>
+                  {t("acceptTermsText")}{" "}
+                  <Link href="/terms">{t("termsLink")}</Link> \u0026{" "}
+                  <Link href="/privacy">{t("privacyLink")}</Link>
                 </span>
               </label>
               {errors.acceptTerms && (
@@ -403,19 +407,19 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <i className="fa-solid fa-spinner auth-spinner"></i>
-                  Đang xử lý...
+                  {t("registering")}...
                 </>
               ) : (
                 <>
                   <i className="fa-solid fa-user-plus"></i>
-                  Đăng ký
+                  {t("register")}
                 </>
               )}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="auth-divider">hoặc đăng ký với</div>
+          <div className="auth-divider">{t("orRegisterWith")}</div>
 
           {/* Social Login */}
           <div className="auth-social">
@@ -436,8 +440,8 @@ export default function RegisterPage() {
 
         {/* Footer */}
         <div className="auth-card__footer">
-          Đã có tài khoản?
-          <Link href="/login">Đăng nhập</Link>
+          {t("alreadyHaveAccount")}
+          <Link href="/login">{t("login")}</Link>
         </div>
       </div>
     </div>

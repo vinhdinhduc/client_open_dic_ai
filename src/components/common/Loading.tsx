@@ -494,11 +494,7 @@ export function CardLoading({ text }: { text?: string }) {
 }
 
 /** Loading khi search */
-export function SearchLoading({
-  text = "Đang tìm kiếm...",
-}: {
-  text?: string;
-}) {
+export function SearchLoading({ text }: { text?: string }) {
   return <Loading variant="magnifying-glass" size="md" text={text} />;
 }
 

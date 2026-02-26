@@ -36,7 +36,11 @@ export default function TermCard({
 
   const getTermText = (): string => {
     return (
-      term.term[currentLanguage] || term.term["en"] || term.term["vi"] || ""
+      term.term[currentLanguage] ||
+      term.term["en"] ||
+      term.term["vi"] ||
+      term.term["lo"] ||
+      ""
     );
   };
 
@@ -45,6 +49,7 @@ export default function TermCard({
       term.definition[currentLanguage] ||
       term.definition["en"] ||
       term.definition["vi"] ||
+      term.definition["lo"] ||
       ""
     );
   };
@@ -55,6 +60,7 @@ export default function TermCard({
       term.category.name[currentLanguage] ||
       term.category.name["en"] ||
       term.category.name["vi"] ||
+      term.category.name["lo"] ||
       ""
     );
   };

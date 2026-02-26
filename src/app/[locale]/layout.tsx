@@ -12,6 +12,9 @@ import { Toaster } from "react-hot-toast";
 export const metadata = {
   title: "Từ Điển Chuyên Ngành Mở",
   description: "Nền tảng từ điển chuyên ngành cộng đồng cho Việt Nam và Lào",
+  icons: {
+    icon: "/images/logo.jpg",
+  },
 };
 
 // Script để đọc theme từ localStorage trước khi React hydrate

@@ -3,11 +3,14 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import { authService } from "@/services/authService";
 import "../Auth.scss";
 
 function VerifyEmailContent() {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -24,7 +27,7 @@ function VerifyEmailContent() {
       verifyEmail(token);
     } else {
       setVerificationStatus("error");
-      setMessage("Token xác thực không hợp lệ");
+      setMessage(t("invalidTokenVerifyError"));
       setIsLoading(false);
     }
   }, [token]);
@@ -35,8 +38,8 @@ function VerifyEmailContent() {
       const response = await authService.verifyEmail(verificationToken);
       if (response.success) {
         setVerificationStatus("success");
-        setMessage(response.message || "Xác thực email thành công!");
-        toast.success("Xác thực email thành công!");
+        setMessage(response.message || t("verificationSuccess"));
+        toast.success(t("verificationSuccess"));
 
         // Redirect to home page after 3 seconds
         setTimeout(() => {
@@ -47,7 +50,7 @@ function VerifyEmailContent() {
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
         err.response?.data?.message ||
-        "Xác thực email thất bại. Token có thể đã hết hạn.";
+        t("verificationFailed");
       setVerificationStatus("error");
       setMessage(errorMessage);
       toast.error(errorMessage);
@@ -58,7 +61,7 @@ function VerifyEmailContent() {
 
   const handleResendEmail = async () => {
     if (!authService.isAuthenticated()) {
-      toast.error("Vui lòng đăng nhập để gửi lại email xác thực");
+      toast.error(t("loginToResendEmail"));
       router.push("/login");
       return;
     }
@@ -67,18 +70,14 @@ function VerifyEmailContent() {
     try {
       const response = await authService.resendVerificationEmail();
       if (response.success) {
-        toast.success(
-          "Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư của bạn!",
-        );
-        setMessage(
-          "Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư của bạn!",
-        );
+        toast.success(t("resendVerificationEmail"));
+        setMessage(t("checkEmailForVerification"));
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
         err.response?.data?.message ||
-        "Không thể gửi lại email. Vui lòng thử lại sau.";
+        t("cannotSendEmail");
       toast.error(errorMessage);
     } finally {
       setIsResending(false);
@@ -103,17 +102,14 @@ function VerifyEmailContent() {
               <h1 className="logo-text">Từ điển Mở</h1>
             </div>
             <h2 className="auth-card__title">
-              {verificationStatus === "verifying" && "Đang xác thực email..."}
-              {verificationStatus === "success" && "Xác thực thành công!"}
-              {verificationStatus === "error" && "Xác thực thất bại"}
+              {verificationStatus === "verifying" && t("verifyingTitle")}
+              {verificationStatus === "success" && t("verifySuccessTitle")}
+              {verificationStatus === "error" && t("verifyErrorTitle")}
             </h2>
             <p className="auth-card__subtitle">
-              {verificationStatus === "verifying" &&
-                "Vui lòng đợi trong giây lát"}
-              {verificationStatus === "success" &&
-                "Tài khoản của bạn đã được kích hoạt"}
-              {verificationStatus === "error" &&
-                "Đã xảy ra lỗi trong quá trình xác thực"}
+              {verificationStatus === "verifying" && t("verifyingSubtitle")}
+              {verificationStatus === "success" && t("verifySuccessSubtitle")}
+              {verificationStatus === "error" && t("verifyErrorSubtitle")}
             </p>
           </div>
 
@@ -121,7 +117,7 @@ function VerifyEmailContent() {
             {isLoading ? (
               <div className="verification-status">
                 <div className="spinner"></div>
-                <p>Đang xác thực email của bạn...</p>
+                <p>{t("verifyingMessage")}</p>
               </div>
             ) : (
               <>
@@ -132,10 +128,10 @@ function VerifyEmailContent() {
                     </div>
                     <p className="success-message">{message}</p>
                     <p className="redirect-message">
-                      Bạn sẽ được chuyển hướng về trang chủ trong giây lát...
+                      {t("verifyRedirectMessage")}
                     </p>
                     <Link href="/" className="btn btn-primary">
-                      Về trang chủ
+                      {tCommon("backToHome")}
                     </Link>
                   </div>
                 )}
@@ -152,10 +148,10 @@ function VerifyEmailContent() {
                         className="btn btn-primary"
                         disabled={isResending}
                       >
-                        {isResending ? "Đang gửi..." : "Gửi lại email xác thực"}
+                        {isResending ? t("resending") : t("resendVerificationEmail")}
                       </button>
                       <Link href="/login" className="btn btn-secondary">
-                        Đăng nhập
+                        {t("login")}
                       </Link>
                     </div>
                   </div>
@@ -166,9 +162,9 @@ function VerifyEmailContent() {
 
           <div className="auth-card__footer">
             <p className="auth-card__footer-text">
-              Cần hỗ trợ?{" "}
+              {t("needSupport")}{" "}
               <Link href="/contact" className="link">
-                Liên hệ với chúng tôi
+                {t("contactUs")}
               </Link>
             </p>
           </div>

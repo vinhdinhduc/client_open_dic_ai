@@ -79,7 +79,6 @@ export default function SearchResultsClient({
     const checkStatus = async () => {
       try {
         const res = await checkFavorite(exactMatch._id);
-        console.log("Check favorite", res);
 
         if (res.success) {
           setIsFavorited(res.data.isFavorited);
@@ -167,7 +166,13 @@ export default function SearchResultsClient({
     multiLang: { vi?: string; en?: string; lo?: string } | undefined,
   ): string => {
     if (!multiLang) return "";
-    return multiLang[currentLanguage] || multiLang.vi || multiLang.en || "";
+    return (
+      multiLang[currentLanguage as keyof typeof multiLang] ||
+      multiLang.vi ||
+      multiLang.en ||
+      multiLang.lo ||
+      ""
+    );
   };
 
   const truncateText = (text: string, maxLength: number): string => {

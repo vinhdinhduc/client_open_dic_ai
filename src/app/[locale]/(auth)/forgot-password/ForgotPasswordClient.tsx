@@ -2,11 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import { authService, validateEmail } from "@/services/authService";
 import "../Auth.scss";
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -17,12 +19,12 @@ export default function ForgotPasswordPage() {
     setError("");
 
     if (!email.trim()) {
-      setError("Vui lòng nhập email");
+      setError(t("errorEmailRequired"));
       return;
     }
 
     if (!validateEmail(email)) {
-      setError("Email không hợp lệ");
+      setError(t("errorEmailInvalid"));
       return;
     }
 
@@ -32,12 +34,11 @@ export default function ForgotPasswordPage() {
       const response = await authService.forgotPassword(email);
       if (response.success) {
         setEmailSent(true);
-        toast.success("Email đặt lại mật khẩu đã được gửi!");
+        toast.success(t("emailSentTitle"));
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      const message =
-        err.response?.data?.message || "Không thể gửi email. Vui lòng thử lại.";
+      const message = err.response?.data?.message || t("cannotSendEmail");
       setError(message);
       toast.error(message);
     } finally {
@@ -69,10 +70,8 @@ export default function ForgotPasswordPage() {
             <i className="fa-solid fa-book-open"></i>
             OpenDic
           </div>
-          <h1 className="auth-card__title">Quên mật khẩu</h1>
-          <p className="auth-card__subtitle">
-            Nhập email để nhận liên kết đặt lại mật khẩu
-          </p>
+          <h1 className="auth-card__title">{t("forgotPasswordTitle")}</h1>
+          <p className="auth-card__subtitle">{t("forgotPasswordSubtitle")}</p>
         </div>
 
         {/* Body */}
@@ -82,15 +81,11 @@ export default function ForgotPasswordPage() {
               <div className="auth-success-message__icon">
                 <i className="fa-solid fa-envelope-circle-check"></i>
               </div>
-              <h3>Email đã được gửi!</h3>
+              <h3>{t("emailSentTitle")}</h3>
               <p>
-                Chúng tôi đã gửi liên kết đặt lại mật khẩu đến{" "}
-                <strong>{email}</strong>. Vui lòng kiểm tra hộp thư (kể cả thư
-                rác).
+                {t("emailSentMessage")} <strong>{email}</strong>
               </p>
-              <p className="auth-success-message__note">
-                Liên kết có hiệu lực trong 30 phút.
-              </p>
+              <p className="auth-success-message__note">{t("linkExpiry")}</p>
               <button
                 className="auth-submit auth-submit--secondary"
                 onClick={() => {
@@ -99,7 +94,7 @@ export default function ForgotPasswordPage() {
                 }}
               >
                 <i className="fa-solid fa-rotate-left"></i>
-                Gửi lại email
+                {t("resendEmail")}
               </button>
             </div>
           ) : (
@@ -116,7 +111,7 @@ export default function ForgotPasswordPage() {
                 {/* Email */}
                 <div className="auth-input-group">
                   <label className="auth-input-group__label" htmlFor="email">
-                    Email
+                    {t("email")}
                   </label>
                   <div className="auth-input-group__wrapper">
                     <input
@@ -124,7 +119,7 @@ export default function ForgotPasswordPage() {
                       id="email"
                       name="email"
                       className={`auth-input-group__input ${error ? "auth-input-group__input--error" : ""}`}
-                      placeholder="Nhập email đã đăng ký"
+                      placeholder={t("forgotPasswordEmailPlaceholder")}
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
@@ -146,12 +141,12 @@ export default function ForgotPasswordPage() {
                   {isLoading ? (
                     <>
                       <i className="fa-solid fa-spinner auth-spinner"></i>
-                      Đang gửi...
+                      {t("sendingEmail")}
                     </>
                   ) : (
                     <>
                       <i className="fa-solid fa-paper-plane"></i>
-                      Gửi liên kết đặt lại
+                      {t("sendResetLink")}
                     </>
                   )}
                 </button>
@@ -162,8 +157,8 @@ export default function ForgotPasswordPage() {
 
         {/* Footer */}
         <div className="auth-card__footer">
-          Đã nhớ mật khẩu?
-          <Link href="/login">Đăng nhập</Link>
+          {t("rememberPassword")}
+          <Link href="/login">{t("login")}</Link>
         </div>
       </div>
     </div>

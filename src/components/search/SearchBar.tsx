@@ -176,6 +176,13 @@ export default function SearchBar({
           setSelectedIndex(-1);
           inputRef.current?.blur();
           break;
+        case "Space":
+          //Nếu space thì phần gost thêm dấu cách
+          if (ghostSuggestion && ghostText) {
+            e.preventDefault();
+            setKeyword(ghostSuggestion + " ");
+            setShowDropdown(false);
+          }
 
         case "ArrowRight":
           // Autocomplete khi cursor ở cuối và có ghost text
@@ -314,7 +321,7 @@ export default function SearchBar({
         {/* Tab hint - hiển thị khi có ghost text */}
         {ghostText && isFocused && (
           <div className="search-bar__tab-hint">
-            <kbd>Tab</kbd> để hoàn thành
+            <kbd>Tab</kbd> {t("search.complete")}
           </div>
         )}
       </div>

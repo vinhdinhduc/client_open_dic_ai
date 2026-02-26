@@ -11,7 +11,7 @@ import GoogleLoginButton from "@/components/common/GoogleLoginButton";
 import "../Auth.scss";
 
 export default function LoginPage() {
-  const t = useTranslations();
+  const t = useTranslations("auth");
   const router = useRouter();
   const { login, isAuthenticated, user } = useAuth();
 
@@ -64,15 +64,15 @@ export default function LoginPage() {
     const newErrors: { email?: string; password?: string } = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = "Vui lòng nhập email";
+      newErrors.email = t("errorEmailRequired");
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = t("errorEmailInvalid");
     }
 
     if (!formData.password) {
-      newErrors.password = "Vui lòng nhập mật khẩu";
+      newErrors.password = t("errorPasswordRequired");
     } else if (formData.password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+      newErrors.password = t("errorPasswordMin");
     }
 
     setErrors(newErrors);
@@ -114,7 +114,7 @@ export default function LoginPage() {
       const message =
         err.response?.data?.error ||
         err.response?.data?.message ||
-        "Đăng nhập thất bại. Vui lòng thử lại.";
+        t("loginFailed");
       console.log("Message", err);
 
       setAlertMessage({ type: "error", message });
@@ -155,10 +155,8 @@ export default function LoginPage() {
             <i className="fa-solid fa-book-open"></i>
             OpenDic
           </div>
-          <h1 className="auth-card__title">Chào mừng trở lại!</h1>
-          <p className="auth-card__subtitle">
-            Đăng nhập để tiếp tục khám phá từ điển
-          </p>
+          <h1 className="auth-card__title">{t("welcome")}</h1>
+          <p className="auth-card__subtitle">{t("dear")}</p>
         </div>
 
         {/* Body */}
@@ -177,7 +175,7 @@ export default function LoginPage() {
             {/* Email */}
             <div className="auth-input-group">
               <label className="auth-input-group__label" htmlFor="email">
-                Email
+                {t("email")}
               </label>
               <div className="auth-input-group__wrapper">
                 <input
@@ -185,7 +183,7 @@ export default function LoginPage() {
                   id="email"
                   name="email"
                   className={`auth-input-group__input ${errors.email ? "auth-input-group__input--error" : ""}`}
-                  placeholder="Nhập email của bạn"
+                  placeholder={t("emailPlaceholder")}
                   value={formData.email}
                   onChange={handleChange}
                   autoComplete="email"
@@ -203,7 +201,7 @@ export default function LoginPage() {
             {/* Password */}
             <div className="auth-input-group">
               <label className="auth-input-group__label" htmlFor="password">
-                Mật khẩu
+                {t("password")}
               </label>
               <div className="auth-input-group__wrapper">
                 <input
@@ -211,7 +209,7 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   className={`auth-input-group__input auth-input-group__input--with-toggle ${errors.password ? "auth-input-group__input--error" : ""}`}
-                  placeholder="Nhập mật khẩu"
+                  placeholder={t("passwordPlaceholder")}
                   value={formData.password}
                   onChange={handleChange}
                   autoComplete="current-password"
@@ -221,7 +219,9 @@ export default function LoginPage() {
                   type="button"
                   className="auth-input-group__toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  aria-label={
+                    showPassword ? t("hidePassword") : t("showPassword")
+                  }
                 >
                   <i
                     className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
@@ -245,10 +245,10 @@ export default function LoginPage() {
                   checked={formData.rememberMe}
                   onChange={handleChange}
                 />
-                <span>Ghi nhớ đăng nhập</span>
+                <span>{t("rememberMe")}</span>
               </label>
               <Link href="/forgot-password" className="auth-options__forgot">
-                Quên mật khẩu?
+                {t("forgotPassword")}
               </Link>
             </div>
 
@@ -257,19 +257,19 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <i className="fa-solid fa-spinner auth-spinner"></i>
-                  Đang đăng nhập...
+                  {t("logingIn")}...
                 </>
               ) : (
                 <>
                   <i className="fa-solid fa-right-to-bracket"></i>
-                  Đăng nhập
+                  {t("login")}
                 </>
               )}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="auth-divider">hoặc đăng nhập với</div>
+          <div className="auth-divider">{t("orLoginWith")}</div>
 
           {/* Social Login */}
           <div className="auth-social">
@@ -287,8 +287,8 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="auth-card__footer">
-          Chưa có tài khoản?
-          <Link href="/register">Đăng ký ngay</Link>
+          {t("dontHaveAccount")}
+          <Link href="/register">{t("registerNow")}</Link>
         </div>
       </div>
     </div>

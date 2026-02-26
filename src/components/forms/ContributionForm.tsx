@@ -69,60 +69,85 @@ export default function ContributionForm() {
     loadCategories();
   }, []);
 
-  // Load data from AI if available
   useEffect(() => {
     const fromAI = searchParams.get("from");
     const storageKey = searchParams.get("key");
-    const aiData = searchParams.get("aiData"); // Fallback for old method
+    const aiData = searchParams.get("aiData");
     const termFromQuery = searchParams.get("term");
 
-    // Method 1: Load from sessionStorage (tối ưu)
     if (fromAI === "ai" && storageKey) {
       const data = loadContributionData(decodeURIComponent(storageKey));
 
       if (data) {
+        const lang = (
+          data.language && ["vi", "en", "lo"].includes(data.language)
+            ? data.language
+            : "vi"
+        ) as LanguageTab;
+
         setFormData((prev) => ({
           ...prev,
           term: {
-            vi: data.term || "",
-            en: data.language === "en" ? data.term : undefined,
-            lo: data.language === "lo" ? data.term : undefined,
+            ...prev.term,
+            [lang]: data.term || "",
           },
           definition: {
-            vi: data.definition || "",
+            ...prev.definition,
+            [lang]: data.definition || "",
           },
           detailedExplanation: {
-            vi: data.detailedExplanation || "",
+            ...prev.detailedExplanation,
+            [lang]: data.detailedExplanation || "",
           },
           examples: data.examples?.length
-            ? data.examples.map((ex: string) => ({ vi: ex }))
+            ? data.examples.map((ex: string) => ({ [lang]: ex }) as Example)
             : [{ vi: "" }],
           partOfSpeech: (data.partOfSpeech as PartOfSpeech) || undefined,
           relatedTerms: data.relatedTerms || [],
           tags: data.tags || [],
         }));
 
-        // Clear storage sau khi đã load
         clearContributionData(decodeURIComponent(storageKey));
+        if (
+          data.language &&
+          data.language !== "vi" &&
+          ["en", "lo"].includes(data.language)
+        ) {
+          setCurrentLang(data.language as LanguageTab);
+        }
         toast.success(t("aiDataLoaded"));
-      } else {
-        toast.error(t("aiDataError"));
       }
     } else if (aiData) {
       try {
         const parsed = JSON.parse(decodeURIComponent(aiData));
+        const lang = (
+          parsed.language && ["vi", "en", "lo"].includes(parsed.language)
+            ? parsed.language
+            : "vi"
+        ) as LanguageTab;
+
         setFormData((prev) => ({
           ...prev,
-          term: { vi: parsed.term || termFromQuery || "" },
-          definition: { vi: parsed.definition || "" },
-          detailedExplanation: { vi: parsed.detailedExplanation || "" },
+          term: {
+            ...prev.term,
+            [lang]: parsed.term || termFromQuery || "",
+          },
+          definition: {
+            ...prev.definition,
+            [lang]: parsed.definition || "",
+          },
+          detailedExplanation: {
+            ...prev.detailedExplanation,
+            [lang]: parsed.detailedExplanation || "",
+          },
           examples: parsed.examples
-            ? parsed.examples.map((ex: string) => ({ vi: ex }))
+            ? parsed.examples.map((ex: string) => ({ [lang]: ex }) as Example)
             : [{ vi: "" }],
           partOfSpeech: (parsed.partOfSpeech as PartOfSpeech) || undefined,
           relatedTerms: parsed.relatedTerms || [],
           tags: parsed.tags || [],
         }));
+        if (lang !== "vi") setCurrentLang(lang);
       } catch (error) {
         console.error("Failed to parse AI data from URL:", error);
       }
@@ -235,15 +260,24 @@ export default function ContributionForm() {
       return;
     }
 
-    // Validation
-    if (!formData.term.vi?.trim()) {
+    const termFilled =
+      formData.term.vi?.trim() ||
+      formData.term.en?.trim() ||
+      formData.term.lo?.trim();
+    if (!termFilled) {
       toast.error(t("termRequired"));
       return;
     }
-    if (!formData.definition.vi?.trim()) {
+
+    const defFilled =
+      formData.definition.vi?.trim() ||
+      formData.definition.en?.trim() ||
+      formData.definition.lo?.trim();
+    if (!defFilled) {
       toast.error(t("definitionRequired"));
       return;
     }
+
     if (!formData.category) {
       toast.error(t("categoryRequired"));
       return;
@@ -256,22 +290,25 @@ export default function ContributionForm() {
       const submissionData = {
         type: "new_term" as const,
         term: {
-          vi: formData.term.vi?.trim() || "",
+          vi: formData.term.vi?.trim() || undefined,
           lo: formData.term.lo?.trim() || undefined,
           en: formData.term.en?.trim() || undefined,
         },
         definition: {
-          vi: formData.definition.vi?.trim() || "",
+          vi: formData.definition.vi?.trim() || undefined,
           lo: formData.definition.lo?.trim() || undefined,
           en: formData.definition.en?.trim() || undefined,
         },
-        detailedExplanation: formData.detailedExplanation?.vi
-          ? {
-              vi: formData.detailedExplanation.vi?.trim() || "",
-              lo: formData.detailedExplanation.lo?.trim() || undefined,
-              en: formData.detailedExplanation.en?.trim() || undefined,
-            }
-          : undefined,
+        detailedExplanation:
+          formData.detailedExplanation?.vi?.trim() ||
+          formData.detailedExplanation?.en?.trim() ||
+          formData.detailedExplanation?.lo?.trim()
+            ? {
+                vi: formData.detailedExplanation?.vi?.trim() || undefined,
+                lo: formData.detailedExplanation?.lo?.trim() || undefined,
+                en: formData.detailedExplanation?.en?.trim() || undefined,
+              }
+            : undefined,
         examples: formData.examples
           ?.filter((ex) => ex.vi?.trim() || ex.lo?.trim() || ex.en?.trim())
           .map((ex) => ({
@@ -314,11 +351,13 @@ export default function ContributionForm() {
         <div className="language-tabs">
           <button
             type="button"
-            className={`language-tab ${currentLang === "vi" ? "active" : ""}`}
+            className={`language-tab ${currentLang === "vi" ? "active" : ""} ${formData.term.vi || formData.definition.vi ? "has-content" : ""}`}
             onClick={() => setCurrentLang("vi")}
           >
             🇻🇳 Tiếng Việt
-            <span className="required-badge">*</span>
+            {(formData.term.vi || formData.definition.vi) && (
+              <span className="content-indicator">●</span>
+            )}
           </button>
           <button
             type="button"
@@ -356,7 +395,6 @@ export default function ContributionForm() {
               onChange={(e) =>
                 handleInputChange("term", e.target.value, currentLang)
               }
-              required={currentLang === "vi"}
             />
           </div>
 
@@ -372,7 +410,6 @@ export default function ContributionForm() {
                 handleInputChange("definition", e.target.value, currentLang)
               }
               rows={3}
-              required={currentLang === "vi"}
             />
           </div>
 

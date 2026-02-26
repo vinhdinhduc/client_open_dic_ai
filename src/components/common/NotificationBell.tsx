@@ -156,6 +156,7 @@ export default function NotificationBell({
     if (type.includes("comment")) return "comment";
     return "system";
   };
+  console.log("Notification", notifications);
 
   return (
     <div className={`notification-bell ${className}`} ref={dropdownRef}>
