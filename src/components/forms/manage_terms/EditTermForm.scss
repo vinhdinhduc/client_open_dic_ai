@@ -559,3 +559,108 @@
         }
     }
 }
+
+// ============ Related Terms ============
+.related-terms-list {
+    margin-bottom: 0.625rem;
+}
+
+.tag-item--related {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.25);
+}
+
+.related-search-wrapper {
+    position: relative;
+
+    .related-search-input {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 0.75rem;
+        background: var(--bg-secondary, #f8fafc);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px;
+        transition: border-color 0.2s;
+
+        &:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+        }
+
+        svg {
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .form-input {
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            padding-left: 0;
+
+            &:focus {
+                outline: none;
+                box-shadow: none;
+            }
+        }
+
+        .spin {
+            flex-shrink: 0;
+            animation: spin 1s linear infinite;
+        }
+    }
+
+    .related-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: var(--bg-card, #fff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        z-index: 50;
+        overflow: hidden;
+        max-height: 220px;
+        overflow-y: auto;
+
+        &__item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.6rem 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.15s;
+
+            &:hover {
+                background: rgba(102, 126, 234, 0.08);
+            }
+        }
+
+        &__vi {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        &__en {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        &__empty {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+    }
+}

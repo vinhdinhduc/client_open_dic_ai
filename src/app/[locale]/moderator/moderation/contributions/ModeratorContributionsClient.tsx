@@ -251,13 +251,8 @@ export default function ModeratorContributionPage() {
   };
 
   const getTermName = (contribution: Contribution) => {
-    if (contribution.term?.vi) {
-      return contribution.term.vi;
-    }
-    if (contribution.targetTerm?.term?.vi) {
-      return contribution.targetTerm.term.vi;
-    }
-    return "Thuật ngữ mới";
+    const term = contribution.term ?? contribution.targetTerm?.term;
+    return term?.vi || term?.en || term?.lo || "N/A";
   };
 
   const getContributorName = (contribution: Contribution) => {
@@ -312,7 +307,7 @@ export default function ModeratorContributionPage() {
           </div>
           <div className="header-text">
             <h1>Kiểm duyệt đóng góp</h1>
-            <p>Xem xét và phê duyệt các đóng góp chỉnh sửa từ cộng đồng</p>
+            <p>Xem xét và phê duyệt các đóng góp từ cộng đồng</p>
           </div>
         </div>
         <div className="header-actions">
@@ -497,10 +492,11 @@ export default function ModeratorContributionPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="pagination">
-                <div className="pagination-info">
+              <div className="admin-pagination">
+                <div className="admin-pagination__info">
                   <label htmlFor="itemsPerPage">Số lượng mỗi trang</label>
                   <select
+                    name="itemsPerPage"
                     id="itemsPerPage"
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -511,33 +507,39 @@ export default function ModeratorContributionPage() {
                   </select>
                   <p>
                     Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                    {Math.min(currentPage * itemsPerPage, totalItems)} /{" "}
+                    {Math.min(currentPage * itemsPerPage, totalItems)} trong{" "}
                     {totalItems} đóng góp
                   </p>
                 </div>
-                <div className="pagination-controls">
+                <div className="admin-pagination__controls">
                   <button
-                    className="pagination-btn"
+                    className="admin-pagination__btn"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(1)}
+                    title="Trang đầu"
                   >
                     <ChevronLeft size={16} />
                     <ChevronLeft size={16} />
                   </button>
                   <button
-                    className="pagination-btn"
+                    className="admin-pagination__btn"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((p) => p - 1)}
+                    title="Trang trước"
                   >
                     <ChevronLeft size={16} />
                   </button>
                   {getPageNumbers().map((page, index) =>
                     page === "..." ? (
-                      <span key={index}>...</span>
+                      <span key={index} className="admin-pagination__ellipsis">...</span>
                     ) : (
                       <button
                         key={index}
-                        className={`pagination-btn ${page === currentPage ? "active" : ""}`}
+                        className={`admin-pagination__btn ${
+                          page === currentPage
+                            ? "admin-pagination__btn--active"
+                            : ""
+                        }`}
                         onClick={() => setCurrentPage(Number(page))}
                       >
                         {page}
@@ -545,16 +547,18 @@ export default function ModeratorContributionPage() {
                     ),
                   )}
                   <button
-                    className="pagination-btn"
+                    className="admin-pagination__btn"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage((p) => p + 1)}
+                    title="Trang sau"
                   >
                     <ChevronRight size={16} />
                   </button>
                   <button
-                    className="pagination-btn"
+                    className="admin-pagination__btn"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(totalPages)}
+                    title="Trang cuối"
                   >
                     <ChevronRight size={16} />
                     <ChevronRight size={16} />

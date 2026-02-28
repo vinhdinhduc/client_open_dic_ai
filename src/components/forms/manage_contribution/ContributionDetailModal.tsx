@@ -60,17 +60,12 @@ export default function ContributionDetailModal({
     });
   };
 
-  const getTermName = () => {
-    if (contribution.term?.vi) {
-      return contribution.term.vi;
-    }
-    if (contribution.targetTerm?.term?.vi) {
-      return contribution.targetTerm.term.vi;
-    }
-    return "Thuật ngữ mới";
+  const getTermName = (contribution: Contribution) => {
+    const term = contribution.term ?? contribution.targetTerm?.term;
+    return term?.vi || term?.en || term?.lo || "N/A";
   };
 
-  const getContributorName = () => {
+  const getContributorName = (contribution: Contribution) => {
     return contribution.contributor?.fullName || "Ẩn danh";
   };
 
@@ -98,7 +93,7 @@ export default function ContributionDetailModal({
               >
                 {getTypeBadge(contribution.type).label}
               </span>
-              <p className="detail-title">{getTermName()}</p>
+              <p className="detail-title">{getTermName(contribution)}</p>
               {contribution.targetTerm && (
                 <a
                   href={`/terms/${contribution.targetTerm.slug}`}
@@ -213,7 +208,7 @@ export default function ContributionDetailModal({
             <div className="detail-grid">
               <div className="detail-item">
                 <label>Người gửi:</label>
-                <p>{getContributorName()}</p>
+                <p>{getContributorName(contribution)}</p>
               </div>
               <div className="detail-item">
                 <label>Email:</label>

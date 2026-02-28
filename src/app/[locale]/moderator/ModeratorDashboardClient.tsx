@@ -126,8 +126,8 @@ export default function ModeratorDashboardPage() {
               type: "contribution",
               title:
                 c.type === "new_term"
-                  ? `Thuật ngữ mới: ${c.term?.vi || "N/A"}`
-                  : `Gợi ý sửa: ${c.term?.vi || "N/A"}`,
+                  ? `Thuật ngữ mới: ${c.term?.vi || c.term?.en || c.term?.lo || "N/A"}`
+                  : `Gợi ý sửa: ${c.term?.vi || c.term?.en || c.term?.lo || "N/A"}`,
               user: c.contributor?.fullName || "Người dùng",
               date: c.createdAt,
               status: c.status,
@@ -149,7 +149,11 @@ export default function ModeratorDashboardPage() {
             user: c.author?.fullName || "Người dùng",
             date: c.createdAt,
             status: c.status,
-            categoryName: c.term?.category?.name?.vi || "",
+            categoryName:
+              c.term?.category?.name?.vi ||
+              c.term?.category?.name?.en ||
+              c.term?.category?.name?.lo ||
+              "",
           });
         });
       }
@@ -273,6 +277,7 @@ export default function ModeratorDashboardPage() {
       console.error("Error marking all as read:", error);
     }
   };
+  console.log("Check recent activity", recentActivities);
 
   if (loading) {
     return (

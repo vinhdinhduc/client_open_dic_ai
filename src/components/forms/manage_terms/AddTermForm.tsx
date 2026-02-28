@@ -14,9 +14,16 @@ import {
   Languages,
   TicketPercent,
   Info,
+  Link2,
+  X,
+  Search,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { createTerm, CreateTermData } from "@/services/termService";
+import {
+  createTerm,
+  CreateTermData,
+  getAllTerms,
+} from "@/services/termService";
 import categoryService, { Category } from "@/services/categoryService";
 import { MultiLangText, Example, LangKey } from "./types";
 import "./AddTermForm.scss";
@@ -78,6 +85,22 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
+  // Related terms state
+  type RelatedTermOption = {
+    _id: string;
+    term: { vi?: string; en?: string; lo?: string };
+  };
+  const [relatedTermIds, setRelatedTermIds] = useState<string[]>([]);
+  const [relatedTermObjects, setRelatedTermObjects] = useState<
+    RelatedTermOption[]
+  >([]);
+  const [relatedSearchInput, setRelatedSearchInput] = useState("");
+  const [relatedSearchResults, setRelatedSearchResults] = useState<
+    RelatedTermOption[]
+  >([]);
+  const [relatedSearchLoading, setRelatedSearchLoading] = useState(false);
+  const [showRelatedDropdown, setShowRelatedDropdown] = useState(false);
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -92,6 +115,39 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     };
     fetchCategories();
   }, []);
+
+  // Debounced search for related terms
+  useEffect(() => {
+    if (!relatedSearchInput.trim()) {
+      setRelatedSearchResults([]);
+      setShowRelatedDropdown(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setRelatedSearchLoading(true);
+      try {
+        const res = await getAllTerms(
+          "all",
+          "approved",
+          1,
+          10,
+          relatedSearchInput.trim(),
+        );
+        if (res.success) {
+          const filtered = res.data.terms.filter(
+            (t) => !relatedTermIds.includes(t._id),
+          );
+          setRelatedSearchResults(filtered);
+          setShowRelatedDropdown(true);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setRelatedSearchLoading(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [relatedSearchInput, relatedTermIds]);
 
   // Handlers for multi-lang fields
   const handleMultiLangChange = (
@@ -142,14 +198,16 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
 
   // Form validation
   const validateForm = (): boolean => {
-    if (!term.vi?.trim()) {
-      toast.error("Thuật ngữ tiếng Việt là bắt buộc");
-      setActiveTab("vi");
+    if (!term.vi?.trim() && !term.en?.trim() && !term.lo?.trim()) {
+      toast.error("Vui lòng nhập thuật ngữ ít nhất một ngôn ngữ");
       return false;
     }
-    if (!definition.vi?.trim()) {
-      toast.error("Định nghĩa tiếng Việt là bắt buộc");
-      setActiveTab("vi");
+    if (
+      !definition.vi?.trim() &&
+      !definition.en?.trim() &&
+      !definition.lo?.trim()
+    ) {
+      toast.error("Vui lòng nhập định nghĩa ít nhất một ngôn ngữ");
       return false;
     }
     if (!categoryId) {
@@ -169,12 +227,12 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     // Build term data
     const termData: CreateTermData = {
       term: {
-        vi: term.vi!.trim(),
+        vi: term.vi?.trim() || undefined,
         en: term.en?.trim() || undefined,
         lo: term.lo?.trim() || undefined,
       },
       definition: {
-        vi: definition.vi!.trim(),
+        vi: definition.vi?.trim() || undefined,
         en: definition.en?.trim() || undefined,
         lo: definition.lo?.trim() || undefined,
       },
@@ -208,6 +266,10 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
 
     if (tags.length > 0) {
       termData.tags = tags;
+    }
+
+    if (relatedTermIds.length > 0) {
+      termData.relatedTerms = relatedTermIds;
     }
 
     try {
@@ -271,7 +333,6 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
           >
             <span className="tab-flag">{flag}</span>
             <span className="tab-label">{label}</span>
-            {key === "vi" && <span className="required-indicator">*</span>}
           </button>
         ))}
       </div>
@@ -286,7 +347,6 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
               <label className="form-label">
                 <Languages size={16} />
                 Thuật ngữ
-                {activeTab === "vi" && <span className="required">*</span>}
               </label>
               <input
                 type="text"
@@ -305,7 +365,6 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
               <label className="form-label">
                 <FileText size={16} />
                 Định nghĩa
-                {activeTab === "vi" && <span className="required">*</span>}
               </label>
               <textarea
                 value={definition[activeTab] || ""}
@@ -487,6 +546,94 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                     <Plus size={16} />
                   </button>
                 </div>
+              </div>
+            </div>
+
+            {/* Related Terms */}
+            <div className="form-group">
+              <label className="form-label">
+                <Link2 size={16} />
+                Thuật ngữ liên quan
+                <span className="optional">(không bắt buộc)</span>
+              </label>
+              {relatedTermObjects.length > 0 && (
+                <div className="tags-list related-terms-list">
+                  {relatedTermObjects.map((rt) => (
+                    <span key={rt._id} className="tag-item tag-item--related">
+                      {rt.term?.vi || rt.term?.en || "Thuật ngữ"}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRelatedTermIds((prev) =>
+                            prev.filter((id) => id !== rt._id),
+                          );
+                          setRelatedTermObjects((prev) =>
+                            prev.filter((obj) => obj._id !== rt._id),
+                          );
+                        }}
+                        disabled={submitting}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="related-search-wrapper">
+                <div className="related-search-input">
+                  <Search size={15} />
+                  <input
+                    type="text"
+                    value={relatedSearchInput}
+                    onChange={(e) => setRelatedSearchInput(e.target.value)}
+                    onFocus={() =>
+                      relatedSearchResults.length > 0 &&
+                      setShowRelatedDropdown(true)
+                    }
+                    onBlur={() =>
+                      setTimeout(() => setShowRelatedDropdown(false), 150)
+                    }
+                    placeholder="Tìm và thêm thuật ngữ liên quan..."
+                    className="form-input"
+                    disabled={submitting}
+                  />
+                  {relatedSearchLoading && (
+                    <Loader2 size={14} className="spin" />
+                  )}
+                </div>
+                {showRelatedDropdown && (
+                  <div className="related-dropdown">
+                    {relatedSearchResults.length > 0 ? (
+                      relatedSearchResults.map((result) => (
+                        <button
+                          key={result._id}
+                          type="button"
+                          className="related-dropdown__item"
+                          onMouseDown={() => {
+                            setRelatedTermIds((prev) => [...prev, result._id]);
+                            setRelatedTermObjects((prev) => [...prev, result]);
+                            setRelatedSearchInput("");
+                            setRelatedSearchResults([]);
+                            setShowRelatedDropdown(false);
+                          }}
+                        >
+                          <span className="related-dropdown__vi">
+                            {result.term?.vi || "—"}
+                          </span>
+                          {result.term?.en && (
+                            <span className="related-dropdown__en">
+                              {result.term.en}
+                            </span>
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="related-dropdown__empty">
+                        Không tìm thấy thuật ngữ
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

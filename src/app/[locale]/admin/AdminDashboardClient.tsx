@@ -74,8 +74,8 @@ export default function AdminDashboard() {
           type: c.type,
           title:
             c.type === "new_term"
-              ? c.term?.vi || "Thuật ngữ mới"
-              : `Chỉnh sửa: ${c.term?.vi || ""}`,
+              ? c.term?.vi || c.term?.en || c.term?.lo || "Thuật ngữ mới"
+              : `Chỉnh sửa: ${c.term?.vi || c.term?.en || c.term?.lo || ""}`,
           user: c.contributor?.fullName || "Người dùng",
           date: new Date(c.createdAt).toLocaleDateString("vi-VN"),
           status: c.status,

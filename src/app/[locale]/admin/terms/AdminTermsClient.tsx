@@ -380,7 +380,7 @@ export default function TermsPage() {
                   <td>
                     <div className="term-cell">
                       <span className="term-cell__vi">
-                        {term.term.vi || ""}
+                        {term.term.vi || term.term.en || term.term.lo || ""}
                       </span>
                       {term.term.en && (
                         <span className="term-cell__en">{term.term.en}</span>

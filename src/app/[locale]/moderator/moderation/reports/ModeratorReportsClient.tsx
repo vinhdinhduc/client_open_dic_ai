@@ -158,6 +158,23 @@ export default function ModeratorReportPage() {
     setReportToDismiss(null);
   };
 
+  const getReasonText = (reason: string) => {
+    switch (reason) {
+      case "duplicate":
+        return "Thuật ngữ trùng lặp";
+      case "incorrect":
+        return "Thông tin không chính xác";
+      case "spam":
+        return "Spam hoặc quảng cáo";
+      case "inappropriate":
+        return "Nội dung không phù hợp";
+      case "other":
+        return "Lý do khác";
+      default:
+        return reason;
+    }
+  };
+
   const getStatusBadge = (status: Report["status"]) => {
     const statusConfig = {
       pending: { label: "Chờ xử lý", className: "badge--warning" },
@@ -352,7 +369,9 @@ export default function ModeratorReportPage() {
                             {getTargetTitle(report)}
                           </span>
                         </td>
-                        <td className="reason-cell">{report.reason}</td>
+                        <td className="reason-cell">
+                          {getReasonText(report.reason)}
+                        </td>
                         <td className="reporter-cell">
                           <div className="reporter">
                             <div className="reporter-avatar">
@@ -548,7 +567,7 @@ export default function ModeratorReportPage() {
                 <div className="detail-grid">
                   <div className="detail-item">
                     <label>Lý do:</label>
-                    <p>{selectedReport.reason}</p>
+                    <p>{getReasonText(selectedReport.reason)}</p>
                   </div>
                   <div className="detail-item">
                     <label>Mô tả chi tiết:</label>

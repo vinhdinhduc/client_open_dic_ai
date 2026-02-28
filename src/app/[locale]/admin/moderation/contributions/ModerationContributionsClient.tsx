@@ -251,13 +251,8 @@ export default function ContributionsModerationPage() {
   };
 
   const getTermName = (contribution: Contribution) => {
-    if (contribution.term?.vi) {
-      return contribution.term.vi;
-    }
-    if (contribution.targetTerm?.term?.vi) {
-      return contribution.targetTerm.term.vi;
-    }
-    return "Thuật ngữ mới";
+    const term = contribution.term ?? contribution.targetTerm?.term;
+    return term?.vi || term?.en || term?.lo || "N/A";
   };
 
   const getContributorName = (contribution: Contribution) => {

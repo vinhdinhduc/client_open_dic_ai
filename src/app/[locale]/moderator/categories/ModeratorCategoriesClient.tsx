@@ -272,11 +272,11 @@ export default function ModeratorCategoriesPage() {
               {/* Actions */}
               <div className="category-card__actions">
                 <Link
-                  href={`/admin/moderation/contributions?category=${category._id}`}
+                  href={`/moderator/moderation/contributions?category=${category._id}`}
                   className="action-btn action-btn--contributions"
                 >
                   <GitPullRequest size={14} />
-                  Kiểm duyệt đóng góp
+                  <span>Kiểm duyệt đóng góp</span>
                   {(category.stats?.pendingContributions || 0) > 0 && (
                     <span className="action-badge">
                       {category.stats.pendingContributions}
@@ -284,11 +284,11 @@ export default function ModeratorCategoriesPage() {
                   )}
                 </Link>
                 <Link
-                  href={`/admin/moderation/reports?category=${category._id}`}
+                  href={`/moderator/moderation/reports?category=${category._id}`}
                   className="action-btn action-btn--reports"
                 >
                   <Flag size={14} />
-                  Xử lý báo xấu
+                  <span>Xử lý báo xấu</span>
                   {(category.stats?.pendingReports || 0) > 0 && (
                     <span className="action-badge">
                       {category.stats.pendingReports}
@@ -296,11 +296,11 @@ export default function ModeratorCategoriesPage() {
                   )}
                 </Link>
                 <Link
-                  href={`/admin/terms?category=${category._id}`}
+                  href={`/moderator/terms?category=${category._id}`}
                   className="action-btn action-btn--view"
                 >
                   <Eye size={14} />
-                  Xem thuật ngữ
+                  <span>Xem thuật ngữ</span>
                   <ChevronRight size={14} />
                 </Link>
               </div>

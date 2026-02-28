@@ -5,14 +5,6 @@ import { FileText, Edit3 } from "lucide-react";
 import { Contribution } from "@/services/contributionService";
 import { diffWords } from "./diffWords";
 
-// ─────────────────────────────────────────────
-//  Inline text renderers
-// ─────────────────────────────────────────────
-
-/**
- * Renders original text: shows unchanged and removed words, hides added words.
- * Removed words are highlighted with red strikethrough.
- */
 function OriginalText({
   oldText,
   newText,

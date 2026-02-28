@@ -197,12 +197,12 @@ const checkFavorite = async (termId: string): Promise<boolean> => {
 // Tạo thuật ngữ mới
 export interface CreateTermData {
   term: {
-    vi: string;
+    vi?: string;
     en?: string;
     lo?: string;
   };
   definition: {
-    vi: string;
+    vi?: string;
     en?: string;
     lo?: string;
   };
@@ -219,6 +219,7 @@ export interface CreateTermData {
   partOfSpeech?: string;
   category: string;
   tags?: string[];
+  relatedTerms?: string[];
   status?: 'pending' | 'approved' | 'rejected';
 }
 

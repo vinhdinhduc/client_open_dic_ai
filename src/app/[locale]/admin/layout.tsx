@@ -386,7 +386,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Sidebar Footer */}
         <div className="admin-sidebar__footer">
           <Link href="/" className="admin-sidebar__back">
-            <MoveLeft size={16} className="m-3" /> Về trang chủ
+            <MoveLeft size={16} />
+            <span>Về trang chủ</span>
           </Link>
         </div>
       </aside>

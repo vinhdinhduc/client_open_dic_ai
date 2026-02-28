@@ -137,7 +137,7 @@ export function ViewDetailTerm({
         toast.success(
           newStatus === "approved"
             ? "Đã duyệt thuật ngữ"
-            : "Đã từ chối thuật ngữ"
+            : "Đã từ chối thuật ngữ",
         );
       } else {
         toast.error(result.message || "Có lỗi xảy ra");
@@ -160,17 +160,26 @@ export function ViewDetailTerm({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <span className="status-badge status-badge--success">Đã duyệt</span>;
+        return (
+          <span className="status-badge status-badge--success">Đã duyệt</span>
+        );
       case "pending":
-        return <span className="status-badge status-badge--warning">Chờ duyệt</span>;
+        return (
+          <span className="status-badge status-badge--warning">Chờ duyệt</span>
+        );
       case "rejected":
-        return <span className="status-badge status-badge--danger">Từ chối</span>;
+        return (
+          <span className="status-badge status-badge--danger">Từ chối</span>
+        );
       default:
         return null;
     }
   };
 
-  const getMultiLangValue = (obj: MultiLangText | undefined, lang: LangKey): string => {
+  const getMultiLangValue = (
+    obj: MultiLangText | undefined,
+    lang: LangKey,
+  ): string => {
     if (!obj) return "";
     return obj[lang] || "";
   };
@@ -224,7 +233,9 @@ export function ViewDetailTerm({
 
         <div className="header-info">
           <div className="header-title">
-            <h1>{term.term.vi || "Không có tên"}</h1>
+            <h1>
+              {term.term.vi || term.term.en || term.term.lo || "Không có tên"}
+            </h1>
             {getStatusBadge(term.status || "pending")}
           </div>
           <div className="header-meta">
@@ -305,7 +316,9 @@ export function ViewDetailTerm({
                 <h3>Thuật ngữ</h3>
                 <button
                   className="copy-btn"
-                  onClick={() => copyToClipboard(getMultiLangValue(term.term, activeTab))}
+                  onClick={() =>
+                    copyToClipboard(getMultiLangValue(term.term, activeTab))
+                  }
                   title="Sao chép"
                 >
                   {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
@@ -344,7 +357,9 @@ export function ViewDetailTerm({
               <div className="section-content">
                 <p>
                   {getMultiLangValue(term.detailedExplanation, activeTab) || (
-                    <span className="empty-text">Chưa có giải thích chi tiết</span>
+                    <span className="empty-text">
+                      Chưa có giải thích chi tiết
+                    </span>
                   )}
                 </p>
               </div>
@@ -434,7 +449,8 @@ export function ViewDetailTerm({
                       Từ loại
                     </span>
                     <span className="meta-value">
-                      {PART_OF_SPEECH_LABELS[term.partOfSpeech] || term.partOfSpeech}
+                      {PART_OF_SPEECH_LABELS[term.partOfSpeech] ||
+                        term.partOfSpeech}
                     </span>
                   </div>
                 )}
@@ -466,7 +482,9 @@ export function ViewDetailTerm({
                     <Clock size={14} />
                     Ngày tạo
                   </span>
-                  <span className="meta-value">{formatDate(term.createdAt)}</span>
+                  <span className="meta-value">
+                    {formatDate(term.createdAt)}
+                  </span>
                 </div>
 
                 <div className="meta-row">
@@ -474,7 +492,9 @@ export function ViewDetailTerm({
                     <Clock size={14} />
                     Cập nhật lần cuối
                   </span>
-                  <span className="meta-value">{formatDate(term.updatedAt)}</span>
+                  <span className="meta-value">
+                    {formatDate(term.updatedAt)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -525,9 +545,7 @@ export function ViewDetailTerm({
               <div className="quick-actions">
                 <button
                   className="quick-action-btn"
-                  onClick={() =>
-                    window.open(`/terms/${termId}`, "_blank")
-                  }
+                  onClick={() => window.open(`/terms/${termId}`, "_blank")}
                 >
                   <ExternalLink size={16} />
                   Xem trang công khai
@@ -540,7 +558,10 @@ export function ViewDetailTerm({
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
               <h3>Xác nhận xóa</h3>
