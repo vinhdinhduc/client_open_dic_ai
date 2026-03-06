@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import TermDetailAdminClient from "./TermDetailAdminClient";
 
 export const metadata: Metadata = {
-  title: "Chi tiết thuật ngữ - Admin | Từ Điển Chuyên Ngành",
+  title: "Chi tiết thuật ngữ - Admin | OpenDict",
   description: "Xem và quản lý chi tiết thuật ngữ trong hệ thống từ điển",
 };
 

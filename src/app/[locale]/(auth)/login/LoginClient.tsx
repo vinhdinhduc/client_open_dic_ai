@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -153,7 +153,7 @@ export default function LoginPage() {
         <div className="auth-card__header">
           <div className="auth-card__logo">
             <i className="fa-solid fa-book-open"></i>
-            OpenDic
+            OpenDict
           </div>
           <h1 className="auth-card__title">{t("welcome")}</h1>
           <p className="auth-card__subtitle">{t("dear")}</p>

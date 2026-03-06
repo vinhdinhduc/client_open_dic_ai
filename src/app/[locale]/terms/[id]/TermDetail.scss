@@ -1,9 +1,18 @@
 @import "@/styles/variables.scss";
+@import "@/styles/mixins.scss";
 
 // Term Detail Page Styles
 .term-detail-page {
     min-height: 100vh;
     padding: $spacing-lg 0;
+
+    @include mobile {
+        padding: $spacing-md 0;
+    }
+
+    @include large-screen {
+        padding: $spacing-xl 0;
+    }
 
     &--loading,
     &--error {
@@ -21,6 +30,10 @@
             font-size: $font-2xl;
             margin-bottom: $spacing-md;
             color: var(--text-primary);
+
+            @include mobile {
+                font-size: $font-xl;
+            }
         }
 
         p {

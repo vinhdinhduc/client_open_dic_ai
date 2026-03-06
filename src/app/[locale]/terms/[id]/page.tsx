@@ -8,7 +8,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   return {
-    title: `Chi tiết thuật ngữ - Từ Điển Chuyên Ngành`,
+    title: `Chi tiết thuật ngữ - OpenDict`,
     description: `Xem định nghĩa và giải thích chi tiết thuật ngữ chuyên ngành trong từ điển đa ngôn ngữ Việt - Lào - Anh`,
   };
 }

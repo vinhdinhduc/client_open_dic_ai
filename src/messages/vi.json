@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Hệ thống Từ điển Chuyên ngành",
+    "appName": "OpenDict",
     "search": "Tìm kiếm",
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
@@ -127,9 +127,9 @@
     "profile": "Hồ sơ"
   },
   "home": {
-    "title": "Hệ thống Từ điển Chuyên ngành",
-    "subtitle": "Đa ngôn ngữ",
-    "description": "Tra cứu thuật ngữ chuyên ngành nhanh chóng, chính xác với hỗ trợ đa ngôn ngữ Việt - Lào - Anh",
+    "title": "OpenDict",
+    "subtitle": "Từ Điển Mở Đa Ngôn Ngữ",
+    "description": "Tra cứu thuật ngữ nhanh chóng, chính xác từ nhiều bộ từ điển khác nhau với hỗ trợ đa ngôn ngữ Việt - Lào - Anh",
     "searchPlaceholder": "Nhập thuật ngữ cần tra cứu...",
     "searchButton": "Tìm kiếm",
     "search": {
@@ -148,7 +148,7 @@
     "feature3Desc": "Thuật ngữ được cập nhật thường xuyên với kiến thức mới",
     "statsTerms": "Thuật ngữ",
     "statsUsers": "Người dùng",
-    "statsCategories": "Chuyên ngành",
+    "statsCategories": "Từ điển",
     "ctaTitle": "Bắt đầu ngay hôm nay",
     "ctaDescription": "Tham gia cộng đồng để học tập và chia sẻ kiến thức",
     "ctaRegister": "Đăng ký miễn phí",
@@ -195,7 +195,7 @@
   },
   
     "footer": {
-      "appName": "Hệ thống Từ điển Chuyên ngành",
+      "appName": "Hệ thống Từ điển ",
       "quickLinks": "Liên kết nhanh",
       "about": "Giới thiệu",
       "contact": "Liên hệ"

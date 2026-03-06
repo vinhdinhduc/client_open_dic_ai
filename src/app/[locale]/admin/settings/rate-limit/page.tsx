@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import RateLimitClient from "./RateLimitClient";
 
 export const metadata: Metadata = {
-  title: "Giới hạn tốc độ - Admin | Từ Điển Chuyên Ngành",
+  title: "Giới hạn tốc độ - Admin | OpenDict",
   description: "Cấu hình giới hạn tốc độ API và bảo mật hệ thống từ điển",
 };
 

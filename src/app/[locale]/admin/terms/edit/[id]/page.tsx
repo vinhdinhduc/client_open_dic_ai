@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import EditTermClient from "./EditTermClient";
 
 export const metadata: Metadata = {
-  title: "Chỉnh sửa thuật ngữ - Admin | Từ Điển Chuyên Ngành",
+  title: "Chỉnh sửa thuật ngữ - Admin | OpenDict",
   description: "Chỉnh sửa thông tin thuật ngữ trong hệ thống từ điển",
 };
 

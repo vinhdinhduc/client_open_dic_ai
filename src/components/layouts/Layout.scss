@@ -1,6 +1,10 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
 .layout {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
     background: var(--background, #ffffff);
     transition: background 0.3s ease;
 
@@ -10,24 +14,286 @@
         max-width: 1400px;
         margin: 0 auto;
         min-height: 550px;
-        padding: 2rem 1rem;
+        padding: 2rem 1.5rem;
 
-        @media (max-width: 768px) {
+        @include mobile {
             padding: 1.5rem 1rem;
+            min-height: 400px;
+        }
+
+        @include large-screen {
+            max-width: 1600px;
+            padding: 2.5rem 2rem;
+        }
+
+        @include ultra-wide {
+            max-width: 1800px;
         }
     }
 
     &--home &__main {
+        max-width: 100%;
+        padding: 0;
         background-image: url("/images/bgr.png");
         background-size: cover;
         background-position: bottom center;
         background-repeat: no-repeat;
-        width: 100%;
+        position: relative;
+
+        // Overlay for better text readability
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.85) 0%,
+                rgba(255, 255, 255, 0.7) 40%,
+                rgba(255, 255, 255, 0.4) 100%
+            );
+            z-index: 0;
+
+            [data-theme="dark"] & {
+                background: linear-gradient(
+                    180deg,
+                    rgba(17, 24, 39, 0.9) 0%,
+                    rgba(17, 24, 39, 0.75) 40%,
+                    rgba(17, 24, 39, 0.5) 100%
+                );
+            }
+        }
     }
 }
 
 [data-theme="dark"] {
     .layout {
         --background: #111827;
+    }
+}
+
+// ============ HERO SECTION ============
+.hero {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 550px;
+    padding: $spacing-3xl $spacing-lg $spacing-2xl;
+    text-align: center;
+
+    @include mobile {
+        min-height: 450px;
+        padding: $spacing-2xl $spacing-md $spacing-xl;
+    }
+
+    @media (max-width: 480px) {
+        min-height: 400px;
+        padding: $spacing-xl $spacing-sm $spacing-lg;
+    }
+
+    @include large-screen {
+        min-height: 650px;
+        padding: $spacing-3xl $spacing-xl;
+    }
+
+    &__content {
+        max-width: 700px;
+        margin-bottom: $spacing-xl;
+        animation: heroFadeIn 0.8s ease-out;
+
+        @include large-screen {
+            max-width: 800px;
+        }
+    }
+
+    &__title {
+        font-size: $font-4xl;
+        font-weight: $font-bold;
+        color: var(--primary);
+        margin-bottom: $spacing-xs;
+        letter-spacing: -0.02em;
+
+        @include mobile {
+            font-size: $font-3xl;
+        }
+
+        @media (max-width: 480px) {
+            font-size: $font-2xl;
+        }
+
+        @include large-screen {
+            font-size: 3rem;
+        }
+    }
+
+    &__subtitle {
+        font-size: $font-xl;
+        font-weight: $font-semibold;
+        color: var(--text-primary);
+        margin-bottom: $spacing-sm;
+
+        @include mobile {
+            font-size: $font-lg;
+        }
+
+        @media (max-width: 480px) {
+            font-size: $font-base;
+        }
+
+        @include large-screen {
+            font-size: $font-2xl;
+        }
+    }
+
+    &__description {
+        font-size: $font-base;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        max-width: 560px;
+        margin: 0 auto;
+
+        @include mobile {
+            font-size: $font-sm;
+        }
+
+        @include large-screen {
+            font-size: $font-lg;
+            max-width: 640px;
+        }
+    }
+
+    &__search {
+        position: relative;
+        z-index: 1000;
+        width: 100%;
+        max-width: 700px;
+        margin-bottom: $spacing-3xl;
+        animation: heroFadeIn 0.8s ease-out 0.2s both;
+
+        @include mobile {
+            margin-bottom: $spacing-2xl;
+        }
+
+        @include large-screen {
+            max-width: 780px;
+        }
+    }
+
+    // Features grid
+    &__features {
+        position: relative;
+        z-index: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: $spacing-lg;
+        width: 100%;
+        max-width: 900px;
+        animation: heroFadeIn 0.8s ease-out 0.4s both;
+
+        @include mobile {
+            grid-template-columns: 1fr;
+            gap: $spacing-md;
+            max-width: 400px;
+        }
+
+        @include tablet {
+            gap: $spacing-md;
+        }
+
+        @include large-screen {
+            max-width: 1000px;
+            gap: $spacing-xl;
+        }
+    }
+
+    &__feature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: $spacing-lg;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: $radius-xl;
+        transition: all 0.3s ease;
+
+        [data-theme="dark"] & {
+            background: rgba(30, 30, 40, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+
+            [data-theme="dark"] & {
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        @include mobile {
+            flex-direction: row;
+            text-align: left;
+            padding: $spacing-md;
+        }
+    }
+
+    &__feature-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: $radius-lg;
+        background: var(--primary-light, rgba(37, 99, 235, 0.1));
+        color: var(--primary);
+        flex-shrink: 0;
+
+        @include mobile {
+            width: 40px;
+            height: 40px;
+
+            svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    }
+
+    &__feature-title {
+        font-size: $font-base;
+        font-weight: $font-semibold;
+        color: var(--text-primary);
+        margin: 0;
+
+        @include mobile {
+            font-size: $font-sm;
+        }
+    }
+
+    &__feature-desc {
+        font-size: $font-sm;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0;
+
+        @include mobile {
+            font-size: $font-xs;
+        }
+    }
+}
+
+@keyframes heroFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

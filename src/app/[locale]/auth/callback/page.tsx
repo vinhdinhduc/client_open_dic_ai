@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import CallbackClient from "./CallbackClient";
 
 export const metadata: Metadata = {
-  title: "Đăng nhập - Từ Điển Chuyên Ngành",
+  title: "Đăng nhập - OpenDict",
   description: "Xác thực đăng nhập qua Google",
   robots: { index: false, follow: false },
 };

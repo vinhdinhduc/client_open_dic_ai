@@ -127,6 +127,8 @@
     color: var(--text-tertiary);
     cursor: pointer;
     transition: all $transition-base;
+    min-width: 44px;
+    min-height: 44px;
 
     &:hover {
         background-color: var(--bg-secondary);

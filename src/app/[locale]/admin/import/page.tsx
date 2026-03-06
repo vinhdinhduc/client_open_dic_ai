@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ImportClient from "./ImportClient";
 
 export const metadata: Metadata = {
-  title: "Nhập dữ liệu - Admin | Từ Điển Chuyên Ngành",
+  title: "Nhập dữ liệu - Admin | OpenDict",
   description: "Nhập hàng loạt thuật ngữ vào hệ thống từ file Excel hoặc CSV",
 };
 

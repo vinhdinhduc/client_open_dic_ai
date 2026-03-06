@@ -17,7 +17,7 @@ const getSearchSuggestions = async (keyword: string, language: 'vi' | 'en' | 'lo
     const res = await axiosInstance.get<ApiResponse<{ suggestions: string[] }>>('/terms/suggestions', {
       params: {
         q: keyword,
-        lang: language
+        language: language
       }
     });
 

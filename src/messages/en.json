@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Specialized Dictionary System",
+    "appName": "OpenDict",
     "search": "Search",
     "login": "Login",
     "logout": "Logout",
@@ -127,9 +127,9 @@
     "loginToResendEmail": "Please login to resend the verification email"
   },
   "home": {
-    "title": "Specialized Dictionary System",
-    "subtitle": "Multilingual",
-    "description": "Fast and accurate specialized terminology lookup with Vietnamese - Lao - English support",
+    "title": "OpenDict",
+    "subtitle": "Open Multilingual Dictionary",
+    "description": "Fast and accurate terminology lookup across multiple dictionaries with Vietnamese - Lao - English support",
     "searchPlaceholder": "Enter term to search...",
     "searchButton": "Search",
     "search": {
@@ -148,7 +148,7 @@
     "feature3Desc": "Terms are regularly updated with new knowledge",
     "statsTerms": "Terms",
     "statsUsers": "Users",
-    "statsCategories": "Categories",
+    "statsCategories": "Dictionaries",
     "ctaTitle": "Get Started Today",
     "ctaDescription": "Join the community to learn and share knowledge",
     "ctaRegister": "Register for free",
@@ -194,7 +194,7 @@
     "searchHistory": "Search History"
   },
    "footer": {
-      "appName": "Specialized Dictionary System",
+      "appName": "Dictionary System",
       "quickLinks": "Quick Links",
       "about": "About",
       "contact": "Contact"

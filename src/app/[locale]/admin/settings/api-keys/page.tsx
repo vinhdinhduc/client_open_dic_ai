@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ApiKeysClient from "./ApiKeysClient";
 
 export const metadata: Metadata = {
-  title: "Quản lý API Keys - Admin | Từ Điển Chuyên Ngành",
+  title: "Quản lý API Keys - Admin | OpenDict",
   description: "Quản lý các khóa API cho tích hợp AI và dịch vụ bên ngoài",
 };
 

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import AdminTermsClient from "./AdminTermsClient";
 
 export const metadata: Metadata = {
-  title: "Quản lý thuật ngữ - Admin | Từ Điển Chuyên Ngành",
+  title: "Quản lý thuật ngữ - Admin | OpenDict",
   description: "Quản lý, thêm, sửa, xóa thuật ngữ trong hệ thống từ điển",
 };
 

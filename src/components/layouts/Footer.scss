@@ -30,6 +30,14 @@
         @media (max-width: 640px) {
             padding: 0 1rem;
         }
+
+        @media (min-width: 1440px) {
+            max-width: 1400px;
+        }
+
+        @media (min-width: 1920px) {
+            max-width: 1600px;
+        }
     }
 
     // Content Grid
@@ -39,6 +47,11 @@
         grid-template-columns: 2fr repeat(2, 1fr);
         gap: 3rem;
         margin-bottom: 3rem;
+
+        // Large screens
+        @media (min-width: 1440px) {
+            gap: 4rem;
+        }
 
         // Tablet
         @media (max-width: 1024px) {

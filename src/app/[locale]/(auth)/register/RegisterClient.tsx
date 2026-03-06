@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -199,7 +199,7 @@ export default function RegisterPage() {
         <div className="auth-card__header">
           <div className="auth-card__logo">
             <i className="fa-solid fa-book-open"></i>
-            OpenDic
+            OpenDict
           </div>
           <h1 className="auth-card__title">{t("registerTitle")}</h1>
           <p className="auth-card__subtitle">{t("registerSubtitle")}</p>
@@ -428,13 +428,6 @@ export default function RegisterPage() {
                 router.push("/");
               }}
             />
-            <button
-              type="button"
-              className="auth-social__btn auth-social__btn--facebook"
-            >
-              <i className="fa-brands fa-facebook-f"></i>
-              Facebook
-            </button>
           </div>
         </div>
 

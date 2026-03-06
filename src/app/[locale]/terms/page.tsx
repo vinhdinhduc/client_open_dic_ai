@@ -19,8 +19,8 @@ export async function generateMetadata({
   const { q: query } = await searchParams;
   return {
     title: query
-      ? `Tìm kiếm: ${query} - Từ Điển Chuyên Ngành`
-      : "Tìm kiếm thuật ngữ - Từ Điển Chuyên Ngành",
+      ? `Tìm kiếm: ${query} - OpenDict`
+      : "Tìm kiếm thuật ngữ - OpenDict",
     description: query
       ? `Kết quả tìm kiếm cho "${query}" trong từ điển chuyên ngành`
       : "Tìm kiếm thuật ngữ chuyên ngành bằng tiếng Việt, Anh và Lào",

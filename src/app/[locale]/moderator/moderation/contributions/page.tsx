@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ModeratorContributionsClient from "./ModeratorContributionsClient";
 
 export const metadata: Metadata = {
-  title: "Kiểm duyệt đóng góp - Kiểm duyệt viên | Từ Điển Chuyên Ngành",
+  title: "Kiểm duyệt đóng góp - Kiểm duyệt viên | OpenDict",
   description:
     "Xem xét và phê duyệt đóng góp thuật ngữ trong danh mục được phân công",
 };

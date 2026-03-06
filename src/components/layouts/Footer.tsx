@@ -31,8 +31,8 @@ export function Footer() {
               <span className="logo-text">{t("common.appName")}</span>
             </div>
             <p className="footer-description">
-              {t("common.appName")} - Hệ thống từ điển chuyên ngành mở, hỗ trợ
-              đa ngôn ngữ Việt - Lào - Anh
+              {t("common.appName")} - Hệ thống từ điển mở, hỗ trợ đa ngôn ngữ
+              Việt - Lào - Anh
             </p>
           </div>
 
