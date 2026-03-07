@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -103,16 +103,11 @@ export default function UsersPage() {
     });
   const [savingPermissions, setSavingPermissions] = useState(false);
 
-  // Ref for dropdown menu
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Element;
+      if (!target.closest(".action-dropdown")) {
         setShowMoreMenu(null);
       }
     };
@@ -744,7 +739,7 @@ export default function UsersPage() {
                         )}
 
                         {/* More Menu Dropdown */}
-                        <div className="action-dropdown" ref={dropdownRef}>
+                        <div className="action-dropdown">
                           <button
                             className="action-btn action-btn--more"
                             onClick={() =>
