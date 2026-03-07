@@ -1,7 +1,7 @@
 
 
 
-const API_URL =
+const API_URL = process.env.API_SERVER_URL ||
     process.env.NEXT_PUBLIC_API_URL || "https://opendict.utb.edu.vn/api"
 
 interface FetchOptions extends RequestInit {
