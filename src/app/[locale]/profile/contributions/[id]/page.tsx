@@ -1,10 +1,17 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import ContributionDetailClient from "./ContributionDetailClient";
 
-export const metadata: Metadata = {
-  title: "Chi tiết đóng góp - OpenDict",
-  description: "Xem chi tiết và trạng thái đóng góp thuật ngữ của bạn",
-};
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "contribution" });
+  return {
+    title: t("detailMetaTitle"),
+    description: t("detailMetaDescription"),
+  };
+}
 
 export default function ContributionDetailPage() {
   return <ContributionDetailClient />;

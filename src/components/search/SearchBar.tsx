@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { SearchBarProps } from "./types";
-import { useLanguage } from "@/hooks";
+
 import {
   ChangeEvent,
   useCallback,
@@ -23,7 +23,6 @@ export default function SearchBar({
   className = "",
 }: SearchBarProps) {
   const router = useRouter();
-  const { currentLanguage } = useLanguage();
   const t = useTranslations("home");
 
   // State chính
@@ -83,7 +82,7 @@ export default function SearchBar({
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const result = await getSearchSuggestions(keyword, currentLanguage);
+        const result = await getSearchSuggestions(keyword);
         setSuggestions(result);
         setShowDropdown(result.length > 0);
         setSelectedIndex(-1);
@@ -100,7 +99,7 @@ export default function SearchBar({
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [keyword, currentLanguage]);
+  }, [keyword]);
 
   // Click outside để đóng dropdown
   useEffect(() => {
@@ -350,12 +349,33 @@ export default function SearchBar({
               <Search size={14} className="search-bar__suggestion-icon" />
               <span className="search-bar__term-name">
                 {/* Highlight phần match */}
-                <span className="search-bar__term-match">
-                  {term.slice(0, keyword.length)}
-                </span>
-                <span className="search-bar__term-rest">
-                  {term.slice(keyword.length)}
-                </span>
+                {(() => {
+                  const idx = term.toLowerCase().indexOf(keyword.toLowerCase());
+                  if (idx === -1)
+                    return (
+                      <span className="search-bar__term-rest">{term}</span>
+                    );
+                  const beforeMatch = term.slice(0, idx);
+                  const matchText = term.slice(idx, idx + keyword.length);
+                  const afterMatch = term.slice(idx + keyword.length);
+                  return (
+                    <>
+                      {beforeMatch && (
+                        <span className="search-bar__term-rest">
+                          {beforeMatch}
+                        </span>
+                      )}
+                      <span className="search-bar__term-match">
+                        {matchText}
+                      </span>
+                      {afterMatch && (
+                        <span className="search-bar__term-rest">
+                          {afterMatch}
+                        </span>
+                      )}
+                    </>
+                  );
+                })()}
               </span>
             </div>
           ))}

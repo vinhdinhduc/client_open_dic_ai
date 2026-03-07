@@ -12,18 +12,21 @@ export const revalidate = 60;
 
 // Generate metadata for SEO
 export async function generateMetadata({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ q?: string; lang?: string }>;
 }) {
-  const { q: query } = await searchParams;
+  const [{ locale }, { q: query }] = await Promise.all([params, searchParams]);
+  const t = await getTranslations({ locale, namespace: "searchResults" });
   return {
     title: query
-      ? `Tìm kiếm: ${query} - OpenDict`
-      : "Tìm kiếm thuật ngữ - OpenDict",
+      ? `${t("metaSearchPrefix")}: ${query} - OpenDict`
+      : t("metaTitle"),
     description: query
-      ? `Kết quả tìm kiếm cho "${query}" trong từ điển chuyên ngành`
-      : "Tìm kiếm thuật ngữ chuyên ngành bằng tiếng Việt, Anh và Lào",
+      ? `${t("metaSearchDescription")} "${query}"`
+      : t("metaDescription"),
   };
 }
 

@@ -12,12 +12,11 @@ import {
 
 
 //Get search suggestions
-const getSearchSuggestions = async (keyword: string, language: 'vi' | 'en' | 'lo' = 'vi'): Promise<string[]> => {
+const getSearchSuggestions = async (keyword: string): Promise<string[]> => {
   try {
     const res = await axiosInstance.get<ApiResponse<{ suggestions: string[] }>>('/terms/suggestions', {
       params: {
         q: keyword,
-        language: language
       }
     });
 

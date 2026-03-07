@@ -1,11 +1,17 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import VerifyEmailClient from "./VerifyEmailClient";
 
-export const metadata: Metadata = {
-  title: "Xác thực Email - OpenDict",
-  description:
-    "Xác thực địa chỉ email để kích hoạt tài khoản từ điển chuyên ngành",
-};
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "auth" });
+  return {
+    title: t("verifyEmailMetaTitle"),
+    description: t("verifyEmailMetaDescription"),
+  };
+}
 
 export default function VerifyEmailPage() {
   return <VerifyEmailClient />;

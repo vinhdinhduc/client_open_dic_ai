@@ -4,15 +4,15 @@ import ContributionForm from "@/components/forms/ContributionForm";
 import { Layout } from "@/components/layouts";
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "contribution" });
-
   return {
-    title: t("title"),
-    description: t("title"),
+    title: t("metaTitle"),
+    description: t("metaDescription"),
   };
 }
 

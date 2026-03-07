@@ -1,18 +1,26 @@
 import { Metadata } from "next";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Layout } from "@/components/layouts";
 import SearchBar from "@/components/search/SearchBar";
-import { BookOpen, Users, Globe, Sparkles, ArrowRight } from "lucide-react";
+import { Users, Globe, Sparkles } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "OpenDict - Tra cứu thuật ngữ Việt Lào Anh",
-  description:
-    "Tra cứu thuật ngữ nhanh chóng, chính xác với hỗ trợ đa ngôn ngữ Việt - Lào - Anh. Cộng đồng đóng góp thuật ngữ mở.",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default function HomePage() {
-  const t = useTranslations("home");
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
+
+export default async function HomePage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home" });
 
   return (
     <Layout className="layout--home">

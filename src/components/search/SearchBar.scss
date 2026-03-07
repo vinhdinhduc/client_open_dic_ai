@@ -510,6 +510,7 @@
 
             .search-bar__term-name {
                 color: var(--text-primary);
+                white-space: pre;
             }
 
             [data-theme="dark"] & {
@@ -549,8 +550,8 @@
         font-weight: $font-normal;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         @include truncate;
-        display: flex;
-        align-items: center;
+        white-space: pre;
+        text-align: left;
 
         @include mobile {
             font-size: $font-sm;

@@ -390,8 +390,9 @@ export default function RegisterPage() {
                 />
                 <span>
                   {t("acceptTermsText")}{" "}
-                  <Link href="/terms">{t("termsLink")}</Link> \u0026{" "}
-                  <Link href="/privacy">{t("privacyLink")}</Link>
+                  <Link href="/terms-of-service">{t("termsLink")}</Link>{" "}
+                  {t("and")}{" "}
+                  <Link href="/privacy-policy">{t("privacyLink")}</Link>
                 </span>
               </label>
               {errors.acceptTerms && (

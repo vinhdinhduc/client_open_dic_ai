@@ -44,9 +44,6 @@ export function Footer() {
                 <Link href="/">{t("navigation.home")}</Link>
               </li>
               <li>
-                <Link href="/terms">{t("navigation.terms")}</Link>
-              </li>
-              <li>
                 <Link href="/contribute">{t("navigation.contribute")}</Link>
               </li>
               <li>
@@ -74,6 +71,19 @@ export function Footer() {
                   <Github className="icon" />
                   GitHub
                 </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div className="footer-section">
+            <h3 className="footer-title">{d("legal")}</h3>
+            <ul className="footer-links">
+              <li>
+                <Link href="/terms-of-service">{d("termsOfService")}</Link>
+              </li>
+              <li>
+                <Link href="/privacy-policy">{d("privacyPolicy")}</Link>
               </li>
             </ul>
           </div>

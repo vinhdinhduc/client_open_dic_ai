@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import TermDetailClient from "./TermDetailClient";
 
 export async function generateMetadata({
@@ -6,10 +7,11 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string; locale: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "searchResults" });
   return {
-    title: `Chi tiết thuật ngữ - OpenDict`,
-    description: `Xem định nghĩa và giải thích chi tiết thuật ngữ chuyên ngành trong từ điển đa ngôn ngữ Việt - Lào - Anh`,
+    title: t("termDetailMetaTitle"),
+    description: t("termDetailMetaDescription"),
   };
 }
 
