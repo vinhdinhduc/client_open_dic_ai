@@ -26,6 +26,9 @@ import {
   Key,
   Send,
   History,
+  EyeOff,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import userService from "@/services/userService";
 import categoryService, { Category } from "@/services/categoryService";
@@ -85,6 +88,10 @@ export default function UsersPage() {
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loadingResetPassword, setLoadingResetPassword] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showBatchActionsModal, setShowBatchActionsModal] = useState(false);
   const [batchStatus, setBatchStatus] = useState<UserStatus>("active");
@@ -462,7 +469,16 @@ export default function UsersPage() {
   // Handle reset password
   const handleResetPassword = async () => {
     if (!selectedUser || !newPassword) return;
+    if (newPassword !== confirmPassword) {
+      toast.error("Mật khẩu xác nhận không khớp");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+      return;
+    }
 
+    setLoadingResetPassword(true);
     try {
       const res = await userService.resetUserPassword(
         selectedUser._id,
@@ -472,11 +488,32 @@ export default function UsersPage() {
         toast.success("Đặt lại mật khẩu thành công");
         setShowResetPasswordModal(false);
         setNewPassword("");
+        setConfirmPassword("");
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
         setSelectedUser(null);
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi đặt lại mật khẩu");
+    } finally {
+      setLoadingResetPassword(false);
     }
+  };
+
+  const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return { level: 0, label: "", color: "" };
+    let score = 0;
+    if (pwd.length >= 6) score++;
+    if (pwd.length >= 10) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    if (score <= 1) return { level: score, label: "Rất yếu", color: "#ef4444" };
+    if (score === 2) return { level: score, label: "Yếu", color: "#f97316" };
+    if (score === 3)
+      return { level: score, label: "Trung bình", color: "#eab308" };
+    if (score === 4) return { level: score, label: "Mạnh", color: "#22c55e" };
+    return { level: score, label: "Rất mạnh", color: "#16a34a" };
   };
 
   // Handle resend verification email
@@ -1410,6 +1447,9 @@ export default function UsersPage() {
           onClick={() => {
             setShowResetPasswordModal(false);
             setNewPassword("");
+            setConfirmPassword("");
+            setShowNewPassword(false);
+            setShowConfirmPassword(false);
           }}
         >
           <div className="modal modal--sm" onClick={(e) => e.stopPropagation()}>
@@ -1423,48 +1463,130 @@ export default function UsersPage() {
                 onClick={() => {
                   setShowResetPasswordModal(false);
                   setNewPassword("");
+                  setConfirmPassword("");
+                  setShowNewPassword(false);
+                  setShowConfirmPassword(false);
                 }}
               >
                 <X size={20} />
               </button>
             </div>
             <div className="modal__body">
-              <div
-                className="permissions-user-info"
-                style={{ marginBottom: 16 }}
-              >
+              {/* User info */}
+              <div className="reset-pw__user-info">
                 <div className="user-cell__avatar">
                   {selectedUser.fullName.charAt(0)}
                 </div>
-                <div>
-                  <h4>{selectedUser.fullName}</h4>
-                  <p>{selectedUser.email}</p>
+                <div className="reset-pw__user-text">
+                  <span className="reset-pw__user-name">
+                    {selectedUser.fullName}
+                  </span>
+                  <span className="reset-pw__user-email">
+                    {selectedUser.email}
+                  </span>
                 </div>
               </div>
-              <div className="form-group">
-                <label htmlFor="newPassword" style={{ fontWeight: 600 }}>
-                  Mật khẩu mới
-                </label>
-                <input
-                  id="newPassword"
-                  type="password"
-                  className="form-control"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
-                  minLength={6}
-                  style={{ marginTop: 6 }}
-                />
-                <small
-                  style={{
-                    color: "var(--text-secondary)",
-                    marginTop: 4,
-                    display: "block",
-                  }}
-                >
-                  Mật khẩu mới sẽ được áp dụng ngay lập tức
-                </small>
+
+              {/* New password */}
+              <div className="reset-pw__field">
+                <label className="reset-pw__label">Mật khẩu mới</label>
+                <div className="reset-pw__input-wrap">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    className="reset-pw__input"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Ít nhất 6 ký tự"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="reset-pw__eye"
+                    onClick={() => setShowNewPassword((v) => !v)}
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {/* Password strength bar */}
+                {newPassword &&
+                  (() => {
+                    const strength = getPasswordStrength(newPassword);
+                    return (
+                      <div className="reset-pw__strength">
+                        <div className="reset-pw__strength-bars">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <div
+                              key={i}
+                              className="reset-pw__strength-bar"
+                              style={{
+                                background:
+                                  i <= strength.level
+                                    ? strength.color
+                                    : "var(--border-color)",
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <span
+                          className="reset-pw__strength-label"
+                          style={{ color: strength.color }}
+                        >
+                          {strength.label}
+                        </span>
+                      </div>
+                    );
+                  })()}
               </div>
+
+              {/* Confirm password */}
+              <div className="reset-pw__field">
+                <label className="reset-pw__label">Xác nhận mật khẩu</label>
+                <div className="reset-pw__input-wrap">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className={`reset-pw__input${
+                      confirmPassword && newPassword !== confirmPassword
+                        ? " reset-pw__input--error"
+                        : confirmPassword && newPassword === confirmPassword
+                          ? " reset-pw__input--ok"
+                          : ""
+                    }`}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Nhập lại mật khẩu"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="reset-pw__eye"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
+                  </button>
+                  {confirmPassword && (
+                    <span className="reset-pw__match-icon">
+                      {newPassword === confirmPassword ? (
+                        <CheckCircle size={16} color="#22c55e" />
+                      ) : (
+                        <AlertCircle size={16} color="#ef4444" />
+                      )}
+                    </span>
+                  )}
+                </div>
+                {confirmPassword && newPassword !== confirmPassword && (
+                  <p className="reset-pw__error-msg">Mật khẩu không khớp</p>
+                )}
+              </div>
+
+              <p className="reset-pw__hint">
+                Mật khẩu mới sẽ được áp dụng ngay lập tức sau khi lưu.
+              </p>
             </div>
             <div className="modal__footer">
               <button
@@ -1472,6 +1594,9 @@ export default function UsersPage() {
                 onClick={() => {
                   setShowResetPasswordModal(false);
                   setNewPassword("");
+                  setConfirmPassword("");
+                  setShowNewPassword(false);
+                  setShowConfirmPassword(false);
                 }}
               >
                 Hủy
@@ -1480,15 +1605,20 @@ export default function UsersPage() {
                 className="admin-btn admin-btn--primary"
                 onClick={handleResetPassword}
                 disabled={
-                  !newPassword || newPassword.length < 6 || tableLoading
+                  !newPassword ||
+                  newPassword.length < 6 ||
+                  newPassword !== confirmPassword ||
+                  loadingResetPassword
                 }
               >
-                {tableLoading ? (
-                  "Đang xử lý..."
+                {loadingResetPassword ? (
+                  <>
+                    <div className="admin-loading__spinner admin-loading__spinner--sm" />{" "}
+                    Đang lưu...
+                  </>
                 ) : (
                   <>
-                    <Key size={16} />
-                    Đặt lại mật khẩu
+                    <Key size={16} /> Đặt lại mật khẩu
                   </>
                 )}
               </button>
@@ -1510,7 +1640,7 @@ export default function UsersPage() {
             <div className="modal__header">
               <h2>
                 <History size={20} />
-                Lịch sử hoạt động — {selectedUser.fullName}
+                Lịch sử hoạt động
               </h2>
               <button
                 className="modal__close"
@@ -1523,75 +1653,70 @@ export default function UsersPage() {
               </button>
             </div>
             <div className="modal__body">
+              {/* User info banner */}
+              <div className="activity-modal__user-info">
+                <div className="user-cell__avatar activity-modal__avatar">
+                  {selectedUser.fullName.charAt(0)}
+                </div>
+                <div>
+                  <p className="activity-modal__user-name">
+                    {selectedUser.fullName}
+                  </p>
+                  <p className="activity-modal__user-email">
+                    {selectedUser.email}
+                  </p>
+                </div>
+              </div>
+
               {loadingActivity ? (
-                <div style={{ textAlign: "center", padding: "2rem" }}>
-                  <div
-                    className="admin-loading__spinner"
-                    style={{ margin: "0 auto 12px" }}
-                  ></div>
+                <div className="activity-modal__loading">
+                  <div className="admin-loading__spinner" />
                   <p>Đang tải lịch sử hoạt động...</p>
                 </div>
               ) : activityData ? (
                 <>
-                  {/* Stats summary */}
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(120px, 1fr))",
-                      gap: "0.75rem",
-                      marginBottom: "1.5rem",
-                    }}
-                  >
+                  {/* Stats */}
+                  <div className="activity-modal__stats">
                     {[
                       {
                         label: "Thuật ngữ",
                         value: activityData.stats?.terms ?? 0,
-                        icon: <BookPlus size={16} />,
+                        icon: <BookPlus size={18} />,
+                        color: "#6366f1",
                       },
                       {
                         label: "Bình luận",
                         value: activityData.stats?.comments ?? 0,
-                        icon: <MessageSquare size={16} />,
+                        icon: <MessageSquare size={18} />,
+                        color: "#0ea5e9",
                       },
                       {
                         label: "Đóng góp",
                         value: activityData.stats?.contributions ?? 0,
-                        icon: <Lightbulb size={16} />,
+                        icon: <Lightbulb size={18} />,
+                        color: "#f59e0b",
                       },
                       {
                         label: "Báo cáo",
                         value: activityData.stats?.reports ?? 0,
-                        icon: <Flag size={16} />,
+                        icon: <Flag size={18} />,
+                        color: "#ef4444",
                       },
                     ].map((stat) => (
                       <div
                         key={stat.label}
-                        style={{
-                          background: "var(--bg-secondary)",
-                          borderRadius: 8,
-                          padding: "12px",
-                          textAlign: "center",
-                          border: "1px solid var(--border-color)",
-                        }}
+                        className="activity-modal__stat-card"
+                        style={
+                          { "--stat-color": stat.color } as React.CSSProperties
+                        }
                       >
-                        <div
-                          style={{
-                            color: "var(--primary-color)",
-                            marginBottom: 4,
-                          }}
-                        >
+                        <div className="activity-modal__stat-icon">
                           {stat.icon}
                         </div>
-                        <div style={{ fontSize: 22, fontWeight: 700 }}>
+                        <div className="activity-modal__stat-value">
                           {stat.value}
                         </div>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "var(--text-secondary)",
-                          }}
-                        >
+                        <div className="activity-modal__stat-label">
                           {stat.label}
                         </div>
                       </div>
@@ -1601,140 +1726,133 @@ export default function UsersPage() {
                   {/* Activity list */}
                   {activityData.activities &&
                   activityData.activities.length > 0 ? (
-                    <div
-                      style={{
-                        maxHeight: 360,
-                        overflowY: "auto",
-                        border: "1px solid var(--border-color)",
-                        borderRadius: 8,
-                      }}
-                    >
+                    <div className="activity-modal__list">
                       {activityData.activities.map(
-                        (activity: any, idx: number) => (
-                          <div
-                            key={`${activity.type}-${idx}`}
-                            style={{
-                              display: "flex",
-                              alignItems: "flex-start",
-                              gap: "0.75rem",
-                              padding: "12px 16px",
-                              borderBottom:
-                                idx < activityData.activities.length - 1
-                                  ? "1px solid var(--border-color)"
-                                  : "none",
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: 18,
-                                flexShrink: 0,
-                                marginTop: 2,
-                              }}
+                        (activity: any, idx: number) => {
+                          const typeMap: Record<
+                            string,
+                            {
+                              icon: React.ReactNode;
+                              label: string;
+                              color: string;
+                            }
+                          > = {
+                            term: {
+                              icon: <BookPlus size={15} />,
+                              label:
+                                typeof activity.term === "object"
+                                  ? activity.term?.vi ||
+                                    activity.term?.en ||
+                                    activity.term?.lo ||
+                                    "Thuật ngữ"
+                                  : activity.term || "Thuật ngữ",
+                              color: "#6366f1",
+                            },
+                            comment: {
+                              icon: <MessageSquare size={15} />,
+                              label: "Bình luận",
+                              color: "#0ea5e9",
+                            },
+                            contribution: {
+                              icon: <Lightbulb size={15} />,
+                              label: "Đóng góp",
+                              color: "#f59e0b",
+                            },
+                            report: {
+                              icon: <Flag size={15} />,
+                              label: "Báo cáo",
+                              color: "#ef4444",
+                            },
+                          };
+                          const t = typeMap[activity.type] ?? {
+                            icon: <History size={15} />,
+                            label: activity.type,
+                            color: "#6b7280",
+                          };
+
+                          const statusMap: Record<
+                            string,
+                            { label: string; cls: string }
+                          > = {
+                            approved: {
+                              label: "Đã duyệt",
+                              cls: "status--approved",
+                            },
+                            rejected: {
+                              label: "Từ chối",
+                              cls: "status--rejected",
+                            },
+                            pending: {
+                              label: "Chờ duyệt",
+                              cls: "status--pending",
+                            },
+                            active: {
+                              label: "Hoạt động",
+                              cls: "status--approved",
+                            },
+                            resolved: {
+                              label: "Đã xử lý",
+                              cls: "status--approved",
+                            },
+                          };
+                          const s = statusMap[activity.status] ?? {
+                            label: activity.status || "—",
+                            cls: "status--pending",
+                          };
+
+                          return (
+                            <div
+                              key={`${activity.type}-${idx}`}
+                              className="activity-modal__item"
                             >
-                              {activity.type === "term"
-                                ? "📖"
-                                : activity.type === "comment"
-                                  ? "💬"
-                                  : activity.type === "contribution"
-                                    ? "✏️"
-                                    : "🚩"}
-                            </span>
-                            <div style={{ flex: 1, minWidth: 0 }}>
                               <div
+                                className="activity-modal__item-icon"
                                 style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "0.5rem",
-                                  flexWrap: "wrap",
+                                  color: t.color,
+                                  background: `${t.color}18`,
                                 }}
                               >
-                                <span style={{ fontWeight: 600, fontSize: 14 }}>
-                                  {activity.type === "term"
-                                    ? activity.term
-                                    : activity.type === "comment"
-                                      ? "Bình luận"
-                                      : activity.type === "contribution"
-                                        ? `Đóng góp (${activity.type})`
-                                        : "Báo cáo"}
-                                </span>
-                                <span
-                                  style={{
-                                    fontSize: 11,
-                                    padding: "2px 8px",
-                                    borderRadius: 12,
-                                    background:
-                                      activity.status === "approved"
-                                        ? "#d1fae5"
-                                        : activity.status === "rejected"
-                                          ? "#fee2e2"
-                                          : "#fef9c3",
-                                    color:
-                                      activity.status === "approved"
-                                        ? "#065f46"
-                                        : activity.status === "rejected"
-                                          ? "#991b1b"
-                                          : "#713f12",
-                                  }}
-                                >
-                                  {activity.status || "N/A"}
+                                {t.icon}
+                              </div>
+                              <div className="activity-modal__item-body">
+                                <div className="activity-modal__item-header">
+                                  <span className="activity-modal__item-title">
+                                    {t.label}
+                                  </span>
+                                  <span
+                                    className={`activity-modal__status ${s.cls}`}
+                                  >
+                                    {s.label}
+                                  </span>
+                                </div>
+                                {(activity.content || activity.reason) && (
+                                  <p className="activity-modal__item-content">
+                                    {activity.content || activity.reason}
+                                  </p>
+                                )}
+                                <span className="activity-modal__item-date">
+                                  {new Date(activity.createdAt).toLocaleString(
+                                    "vi-VN",
+                                  )}
                                 </span>
                               </div>
-                              {activity.content && (
-                                <p
-                                  style={{
-                                    fontSize: 13,
-                                    color: "var(--text-secondary)",
-                                    marginTop: 2,
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  {activity.content}
-                                </p>
-                              )}
-                              <span
-                                style={{
-                                  fontSize: 12,
-                                  color: "var(--text-muted)",
-                                  marginTop: 4,
-                                  display: "block",
-                                }}
-                              >
-                                {new Date(activity.createdAt).toLocaleString(
-                                  "vi-VN",
-                                )}
-                              </span>
                             </div>
-                          </div>
-                        ),
+                          );
+                        },
                       )}
                     </div>
                   ) : (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "2rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      <History
-                        size={40}
-                        style={{ opacity: 0.3, marginBottom: 8 }}
-                      />
+                    <div className="activity-modal__empty">
+                      <History size={40} />
                       <p>Người dùng chưa có hoạt động nào</p>
                     </div>
                   )}
                 </>
               ) : (
-                <p
-                  style={{
-                    textAlign: "center",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  Không thể tải dữ liệu
-                </p>
+                <div className="activity-modal__empty">
+                  <AlertCircle size={40} />
+                  <p>Không thể tải dữ liệu hoạt động</p>
+                </div>
               )}
             </div>
             <div className="modal__footer">
