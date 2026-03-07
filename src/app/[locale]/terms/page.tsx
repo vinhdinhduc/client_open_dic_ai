@@ -7,8 +7,8 @@ import "./Term.scss";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 
-// Enable ISR - revalidate every 60 seconds
-export const revalidate = 60;
+// Force dynamic rendering - search results must always be fresh
+export const dynamic = "force-dynamic";
 
 // Generate metadata for SEO
 export async function generateMetadata({

@@ -1,6 +1,8 @@
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "https://opendict.utb.edu.vn/api"
 
 interface FetchOptions extends RequestInit {
     timeout?: number;
@@ -74,7 +76,7 @@ export async function searchTermsServer(
                 };
             };
         }>(`/terms/search?${params.toString()}`, {
-            next: { revalidate: 60 },
+            cache: "no-store",
         });
 
 
