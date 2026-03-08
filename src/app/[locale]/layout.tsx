@@ -13,7 +13,7 @@ export const metadata = {
   title: "OpenDict",
   description: "Nền tảng từ điển mở cộng đồng cho Việt Nam và Lào",
   icons: {
-    icon: "/images/logo.jpg",
+    icon: "/images/logo.png",
   },
 };
 

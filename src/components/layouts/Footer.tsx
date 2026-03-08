@@ -18,7 +18,7 @@ export function Footer() {
           <div className="footer-section">
             <div className="footer-logo">
               <img
-                src="/images/logo.jpg"
+                src="/images/logo.png"
                 className="logo"
                 alt="Logo"
                 style={{
