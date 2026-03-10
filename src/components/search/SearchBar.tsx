@@ -208,6 +208,7 @@ export default function SearchBar({
     const keywordLower = keyword.toLowerCase();
     const match = suggestions.find((s) => {
       const text = getTermText(s);
+      if (typeof text !== "string") return false;
       return text.toLowerCase().startsWith(keywordLower);
     });
     return match ? getTermText(match) : null;
