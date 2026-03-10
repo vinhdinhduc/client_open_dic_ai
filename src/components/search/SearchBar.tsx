@@ -97,6 +97,7 @@ export default function SearchBar({
   const debounceTimer = useRef<NodeJS.Timeout>();
 
   const getTermText = (s: SearchSuggestion): string => {
+    if (!s?.term) return "";
     const val =
       s.term[currentLanguage as keyof typeof s.term] ||
       s.term.vi ||

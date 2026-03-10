@@ -49,13 +49,17 @@ export default function SearchResultsClient({
   // Track saved queries to prevent duplicate saves
   const savedQueryRef = useRef<string>("");
   const exactMatch = useMemo(() => {
-    if (!query) return null;
+    if (!query || typeof query !== "string") return null;
     const queryLower = query.toLowerCase().trim();
+    if (!queryLower) return null;
     return terms.find(
       (term) =>
-        term.term.vi?.toLowerCase().trim() === queryLower ||
-        term.term.en?.toLowerCase().trim() === queryLower ||
-        term.term.lo?.toLowerCase().trim() === queryLower,
+        (typeof term.term?.vi === "string" &&
+          term.term.vi.toLowerCase().trim() === queryLower) ||
+        (typeof term.term?.en === "string" &&
+          term.term.en.toLowerCase().trim() === queryLower) ||
+        (typeof term.term?.lo === "string" &&
+          term.term.lo.toLowerCase().trim() === queryLower),
     );
   }, [terms, query]);
   // Lưu lịch sử tìm kiếm khi component mount (chỉ 1 lần per query)
