@@ -97,13 +97,13 @@ export default function SearchBar({
   const debounceTimer = useRef<NodeJS.Timeout>();
 
   const getTermText = (s: SearchSuggestion): string => {
-    return (
+    const val =
       s.term[currentLanguage as keyof typeof s.term] ||
       s.term.vi ||
       s.term.en ||
       s.term.lo ||
-      ""
-    );
+      "";
+    return typeof val === "string" ? val : String(val);
   };
 
   const getCategoryName = (s: SearchSuggestion): string => {

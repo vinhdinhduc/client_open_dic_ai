@@ -32,6 +32,7 @@ import {
   Mail,
   Gauge,
   MoveLeft,
+  Home,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import NotificationBell from "@/components/common/NotificationBell";
@@ -386,8 +387,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Sidebar Footer */}
         <div className="admin-sidebar__footer">
           <Link href="/" className="admin-sidebar__back">
-            <MoveLeft size={16} />
-            <span>Về trang chủ</span>
+            <Home size={16} />
+            <span>Mở trang chủ</span>
           </Link>
         </div>
       </aside>
