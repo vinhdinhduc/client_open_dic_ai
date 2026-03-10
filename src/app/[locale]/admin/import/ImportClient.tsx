@@ -245,7 +245,27 @@ export default function ImportPage() {
           </p>
         </div>
         <div className="admin-page-header__actions">
-          <button className="admin-btn admin-btn--secondary">
+          <button
+            className="admin-btn admin-btn--secondary"
+            onClick={async () => {
+              try {
+                const response = await axiosInstance.get("/terms/import-template", {
+                  responseType: "blob",
+                });
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "import_template.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                toast.success("Đã tải mẫu Excel");
+              } catch {
+                toast.error("Không thể tải mẫu Excel");
+              }
+            }}
+          >
             <Download size={16} />
             Tải mẫu Excel
           </button>

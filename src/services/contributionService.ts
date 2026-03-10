@@ -213,6 +213,26 @@ const deleteContribution = async (id: string): Promise<ApiResponse<void>> => {
 }
 
 
+const bulkApprove = async (
+    ids: string[],
+    moderatorNote?: string
+): Promise<ApiResponse<{ approved: number; failed: number }>> => {
+    const response = await axiosInstance.post<
+        ApiResponse<{ approved: number; failed: number }>
+    >("/contributions/bulk-approve", { ids, moderatorNote });
+    return response.data;
+};
+
+const bulkReject = async (
+    ids: string[],
+    moderatorNote: string
+): Promise<ApiResponse<{ rejected: number; failed: number }>> => {
+    const response = await axiosInstance.post<
+        ApiResponse<{ rejected: number; failed: number }>
+    >("/contributions/bulk-reject", { ids, moderatorNote });
+    return response.data;
+};
+
 export const contributionService = {
     createContribution,
     getContributions,
@@ -220,5 +240,7 @@ export const contributionService = {
     approveContribution,
     rejectContribution,
     deleteContribution,
+    bulkApprove,
+    bulkReject,
 };
 export default contributionService;

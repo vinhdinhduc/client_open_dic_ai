@@ -187,6 +187,13 @@
     "favoriteError": "An error occurred",
     "loginToReport": "Please login to report",
     "loginToSuggestEdit": "Please login to suggest an edit",
+    "loginToAskAI": "Please login to ask AI",
+    "askAI": "Ask AI",
+    "contributors": "Contributors",
+    "created": "Created",
+    "edited": "Edited",
+    "aiThinking": "AI is analyzing...",
+    "aiSuggestEditPrompt": "Would you like to suggest an edit to this term?",
     "searchBreadcrumb": "Search",
     "detailedExplanation": "Detailed Explanation",
     "views": "views",
@@ -324,6 +331,21 @@
       "adverb": "Adverb",
       "phrase": "Phrase",
       "abbreviation": "Abbreviation"
+    },
+    "guide": {
+      "title": "How to contribute a term",
+      "step1Title": "Select language",
+      "step1Desc": "Choose a language tab (Vietnamese, English, Lao) to enter the term. You can fill in multiple languages.",
+      "step1Tip": "Vietnamese is required; other languages are optional.",
+      "step2Title": "Enter basic information",
+      "step2Desc": "Fill in the term name, a concise definition, and select the appropriate category.",
+      "step2Tip": "The definition should be clear, concise, and easy to understand.",
+      "step3Title": "Add detailed information",
+      "step3Desc": "Add detailed explanation, part of speech, usage examples, related terms, and tags.",
+      "step3Tip": "The more information, the easier it is for the term to be approved.",
+      "step4Title": "Submit contribution",
+      "step4Desc": "Review the content and click 'Submit Contribution'. A moderator will review and approve it.",
+      "step4Tip": "You can track the status in 'My Contributions'."
     }
   },
   "profile": {
@@ -442,7 +464,20 @@
     "definitionViRequired": "Vietnamese definition is required",
     "noteRequired": "Please provide an edit reason",
     "success": "Edit suggestion submitted. Thank you for your contribution!",
-    "error": "Unable to submit suggestion. Please try again."
+    "error": "Unable to submit suggestion. Please try again.",
+    "guide": {
+      "title": "How to suggest an edit",
+      "step1Title": "Review current content",
+      "step1Desc": "Fields are pre-filled with the original content. Review which parts need editing.",
+      "step2Title": "Edit content",
+      "step2Desc": "Modify the term, definition, explanation, examples, or tags per language.",
+      "step2Tip": "Switch language tabs to edit different language versions.",
+      "step3Title": "Provide edit reason",
+      "step3Desc": "Explain why you are suggesting this edit. This field is required.",
+      "step3Tip": "A clear reason helps moderators approve faster.",
+      "step4Title": "Submit suggestion",
+      "step4Desc": "Click 'Submit Suggestion' to finish. You'll be notified when it's processed."
+    }
   },
   "searchHistory": {
     "metaTitle": "Search History - OpenDict",

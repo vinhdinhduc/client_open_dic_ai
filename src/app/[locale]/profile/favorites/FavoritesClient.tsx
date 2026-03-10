@@ -12,13 +12,12 @@ import {
   Trash2,
   X,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   BookOpen,
   Tag,
   ExternalLink,
 } from "lucide-react";
+import Pagination from "@/components/common/Pagination";
 import { Layout } from "@/components/layouts";
 import {
   getFavorites,
@@ -260,25 +259,11 @@ export default function FavoritesPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="favorites-page__pagination">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              <ChevronLeft size={16} />
-              {t("prev")}
-            </button>
-            <span>
-              {t("page")} {currentPage} / {totalPages}
-            </span>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              {t("next")}
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
     </Layout>

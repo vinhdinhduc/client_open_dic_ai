@@ -24,6 +24,7 @@ import {
   ChevronRight,
   EyeOff,
   Eye,
+  Bell,
 } from "lucide-react";
 import "./page.scss";
 import { Layout } from "@/components/layouts";
@@ -59,11 +60,25 @@ export default function ProfilePage() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [emailNotifications, setEmailNotifications] = useState({
+    contributions: true,
+    moderation: true,
+    system: true,
+  });
+  const [savingNotifications, setSavingNotifications] = useState(false);
 
   useEffect(() => {
     if (user) {
       setFullName(user.fullName || "");
       setPreferredLanguage((user as any).preferredLanguage || "vi");
+      const notifs = (user as any).emailNotifications;
+      if (notifs) {
+        setEmailNotifications({
+          contributions: notifs.contributions,
+          moderation: notifs.moderation,
+          system: notifs.system,
+        });
+      }
     }
   }, [user]);
 
@@ -179,6 +194,23 @@ export default function ProfilePage() {
         return "Kiểm duyệt viên";
       default:
         return "Người dùng";
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setSavingNotifications(true);
+    try {
+      const response = await authService.updateProfile({
+        emailNotifications,
+      } as any);
+      if (response.success) {
+        updateUser({ emailNotifications } as any);
+        toast.success("Đã cập nhật cài đặt thông báo");
+      }
+    } catch {
+      toast.error("Không thể cập nhật cài đặt thông báo");
+    } finally {
+      setSavingNotifications(false);
     }
   };
 
@@ -571,6 +603,103 @@ export default function ProfilePage() {
                     "Để bảo mật tài khoản, hãy sử dụng mật khẩu mạnh và thay đổi định kỳ."}
                 </p>
               )}
+            </div>
+          </div>
+
+          {/* Email Notifications Card */}
+          <div className="profile-card profile-card--full">
+            <div className="profile-card__header">
+              <h2 className="card-title">
+                <Bell size={20} />
+                Cài đặt thông báo email
+              </h2>
+            </div>
+            <div className="profile-card__body">
+              <div className="notification-settings">
+                <label className="notification-toggle">
+                  <div className="notification-toggle__info">
+                    <span className="notification-toggle__label">Đóng góp</span>
+                    <span className="notification-toggle__desc">
+                      Nhận thông báo khi đóng góp được duyệt hoặc từ chối
+                    </span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications.contributions}
+                    onChange={(e) =>
+                      setEmailNotifications((prev) => ({
+                        ...prev,
+                        contributions: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span className="toggle-slider" />
+                </label>
+
+                {user?.role !== "user" && (
+                  <label className="notification-toggle">
+                    <div className="notification-toggle__info">
+                      <span className="notification-toggle__label">
+                        Kiểm duyệt
+                      </span>
+                      <span className="notification-toggle__desc">
+                        Nhận thông báo khi có đóng góp mới cần duyệt
+                      </span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={emailNotifications.moderation}
+                      onChange={(e) =>
+                        setEmailNotifications((prev) => ({
+                          ...prev,
+                          moderation: e.target.checked,
+                        }))
+                      }
+                    />
+                    <span className="toggle-slider" />
+                  </label>
+                )}
+
+                <label className="notification-toggle">
+                  <div className="notification-toggle__info">
+                    <span className="notification-toggle__label">Hệ thống</span>
+                    <span className="notification-toggle__desc">
+                      Nhận thông báo về cập nhật và bảo trì hệ thống
+                    </span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications.system}
+                    onChange={(e) =>
+                      setEmailNotifications((prev) => ({
+                        ...prev,
+                        system: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span className="toggle-slider" />
+                </label>
+
+                <div className="form-actions" style={{ marginTop: "1rem" }}>
+                  <button
+                    className="btn btn--primary"
+                    onClick={handleSaveNotifications}
+                    disabled={savingNotifications}
+                  >
+                    {savingNotifications ? (
+                      <>
+                        <Loader2 className="spinner" size={16} />
+                        Đang lưu...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} />
+                        Lưu cài đặt
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

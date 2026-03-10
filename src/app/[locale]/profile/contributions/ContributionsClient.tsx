@@ -19,6 +19,7 @@ import {
   Calendar,
   User,
 } from "lucide-react";
+import Pagination from "@/components/common/Pagination";
 import "./page.scss";
 import { Layout } from "@/components/layouts";
 
@@ -377,25 +378,11 @@ export default function MyContributionsPage() {
 
         {/* Pagination */}
         {pagination.pages > 1 && (
-          <div className="pagination">
-            <button
-              className="pagination__btn"
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-              disabled={currentPage === 1}
-            >
-              {tCommon("previous")}
-            </button>
-            <span className="pagination__info">
-              {t("page")} {currentPage} / {pagination.pages}
-            </span>
-            <button
-              className="pagination__btn"
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-              disabled={currentPage === pagination.pages}
-            >
-              {tCommon("next")}
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pagination.pages}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
     </Layout>

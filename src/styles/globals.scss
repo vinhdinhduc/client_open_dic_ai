@@ -40,6 +40,8 @@
 
 // Dark Theme
 [data-theme="dark"] {
+    color-scheme: dark;
+
     --bg-primary: #1a1a1a;
     --bg-secondary: #2d2d2d;
     --bg-tertiary: #404040;
@@ -56,6 +58,12 @@
     --primary: #3b82f6;
     --primary-hover: #60a5fa;
     --primary-light: rgba(59, 130, 246, 0.15);
+
+    select,
+    option {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
 }
 
 * {

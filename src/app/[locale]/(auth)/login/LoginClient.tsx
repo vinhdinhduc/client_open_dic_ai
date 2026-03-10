@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import { authService, validateEmail } from "@/services/authService";
@@ -12,6 +12,7 @@ import "../Auth.scss";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { login, isAuthenticated, user } = useAuth();
 
@@ -33,6 +34,7 @@ export default function LoginPage() {
     message: string;
   } | null>(null);
 
+  const redirect = searchParams.get("returnUrl");
   // Check if already logged in
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
@@ -40,9 +42,9 @@ export default function LoginPage() {
     } else if (isAuthenticated && user?.role === "moderator") {
       router.push("/moderator");
     } else if (isAuthenticated) {
-      router.push("/");
+      router.push(redirect || "/");
     }
-  }, [router, isAuthenticated, user]);
+  }, [router, isAuthenticated, user, redirect]);
 
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

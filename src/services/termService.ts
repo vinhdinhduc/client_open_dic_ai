@@ -11,12 +11,29 @@ import {
 } from "@/components/terms/types";
 
 
+export interface SearchSuggestion {
+  _id: string;
+  term: {
+    vi?: string;
+    en?: string;
+    lo?: string;
+  };
+  category: {
+    _id: string;
+    name: { vi?: string; en?: string; lo?: string };
+    icon?: string;
+    slug?: string;
+  } | null;
+  matchedField?: string;
+}
+
 //Get search suggestions
-const getSearchSuggestions = async (keyword: string): Promise<string[]> => {
+const getSearchSuggestions = async (keyword: string, language: string = "vi"): Promise<SearchSuggestion[]> => {
   try {
-    const res = await axiosInstance.get<ApiResponse<{ suggestions: string[] }>>('/terms/suggestions', {
+    const res = await axiosInstance.get<ApiResponse<{ suggestions: SearchSuggestion[] }>>('/terms/suggestions', {
       params: {
         q: keyword,
+        language,
       }
     });
 

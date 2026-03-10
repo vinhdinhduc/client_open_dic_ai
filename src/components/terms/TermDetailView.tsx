@@ -28,8 +28,12 @@ import {
   Clock,
   User as UserIcon,
   ChevronRight,
+  Bot,
+  Loader2,
+  Users,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import axiosInstance from "@/lib/axios";
 import "./TermDetailView.scss";
 
 interface TermDetailViewProps {
@@ -41,7 +45,9 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
   const tContribute = useTranslations("contribution");
   const tCommon = useTranslations("common");
   const { currentLanguage } = useLanguage();
-  console.log("Check term", term);
+
+  // Content language tabs - independent from system language
+  const [contentLang, setContentLang] = useState<string>(currentLanguage);
 
   // Map partOfSpeech codes to localised labels
   const getPartOfSpeechLabel = (pos: string): string => {
@@ -68,6 +74,24 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
   const [commentsLoading, setCommentsLoading] = useState(true);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResponse, setAiResponse] = useState<{
+    definition?: string;
+    detailedExplanation?: string;
+    examples?: string[];
+  } | null>(null);
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  // Client-side cache: store AI responses per language to avoid re-calling API
+  const [aiCache, setAiCache] = useState<
+    Record<
+      string,
+      {
+        definition?: string;
+        detailedExplanation?: string;
+        examples?: string[];
+      }
+    >
+  >({});
 
   // Load comments và check favorite khi mount
   useEffect(() => {
@@ -98,8 +122,22 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     }
   };
 
-  // Helpers
+  // Helpers - use contentLang for dictionary content (independent from system language)
   const getText = (
+    multiLang: { vi?: string; en?: string; lo?: string } | undefined,
+  ): string => {
+    if (!multiLang) return "";
+    return (
+      multiLang[contentLang as keyof typeof multiLang] ||
+      multiLang.vi ||
+      multiLang.en ||
+      multiLang.lo ||
+      ""
+    );
+  };
+
+  // For UI elements, use system language
+  const getUIText = (
     multiLang: { vi?: string; en?: string; lo?: string } | undefined,
   ): string => {
     if (!multiLang) return "";
@@ -171,6 +209,62 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     setComments((prev) => [newComment, ...prev]);
   };
 
+  // AI Ask handler
+  const handleAskAI = async (lang?: string) => {
+    if (!isAuthenticated) {
+      toast.error(t("loginToAskAI") || "Vui lòng đăng nhập để hỏi AI");
+      return;
+    }
+    const targetLang = lang || contentLang;
+    setShowAiPanel(true);
+
+    // Check client-side cache first
+    if (aiCache[targetLang]) {
+      setAiResponse(aiCache[targetLang]);
+      return;
+    }
+
+    setAiLoading(true);
+    setAiResponse(null);
+    try {
+      const res = await axiosInstance.post("/ai/ask-about-term", {
+        termId: term._id,
+        language: targetLang,
+      });
+      if (res.data?.success && res.data.data) {
+        const data = res.data.data;
+        const parsed = {
+          definition: data.definition || undefined,
+          detailedExplanation: data.detailedExplanation || undefined,
+          examples: data.examples?.length ? data.examples : undefined,
+        };
+        setAiResponse(parsed);
+        // Save to local cache
+        setAiCache((prev) => ({ ...prev, [targetLang]: parsed }));
+      }
+    } catch {
+      toast.error("Không thể kết nối với AI");
+      setAiResponse(null);
+      setShowAiPanel(false);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Re-call AI when content language changes
+  useEffect(() => {
+    if (showAiPanel) {
+      handleAskAI(contentLang);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentLang]);
+
+  const contentLanguages = [
+    { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+    { code: "en", label: "English", flag: "🇬🇧" },
+    { code: "lo", label: "ລາວ", flag: "🇱🇦" },
+  ];
+
   return (
     <div className="term-detail">
       {/* Breadcrumb */}
@@ -180,13 +274,13 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         </Link>
         <ChevronRight size={16} />
         <Link
-          href={`/terms?q=${encodeURIComponent(getText(term.term))}`}
+          href={`/terms?q=${encodeURIComponent(getUIText(term.term))}`}
           className="breadcrumb-link"
         >
           {t("searchBreadcrumb")}
         </Link>
         <ChevronRight size={16} />
-        <span className="breadcrumb-current">{getText(term.term)}</span>
+        <span className="breadcrumb-current">{getUIText(term.term)}</span>
       </nav>
 
       {/* Main Content */}
@@ -198,6 +292,17 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
 
             {/* Action buttons */}
             <div className="term-detail__actions">
+              <button
+                className={`action-btn action-btn--ai ${showAiPanel ? "active" : ""}`}
+                onClick={() => handleAskAI()}
+                title={t("askAI") || "Hỏi AI"}
+              >
+                {aiLoading ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <Bot size={20} />
+                )}
+              </button>
               <button
                 className={`action-btn action-btn--favorite ${isFavorited ? "active" : ""}`}
                 onClick={handleFavoriteToggle}
@@ -219,7 +324,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
                 className="term-detail__category"
               >
                 <Tag size={16} />
-                <span>{getText(term.category.name)}</span>
+                <span>{getUIText(term.category.name)}</span>
               </Link>
             )}
 
@@ -237,35 +342,19 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
           </div>
         </header>
 
-        {/* Multi-language terms */}
-        {(term.term.en || term.term.lo) && (
-          <div className="term-detail__translations">
-            {term.term.vi && currentLanguage !== "vi" && (
-              <div className="translation-item">
-                <span className="lang-label" title="Tiếng Việt">
-                  🇻🇳
-                </span>
-                <span className="lang-value">{term.term.vi}</span>
-              </div>
-            )}
-            {term.term.en && currentLanguage !== "en" && (
-              <div className="translation-item">
-                <span className="lang-label" title="English">
-                  🇬🇧
-                </span>
-                <span className="lang-value">{term.term.en}</span>
-              </div>
-            )}
-            {term.term.lo && currentLanguage !== "lo" && (
-              <div className="translation-item">
-                <span className="lang-label" title="ພາສາລາວ">
-                  🇱🇦
-                </span>
-                <span className="lang-value">{term.term.lo}</span>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Content Language Tabs */}
+        <div className="term-detail__lang-tabs">
+          {contentLanguages.map((lang) => (
+            <button
+              key={lang.code}
+              className={`lang-tab ${contentLang === lang.code ? "lang-tab--active" : ""}`}
+              onClick={() => setContentLang(lang.code)}
+            >
+              <span className="lang-tab__flag">{lang.flag}</span>
+              <span className="lang-tab__label">{lang.label}</span>
+            </button>
+          ))}
+        </div>
 
         {/* Definition */}
         <section className="term-detail__section">
@@ -276,30 +365,106 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
           <div className="term-detail__definition">
             {getText(term.definition)}
           </div>
+          {showAiPanel && (
+            <div className="term-detail__ai-inline">
+              <div className="ai-inline__label">
+                <Bot size={14} /> AI
+              </div>
+              {aiLoading ? (
+                <div className="ai-inline__loading">
+                  <Loader2 size={16} className="animate-spin" />{" "}
+                  {t("aiThinking") || "AI đang phân tích..."}
+                </div>
+              ) : aiResponse?.definition ? (
+                <div className="ai-inline__content">
+                  {aiResponse.definition}
+                </div>
+              ) : !aiLoading ? (
+                <div className="ai-inline__empty">—</div>
+              ) : null}
+            </div>
+          )}
         </section>
 
         {/* Detailed Explanation */}
-        {term.detailedExplanation && getText(term.detailedExplanation) && (
+        {(getText(term.detailedExplanation) ||
+          (showAiPanel && aiResponse?.detailedExplanation)) && (
           <section className="term-detail__section">
             <h2 className="section-title">{t("detailedExplanation")}</h2>
-            <div className="term-detail__explanation">
-              {getText(term.detailedExplanation)}
-            </div>
+            {getText(term.detailedExplanation) && (
+              <div className="term-detail__explanation">
+                {getText(term.detailedExplanation)}
+              </div>
+            )}
+            {showAiPanel && (
+              <div className="term-detail__ai-inline">
+                <div className="ai-inline__label">
+                  <Bot size={14} /> AI
+                </div>
+                {aiLoading ? (
+                  <div className="ai-inline__loading">
+                    <Loader2 size={16} className="animate-spin" />{" "}
+                    {t("aiThinking") || "AI đang phân tích..."}
+                  </div>
+                ) : aiResponse?.detailedExplanation ? (
+                  <div className="ai-inline__content">
+                    {aiResponse.detailedExplanation}
+                  </div>
+                ) : !aiLoading ? (
+                  <div className="ai-inline__empty">—</div>
+                ) : null}
+              </div>
+            )}
           </section>
         )}
 
         {/* Examples */}
-        {term.examples && term.examples.length > 0 && (
+        {((term.examples && term.examples.length > 0) ||
+          (showAiPanel && aiResponse?.examples?.length)) && (
           <section className="term-detail__section">
             <h2 className="section-title">{t("example")}</h2>
-            <ul className="term-detail__examples">
-              {term.examples.map((example, index) => (
-                <li key={index} className="example-item">
-                  {getText(example)}
-                </li>
-              ))}
-            </ul>
+            {term.examples && term.examples.length > 0 && (
+              <ul className="term-detail__examples">
+                {term.examples.map((example, index) => (
+                  <li key={index} className="example-item">
+                    {getText(example)}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {showAiPanel && (
+              <div className="term-detail__ai-inline">
+                <div className="ai-inline__label">
+                  <Bot size={14} /> AI
+                </div>
+                {aiLoading ? (
+                  <div className="ai-inline__loading">
+                    <Loader2 size={16} className="animate-spin" />{" "}
+                    {t("aiThinking") || "AI đang phân tích..."}
+                  </div>
+                ) : aiResponse?.examples?.length ? (
+                  <ul className="ai-inline__examples">
+                    {aiResponse.examples.map((ex, i) => (
+                      <li key={i}>{ex}</li>
+                    ))}
+                  </ul>
+                ) : !aiLoading ? (
+                  <div className="ai-inline__empty">—</div>
+                ) : null}
+              </div>
+            )}
           </section>
+        )}
+
+        {/* AI Suggest Edit CTA */}
+        {showAiPanel && aiResponse && !aiLoading && (
+          <div className="term-detail__ai-suggest-cta">
+            <p>{t("aiSuggestEditPrompt")}</p>
+            <button className="btn-suggest-edit" onClick={handleEditClick}>
+              <Edit3 size={16} />
+              {t("suggestEditBtn")}
+            </button>
+          </div>
         )}
 
         {/* Related Terms */}
@@ -327,22 +492,49 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         {term.tags && term.tags.length > 0 && (
           <div className="term-detail__tags">
             {term.tags.map((tag, index) => (
-              <span key={index} className="tag">
+              <Link
+                key={index}
+                href={`/terms?q=${encodeURIComponent(tag)}`}
+                className="tag tag--clickable"
+              >
                 #{tag}
-              </span>
+              </Link>
             ))}
           </div>
         )}
 
+        {/* Contributors */}
+        <section className="term-detail__contributors">
+          <h3 className="contributors-title">
+            <Users size={18} />
+            {t("contributors")}
+          </h3>
+          <div className="contributors-list">
+            {term.createdBy && (
+              <div className="contributor-item">
+                <UserIcon size={14} />
+                <span className="contributor-name">
+                  {term.createdBy.fullName}
+                </span>
+                <span className="contributor-role">({t("created")})</span>
+              </div>
+            )}
+            {term.lastModifiedBy &&
+              term.lastModifiedBy._id !== term.createdBy?._id && (
+                <div className="contributor-item">
+                  <Edit3 size={14} />
+                  <span className="contributor-name">
+                    {term.lastModifiedBy.fullName}
+                  </span>
+                  <span className="contributor-role">({t("edited")})</span>
+                </div>
+              )}
+          </div>
+        </section>
+
         {/* Footer Info */}
         <footer className="term-detail__footer">
           <div className="footer-info">
-            {term.createdBy && (
-              <span className="footer-item">
-                <UserIcon size={14} />
-                {t("contributedBy")}: {term.createdBy.fullName}
-              </span>
-            )}
             {term.createdAt && (
               <span className="footer-item">
                 <Clock size={14} />

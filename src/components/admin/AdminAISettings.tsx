@@ -34,6 +34,9 @@ export default function AdminAISettings() {
     provider: "gemini",
     model: "gemini-2.5-flash",
     maxTokens: 1000,
+    promptDefinition: "",
+    promptExplanation: "",
+    promptAnswer: "",
   });
 
   useEffect(() => {
@@ -55,6 +58,9 @@ export default function AdminAISettings() {
         provider: data.provider || "gemini",
         model: data.model || "gemini-2.5-flash",
         maxTokens: data.maxTokens || 1000,
+        promptDefinition: data.promptDefinition || "",
+        promptExplanation: data.promptExplanation || "",
+        promptAnswer: data.promptAnswer || "",
       });
 
       // If API key is masked, the form field is left empty (placeholder shows masked value)
@@ -77,8 +83,8 @@ export default function AdminAISettings() {
         return;
       }
 
-      if (formData.maxTokens < 100 || formData.maxTokens > 4000) {
-        toast.error("Max Tokens phải từ 100 đến 4000");
+      if (formData.maxTokens < 100 || formData.maxTokens > 8192) {
+        toast.error("Max Tokens phải từ 100 đến 8192");
         return;
       }
 
@@ -127,7 +133,9 @@ export default function AdminAISettings() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
     // Reset model when provider changes to avoid stale model
@@ -326,6 +334,57 @@ export default function AdminAISettings() {
               "Sử dụng xAI API — cùng định dạng với OpenAI, base URL: api.x.ai"}
             {formData.provider === "openai" && "Sử dụng OpenAI API chính thức"}
           </small>
+        </div>
+      </div>
+
+      {/* Prompt Templates */}
+      <div className="admin-settings-section__group">
+        <h3>Mẫu Prompt AI</h3>
+        <small
+          className="form-text"
+          style={{ marginBottom: "1rem", display: "block" }}
+        >
+          Tùy chỉnh các prompt gửi cho AI. Sử dụng {"{term}"} để đại diện cho
+          thuật ngữ.
+        </small>
+
+        <div className="form-group">
+          <label htmlFor="promptDefinition">Prompt Định nghĩa</label>
+          <textarea
+            id="promptDefinition"
+            name="promptDefinition"
+            value={formData.promptDefinition}
+            onChange={handleInputChange}
+            className="form-control"
+            rows={3}
+            placeholder="VD: Hãy định nghĩa thuật ngữ CNTT '{term}' bằng tiếng Việt, ngắn gọn và chính xác."
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="promptExplanation">Prompt Giải thích chi tiết</label>
+          <textarea
+            id="promptExplanation"
+            name="promptExplanation"
+            value={formData.promptExplanation}
+            onChange={handleInputChange}
+            className="form-control"
+            rows={3}
+            placeholder="VD: Hãy giải thích chi tiết thuật ngữ CNTT '{term}' bằng tiếng Việt."
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="promptAnswer">Prompt Hỏi đáp</label>
+          <textarea
+            id="promptAnswer"
+            name="promptAnswer"
+            value={formData.promptAnswer}
+            onChange={handleInputChange}
+            className="form-control"
+            rows={3}
+            placeholder="VD: Trả lời câu hỏi sau về thuật ngữ CNTT '{term}': {question}"
+          />
         </div>
       </div>
 

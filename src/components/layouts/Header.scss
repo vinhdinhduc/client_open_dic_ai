@@ -112,6 +112,13 @@
 
     &__app-name {
         white-space: nowrap;
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, #16a34a 0%, #22c55e 45%, #4ade80 75%, #86efac 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.01em;
 
         @media (max-width: 768px) {
             max-width: 200px;

@@ -12,6 +12,8 @@ import {
 } from "@/utils/contributionStorage";
 import { toast } from "react-hot-toast";
 import { PlusCircle, X, Send, Loader2 } from "lucide-react";
+import RichTextEditor from "@/components/common/RichTextEditor";
+import StepGuide, { GuideStep } from "@/components/common/StepGuide";
 import "./ContributionForm.scss";
 import type { MultiLangText, Example, PartOfSpeech } from "@/types/term.types";
 import type { CategoryRef } from "@/types/category.types";
@@ -339,12 +341,37 @@ export default function ContributionForm() {
     }
   };
 
+  const guideSteps: GuideStep[] = [
+    {
+      title: t("guide.step1Title"),
+      description: t("guide.step1Desc"),
+      tip: t("guide.step1Tip"),
+    },
+    {
+      title: t("guide.step2Title"),
+      description: t("guide.step2Desc"),
+      tip: t("guide.step2Tip"),
+    },
+    {
+      title: t("guide.step3Title"),
+      description: t("guide.step3Desc"),
+      tip: t("guide.step3Tip"),
+    },
+    {
+      title: t("guide.step4Title"),
+      description: t("guide.step4Desc"),
+      tip: t("guide.step4Tip"),
+    },
+  ];
+
   return (
     <div className="contribution-form">
       <div className="contribution-form__header">
         <h1>{t("title")}</h1>
         <p className="contribution-form__subtitle">{t("newTerm")}</p>
       </div>
+
+      <StepGuide title={t("guide.title")} steps={guideSteps} />
 
       <form onSubmit={handleSubmit} className="contribution-form__form">
         {/* Language Tabs */}
@@ -402,14 +429,13 @@ export default function ContributionForm() {
             <label className="form-label required">
               {t("definitionLabel")}
             </label>
-            <textarea
-              className="form-textarea"
-              placeholder={t("definitionPlaceholder")}
+            <RichTextEditor
               value={formData.definition[currentLang] || ""}
-              onChange={(e) =>
-                handleInputChange("definition", e.target.value, currentLang)
+              onChange={(value) =>
+                handleInputChange("definition", value, currentLang)
               }
-              rows={3}
+              placeholder={t("definitionPlaceholder")}
+              minHeight={80}
             />
           </div>
 
@@ -444,18 +470,13 @@ export default function ContributionForm() {
             <label className="form-label">
               {t("detailedExplanationLabel")}
             </label>
-            <textarea
-              className="form-textarea"
-              placeholder={t("detailedExplanationPlaceholder")}
+            <RichTextEditor
               value={formData.detailedExplanation?.[currentLang] || ""}
-              onChange={(e) =>
-                handleInputChange(
-                  "detailedExplanation",
-                  e.target.value,
-                  currentLang,
-                )
+              onChange={(value) =>
+                handleInputChange("detailedExplanation", value, currentLang)
               }
-              rows={5}
+              placeholder={t("detailedExplanationPlaceholder")}
+              minHeight={120}
             />
           </div>
 

@@ -93,6 +93,11 @@
 
             .logo-text {
                 line-height: 1.2;
+                font-weight: 700;
+                background: linear-gradient(135deg, #16a34a 0%, #22c55e 45%, #4ade80 75%, #86efac 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
             }
 
             @media (max-width: 640px) {

@@ -1,0 +1,87 @@
+.rich-text-editor {
+    .ql-toolbar.ql-snow {
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px 8px 0 0;
+        background: var(--bg-secondary, #f8fafc);
+        padding: 6px 8px;
+
+        .ql-formats {
+            margin-right: 8px;
+        }
+
+        button {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+
+            &:hover {
+                background: var(--bg-hover, #e2e8f0);
+            }
+
+            &.ql-active {
+                color: var(--primary-color, #667eea);
+            }
+        }
+    }
+
+    .ql-container.ql-snow {
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        font-family: inherit;
+        font-size: 0.9375rem;
+
+        .ql-editor {
+            min-height: var(--editor-min-height, 120px);
+            line-height: 1.6;
+            padding: 12px 14px;
+            color: var(--text-primary);
+
+            &.ql-blank::before {
+                color: var(--text-tertiary, #a0aec0);
+                font-style: normal;
+            }
+        }
+    }
+
+    // Dark mode
+    [data-theme="dark"] & {
+        .ql-toolbar.ql-snow {
+            border-color: var(--border-color, #374151);
+            background: var(--bg-secondary, #1f2937);
+
+            button {
+                color: var(--text-secondary, #9ca3af);
+
+                &:hover {
+                    background: var(--bg-hover, #374151);
+                    color: var(--text-primary, #e5e7eb);
+                }
+
+                &.ql-active {
+                    color: var(--primary-color, #818cf8);
+                }
+            }
+
+            .ql-stroke {
+                stroke: var(--text-secondary, #9ca3af);
+            }
+
+            .ql-fill {
+                fill: var(--text-secondary, #9ca3af);
+            }
+
+            .ql-picker-label {
+                color: var(--text-secondary, #9ca3af);
+            }
+        }
+
+        .ql-container.ql-snow {
+            border-color: var(--border-color, #374151);
+
+            .ql-editor {
+                color: var(--text-primary, #e5e7eb);
+            }
+        }
+    }
+}

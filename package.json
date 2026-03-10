@@ -20,6 +20,7 @@
     "react-hot-toast": "^2.6.0",
     "react-loader-spinner": "^8.0.2",
     "react-markdown": "^10.1.0",
+    "react-quill-new": "^3.8.3",
     "recharts": "^3.7.0",
     "remark-gfm": "^4.0.1",
     "sass": "^1.97.3"

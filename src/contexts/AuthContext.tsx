@@ -91,6 +91,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (response.success && response.data) {
           setUser(response.data.user);
+          // Refresh profile to get latest data (contributionCount, etc.)
+          try {
+            const profile = await authService.getProfile();
+            if (profile.success && profile.data) {
+              setUser(profile.data);
+              tokenUtils.setUser(profile.data);
+            }
+          } catch {
+            // Non-critical, user data from login response is still valid
+          }
           return true;
         }
         return false;
@@ -154,6 +164,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (response.success && response.data) {
           setUser(response.data.user);
+          try {
+            const profile = await authService.getProfile();
+            if (profile.success && profile.data) {
+              setUser(profile.data);
+              tokenUtils.setUser(profile.data);
+            }
+          } catch {
+            // Non-critical
+          }
           return true;
         }
         return false;

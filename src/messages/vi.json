@@ -185,8 +185,15 @@
     "addedToFavorite": "Đã thêm vào yêu thích",
     "removedFromFavorite": "Đã bỏ khỏi yêu thích",
     "favoriteError": "Có lỗi xảy ra",
+     "contributors": "Người đóng góp",
+    "created": "Tạo mới",
+    "edited": "Chỉnh sửa",
     "loginToReport": "Vui lòng đăng nhập để báo cáo",
     "loginToSuggestEdit": "Vui lòng đăng nhập để gợi ý chỉnh sửa",
+    "loginToAskAI": "Vui lòng đăng nhập để hỏi AI",
+    "askAI": "Hỏi AI",
+    "aiThinking": "AI đang phân tích...",
+    "aiSuggestEditPrompt": "Bạn có muốn gợi ý chỉnh sửa thuật ngữ này không?",
     "searchBreadcrumb": "Tra cứu",
     "detailedExplanation": "Giải thích chi tiết",
     "views": "lượt xem",
@@ -326,6 +333,21 @@
       "adverb": "Trạng từ",
       "phrase": "Cụm từ",
       "abbreviation": "Viết tắt"
+    },
+    "guide": {
+      "title": "Hướng dẫn đóng góp thuật ngữ",
+      "step1Title": "Chọn ngôn ngữ",
+      "step1Desc": "Chọn tab ngôn ngữ (Tiếng Việt, English, ລາວ) để nhập thuật ngữ. Bạn có thể nhập nhiều ngôn ngữ.",
+      "step1Tip": "Tiếng Việt là ngôn ngữ bắt buộc, các ngôn ngữ khác là tùy chọn.",
+      "step2Title": "Nhập thông tin cơ bản",
+      "step2Desc": "Điền tên thuật ngữ, định nghĩa ngắn gọn và chọn chuyên ngành phù hợp.",
+      "step2Tip": "Định nghĩa nên rõ ràng, súc tích và dễ hiểu.",
+      "step3Title": "Bổ sung thông tin chi tiết",
+      "step3Desc": "Thêm giải thích chi tiết, loại từ, ví dụ sử dụng, thuật ngữ liên quan và từ khóa.",
+      "step3Tip": "Càng nhiều thông tin, thuật ngữ càng dễ được duyệt.",
+      "step4Title": "Gửi đóng góp",
+      "step4Desc": "Kiểm tra lại nội dung và nhấn 'Gửi đóng góp'. Người kiểm duyệt sẽ xem xét và phê duyệt.",
+      "step4Tip": "Bạn có thể theo dõi trạng thái tại mục 'Đóng góp của tôi'."
     }
   },
   "profile": {
@@ -443,7 +465,20 @@
     "definitionViRequired": "Định nghĩa tiếng Việt là bắt buộc",
     "noteRequired": "Vui lòng ghi chú lý do chỉnh sửa",
     "success": "Đề xuất chỉnh sửa đã được gửi. Cảm ơn đóng góp của bạn!",
-    "error": "Không thể gửi đề xuất. Vui lòng thử lại."
+    "error": "Không thể gửi đề xuất. Vui lòng thử lại.",
+    "guide": {
+      "title": "Hướng dẫn gợi ý chỉnh sửa",
+      "step1Title": "Xem nội dung hiện tại",
+      "step1Desc": "Các trường đã được điền sẵn nội dung gốc. Xem xét những phần cần chỉnh sửa.",
+      "step2Title": "Chỉnh sửa nội dung",
+      "step2Desc": "Sửa thuật ngữ, định nghĩa, giải thích, ví dụ hoặc từ khóa theo từng ngôn ngữ.",
+      "step2Tip": "Chuyển tab ngôn ngữ để chỉnh sửa phiên bản khác nhau.",
+      "step3Title": "Ghi chú lý do",
+      "step3Desc": "Giải thích lý do bạn đề xuất chỉnh sửa. Đây là trường bắt buộc.",
+      "step3Tip": "Lý do rõ ràng giúp người kiểm duyệt phê duyệt nhanh hơn.",
+      "step4Title": "Gửi đề xuất",
+      "step4Desc": "Nhấn 'Gửi đề xuất' để hoàn tất. Bạn sẽ nhận thông báo khi được xử lý."
+    }
   },
   "searchHistory": {
     "metaTitle": "Lịch sử tra cứu - OpenDict",

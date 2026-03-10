@@ -1680,3 +1680,128 @@ $moderation-info: #3b82f6;
         background: darken($moderation-warning, 10%);
     }
 }
+
+// Bulk Action Bar
+.bulk-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(99, 102, 241, 0.08));
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    animation: slideDown 0.25s ease;
+
+    &__count {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+
+        strong {
+            color: var(--primary, #3b82f6);
+            font-size: 1rem;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+}
+
+.btn--sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn--success {
+    background: #10b981;
+    color: white;
+
+    &:hover {
+        background: #059669;
+    }
+}
+
+.btn--danger {
+    background: #ef4444;
+    color: white;
+
+    &:hover {
+        background: #dc2626;
+    }
+}
+
+.checkbox-cell {
+    width: 40px;
+    text-align: center;
+
+    input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: var(--primary, #3b82f6);
+    }
+}
+
+// Modal overlay & content for bulk reject
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: var(--bg-card, #fff);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+
+    h3 {
+        font-size: 1.125rem;
+        color: var(--text-primary);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 0.5rem;
+        background: var(--bg-primary, #fff);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        resize: vertical;
+
+        &:focus {
+            outline: none;
+            border-color: var(--primary, #3b82f6);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

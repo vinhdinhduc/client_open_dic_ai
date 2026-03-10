@@ -54,6 +54,12 @@ export default function ContributionsModerationPage() {
     "approve",
   );
 
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkRejectNote, setBulkRejectNote] = useState("");
+  const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -196,6 +202,73 @@ export default function ContributionsModerationPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (
+      selectedIds.size === pendingFilteredIds.length &&
+      pendingFilteredIds.length > 0
+    ) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pendingFilteredIds));
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      setBulkLoading(true);
+      const res = await contributionService.bulkApprove(
+        Array.from(selectedIds),
+        moderatorNote || undefined,
+      );
+      if (res.success) {
+        toast.success(`Đã phê duyệt ${res.data.approved} đóng góp`);
+        setSelectedIds(new Set());
+        setModeratorNote("");
+        fetchContributions();
+      }
+    } catch {
+      toast.error("Không thể phê duyệt hàng loạt");
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    if (selectedIds.size === 0) return;
+    if (!bulkRejectNote.trim()) {
+      toast.error("Vui lòng nhập lý do từ chối");
+      return;
+    }
+    try {
+      setBulkLoading(true);
+      const res = await contributionService.bulkReject(
+        Array.from(selectedIds),
+        bulkRejectNote,
+      );
+      if (res.success) {
+        toast.success(`Đã từ chối ${res.data.rejected} đóng góp`);
+        setSelectedIds(new Set());
+        setBulkRejectNote("");
+        setShowBulkRejectModal(false);
+        fetchContributions();
+      }
+    } catch {
+      toast.error("Không thể từ chối hàng loạt");
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxPagesToShow = 5;
@@ -282,6 +355,10 @@ export default function ContributionsModerationPage() {
       getContributorName(contribution).toLowerCase().includes(searchLower)
     );
   });
+
+  const pendingFilteredIds = filteredContributions
+    .filter((c) => c.status === "pending")
+    .map((c) => c._id);
 
   const closeModal = () => {
     setShowDetailModal(false);
@@ -389,6 +466,95 @@ export default function ContributionsModerationPage() {
         </div>
       </div>
 
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bulk-action-bar">
+          <span className="bulk-action-bar__count">
+            Đã chọn <strong>{selectedIds.size}</strong> đóng góp
+          </span>
+          <div className="bulk-action-bar__actions">
+            <button
+              className="btn btn--success btn--sm"
+              onClick={handleBulkApprove}
+              disabled={bulkLoading}
+            >
+              {bulkLoading ? (
+                <Loader2 size={14} className="spinning" />
+              ) : (
+                <CheckCircle size={14} />
+              )}
+              Duyệt tất cả
+            </button>
+            <button
+              className="btn btn--danger btn--sm"
+              onClick={() => setShowBulkRejectModal(true)}
+              disabled={bulkLoading}
+            >
+              <XCircle size={14} />
+              Từ chối tất cả
+            </button>
+            <button
+              className="btn btn--secondary btn--sm"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Bỏ chọn
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Reject Modal */}
+      {showBulkRejectModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowBulkRejectModal(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Từ chối {selectedIds.size} đóng góp</h3>
+            <div className="form-group" style={{ marginTop: "1rem" }}>
+              <label>
+                Lý do từ chối <span style={{ color: "red" }}>*</span>
+              </label>
+              <textarea
+                className="form-control"
+                rows={3}
+                value={bulkRejectNote}
+                onChange={(e) => setBulkRejectNote(e.target.value)}
+                placeholder="Nhập lý do từ chối..."
+              />
+            </div>
+            <div
+              className="form-actions"
+              style={{
+                marginTop: "1rem",
+                display: "flex",
+                gap: "0.5rem",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                className="btn btn--secondary btn--sm"
+                onClick={() => setShowBulkRejectModal(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="btn btn--danger btn--sm"
+                onClick={handleBulkReject}
+                disabled={bulkLoading}
+              >
+                {bulkLoading ? (
+                  <Loader2 size={14} className="spinning" />
+                ) : (
+                  <XCircle size={14} />
+                )}
+                Xác nhận từ chối
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Contributions Table */}
       <div className="moderation-page__table">
         {loading ? (
@@ -401,6 +567,16 @@ export default function ContributionsModerationPage() {
             <table>
               <thead>
                 <tr>
+                  <th className="checkbox-cell">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedIds.size === pendingFilteredIds.length &&
+                        pendingFilteredIds.length > 0
+                      }
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
                   <th>Thuật ngữ</th>
                   <th>Loại</th>
                   <th>Danh mục</th>
@@ -413,7 +589,7 @@ export default function ContributionsModerationPage() {
               <tbody>
                 {filteredContributions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="empty-state">
+                    <td colSpan={8} className="empty-state">
                       <GitPullRequest size={48} />
                       <p>Không có gợi ý nào</p>
                     </td>
@@ -425,6 +601,15 @@ export default function ContributionsModerationPage() {
 
                     return (
                       <tr key={contribution._id}>
+                        <td className="checkbox-cell">
+                          {contribution.status === "pending" && (
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(contribution._id)}
+                              onChange={() => toggleSelect(contribution._id)}
+                            />
+                          )}
+                        </td>
                         <td className="target-cell">
                           <span className="target-title">
                             {getTermName(contribution)}

@@ -11,9 +11,66 @@ import {
   useRef,
   useState,
 } from "react";
-import { getSearchSuggestions } from "@/services/termService";
+import { getSearchSuggestions, SearchSuggestion } from "@/services/termService";
 import { useTranslations } from "next-intl";
-import { Search, X, Loader2 } from "lucide-react";
+import { useLanguage } from "@/hooks";
+import {
+  Search,
+  X,
+  Loader2,
+  BookOpen,
+  FileText,
+  Tag,
+  Laptop,
+  Newspaper,
+  Smartphone,
+  Monitor,
+  Keyboard,
+  Mouse,
+  HardDrive,
+  Disc,
+  Plug,
+  Battery,
+  Radio,
+  Satellite,
+  Wrench,
+  Hammer,
+  Settings,
+  Link,
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  ClipboardList,
+  Folder,
+  FolderOpen,
+  Layers,
+  Book,
+  ZoomIn,
+  Lightbulb,
+  Lock,
+  Key,
+  KeyRound,
+  Shield,
+  Sword,
+  Target,
+  Gamepad2,
+  Globe,
+  Cloud,
+  Zap,
+  Flame,
+  Droplet,
+  Sprout,
+  Leaf,
+  Code,
+  Database,
+  Server,
+  Wifi,
+  Cpu,
+  MemoryStick,
+  CircuitBoard,
+  Network,
+  type LucideIcon,
+} from "lucide-react";
 import "./SearchBar.scss";
 
 export default function SearchBar({
@@ -24,10 +81,11 @@ export default function SearchBar({
 }: SearchBarProps) {
   const router = useRouter();
   const t = useTranslations("home");
+  const { currentLanguage } = useLanguage();
 
   // State chính
   const [keyword, setKeyword] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -38,25 +96,125 @@ export default function SearchBar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout>();
 
-  // Tính toán ghost text - gợi ý phù hợp nhất bắt đầu bằng keyword
+  const getTermText = (s: SearchSuggestion): string => {
+    return (
+      s.term[currentLanguage as keyof typeof s.term] ||
+      s.term.vi ||
+      s.term.en ||
+      s.term.lo ||
+      ""
+    );
+  };
+
+  const getCategoryName = (s: SearchSuggestion): string => {
+    if (!s.category?.name) return "";
+    return (
+      s.category.name[currentLanguage as keyof typeof s.category.name] ||
+      s.category.name.vi ||
+      ""
+    );
+  };
+
+  const CATEGORY_COLORS = [
+    "#3b82f6",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#ec4899",
+    "#06b6d4",
+    "#f97316",
+    "#14b8a6",
+    "#6366f1",
+  ];
+
+  const ICON_MAP: Record<string, LucideIcon> = {
+    laptop: Laptop,
+    smartphone: Smartphone,
+    monitor: Monitor,
+    keyboard: Keyboard,
+    mouse: Mouse,
+    "hard-drive": HardDrive,
+    disc: Disc,
+    plug: Plug,
+    battery: Battery,
+    radio: Radio,
+    satellite: Satellite,
+    wrench: Wrench,
+    hammer: Hammer,
+    settings: Settings,
+    link: Link,
+    "bar-chart": BarChart3,
+    "trending-up": TrendingUp,
+    "trending-down": TrendingDown,
+    clipboard: ClipboardList,
+    folder: Folder,
+    "folder-open": FolderOpen,
+    layers: Layers,
+    newspaper: Newspaper,
+    "book-open": BookOpen,
+    book: Book,
+    search: Search,
+    "zoom-in": ZoomIn,
+    lightbulb: Lightbulb,
+    lock: Lock,
+    key: Key,
+    "key-round": KeyRound,
+    shield: Shield,
+    sword: Sword,
+    target: Target,
+    gamepad: Gamepad2,
+    globe: Globe,
+    cloud: Cloud,
+    zap: Zap,
+    flame: Flame,
+    droplet: Droplet,
+    sprout: Sprout,
+    leaf: Leaf,
+    code: Code,
+    database: Database,
+    server: Server,
+    wifi: Wifi,
+    cpu: Cpu,
+    memory: MemoryStick,
+    circuit: CircuitBoard,
+    network: Network,
+  };
+
+  const getCategoryColor = (s: SearchSuggestion): string => {
+    if (!s.category?._id) return "#6b7280";
+    let hash = 0;
+    for (let i = 0; i < s.category._id.length; i++) {
+      hash = s.category._id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return CATEGORY_COLORS[Math.abs(hash) % CATEGORY_COLORS.length];
+  };
+
+  const getCategoryIcon = (s: SearchSuggestion): LucideIcon | null => {
+    if (!s.category?.icon) return null;
+    return ICON_MAP[s.category.icon] ?? null;
+  };
+
+  const getMatchIcon = (s: SearchSuggestion): LucideIcon => {
+    if (s.matchedField?.startsWith("term")) return BookOpen;
+    if (s.matchedField?.startsWith("definition")) return FileText;
+    if (s.matchedField === "tags") return Tag;
+    return Search;
+  };
+
+  // Tính toán ghost text
   const ghostSuggestion = useMemo(() => {
     if (!keyword.trim() || suggestions.length === 0) return null;
-
     const keywordLower = keyword.toLowerCase();
+    const match = suggestions.find((s) => {
+      const text = getTermText(s);
+      return text.toLowerCase().startsWith(keywordLower);
+    });
+    return match ? getTermText(match) : null;
+  }, [keyword, suggestions, currentLanguage]);
 
-    // Tìm suggestion phù hợp nhất (startsWith, case-insensitive)
-    const match = suggestions.find((s) =>
-      s.toLowerCase().startsWith(keywordLower),
-    );
-
-    return match || null;
-  }, [keyword, suggestions]);
-
-  // Ghost text = phần còn lại của suggestion (chưa được gõ)
   const ghostText = useMemo(() => {
     if (!ghostSuggestion || !keyword.trim()) return "";
-
-    // Giữ nguyên case của suggestion, chỉ lấy phần còn lại
     return ghostSuggestion.slice(keyword.length);
   }, [ghostSuggestion, keyword]);
 
@@ -82,7 +240,7 @@ export default function SearchBar({
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const result = await getSearchSuggestions(keyword);
+        const result = await getSearchSuggestions(keyword, currentLanguage);
         setSuggestions(result);
         setShowDropdown(result.length > 0);
         setSelectedIndex(-1);
@@ -92,7 +250,7 @@ export default function SearchBar({
       } finally {
         setIsLoading(false);
       }
-    }, 200); // Giảm debounce để responsive hơn
+    }, 200);
 
     return () => {
       if (debounceTimer.current) {
@@ -160,11 +318,11 @@ export default function SearchBar({
         case "Enter":
           e.preventDefault();
           if (selectedIndex >= 0 && suggestions[selectedIndex]) {
-            handleSelectSuggestion(suggestions[selectedIndex]);
-          } else if (ghostSuggestion) {
-            // Nếu có ghost suggestion, search với ghost suggestion
-            handleSearch(ghostSuggestion);
-          } else {
+            // Click vào gợi ý → chuyển đến trang chi tiết thuật ngữ
+            const selected = suggestions[selectedIndex];
+            router.push(`/terms/${selected._id}`);
+          } else if (keyword.trim()) {
+            // Nhấn Enter → chuyển đến trang kết quả tìm kiếm
             handleSearch(keyword);
           }
           break;
@@ -224,14 +382,14 @@ export default function SearchBar({
     [keyword, onSearch, router],
   );
 
-  // Chọn suggestion từ dropdown
+  // Chọn suggestion từ dropdown → chuyển đến trang chi tiết
   const handleSelectSuggestion = useCallback(
-    (term: string) => {
-      setKeyword(term);
+    (suggestion: SearchSuggestion) => {
+      setKeyword(getTermText(suggestion));
       setShowDropdown(false);
-      router.push(`/terms?q=${encodeURIComponent(term)}`);
+      router.push(`/terms/${suggestion._id}`);
     },
-    [router],
+    [router, currentLanguage],
   );
 
   // Xóa input
@@ -333,52 +491,81 @@ export default function SearchBar({
           className="search-bar__suggestion"
           role="listbox"
         >
-          {suggestions.map((term, index) => (
-            <div
-              key={`${term}-${index}`}
-              className={`search-bar__suggestion-item ${
-                index === selectedIndex
-                  ? "search-bar__suggestion-item--selected"
-                  : ""
-              }`}
-              onClick={() => handleSelectSuggestion(term)}
-              onMouseEnter={() => setSelectedIndex(index)}
-              role="option"
-              aria-selected={index === selectedIndex}
-            >
-              <Search size={14} className="search-bar__suggestion-icon" />
-              <span className="search-bar__term-name">
-                {/* Highlight phần match */}
+          {suggestions.map((suggestion, index) => {
+            const termText = getTermText(suggestion);
+            const categoryName = getCategoryName(suggestion);
+            return (
+              <div
+                key={suggestion._id}
+                className={`search-bar__suggestion-item ${
+                  index === selectedIndex
+                    ? "search-bar__suggestion-item--selected"
+                    : ""
+                }`}
+                onClick={() => handleSelectSuggestion(suggestion)}
+                onMouseEnter={() => setSelectedIndex(index)}
+                role="option"
+                aria-selected={index === selectedIndex}
+              >
                 {(() => {
-                  const idx = term.toLowerCase().indexOf(keyword.toLowerCase());
-                  if (idx === -1)
-                    return (
-                      <span className="search-bar__term-rest">{term}</span>
-                    );
-                  const beforeMatch = term.slice(0, idx);
-                  const matchText = term.slice(idx, idx + keyword.length);
-                  const afterMatch = term.slice(idx + keyword.length);
+                  const CatIcon = getCategoryIcon(suggestion);
+                  const FallbackIcon = getMatchIcon(suggestion);
+                  const IconToRender = CatIcon ?? FallbackIcon;
                   return (
-                    <>
-                      {beforeMatch && (
-                        <span className="search-bar__term-rest">
-                          {beforeMatch}
-                        </span>
-                      )}
-                      <span className="search-bar__term-match">
-                        {matchText}
-                      </span>
-                      {afterMatch && (
-                        <span className="search-bar__term-rest">
-                          {afterMatch}
-                        </span>
-                      )}
-                    </>
+                    <IconToRender
+                      size={15}
+                      className="search-bar__suggestion-icon"
+                    />
                   );
                 })()}
-              </span>
-            </div>
-          ))}
+                <span className="search-bar__term-name">
+                  {(() => {
+                    const idx = termText
+                      .toLowerCase()
+                      .indexOf(keyword.toLowerCase());
+                    if (idx === -1)
+                      return (
+                        <span className="search-bar__term-rest">
+                          {termText}
+                        </span>
+                      );
+                    const beforeMatch = termText.slice(0, idx);
+                    const matchText = termText.slice(idx, idx + keyword.length);
+                    const afterMatch = termText.slice(idx + keyword.length);
+                    return (
+                      <>
+                        {beforeMatch && (
+                          <span className="search-bar__term-rest">
+                            {beforeMatch}
+                          </span>
+                        )}
+                        <span className="search-bar__term-match">
+                          {matchText}
+                        </span>
+                        {afterMatch && (
+                          <span className="search-bar__term-rest">
+                            {afterMatch}
+                          </span>
+                        )}
+                      </>
+                    );
+                  })()}
+                </span>
+                {categoryName && (
+                  <span
+                    className="search-bar__category-badge"
+                    style={{
+                      backgroundColor: `${getCategoryColor(suggestion)}18`,
+                      color: getCategoryColor(suggestion),
+                      borderColor: `${getCategoryColor(suggestion)}30`,
+                    }}
+                  >
+                    {categoryName}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

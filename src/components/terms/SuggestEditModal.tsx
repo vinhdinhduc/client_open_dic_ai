@@ -6,6 +6,8 @@ import { useLanguage } from "@/hooks";
 import { suggestEdit } from "@/services/termService";
 import { TermDetail, SuggestEditData, MultiLangText, Example } from "./types";
 import { X, Edit3, Loader2, Plus, Trash2, Languages } from "lucide-react";
+import RichTextEditor from "@/components/common/RichTextEditor";
+import StepGuide, { GuideStep } from "@/components/common/StepGuide";
 import { toast } from "react-hot-toast";
 import "./SuggestEditModal.scss";
 
@@ -161,6 +163,27 @@ export default function SuggestEditModal({
     { key: "lo", label: "ພາສາລາວ", flag: "🇱🇦" },
   ];
 
+  const guideSteps: GuideStep[] = [
+    {
+      title: tEdit("guide.step1Title"),
+      description: tEdit("guide.step1Desc"),
+    },
+    {
+      title: tEdit("guide.step2Title"),
+      description: tEdit("guide.step2Desc"),
+      tip: tEdit("guide.step2Tip"),
+    },
+    {
+      title: tEdit("guide.step3Title"),
+      description: tEdit("guide.step3Desc"),
+      tip: tEdit("guide.step3Tip"),
+    },
+    {
+      title: tEdit("guide.step4Title"),
+      description: tEdit("guide.step4Desc"),
+    },
+  ];
+
   return (
     <div className="modal-overlay" onClick={handleBackdropClick}>
       <div className="suggest-edit-modal">
@@ -190,6 +213,8 @@ export default function SuggestEditModal({
           ))}
         </div>
 
+        <StepGuide title={tEdit("guide.title")} steps={guideSteps} />
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="suggest-edit-modal__form">
           {/* Term Name */}
@@ -215,14 +240,13 @@ export default function SuggestEditModal({
               {tEdit("definitionLabel")}{" "}
               {activeTab === "vi" && <span className="required">*</span>}
             </label>
-            <textarea
+            <RichTextEditor
               value={definition[activeTab] || ""}
-              onChange={(e) =>
-                handleMultiLangChange(setDefinition, activeTab, e.target.value)
+              onChange={(value) =>
+                handleMultiLangChange(setDefinition, activeTab, value)
               }
               placeholder={`Nhập định nghĩa (${LANG_TABS.find((l) => l.key === activeTab)?.label})`}
-              rows={3}
-              className="form-textarea"
+              minHeight={80}
             />
           </div>
 
@@ -232,18 +256,13 @@ export default function SuggestEditModal({
               {tEdit("detailedExplanation")}
               <span className="optional">{tEdit("optional")}</span>
             </label>
-            <textarea
+            <RichTextEditor
               value={detailedExplanation[activeTab] || ""}
-              onChange={(e) =>
-                handleMultiLangChange(
-                  setDetailedExplanation,
-                  activeTab,
-                  e.target.value,
-                )
+              onChange={(value) =>
+                handleMultiLangChange(setDetailedExplanation, activeTab, value)
               }
               placeholder="Giải thích thêm về thuật ngữ..."
-              rows={4}
-              className="form-textarea"
+              minHeight={100}
             />
           </div>
 
