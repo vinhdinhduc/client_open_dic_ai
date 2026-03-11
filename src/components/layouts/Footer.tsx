@@ -31,8 +31,7 @@ export function Footer() {
               <span className="logo-text">{t("common.appName")}</span>
             </div>
             <p className="footer-description">
-              {t("common.appName")} - Hệ thống từ điển mở, hỗ trợ đa ngôn ngữ
-              Việt - Lào - Anh
+              <strong>{d("descriptionBold")}</strong> {d("descriptionText")}
             </p>
           </div>
 
@@ -48,6 +47,15 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/about">{d("about")}</Link>
+              </li>
+              <li>
+                <Link href="/contact">{d("contact")}</Link>
+              </li>
+              <li>
+                <Link href="/user-guide">{d("userGuide")}</Link>
+              </li>
+              <li>
+                <Link href="/faq">{d("faq")}</Link>
               </li>
             </ul>
           </div>

@@ -249,10 +249,15 @@ export default function ImportPage() {
             className="admin-btn admin-btn--secondary"
             onClick={async () => {
               try {
-                const response = await axiosInstance.get("/terms/import-template", {
-                  responseType: "blob",
-                });
-                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const response = await axiosInstance.get(
+                  "/terms/import-template",
+                  {
+                    responseType: "blob",
+                  },
+                );
+                const url = window.URL.createObjectURL(
+                  new Blob([response.data]),
+                );
                 const a = document.createElement("a");
                 a.href = url;
                 a.download = "import_template.xlsx";
@@ -486,34 +491,39 @@ export default function ImportPage() {
               <h4>Các cột bắt buộc:</h4>
               <ul>
                 <li>
-                  <code>term_vi</code> - Thuật ngữ tiếng Việt
+                  <code>term_xx</code> - Thuật ngữ 1 trong 3 ngôn ngữ (vi, en,
+                  lo)
                 </li>
                 <li>
-                  <code>definition_vi</code> - Định nghĩa tiếng Việt
+                  <code>definition_xx</code> - Định nghĩa 1 trong 3 ngôn ngữ
+                  (vi, en, lo)
+                </li>
+                <li>
+                  <code>category</code> - Tên danh mục
                 </li>
               </ul>
               <h4>Các cột tùy chọn:</h4>
               <ul>
                 <li>
-                  <code>term_en</code> - Thuật ngữ tiếng Anh
+                  <code>term_xx</code> - Thuật ngữ 2 ngôn ngữ còn lại (nếu có)
                 </li>
+
                 <li>
-                  <code>term_lo</code> - Thuật ngữ tiếng Lào
+                  <code>definition_xx</code> - Định nghĩa 2 ngôn ngữ còn lại
+                  (nếu có)
                 </li>
-                <li>
-                  <code>definition_en</code> - Định nghĩa tiếng Anh
-                </li>
-                <li>
-                  <code>definition_lo</code> - Định nghĩa tiếng Lào
-                </li>
-                <li>
-                  <code>category</code> - Tên danh mục
-                </li>
+
                 <li>
                   <code>example</code> - Ví dụ sử dụng
                 </li>
                 <li>
-                  <code>source</code> - Nguồn tham khảo
+                  <code>Tags</code>
+                </li>
+                <li>
+                  <code>Related Terms</code>
+                </li>
+                <li>
+                  <code>Loại từ</code>
                 </li>
               </ul>
             </div>

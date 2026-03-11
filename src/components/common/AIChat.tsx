@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { aiService, AIResponse } from "@/services/aiService";
-import { saveContributionData } from "@/utils/contributionStorage";
+import { saveMultiLangContributionData } from "@/utils/contributionStorage";
 import { toast } from "react-hot-toast";
 import {
   X,
@@ -39,32 +39,46 @@ export default function AIChat({
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLang, setSelectedLang] = useState(language);
+  /** Cache AI responses per language */
+  const cachedResponses = useRef<Record<string, AIResponse>>({});
   const hasCalledAPI = useRef(false);
 
   const t = useTranslations("aiChat");
 
-  const handleAskAI = useCallback(async () => {
-    if (!term.trim()) {
-      return;
-    }
+  const handleAskAI = useCallback(
+    async (lang?: string) => {
+      const askLang = lang || selectedLang;
+      if (!term.trim()) {
+        return;
+      }
 
-    setIsLoading(true);
-    setError(null);
+      // If already cached, just show it
+      if (cachedResponses.current[askLang]) {
+        setResponse(cachedResponses.current[askLang]);
+        return;
+      }
 
-    try {
-      const result = await aiService.askAboutTerm({
-        term: term.trim(),
-        language,
-      });
-      setResponse(result);
-    } catch (err: any) {
-      console.error("AI Chat Error:", err);
-      setError(err.message || t("errorConnection"));
-      toast.error(t("errorNoResponse"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [term, language, t]);
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await aiService.askAboutTerm({
+          term: term.trim(),
+          language: askLang,
+        });
+        cachedResponses.current[askLang] = result;
+        setResponse(result);
+      } catch (err: any) {
+        console.error("AI Chat Error:", err);
+        setError(err.message || t("errorConnection"));
+        toast.error(t("errorNoResponse"));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [term, selectedLang, t],
+  );
 
   // Tự động gọi AI khi component mount (chỉ gọi 1 lần)
   useEffect(() => {
@@ -73,6 +87,11 @@ export default function AIChat({
       handleAskAI();
     }
   }, [isAuthenticated, term, handleAskAI]);
+
+  const handleLanguageChange = (lang: string) => {
+    setSelectedLang(lang);
+    handleAskAI(lang);
+  };
 
   const handleSearchOtherTerms = () => {
     onClose();
@@ -86,22 +105,49 @@ export default function AIChat({
     }
 
     try {
-      // Sử dụng utility function để lưu data
-      const storageKey = saveContributionData({
-        term: data.term,
-        definition: data.definition || "",
-        detailedExplanation: data.detailedExplanation,
-        examples: data.examples,
+      // Build multi-lang contribution data from all cached responses
+      const langs: Record<
+        string,
+        {
+          term: string;
+          definition: string;
+          detailedExplanation?: string;
+          examples?: string[];
+        }
+      > = {};
+
+      for (const [lang, res] of Object.entries(cachedResponses.current)) {
+        if (res.structured) {
+          langs[lang] = {
+            term: res.term || "",
+            definition: res.definition || "",
+            detailedExplanation: res.detailedExplanation,
+            examples: res.examples,
+          };
+        }
+      }
+
+      // Ensure current response is included
+      if (data.structured && !langs[data.language]) {
+        langs[data.language] = {
+          term: data.term || "",
+          definition: data.definition || "",
+          detailedExplanation: data.detailedExplanation,
+          examples: data.examples,
+        };
+      }
+
+      const storageKey = saveMultiLangContributionData({
+        langs,
         partOfSpeech: data.partOfSpeech,
-        field: data.field,
         relatedTerms: data.relatedTerms,
         tags: data.tags,
-        language: data.language,
       });
 
-      // Navigate với key ngắn gọn
       onClose();
-      router.push(`/contribute?from=ai&key=${encodeURIComponent(storageKey)}`);
+      router.push(
+        `/contribute?from=ai&mlkey=${encodeURIComponent(storageKey)}`,
+      );
     } catch (error) {
       console.error("Failed to save contribution data:", error);
       toast.error(t("errorSavingData") || "Failed to save data");
@@ -248,6 +294,18 @@ export default function AIChat({
               </span>
             </div>
           </div>
+          <div className="ai-chat__lang-selector">
+            <label>{t("responseLanguage")}:</label>
+            <select
+              value={selectedLang}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              disabled={isLoading}
+            >
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+              <option value="en">🇬🇧 English</option>
+              <option value="lo">🇱🇦 ພາສາລາວ</option>
+            </select>
+          </div>
           <button
             className="ai-chat__close-btn"
             onClick={onClose}
@@ -270,7 +328,10 @@ export default function AIChat({
             <div className="ai-chat__error">
               <AlertCircle size={24} />
               <p>{error}</p>
-              <button className="ai-chat__retry-btn" onClick={handleAskAI}>
+              <button
+                className="ai-chat__retry-btn"
+                onClick={() => handleAskAI()}
+              >
                 {t("retry")}
               </button>
             </div>

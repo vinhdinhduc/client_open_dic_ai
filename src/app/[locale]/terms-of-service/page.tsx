@@ -117,7 +117,7 @@ function TermsOfServiceClient() {
           <h2 className="legal-section__title">{t("contactTitle")}</h2>
           <p className="legal-section__text">{t("contactText")}</p>
           <p className="legal-section__text">
-            <strong>Email:</strong> support@opendict.ai
+            <strong>Email:</strong> vinhdd.k63cntt-a@utb.edu.vn
           </p>
         </section>
       </div>

@@ -8,6 +8,7 @@ import { contributionService } from "@/services/contributionService";
 import categoryService from "@/services/categoryService";
 import {
   loadContributionData,
+  loadMultiLangContributionData,
   clearContributionData,
 } from "@/utils/contributionStorage";
 import { toast } from "react-hot-toast";
@@ -19,6 +20,10 @@ import type { MultiLangText, Example, PartOfSpeech } from "@/types/term.types";
 import type { CategoryRef } from "@/types/category.types";
 import type { NewTermContributionData } from "@/types/contribution.types";
 import { ApiResponse } from "@/types";
+
+/** Strip &nbsp; HTML entities and non-breaking spaces */
+const cleanNbsp = (s?: string) =>
+  s?.replace(/&nbsp;/gi, " ").replace(/\u00A0/g, " ");
 
 // Extended form data with additional fields for UI state
 interface ContributionFormData extends Omit<
@@ -39,6 +44,9 @@ export default function ContributionForm() {
   const { isAuthenticated } = useAuth();
   const t = useTranslations("contribution");
   const tCommon = useTranslations("common");
+
+  const langName = (tab: LanguageTab) =>
+    tab === "vi" ? t("langVi") : tab === "en" ? t("langEn") : t("langLo");
 
   const [isLoading, setIsLoading] = useState(false);
   const [currentLang, setCurrentLang] = useState<LanguageTab>("vi");
@@ -74,10 +82,67 @@ export default function ContributionForm() {
   useEffect(() => {
     const fromAI = searchParams.get("from");
     const storageKey = searchParams.get("key");
+    const mlKey = searchParams.get("mlkey");
     const aiData = searchParams.get("aiData");
     const termFromQuery = searchParams.get("term");
 
-    if (fromAI === "ai" && storageKey) {
+    if (fromAI === "ai" && mlKey) {
+      // Multi-language AI data
+      const mlData = loadMultiLangContributionData(decodeURIComponent(mlKey));
+
+      if (mlData) {
+        const newTerm: MultiLangText = {};
+        const newDef: MultiLangText = {};
+        const newExpl: MultiLangText = {};
+        const langExamples: Record<string, string[]> = {};
+
+        for (const [lang, entry] of Object.entries(mlData.langs)) {
+          if (entry.term) newTerm[lang as keyof MultiLangText] = entry.term;
+          if (entry.definition)
+            newDef[lang as keyof MultiLangText] = entry.definition;
+          if (entry.detailedExplanation)
+            newExpl[lang as keyof MultiLangText] = entry.detailedExplanation;
+          if (entry.examples?.length) langExamples[lang] = entry.examples;
+        }
+
+        // Merge examples across languages
+        const maxExamples = Math.max(
+          ...Object.values(langExamples).map((e) => e.length),
+          0,
+        );
+        const mergedExamples: Example[] =
+          maxExamples > 0
+            ? Array.from({ length: maxExamples }, (_, i) => {
+                const ex: Example = {};
+                for (const [lang, exArr] of Object.entries(langExamples)) {
+                  if (exArr[i]) (ex as any)[lang] = exArr[i];
+                }
+                return ex;
+              })
+            : [{ vi: "" }];
+
+        setFormData((prev) => ({
+          ...prev,
+          term: { ...prev.term, ...newTerm },
+          definition: { ...prev.definition, ...newDef },
+          detailedExplanation: { ...prev.detailedExplanation, ...newExpl },
+          examples: mergedExamples,
+          partOfSpeech: (mlData.partOfSpeech as PartOfSpeech) || undefined,
+          relatedTerms: mlData.relatedTerms || [],
+          tags: mlData.tags || [],
+        }));
+
+        clearContributionData(decodeURIComponent(mlKey));
+
+        // Set active tab to first available language
+        const availableLangs = Object.keys(mlData.langs) as LanguageTab[];
+        if (availableLangs.length > 0) {
+          setCurrentLang(availableLangs[0]);
+        }
+
+        toast.success(t("aiDataLoaded"));
+      }
+    } else if (fromAI === "ai" && storageKey) {
       const data = loadContributionData(decodeURIComponent(storageKey));
 
       if (data) {
@@ -262,11 +327,12 @@ export default function ContributionForm() {
       return;
     }
 
-    const termFilled =
-      formData.term.vi?.trim() ||
-      formData.term.en?.trim() ||
-      formData.term.lo?.trim();
-    if (!termFilled) {
+    const termLangCount = [
+      formData.term.vi?.trim(),
+      formData.term.en?.trim(),
+      formData.term.lo?.trim(),
+    ].filter(Boolean).length;
+    if (termLangCount < 2) {
       toast.error(t("termRequired"));
       return;
     }
@@ -292,31 +358,37 @@ export default function ContributionForm() {
       const submissionData = {
         type: "new_term" as const,
         term: {
-          vi: formData.term.vi?.trim() || undefined,
-          lo: formData.term.lo?.trim() || undefined,
-          en: formData.term.en?.trim() || undefined,
+          vi: cleanNbsp(formData.term.vi)?.trim() || undefined,
+          lo: cleanNbsp(formData.term.lo)?.trim() || undefined,
+          en: cleanNbsp(formData.term.en)?.trim() || undefined,
         },
         definition: {
-          vi: formData.definition.vi?.trim() || undefined,
-          lo: formData.definition.lo?.trim() || undefined,
-          en: formData.definition.en?.trim() || undefined,
+          vi: cleanNbsp(formData.definition.vi)?.trim() || undefined,
+          lo: cleanNbsp(formData.definition.lo)?.trim() || undefined,
+          en: cleanNbsp(formData.definition.en)?.trim() || undefined,
         },
         detailedExplanation:
           formData.detailedExplanation?.vi?.trim() ||
           formData.detailedExplanation?.en?.trim() ||
           formData.detailedExplanation?.lo?.trim()
             ? {
-                vi: formData.detailedExplanation?.vi?.trim() || undefined,
-                lo: formData.detailedExplanation?.lo?.trim() || undefined,
-                en: formData.detailedExplanation?.en?.trim() || undefined,
+                vi:
+                  cleanNbsp(formData.detailedExplanation?.vi)?.trim() ||
+                  undefined,
+                lo:
+                  cleanNbsp(formData.detailedExplanation?.lo)?.trim() ||
+                  undefined,
+                en:
+                  cleanNbsp(formData.detailedExplanation?.en)?.trim() ||
+                  undefined,
               }
             : undefined,
         examples: formData.examples
           ?.filter((ex) => ex.vi?.trim() || ex.lo?.trim() || ex.en?.trim())
           .map((ex) => ({
-            vi: ex.vi?.trim() || undefined,
-            lo: ex.lo?.trim() || undefined,
-            en: ex.en?.trim() || undefined,
+            vi: cleanNbsp(ex.vi)?.trim() || undefined,
+            lo: cleanNbsp(ex.lo)?.trim() || undefined,
+            en: cleanNbsp(ex.en)?.trim() || undefined,
           })),
 
         category: formData.category,
@@ -417,7 +489,9 @@ export default function ContributionForm() {
             <input
               type="text"
               className="form-input"
-              placeholder={t("termPlaceholder")}
+              placeholder={t("termPlaceholder", {
+                lang: langName(currentLang),
+              })}
               value={formData.term[currentLang] || ""}
               onChange={(e) =>
                 handleInputChange("term", e.target.value, currentLang)
@@ -434,7 +508,9 @@ export default function ContributionForm() {
               onChange={(value) =>
                 handleInputChange("definition", value, currentLang)
               }
-              placeholder={t("definitionPlaceholder")}
+              placeholder={t("definitionPlaceholder", {
+                lang: langName(currentLang),
+              })}
               minHeight={80}
             />
           </div>
@@ -475,7 +551,9 @@ export default function ContributionForm() {
               onChange={(value) =>
                 handleInputChange("detailedExplanation", value, currentLang)
               }
-              placeholder={t("detailedExplanationPlaceholder")}
+              placeholder={t("detailedExplanationPlaceholder", {
+                lang: langName(currentLang),
+              })}
               minHeight={120}
             />
           </div>
@@ -509,7 +587,9 @@ export default function ContributionForm() {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder={t("examplePlaceholder")}
+                  placeholder={t("examplePlaceholder", {
+                    lang: langName(currentLang),
+                  })}
                   value={example[currentLang] || ""}
                   onChange={(e) =>
                     updateExample(index, e.target.value, currentLang)

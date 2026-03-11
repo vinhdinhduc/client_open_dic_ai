@@ -301,7 +301,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="admin-sidebar__header">
           <Link href="/admin" className="admin-sidebar__logo">
             <Shield className="logo-icon" />
-            <span className="logo-text">Admin Panel</span>
+            <span className="logo-text">UTB OpenDict Admin</span>
           </Link>
           <button
             className="admin-sidebar__close"
@@ -386,7 +386,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Sidebar Footer */}
         <div className="admin-sidebar__footer">
-          <Link href="/" className="admin-sidebar__back">
+          <Link href="/" target="_blank" className="admin-sidebar__back">
             <Home size={16} />
             <span>Mở trang chủ</span>
           </Link>

@@ -138,7 +138,7 @@ function PrivacyPolicyClient() {
           <h2 className="legal-section__title">{t("contactTitle")}</h2>
           <p className="legal-section__text">{t("contactText")}</p>
           <p className="legal-section__text">
-            <strong>Email:</strong> privacy@opendict.ai
+            <strong>Email:</strong> vinhdd.k63cntt-a@utb.edu.vn
           </p>
         </section>
       </div>

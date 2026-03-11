@@ -64,6 +64,12 @@ const moderatorMenuItems: MenuItem[] = [
     href: "/moderator",
   },
   {
+    id: "moderator-terms",
+    label: "Quản lý thuật ngữ",
+    icon: BookOpen,
+    href: "/moderator/terms",
+  },
+  {
     id: "moderator-categories",
     label: "Danh mục phụ trách",
     icon: FolderTree,
@@ -97,6 +103,12 @@ const moderatorMenuItems: MenuItem[] = [
     icon: MessageSquare,
     href: "/moderator/comments",
     badge: true,
+  },
+  {
+    id: "import",
+    label: "Nhập dữ liệu",
+    icon: Upload,
+    href: "/moderator/import",
   },
 ];
 
@@ -258,7 +270,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
             className="admin-sidebar__logo"
           >
             <Shield className="logo-icon" />
-            <span className="logo-text">Moderator Panel</span>
+            <span className="logo-text">UTB OpenDict Moderator</span>
           </Link>
           <button
             className="admin-sidebar__close"

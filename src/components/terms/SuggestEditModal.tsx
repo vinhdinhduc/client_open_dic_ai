@@ -27,6 +27,13 @@ export default function SuggestEditModal({
   const tCommon = useTranslations("common");
   const { currentLanguage } = useLanguage();
 
+  const langName = (tab: LangKey) =>
+    tab === "vi"
+      ? tEdit("langVi")
+      : tab === "en"
+        ? tEdit("langEn")
+        : tEdit("langLo");
+
   // Form state - pre-fill with existing data
   const [termText, setTermText] = useState<MultiLangText>({
     vi: term.term.vi || "",
@@ -108,12 +115,12 @@ export default function SuggestEditModal({
   };
 
   const PART_OF_SPEECH_OPTIONS = [
-    { value: "noun", label: "Danh từ" },
-    { value: "verb", label: "Động từ" },
-    { value: "adjective", label: "Tính từ" },
-    { value: "adverb", label: "Trạng từ" },
-    { value: "phrase", label: "Cụm từ" },
-    { value: "abbreviation", label: "Từ viết tắt" },
+    { value: "noun", label: tEdit("partOfSpeech.noun") },
+    { value: "verb", label: tEdit("partOfSpeech.verb") },
+    { value: "adjective", label: tEdit("partOfSpeech.adjective") },
+    { value: "adverb", label: tEdit("partOfSpeech.adverb") },
+    { value: "phrase", label: tEdit("partOfSpeech.phrase") },
+    { value: "abbreviation", label: tEdit("partOfSpeech.abbreviation") },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -219,33 +226,31 @@ export default function SuggestEditModal({
         <form onSubmit={handleSubmit} className="suggest-edit-modal__form">
           {/* Term Name */}
           <div className="form-group">
-            <label className="form-label">
-              {tEdit("termLabel")}{" "}
-              {activeTab === "vi" && <span className="required">*</span>}
-            </label>
+            <label className="form-label">{tEdit("termLabel")}</label>
             <input
               type="text"
               value={termText[activeTab] || ""}
               onChange={(e) =>
                 handleMultiLangChange(setTermText, activeTab, e.target.value)
               }
-              placeholder={`Nhập thuật ngữ (${LANG_TABS.find((l) => l.key === activeTab)?.label})`}
+              placeholder={tEdit("termPlaceholder", {
+                lang: langName(activeTab),
+              })}
               className="form-input"
             />
           </div>
 
           {/* Definition */}
           <div className="form-group">
-            <label className="form-label">
-              {tEdit("definitionLabel")}{" "}
-              {activeTab === "vi" && <span className="required">*</span>}
-            </label>
+            <label className="form-label">{tEdit("definitionLabel")}</label>
             <RichTextEditor
               value={definition[activeTab] || ""}
               onChange={(value) =>
                 handleMultiLangChange(setDefinition, activeTab, value)
               }
-              placeholder={`Nhập định nghĩa (${LANG_TABS.find((l) => l.key === activeTab)?.label})`}
+              placeholder={tEdit("definitionPlaceholder", {
+                lang: langName(activeTab),
+              })}
               minHeight={80}
             />
           </div>
@@ -261,7 +266,9 @@ export default function SuggestEditModal({
               onChange={(value) =>
                 handleMultiLangChange(setDetailedExplanation, activeTab, value)
               }
-              placeholder="Giải thích thêm về thuật ngữ..."
+              placeholder={tEdit("detailedExplanationPlaceholder", {
+                lang: langName(activeTab),
+              })}
               minHeight={100}
             />
           </div>
@@ -281,7 +288,9 @@ export default function SuggestEditModal({
                     onChange={(e) =>
                       handleExampleChange(index, activeTab, e.target.value)
                     }
-                    placeholder={`Ví dụ ${index + 1}`}
+                    placeholder={tEdit("examplePlaceholder", {
+                      index: index + 1,
+                    })}
                     className="form-input"
                   />
                   {examples.length > 1 && (
@@ -309,7 +318,7 @@ export default function SuggestEditModal({
           {/* Part of Speech */}
           <div className="form-group">
             <label className="form-label">
-              Từ loại
+              {tEdit("partOfSpeechLabel")}
               <span className="optional">{tEdit("optional")}</span>
             </label>
             <select
@@ -317,7 +326,7 @@ export default function SuggestEditModal({
               onChange={(e) => setPartOfSpeech(e.target.value)}
               className="form-select"
             >
-              <option value="">-- Chọn từ loại --</option>
+              <option value="">{tEdit("partOfSpeechPlaceholder")}</option>
               {PART_OF_SPEECH_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -329,7 +338,7 @@ export default function SuggestEditModal({
           {/* Tags */}
           <div className="form-group">
             <label className="form-label">
-              Từ khóa (Tags)
+              {tEdit("tagLabel")}
               <span className="optional">{tEdit("optional")}</span>
             </label>
             <div className="tag-input-wrapper">
@@ -353,7 +362,7 @@ export default function SuggestEditModal({
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagKeyDown}
-                  placeholder="Nhập từ khóa rồi nhấn Enter hoặc Thêm"
+                  placeholder={tEdit("tagPlaceholder")}
                   className="form-input"
                 />
                 <button
@@ -362,7 +371,7 @@ export default function SuggestEditModal({
                   onClick={addTag}
                 >
                   <Plus size={16} />
-                  Thêm
+                  {tEdit("addTag")}
                 </button>
               </div>
             </div>

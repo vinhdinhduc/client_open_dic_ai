@@ -10,8 +10,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 
 export const metadata = {
-  title: "OpenDict",
-  description: "Nền tảng từ điển mở cộng đồng cho Việt Nam và Lào",
+  title: "UTB OpenDict",
+  description:
+    "Hệ thống từ điển mở đa ngôn ngữ do Trường Đại học Tây Bắc phát triển",
   icons: {
     icon: "/images/logo.png",
   },
