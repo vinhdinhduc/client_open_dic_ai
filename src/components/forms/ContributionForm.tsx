@@ -504,6 +504,7 @@ export default function ContributionForm() {
               {t("definitionLabel")}
             </label>
             <RichTextEditor
+              key={`definition-${currentLang}`}
               value={formData.definition[currentLang] || ""}
               onChange={(value) =>
                 handleInputChange("definition", value, currentLang)
@@ -547,6 +548,7 @@ export default function ContributionForm() {
               {t("detailedExplanationLabel")}
             </label>
             <RichTextEditor
+              key={`expl-${currentLang}`}
               value={formData.detailedExplanation?.[currentLang] || ""}
               onChange={(value) =>
                 handleInputChange("detailedExplanation", value, currentLang)

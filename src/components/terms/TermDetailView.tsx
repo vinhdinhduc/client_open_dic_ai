@@ -81,6 +81,12 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     examples?: string[];
   } | null>(null);
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [aiContentForEdit, setAiContentForEdit] = useState<{
+    lang: string;
+    definition?: string;
+    detailedExplanation?: string;
+    examples?: string[];
+  } | null>(null);
   // Client-side cache: store AI responses per language to avoid re-calling API
   const [aiCache, setAiCache] = useState<
     Record<
@@ -201,6 +207,23 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     if (!isAuthenticated) {
       toast.error(t("loginToSuggestEdit"));
       return;
+    }
+    setAiContentForEdit(null);
+    setShowEditModal(true);
+  };
+
+  const handleEditClickWithAI = () => {
+    if (!isAuthenticated) {
+      toast.error(t("loginToSuggestEdit"));
+      return;
+    }
+    if (aiResponse) {
+      setAiContentForEdit({
+        lang: contentLang,
+        definition: aiResponse.definition,
+        detailedExplanation: aiResponse.detailedExplanation,
+        examples: aiResponse.examples,
+      });
     }
     setShowEditModal(true);
   };
@@ -460,7 +483,10 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         {showAiPanel && aiResponse && !aiLoading && (
           <div className="term-detail__ai-suggest-cta">
             <p>{t("aiSuggestEditPrompt")}</p>
-            <button className="btn-suggest-edit" onClick={handleEditClick}>
+            <button
+              className="btn-suggest-edit"
+              onClick={handleEditClickWithAI}
+            >
               <Edit3 size={16} />
               {t("suggestEditBtn")}
             </button>
@@ -589,7 +615,14 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
       )}
 
       {showEditModal && (
-        <SuggestEditModal term={term} onClose={() => setShowEditModal(false)} />
+        <SuggestEditModal
+          term={term}
+          onClose={() => {
+            setShowEditModal(false);
+            setAiContentForEdit(null);
+          }}
+          aiContent={aiContentForEdit ?? undefined}
+        />
       )}
     </div>
   );

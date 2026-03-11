@@ -9,20 +9,18 @@ import {
   ArrowRight,
   Activity,
   Calendar,
+  Flag,
+  Tags,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Upload,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
-import userService from "@/services/userService";
-import { getTermStats } from "@/services/termService";
 import contributionService from "@/services/contributionService";
-import commentService from "@/services/commentService";
+import reportStatsService from "@/services/reportStatsService";
 import "./dashboard.scss";
-
-interface DashboardStats {
-  totalUsers: number;
-  totalTerms: number;
-  pendingContributions: number;
-  totalComments: number;
-}
 
 interface PendingItem {
   id: string;
@@ -35,39 +33,22 @@ interface PendingItem {
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalTerms: 0,
-    pendingContributions: 0,
-    totalComments: 0,
-  });
+  const [overview, setOverview] = useState<any>(null);
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
 
   const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
 
-      const [userStatsRes, termStatsRes, pendingContribRes, commentsRes] =
-        await Promise.all([
-          userService.getUserStats().catch(() => null),
-          getTermStats().catch(() => null),
-          contributionService
-            .getContributions({ status: "pending", limit: 5 })
-            .catch(() => null),
-          commentService.getAllComments({ limit: 1 }).catch(() => null),
-        ]);
+      const [overviewData, pendingContribRes] = await Promise.all([
+        reportStatsService.getSystemOverview().catch(() => null),
+        contributionService
+          .getContributions({ status: "pending", limit: 5 })
+          .catch(() => null),
+      ]);
 
-      setStats({
-        totalUsers: (userStatsRes?.data as any)?.total || 0,
-        totalTerms: termStatsRes?.data?.stats?.total || 0,
-        pendingContributions: pendingContribRes?.data?.pagination?.total || 0,
-        totalComments:
-          (commentsRes as any)?.pagination?.total ||
-          (commentsRes as any)?.stats?.total ||
-          0,
-      });
+      setOverview(overviewData);
 
-      // Map pending contributions to display items
       if (pendingContribRes?.data?.contributions) {
         const items = pendingContribRes.data.contributions.map((c: any) => ({
           id: c._id,
@@ -98,24 +79,35 @@ export default function AdminDashboard() {
     label,
     value,
     iconColor,
+    href,
   }: {
     icon: React.ElementType;
     label: string;
     value: number;
     iconColor: string;
-  }) => (
-    <div className="admin-stat-card">
-      <div
-        className={`admin-stat-card__icon admin-stat-card__icon--${iconColor}`}
-      >
-        <Icon size={24} />
+    href?: string;
+  }) => {
+    const content = (
+      <div className="admin-stat-card">
+        <div
+          className={`admin-stat-card__icon admin-stat-card__icon--${iconColor}`}
+        >
+          <Icon size={24} />
+        </div>
+        <div className="admin-stat-card__content">
+          <div className="admin-stat-card__value">{value.toLocaleString()}</div>
+          <div className="admin-stat-card__label">{label}</div>
+        </div>
       </div>
-      <div className="admin-stat-card__content">
-        <div className="admin-stat-card__value">{value.toLocaleString()}</div>
-        <div className="admin-stat-card__label">{label}</div>
-      </div>
-    </div>
-  );
+    );
+    return href ? (
+      <Link href={href} style={{ textDecoration: "none" }}>
+        {content}
+      </Link>
+    ) : (
+      content
+    );
+  };
 
   if (loading) {
     return (
@@ -126,12 +118,15 @@ export default function AdminDashboard() {
     );
   }
 
+  const pendingContributions = overview?.pendingContributions ?? 0;
+  const totalReports = overview?.totalReports ?? 0;
+
   return (
     <div className="dashboard">
       {/* Page Header */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-header__title">Dashboard</h1>
+          <h1 className="admin-page-header__title">Bảng điều khiển</h1>
           <p className="admin-page-header__subtitle">
             Chào mừng bạn quay lại! Đây là tổng quan hệ thống hôm nay.
           </p>
@@ -149,31 +144,80 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Alert Banners */}
+      {(pendingContributions > 0 || totalReports > 0) && (
+        <div className="dashboard__alerts">
+          {pendingContributions > 0 && (
+            <Link
+              href="/admin/moderation/contributions"
+              className="dashboard__alert dashboard__alert--warning"
+            >
+              <AlertTriangle size={18} />
+              <span>
+                Có <strong>{pendingContributions}</strong> đóng góp đang chờ
+                duyệt
+              </span>
+              <ArrowRight size={16} className="dashboard__alert-arrow" />
+            </Link>
+          )}
+          {totalReports > 0 && (
+            <Link
+              href="/admin/moderation/reports"
+              className="dashboard__alert dashboard__alert--danger"
+            >
+              <Flag size={18} />
+              <span>
+                Có <strong>{totalReports}</strong> báo cáo cần xem xét
+              </span>
+              <ArrowRight size={16} className="dashboard__alert-arrow" />
+            </Link>
+          )}
+        </div>
+      )}
+
       {/* Stats Cards */}
-      <div className="admin-stats">
+      <div className="admin-stats admin-stats--6col">
         <StatCard
           icon={Users}
           label="Tổng người dùng"
-          value={stats.totalUsers}
+          value={overview?.totalUsers ?? 0}
           iconColor="primary"
+          href="/admin/users"
         />
         <StatCard
-          icon={BookOpen}
-          label="Tổng thuật ngữ"
-          value={stats.totalTerms}
+          icon={CheckCircle}
+          label="Thuật ngữ đã duyệt"
+          value={overview?.approvedTerms ?? 0}
           iconColor="success"
+          href="/admin/terms"
+        />
+        <StatCard
+          icon={Clock}
+          label="Thuật ngữ chờ duyệt"
+          value={overview?.pendingTerms ?? 0}
+          iconColor="warning"
+          href="/admin/terms"
         />
         <StatCard
           icon={FileCheck}
           label="Đóng góp chờ duyệt"
-          value={stats.pendingContributions}
+          value={pendingContributions}
           iconColor="warning"
+          href="/admin/moderation/contributions"
+        />
+        <StatCard
+          icon={Flag}
+          label="Báo cáo"
+          value={totalReports}
+          iconColor="danger"
+          href="/admin/moderation/reports"
         />
         <StatCard
           icon={MessageSquare}
           label="Tổng bình luận"
-          value={stats.totalComments}
+          value={overview?.totalComments ?? 0}
           iconColor="info"
+          href="/admin/comments"
         />
       </div>
 
@@ -184,7 +228,7 @@ export default function AdminDashboard() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <FileCheck size={18} />
-              Đóng góp chờ duyệt ({stats.pendingContributions})
+              Đóng góp chờ duyệt ({pendingContributions})
             </h3>
             <Link
               href="/admin/moderation/contributions"
@@ -223,8 +267,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Top Terms */}
-
+        {/* System Overview */}
         <div className="admin-card dashboard__top-terms">
           <div className="admin-card__header">
             <h3 className="admin-card__title">
@@ -235,27 +278,35 @@ export default function AdminDashboard() {
           <div className="admin-card__body">
             <div className="top-terms-list">
               <div className="top-term-item">
-                <span className="top-term-item__name">Người dùng</span>
+                <span className="top-term-item__name">
+                  Người dùng hoạt động
+                </span>
                 <span className="top-term-item__views">
-                  {stats.totalUsers.toLocaleString()}
+                  {(overview?.activeUsers ?? 0).toLocaleString()}
                 </span>
               </div>
               <div className="top-term-item">
-                <span className="top-term-item__name">Thuật ngữ</span>
+                <span className="top-term-item__name">Tổng thuật ngữ</span>
                 <span className="top-term-item__views">
-                  {stats.totalTerms.toLocaleString()}
+                  {(overview?.totalTerms ?? 0).toLocaleString()}
                 </span>
               </div>
               <div className="top-term-item">
-                <span className="top-term-item__name">Đóng góp chờ duyệt</span>
+                <span className="top-term-item__name">Danh mục</span>
                 <span className="top-term-item__views">
-                  {stats.pendingContributions.toLocaleString()}
+                  {(overview?.totalCategories ?? 0).toLocaleString()}
+                </span>
+              </div>
+              <div className="top-term-item">
+                <span className="top-term-item__name">Tổng đóng góp</span>
+                <span className="top-term-item__views">
+                  {(overview?.totalContributions ?? 0).toLocaleString()}
                 </span>
               </div>
               <div className="top-term-item">
                 <span className="top-term-item__name">Bình luận</span>
                 <span className="top-term-item__views">
-                  {stats.totalComments.toLocaleString()}
+                  {(overview?.totalComments ?? 0).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -273,17 +324,39 @@ export default function AdminDashboard() {
                 <BookOpen size={24} />
                 <span>Thêm thuật ngữ</span>
               </Link>
-              <Link href="/admin/categories" className="quick-action-item">
+              <Link
+                href="/admin/moderation/contributions"
+                className="quick-action-item"
+              >
                 <FileCheck size={24} />
-                <span>Quản lý danh mục</span>
+                <span>Duyệt đóng góp</span>
+              </Link>
+              <Link
+                href="/admin/moderation/reports"
+                className="quick-action-item"
+              >
+                <Flag size={24} />
+                <span>Xem báo cáo</span>
+              </Link>
+              <Link href="/admin/categories" className="quick-action-item">
+                <Tags size={24} />
+                <span>Danh mục</span>
               </Link>
               <Link href="/admin/users" className="quick-action-item">
                 <Users size={24} />
-                <span>Quản lý người dùng</span>
+                <span>Người dùng</span>
               </Link>
               <Link href="/admin/import" className="quick-action-item">
-                <Activity size={24} />
+                <Upload size={24} />
                 <span>Nhập dữ liệu</span>
+              </Link>
+              <Link href="/admin/report-stats" className="quick-action-item">
+                <Activity size={24} />
+                <span>Thống kê</span>
+              </Link>
+              <Link href="/admin/system-config" className="quick-action-item">
+                <Settings size={24} />
+                <span>Cấu hình</span>
               </Link>
             </div>
           </div>

@@ -60,7 +60,7 @@ export default async function AboutPage({ params }: Props) {
           <article className="about-card about-card--full">
             <h2 className="about-card__title">{t("contactTitle")}</h2>
             <p className="about-card__text">{t("contactText")}</p>
-            <p className="about-card__contact">vinhdd.k63cntt-a@utb.edu.vn</p>
+            <p className="about-card__contact">opendict@utb.edu.vn</p>
           </article>
         </div>
       </section>

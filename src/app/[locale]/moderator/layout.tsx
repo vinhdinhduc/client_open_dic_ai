@@ -29,6 +29,7 @@ import {
   MoveLeft,
   GitPullRequest,
   LucideIcon,
+  Home,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import NotificationBell from "@/components/common/NotificationBell";
@@ -355,9 +356,9 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
 
         {/* Sidebar Footer */}
         <div className="admin-sidebar__footer">
-          <Link href="/" className="admin-sidebar__back">
-            <MoveLeft size={16} />
-            <span>Về trang chủ</span>
+          <Link href="/" target="_blank" className="admin-sidebar__back">
+            <Home size={16} />
+            <span>Xem trang chủ</span>
           </Link>
         </div>
       </aside>

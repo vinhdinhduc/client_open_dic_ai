@@ -219,11 +219,13 @@
       "quickLinks": "Liên kết nhanh",
       "about": "Giới thiệu",
       "contact": "Liên hệ",
+      "guide": "Hướng dẫn",
       "legal": "Pháp lý",
       "termsOfService": "Điều khoản sử dụng",
       "privacyPolicy": "Chính sách bảo mật",
       "userGuide": "Hướng dẫn sử dụng",
       "faq": "Câu hỏi thường gặp",
+      "fanpage": "Website Trường UTB",
       "descriptionBold": "UTB OpenDict là hệ thống từ điển mở đa ngôn ngữ do Trường Đại học Tây Bắc phát triển.",
       "descriptionText": "Hệ thống giúp tra cứu thuật ngữ nhanh chóng từ nhiều bộ từ điển chuyên ngành. Hệ thống hỗ trợ ngôn ngữ Việt - Lào - Anh, tích hợp công nghệ trí tuệ nhân tạo (AI), được cập nhật liên tục và do cộng đồng đóng góp."
     },
@@ -698,7 +700,7 @@
     "moderatorSubmit": "Gửi đăng ký",
     "moderatorSuccess": "Đơn đăng ký đã được gửi! Chúng tôi sẽ liên hệ sớm.",
     "emailContact": "Hoặc liên hệ qua email:",
-    "emailAddress": "vinhdd.k63cntt-a@utb.edu.vn"
+    "emailAddress": "opendict@utb.edu.vn"
   },
   "userGuide": {
     "metaTitle": "Hướng dẫn sử dụng - UTB OpenDict",

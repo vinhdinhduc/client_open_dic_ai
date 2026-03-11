@@ -22,9 +22,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { getAllTerms, getTermStats, deleteTerm } from "@/services/termService";
+import {
+  getAllTerms,
+  getModeratorTerms,
+  getTermStats,
+  deleteTerm,
+} from "@/services/termService";
 import categoryService, { Category } from "@/services/categoryService";
 import { useLanguage } from "@/hooks";
+import axiosInstance from "@/lib/axios";
 import {
   ApiResponse,
   GetTermsAdminResponse,
@@ -47,7 +53,11 @@ const getCategoryName = (
   return name.vi || name.en || "";
 };
 
-export default function TermsPage() {
+interface TermsPageProps {
+  isModerator?: boolean;
+}
+
+export default function TermsPage({ isModerator = false }: TermsPageProps) {
   const [terms, setTerms] = useState<Term[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,14 +90,34 @@ export default function TermsPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const result = await categoryService.getCategories();
-        setCategories(result.data);
+        if (isModerator) {
+          const res = await axiosInstance.get(
+            "/categories/moderator/my-categories",
+          );
+          if (res.data?.success) {
+            // Normalize moderator categories to match Category interface
+            const normalized: Category[] = (res.data.data || []).map(
+              (c: any) => ({
+                id: c._id,
+                _id: c._id,
+                name: c.name,
+                slug: c.slug,
+                icon: c.icon,
+                isActive: c.isActive,
+              }),
+            );
+            setCategories(normalized);
+          }
+        } else {
+          const result = await categoryService.getCategories();
+          setCategories(result.data);
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     };
     fetchCategories();
-  }, []);
+  }, [isModerator]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -142,7 +172,8 @@ export default function TermsPage() {
   const fetchTerms = async () => {
     setLoading(true);
     try {
-      const resultTerm: ApiResponse<GetTermsAdminResponse> = await getAllTerms(
+      const fetchFn = isModerator ? getModeratorTerms : getAllTerms;
+      const resultTerm: ApiResponse<GetTermsAdminResponse> = await fetchFn(
         categoryFilter,
         statusFilter,
         currentPage,
@@ -270,7 +301,9 @@ export default function TermsPage() {
         <div>
           <h1 className="admin-page-header__title">Quản lý thuật ngữ</h1>
           <p className="admin-page-header__subtitle">
-            Quản lý tất cả thuật ngữ trong hệ thống từ điển
+            {isModerator
+              ? "Quản lý thuật ngữ trong danh mục được phân công"
+              : "Quản lý tất cả thuật ngữ trong hệ thống từ điển"}
           </p>
         </div>
         <div className="admin-page-header__actions">
@@ -281,7 +314,10 @@ export default function TermsPage() {
             <Download size={16} />
             Xuất Excel
           </button>
-          <Link href="/admin/import" className="admin-btn admin-btn--secondary">
+          <Link
+            href={isModerator ? "/moderator/import" : "/admin/import"}
+            className="admin-btn admin-btn--secondary"
+          >
             <Upload size={16} />
             Nhập dữ liệu
           </Link>

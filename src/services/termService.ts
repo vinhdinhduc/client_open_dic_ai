@@ -98,6 +98,31 @@ const getAllTerms = async (
 }
 
 
+const getModeratorTerms = async (
+  category: string,
+  status: string,
+  page: number,
+  limit: number,
+  search?: string
+): Promise<ApiResponse<GetTermsResponse>> => {
+  try {
+    const params: Record<string, string | number> = { page, limit };
+    if (category && category !== 'all') params.category = category;
+    if (status && status !== 'all') params.status = status;
+    if (search && search.trim()) params.search = search.trim();
+    const res = await axiosInstance.get<ApiResponse<GetTermsResponse>>('/terms/moderator-terms', { params });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching moderator terms:", error);
+    return {
+      success: false,
+      message: "Có lỗi xảy ra khi tải danh sách thuật ngữ",
+      data: { terms: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } }
+    };
+  }
+}
+
+
 const getTermStats = async (): Promise<ApiResponse<{ stats: { total: number; approved: number; pending: number; rejected: number } }>> => {
   try {
     const res = await axiosInstance.get<ApiResponse<{ stats: { total: number; approved: number; pending: number; rejected: number } }>>('/terms/stats');
@@ -354,6 +379,7 @@ export {
   toggleFavorite,
   checkFavorite,
   getAllTerms,
+  getModeratorTerms,
   getTermStats,
   createTerm,
   updateTerm,

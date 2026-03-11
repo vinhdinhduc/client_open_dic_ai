@@ -14,6 +14,12 @@ import "./SuggestEditModal.scss";
 interface SuggestEditModalProps {
   term: TermDetail;
   onClose: () => void;
+  aiContent?: {
+    lang: string;
+    definition?: string;
+    detailedExplanation?: string;
+    examples?: string[];
+  };
 }
 
 type LangKey = "vi" | "en" | "lo";
@@ -21,6 +27,7 @@ type LangKey = "vi" | "en" | "lo";
 export default function SuggestEditModal({
   term,
   onClose,
+  aiContent,
 }: SuggestEditModalProps) {
   const t = useTranslations("term");
   const tEdit = useTranslations("suggestEdit");
@@ -34,7 +41,9 @@ export default function SuggestEditModal({
         ? tEdit("langEn")
         : tEdit("langLo");
 
-  // Form state - pre-fill with existing data
+  // Form state - pre-fill with existing data, overlay AI suggestions when provided
+  const aiLang = aiContent?.lang as LangKey | undefined;
+
   const [termText, setTermText] = useState<MultiLangText>({
     vi: term.term.vi || "",
     en: term.term.en || "",
@@ -42,22 +51,48 @@ export default function SuggestEditModal({
   });
 
   const [definition, setDefinition] = useState<MultiLangText>({
-    vi: term.definition.vi || "",
-    en: term.definition.en || "",
-    lo: term.definition.lo || "",
+    vi:
+      aiLang === "vi" && aiContent?.definition
+        ? aiContent.definition
+        : term.definition.vi || "",
+    en:
+      aiLang === "en" && aiContent?.definition
+        ? aiContent.definition
+        : term.definition.en || "",
+    lo:
+      aiLang === "lo" && aiContent?.definition
+        ? aiContent.definition
+        : term.definition.lo || "",
   });
 
   const [detailedExplanation, setDetailedExplanation] = useState<MultiLangText>(
     {
-      vi: term.detailedExplanation?.vi || "",
-      en: term.detailedExplanation?.en || "",
-      lo: term.detailedExplanation?.lo || "",
+      vi:
+        aiLang === "vi" && aiContent?.detailedExplanation
+          ? aiContent.detailedExplanation
+          : term.detailedExplanation?.vi || "",
+      en:
+        aiLang === "en" && aiContent?.detailedExplanation
+          ? aiContent.detailedExplanation
+          : term.detailedExplanation?.en || "",
+      lo:
+        aiLang === "lo" && aiContent?.detailedExplanation
+          ? aiContent.detailedExplanation
+          : term.detailedExplanation?.lo || "",
     },
   );
 
-  const [examples, setExamples] = useState<Example[]>(
-    term.examples?.length ? term.examples : [{ vi: "", en: "", lo: "" }],
-  );
+  const buildInitialExamples = (): Example[] => {
+    if (aiLang && aiContent?.examples?.length) {
+      const aiExamples = aiContent.examples.map(
+        (ex) => ({ [aiLang]: ex }) as Example,
+      );
+      return aiExamples;
+    }
+    return term.examples?.length ? term.examples : [{ vi: "", en: "", lo: "" }];
+  };
+
+  const [examples, setExamples] = useState<Example[]>(buildInitialExamples);
 
   const [partOfSpeech, setPartOfSpeech] = useState<string>(
     term.partOfSpeech || "",
@@ -66,7 +101,9 @@ export default function SuggestEditModal({
   const [tagInput, setTagInput] = useState("");
   const [contributorNote, setContributorNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<LangKey>("vi");
+  const [activeTab, setActiveTab] = useState<LangKey>(
+    (aiLang as LangKey) || "vi",
+  );
 
   // Helpers
   const handleMultiLangChange = (
@@ -244,6 +281,7 @@ export default function SuggestEditModal({
           <div className="form-group">
             <label className="form-label">{tEdit("definitionLabel")}</label>
             <RichTextEditor
+              key={`definition-${activeTab}`}
               value={definition[activeTab] || ""}
               onChange={(value) =>
                 handleMultiLangChange(setDefinition, activeTab, value)
@@ -262,6 +300,7 @@ export default function SuggestEditModal({
               <span className="optional">{tEdit("optional")}</span>
             </label>
             <RichTextEditor
+              key={`expl-${activeTab}`}
               value={detailedExplanation[activeTab] || ""}
               onChange={(value) =>
                 handleMultiLangChange(setDetailedExplanation, activeTab, value)

@@ -297,7 +297,7 @@ export default function ModeratorDashboardPage() {
             <LayoutDashboard size={24} />
           </div>
           <div className="header-text">
-            <h1>Dashboard Kiểm duyệt viên</h1>
+            <h1>Bảng điều khiển Kiểm duyệt viên</h1>
             <p>
               Xin chào <strong>{user?.fullName}</strong>! Đây là tổng quan công
               việc kiểm duyệt của bạn.

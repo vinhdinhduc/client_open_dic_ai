@@ -26,7 +26,7 @@ export default function ContactForm() {
 
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const mailtoLink = `mailto:vinhdd.k63cntt-a@utb.edu.vn?subject=${encodeURIComponent(feedbackForm.subject)}&body=${encodeURIComponent(`Name: ${feedbackForm.name}\nEmail: ${feedbackForm.email}\n\n${feedbackForm.message}`)}`;
+    const mailtoLink = `mailto:opendict@utb.edu.vn?subject=${encodeURIComponent(feedbackForm.subject)}&body=${encodeURIComponent(`Name: ${feedbackForm.name}\nEmail: ${feedbackForm.email}\n\n${feedbackForm.message}`)}`;
     window.open(mailtoLink, "_blank");
     toast.success(t("feedbackSuccess"));
     setFeedbackForm({ name: "", email: "", subject: "", message: "" });
@@ -34,7 +34,7 @@ export default function ContactForm() {
 
   const handleModeratorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const mailtoLink = `mailto:vinhdd.k63cntt-a@utb.edu.vn?subject=${encodeURIComponent("Moderator Registration")}&body=${encodeURIComponent(`Name: ${moderatorForm.name}\nEmail: ${moderatorForm.email}\nLanguages: ${moderatorForm.languages}\n\nReason:\n${moderatorForm.reason}`)}`;
+    const mailtoLink = `mailto:opendict@utb.edu.vn?subject=${encodeURIComponent("Moderator Registration")}&body=${encodeURIComponent(`Name: ${moderatorForm.name}\nEmail: ${moderatorForm.email}\nLanguages: ${moderatorForm.languages}\n\nReason:\n${moderatorForm.reason}`)}`;
     window.open(mailtoLink, "_blank");
     toast.success(t("moderatorSuccess"));
     setModeratorForm({ name: "", email: "", reason: "", languages: "" });

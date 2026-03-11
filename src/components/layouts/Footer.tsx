@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
-import { Github, Mail, BookOpen } from "lucide-react";
+import { Github, Mail, BookOpen, ExternalLink } from "lucide-react";
 import "./Footer.scss";
 
 export function Footer() {
@@ -48,14 +48,24 @@ export function Footer() {
               <li>
                 <Link href="/about">{d("about")}</Link>
               </li>
-              <li>
-                <Link href="/contact">{d("contact")}</Link>
-              </li>
+            </ul>
+          </div>
+
+          {/* Guide (formerly Legal) */}
+          <div className="footer-section">
+            <h3 className="footer-title">{d("guide")}</h3>
+            <ul className="footer-links">
               <li>
                 <Link href="/user-guide">{d("userGuide")}</Link>
               </li>
               <li>
                 <Link href="/faq">{d("faq")}</Link>
+              </li>
+              <li>
+                <Link href="/terms-of-service">{d("termsOfService")}</Link>
+              </li>
+              <li>
+                <Link href="/privacy-policy">{d("privacyPolicy")}</Link>
               </li>
             </ul>
           </div>
@@ -65,9 +75,9 @@ export function Footer() {
             <h3 className="footer-title">{d("contact")}</h3>
             <ul className="footer-links">
               <li>
-                <a href="mailto:vinhdd.k63cntt-a@utb.edu.vn">
+                <a href="mailto:opendict@utb.edu.vn">
                   <Mail className="icon" />
-                  vinhdd.k63cntt-a@utb.edu.vn
+                  opendict@utb.edu.vn
                 </a>
               </li>
               <li>
@@ -80,18 +90,15 @@ export function Footer() {
                   GitHub
                 </a>
               </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div className="footer-section">
-            <h3 className="footer-title">{d("legal")}</h3>
-            <ul className="footer-links">
               <li>
-                <Link href="/terms-of-service">{d("termsOfService")}</Link>
-              </li>
-              <li>
-                <Link href="/privacy-policy">{d("privacyPolicy")}</Link>
+                <a
+                  href="https://www.utb.edu.vn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink className="icon" />
+                  {d("fanpage")}
+                </a>
               </li>
             </ul>
           </div>
@@ -100,7 +107,7 @@ export function Footer() {
         <div className="footer-bottom">
           <p>
             &copy; {currentYear} {t("common.appName")}. All rights reserved. Dev
-            by Đinh Đức Vình.
+            by Đinh Đức Vình - K63 ĐHCNTT-A - Trường Đại học Tây Bắc.
           </p>
         </div>
       </div>

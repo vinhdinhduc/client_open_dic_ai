@@ -312,7 +312,7 @@ export default function UsersPage() {
       case "inactive":
         return (
           <span className="admin-badge admin-badge--warning">
-            Không hoạt động
+            Chưa kích hoạt
           </span>
         );
       case "banned":

@@ -218,13 +218,15 @@
       "quickLinks": "Quick Links",
       "about": "About",
       "contact": "Contact",
+      "guide": "Guide",
       "legal": "Legal",
       "termsOfService": "Terms of Service",
       "privacyPolicy": "Privacy Policy",
       "userGuide": "User Guide",
       "faq": "FAQ",
+      "fanpage": "UTB University Website",
       "descriptionBold": "UTB OpenDict is a multilingual open dictionary system developed by Tay Bac University.",
-      "descriptionText": "The system helps users quickly look up terms from multiple specialized dictionaries. It supports Vietnamese - Lao - English, integrates artificial intelligence (AI), is continuously updated, and is contributed by the community."
+      "descriptionText": "UTB OpenDict is a multilingual open dictionary system developed by Tay Bac University."
     },
   "aiChat": {
     "assistant": "AI Assistant",
@@ -694,7 +696,7 @@
     "messageRequired": "Please enter your message",
     "contactInfo": "Contact Information",
     "contactEmail": "Email",
-    "contactEmailValue": "vinhdd.k63cntt-a@utb.edu.vn"
+    "contactEmailValue": "opendict@utb.edu.vn"
   },
   "userGuide": {
     "metaTitle": "User Guide - UTB OpenDict",
