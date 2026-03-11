@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import AdminFeedbackClient from "./Admin";
+import AdminFeedbackClient from "./AdminFeedbackClient";
 
 export const metadata: Metadata = {
   title: "Phản hồi & Đăng ký kiểm duyệt - Admin | UTB OpenDict",
