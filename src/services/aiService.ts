@@ -44,9 +44,9 @@ export interface AIConfig {
     temperature: number;
     maxTokens: number;
     hasApiKey?: boolean;
-    promptDefinition?: string;
-    promptExplanation?: string;
-    promptAnswer?: string;
+    promptDefinition?: Record<string, string>;
+    promptExplanation?: Record<string, string>;
+    promptAnswer?: Record<string, string>;
 }
 
 /**
@@ -58,9 +58,9 @@ export interface UpdateAIConfigRequest {
     model?: string;
     temperature?: number;
     maxTokens?: number;
-    promptDefinition?: string;
-    promptExplanation?: string;
-    promptAnswer?: string;
+    promptDefinition?: Record<string, string>;
+    promptExplanation?: Record<string, string>;
+    promptAnswer?: Record<string, string>;
 }
 
 /**

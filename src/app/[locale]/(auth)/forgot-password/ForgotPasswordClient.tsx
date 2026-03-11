@@ -67,8 +67,12 @@ export default function ForgotPasswordPage() {
         {/* Header */}
         <div className="auth-card__header">
           <div className="auth-card__logo">
-            <i className="fa-solid fa-book-open"></i>
-            OpenDict
+            <img
+              src="/images/logo.png"
+              alt="UTB OpenDict"
+              className="auth-card__logo-img"
+            />
+            <span className="auth-card__logo-text">UTB OpenDict</span>
           </div>
           <h1 className="auth-card__title">{t("forgotPasswordTitle")}</h1>
           <p className="auth-card__subtitle">{t("forgotPasswordSubtitle")}</p>

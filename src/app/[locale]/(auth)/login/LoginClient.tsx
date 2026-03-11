@@ -159,7 +159,7 @@ export default function LoginPage() {
               alt="UTB OpenDict"
               className="auth-card__logo-img"
             />
-            <span className="auth-card__logo-text">OpenDict</span>
+            <span className="auth-card__logo-text">UTB OpenDict</span>
           </div>
           <h1 className="auth-card__title">{t("welcome")}</h1>
           <p className="auth-card__subtitle">{t("dear")}</p>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   Save,
@@ -25,6 +26,7 @@ import {
   getAllTerms,
 } from "@/services/termService";
 import categoryService, { Category } from "@/services/categoryService";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import { MultiLangText, Example, LangKey } from "./types";
 import "./AddTermForm.scss";
 
@@ -39,15 +41,15 @@ const LANG_TABS: { key: LangKey; label: string; flag: string }[] = [
   { key: "lo", label: "ພາສາລາວ", flag: "🇱🇦" },
 ];
 
-const PART_OF_SPEECH_OPTIONS = [
-  { value: "", label: "Chọn từ loại" },
-  { value: "noun", label: "Danh từ (Noun)" },
-  { value: "verb", label: "Động từ (Verb)" },
-  { value: "adjective", label: "Tính từ (Adjective)" },
-  { value: "adverb", label: "Trạng từ (Adverb)" },
-  { value: "phrase", label: "Cụm từ (Phrase)" },
-  { value: "abbreviation", label: "Từ viết tắt (Abbreviation)" },
-];
+const PART_OF_SPEECH_KEYS = [
+  { value: "", labelKey: "selectPartOfSpeech" },
+  { value: "noun", labelKey: "noun" },
+  { value: "verb", labelKey: "verb" },
+  { value: "adjective", labelKey: "adjective" },
+  { value: "adverb", labelKey: "adverb" },
+  { value: "phrase", labelKey: "phrase" },
+  { value: "abbreviation", labelKey: "abbreviation" },
+] as const;
 
 // Helper function to get category name as string
 const getCategoryName = (
@@ -60,6 +62,7 @@ const getCategoryName = (
 
 export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
   const router = useRouter();
+  const t = useTranslations("termForm");
 
   // Form state
   const [term, setTerm] = useState<MultiLangText>({ vi: "", en: "", lo: "" });
@@ -199,7 +202,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
   // Form validation
   const validateForm = (): boolean => {
     if (!term.vi?.trim() && !term.en?.trim() && !term.lo?.trim()) {
-      toast.error("Vui lòng nhập thuật ngữ ít nhất một ngôn ngữ");
+      toast.error(t("errorAtLeastOneTerm"));
       return false;
     }
     if (
@@ -207,11 +210,11 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
       !definition.en?.trim() &&
       !definition.lo?.trim()
     ) {
-      toast.error("Vui lòng nhập định nghĩa ít nhất một ngôn ngữ");
+      toast.error(t("errorAtLeastOneDef"));
       return false;
     }
     if (!categoryId) {
-      toast.error("Vui lòng chọn danh mục");
+      toast.error(t("errorCategory"));
       return false;
     }
     return true;
@@ -275,14 +278,14 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     try {
       const result = await createTerm(termData);
       if (result.success) {
-        toast.success("Tạo thuật ngữ thành công!");
+        toast.success(t("createSuccess"));
         if (onSuccess) {
           onSuccess();
         } else {
           router.push("/admin/terms");
         }
       } else {
-        toast.error(result.message || "Có lỗi xảy ra");
+        toast.error(result.message || t("errorGeneral"));
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -366,19 +369,13 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                 <FileText size={16} />
                 Định nghĩa
               </label>
-              <textarea
+              <RichTextEditor
                 value={definition[activeTab] || ""}
-                onChange={(e) =>
-                  handleMultiLangChange(
-                    setDefinition,
-                    activeTab,
-                    e.target.value,
-                  )
+                onChange={(value) =>
+                  handleMultiLangChange(setDefinition, activeTab, value)
                 }
                 placeholder={`Nhập định nghĩa (${LANG_TABS.find((l) => l.key === activeTab)?.label})`}
-                rows={4}
-                className="form-textarea"
-                disabled={submitting}
+                minHeight={100}
               />
             </div>
 
@@ -389,19 +386,17 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                 Giải thích chi tiết
                 <span className="optional">(không bắt buộc)</span>
               </label>
-              <textarea
+              <RichTextEditor
                 value={detailedExplanation[activeTab] || ""}
-                onChange={(e) =>
+                onChange={(value) =>
                   handleMultiLangChange(
                     setDetailedExplanation,
                     activeTab,
-                    e.target.value,
+                    value,
                   )
                 }
                 placeholder="Giải thích thêm về thuật ngữ..."
-                rows={5}
-                className="form-textarea"
-                disabled={submitting}
+                minHeight={120}
               />
             </div>
 
@@ -492,7 +487,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
 
             {/* Status */}
             <div className="form-group">
-              <label className="form-label">Trạng thái</label>
+              <label className="form-label">{t("status")}</label>
               <select
                 value={status}
                 onChange={(e) =>
@@ -501,16 +496,16 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                 className="form-select"
                 disabled={submitting}
               >
-                <option value="approved">Đã duyệt</option>
-                <option value="pending">Chờ duyệt</option>
+                <option value="approved">{t("approved")}</option>
+                <option value="pending">{t("pending")}</option>
               </select>
             </div>
 
             {/* Tags */}
             <div className="form-group">
               <label className="form-label">
-                Thẻ (Tags)
-                <span className="optional">(không bắt buộc)</span>
+                {t("tags")}
+                <span className="optional">{t("optional")}</span>
               </label>
               <div className="tags-input-wrapper">
                 <div className="tags-list">
@@ -533,7 +528,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleTagKeyDown}
-                    placeholder="Nhập tag và nhấn Enter"
+                    placeholder={t("tagPlaceholder")}
                     className="form-input"
                     disabled={submitting}
                   />
@@ -553,8 +548,8 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
             <div className="form-group">
               <label className="form-label">
                 <Link2 size={16} />
-                Thuật ngữ liên quan
-                <span className="optional">(không bắt buộc)</span>
+                {t("relatedTerms")}
+                <span className="optional">{t("optional")}</span>
               </label>
               {relatedTermObjects.length > 0 && (
                 <div className="tags-list related-terms-list">
@@ -593,7 +588,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                     onBlur={() =>
                       setTimeout(() => setShowRelatedDropdown(false), 150)
                     }
-                    placeholder="Tìm và thêm thuật ngữ liên quan..."
+                    placeholder={t("searchRelated")}
                     className="form-input"
                     disabled={submitting}
                   />
@@ -660,7 +655,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
             onClick={handleCancel}
             disabled={submitting}
           >
-            Hủy
+            {t("cancel", { ns: "common" })}
           </button>
           <button
             type="submit"
@@ -670,12 +665,12 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
             {submitting ? (
               <>
                 <Loader2 size={18} className="spin" />
-                Đang lưu...
+                {t("saving")}
               </>
             ) : (
               <>
                 <Save size={18} />
-                Lưu thuật ngữ
+                {t("save")}
               </>
             )}
           </button>

@@ -23,10 +23,17 @@ export default function AdminAISettings() {
   const [isTesting, setIsTesting] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [hasExistingConfig, setHasExistingConfig] = useState(false);
+  const [promptLang, setPromptLang] = useState<string>("vi");
   const [testResult, setTestResult] = useState<{
     success: boolean;
     message: string;
   } | null>(null);
+
+  const PROMPT_LANGS = [
+    { code: "vi", label: "Tiếng Việt" },
+    { code: "en", label: "English" },
+    { code: "lo", label: "ພາສາລາວ" },
+  ];
 
   // Form data
   const [formData, setFormData] = useState({
@@ -34,9 +41,9 @@ export default function AdminAISettings() {
     provider: "gemini",
     model: "gemini-2.5-flash",
     maxTokens: 1000,
-    promptDefinition: "",
-    promptExplanation: "",
-    promptAnswer: "",
+    promptDefinition: {} as Record<string, string>,
+    promptExplanation: {} as Record<string, string>,
+    promptAnswer: {} as Record<string, string>,
   });
 
   useEffect(() => {
@@ -58,9 +65,18 @@ export default function AdminAISettings() {
         provider: data.provider || "gemini",
         model: data.model || "gemini-2.5-flash",
         maxTokens: data.maxTokens || 1000,
-        promptDefinition: data.promptDefinition || "",
-        promptExplanation: data.promptExplanation || "",
-        promptAnswer: data.promptAnswer || "",
+        promptDefinition:
+          data.promptDefinition && typeof data.promptDefinition === "object"
+            ? data.promptDefinition
+            : {},
+        promptExplanation:
+          data.promptExplanation && typeof data.promptExplanation === "object"
+            ? data.promptExplanation
+            : {},
+        promptAnswer:
+          data.promptAnswer && typeof data.promptAnswer === "object"
+            ? data.promptAnswer
+            : {},
       });
 
       // If API key is masked, the form field is left empty (placeholder shows masked value)
@@ -344,17 +360,46 @@ export default function AdminAISettings() {
           className="form-text"
           style={{ marginBottom: "1rem", display: "block" }}
         >
-          Tùy chỉnh các prompt gửi cho AI. Sử dụng {"{term}"} để đại diện cho
-          thuật ngữ.
+          Tùy chỉnh các prompt gửi cho AI theo từng ngôn ngữ. Sử dụng {"{term}"}{" "}
+          để đại diện cho thuật ngữ.
         </small>
 
+        {/* Language Tabs */}
+        <div
+          className="prompt-lang-tabs"
+          style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}
+        >
+          {PROMPT_LANGS.map((lang) => (
+            <button
+              key={lang.code}
+              type="button"
+              className={`admin-btn ${promptLang === lang.code ? "admin-btn--primary" : "admin-btn--secondary"}`}
+              onClick={() => setPromptLang(lang.code)}
+              style={{ padding: "0.4rem 1rem", fontSize: "0.9rem" }}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
+
         <div className="form-group">
-          <label htmlFor="promptDefinition">Prompt Định nghĩa</label>
+          <label htmlFor="promptDefinition">
+            Prompt Định nghĩa (
+            {PROMPT_LANGS.find((l) => l.code === promptLang)?.label})
+          </label>
           <textarea
             id="promptDefinition"
             name="promptDefinition"
-            value={formData.promptDefinition}
-            onChange={handleInputChange}
+            value={formData.promptDefinition[promptLang] || ""}
+            onChange={(e) => {
+              setFormData((prev) => ({
+                ...prev,
+                promptDefinition: {
+                  ...prev.promptDefinition,
+                  [promptLang]: e.target.value,
+                },
+              }));
+            }}
             className="form-control"
             rows={3}
             placeholder="VD: Hãy định nghĩa thuật ngữ CNTT '{term}' bằng tiếng Việt, ngắn gọn và chính xác."
@@ -362,12 +407,23 @@ export default function AdminAISettings() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="promptExplanation">Prompt Giải thích chi tiết</label>
+          <label htmlFor="promptExplanation">
+            Prompt Giải thích chi tiết (
+            {PROMPT_LANGS.find((l) => l.code === promptLang)?.label})
+          </label>
           <textarea
             id="promptExplanation"
             name="promptExplanation"
-            value={formData.promptExplanation}
-            onChange={handleInputChange}
+            value={formData.promptExplanation[promptLang] || ""}
+            onChange={(e) => {
+              setFormData((prev) => ({
+                ...prev,
+                promptExplanation: {
+                  ...prev.promptExplanation,
+                  [promptLang]: e.target.value,
+                },
+              }));
+            }}
             className="form-control"
             rows={3}
             placeholder="VD: Hãy giải thích chi tiết thuật ngữ CNTT '{term}' bằng tiếng Việt."
@@ -375,12 +431,23 @@ export default function AdminAISettings() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="promptAnswer">Prompt Hỏi đáp</label>
+          <label htmlFor="promptAnswer">
+            Prompt Hỏi đáp (
+            {PROMPT_LANGS.find((l) => l.code === promptLang)?.label})
+          </label>
           <textarea
             id="promptAnswer"
             name="promptAnswer"
-            value={formData.promptAnswer}
-            onChange={handleInputChange}
+            value={formData.promptAnswer[promptLang] || ""}
+            onChange={(e) => {
+              setFormData((prev) => ({
+                ...prev,
+                promptAnswer: {
+                  ...prev.promptAnswer,
+                  [promptLang]: e.target.value,
+                },
+              }));
+            }}
             className="form-control"
             rows={3}
             placeholder="VD: Trả lời câu hỏi sau về thuật ngữ CNTT '{term}': {question}"

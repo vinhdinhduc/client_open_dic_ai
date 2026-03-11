@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Layout } from "@/components/layouts";
+import AboutForms from "./AboutForms";
 import "./About.scss";
 
 type Props = {
@@ -62,6 +63,8 @@ export default async function AboutPage({ params }: Props) {
             <p className="about-card__text">{t("contactText")}</p>
             <p className="about-card__contact">opendict@utb.edu.vn</p>
           </article>
+
+          <AboutForms />
         </div>
       </section>
     </Layout>

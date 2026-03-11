@@ -96,10 +96,12 @@ function VerifyEmailContent() {
         <div className="auth-card">
           <div className="auth-card__header">
             <div className="auth-card__logo">
-              <div className="logo-icon">
-                <i className="fa-solid fa-circle-check"></i>
-              </div>
-              <h1 className="logo-text">Từ điển Mở</h1>
+              <img
+                src="/images/logo.png"
+                alt="UTB OpenDict"
+                className="auth-card__logo-img"
+              />
+              <span className="auth-card__logo-text">UTB OpenDict</span>
             </div>
             <h2 className="auth-card__title">
               {verificationStatus === "verifying" && t("verifyingTitle")}

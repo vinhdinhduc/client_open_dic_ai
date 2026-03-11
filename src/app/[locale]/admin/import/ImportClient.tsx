@@ -707,6 +707,11 @@ export default function ImportPage() {
           font-size: 14px;
         }
 
+        .option-group select option {
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+        }
+
         .option-hint {
           font-size: 12px;
           color: var(--text-secondary);

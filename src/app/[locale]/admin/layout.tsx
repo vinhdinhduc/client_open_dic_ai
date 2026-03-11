@@ -33,6 +33,7 @@ import {
   Gauge,
   MoveLeft,
   Home,
+  MessageCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import NotificationBell from "@/components/common/NotificationBell";
@@ -125,6 +126,12 @@ const adminMenuItems: MenuItem[] = [
     label: "Báo cáo thống kê",
     icon: BarChart3,
     href: "/admin/reports",
+  },
+  {
+    id: "feedback",
+    label: "Phản hồi & Đăng ký",
+    icon: MessageCircle,
+    href: "/admin/feedback",
   },
   {
     id: "settings",

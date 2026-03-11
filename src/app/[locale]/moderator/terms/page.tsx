@@ -1,1 +1,9 @@
-import { Metadata } from \"next\";\nimport AdminTermsClient from \"../../admin/terms/AdminTermsClient\";\n\nexport const metadata: Metadata = {\n  title: \"Quản lý thuật ngữ - Moderator | UTB OpenDict\",\n  description: \"Quản lý thuật ngữ được phân công cho moderator\",\n};\n\nexport default function ModeratorTermsPage() {\n  return <AdminTermsClient isModerator={true} />;\n}
+import { Metadata } from "next";
+import AdminTermsClient from "../../admin/terms/AdminTermsClient";
+export const metadata: Metadata = {
+  title: "Quản lý thuật ngữ - Moderator | UTB OpenDict",
+  description: "Quản lý thuật ngữ được phân công cho moderator",
+};
+export default function ModeratorTermsPage() {
+  return <AdminTermsClient isModerator={true} />;
+}

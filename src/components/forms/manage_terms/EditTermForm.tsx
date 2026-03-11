@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   Save,
@@ -26,6 +27,7 @@ import {
   getAllTerms,
 } from "@/services/termService";
 import categoryService, { Category } from "@/services/categoryService";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import { MultiLangText, Example, LangKey } from "./types";
 import "./EditTermForm.scss";
 
@@ -47,21 +49,21 @@ const getCategoryName = (name: string | MultiLangText | undefined): string => {
   return name.vi || name.en || name.lo || "";
 };
 
-const PART_OF_SPEECH_OPTIONS = [
-  { value: "", label: "Chọn từ loại" },
-  { value: "noun", label: "Danh từ (Noun)" },
-  { value: "verb", label: "Động từ (Verb)" },
-  { value: "adjective", label: "Tính từ (Adjective)" },
-  { value: "adverb", label: "Trạng từ (Adverb)" },
-  { value: "phrase", label: "Cụm từ (Phrase)" },
-  { value: "abbreviation", label: "Từ viết tắt (Abbreviation)" },
-];
+const PART_OF_SPEECH_KEYS = [
+  { value: "", labelKey: "selectPartOfSpeech" },
+  { value: "noun", labelKey: "noun" },
+  { value: "verb", labelKey: "verb" },
+  { value: "adjective", labelKey: "adjective" },
+  { value: "adverb", labelKey: "adverb" },
+  { value: "phrase", labelKey: "phrase" },
+  { value: "abbreviation", labelKey: "abbreviation" },
+] as const;
 
-const STATUS_OPTIONS = [
-  { value: "approved", label: "Đã duyệt", color: "success" },
-  { value: "pending", label: "Chờ duyệt", color: "warning" },
-  { value: "rejected", label: "Từ chối", color: "danger" },
-];
+const STATUS_KEYS = [
+  { value: "approved", labelKey: "approved", color: "success" },
+  { value: "pending", labelKey: "pending", color: "warning" },
+  { value: "rejected", labelKey: "rejected", color: "danger" },
+] as const;
 
 export function EditTermForm({
   termId,
@@ -69,6 +71,7 @@ export function EditTermForm({
   onCancel,
 }: EditTermFormProps) {
   const router = useRouter();
+  const t = useTranslations("termForm");
 
   // Loading states
   const [loading, setLoading] = useState(true);
@@ -338,7 +341,7 @@ export function EditTermForm({
   // Form validation
   const validateForm = (): boolean => {
     if (!categoryId) {
-      toast.error("Vui lòng chọn danh mục");
+      toast.error(t("errorCategory"));
       return false;
     }
     return true;
@@ -400,7 +403,7 @@ export function EditTermForm({
     try {
       const result = await updateTerm(termId, termData);
       if (result.success) {
-        toast.success("Cập nhật thuật ngữ thành công!");
+        toast.success(t("updateSuccess"));
         if (onSuccess) {
           onSuccess();
         } else {
@@ -450,14 +453,14 @@ export function EditTermForm({
           disabled={submitting}
         >
           <ArrowLeft size={20} />
-          <span>Quay lại</span>
+          <span>{t("back")}</span>
         </button>
         <div className="header-info">
           <h1>
             <BookOpen size={24} />
-            Chỉnh sửa thuật ngữ
+            {t("editTitle")}
           </h1>
-          <p>Cập nhật thông tin thuật ngữ trong từ điển</p>
+          <p>{t("editSubtitle")}</p>
         </div>
         <button
           type="button"
@@ -496,7 +499,7 @@ export function EditTermForm({
             <div className="form-group">
               <label className="form-label">
                 <Languages size={16} />
-                Thuật ngữ
+                {t("term")}
               </label>
               <input
                 type="text"
@@ -514,21 +517,15 @@ export function EditTermForm({
             <div className="form-group">
               <label className="form-label">
                 <FileText size={16} />
-                Định nghĩa
+                {t("definition")}
               </label>
-              <textarea
+              <RichTextEditor
                 value={definition[activeTab] || ""}
-                onChange={(e) =>
-                  handleMultiLangChange(
-                    setDefinition,
-                    activeTab,
-                    e.target.value,
-                  )
+                onChange={(value) =>
+                  handleMultiLangChange(setDefinition, activeTab, value)
                 }
                 placeholder={`Nhập định nghĩa (${LANG_TABS.find((l) => l.key === activeTab)?.label})`}
-                rows={4}
-                className="form-textarea"
-                disabled={submitting}
+                minHeight={100}
               />
             </div>
 
@@ -536,30 +533,28 @@ export function EditTermForm({
             <div className="form-group">
               <label className="form-label">
                 <BookOpen size={16} />
-                Giải thích chi tiết
-                <span className="optional">(không bắt buộc)</span>
+                {t("detailedExplanation")}
+                <span className="optional">{t("optional")}</span>
               </label>
-              <textarea
+              <RichTextEditor
                 value={detailedExplanation[activeTab] || ""}
-                onChange={(e) =>
+                onChange={(value) =>
                   handleMultiLangChange(
                     setDetailedExplanation,
                     activeTab,
-                    e.target.value,
+                    value,
                   )
                 }
                 placeholder="Giải thích thêm về thuật ngữ..."
-                rows={5}
-                className="form-textarea"
-                disabled={submitting}
+                minHeight={120}
               />
             </div>
 
             {/* Examples */}
             <div className="form-group">
               <label className="form-label">
-                Ví dụ
-                <span className="optional">(không bắt buộc)</span>
+                {t("examples")}
+                <span className="optional">{t("optional")}</span>
               </label>
               <div className="examples-list">
                 {examples.map((example, index) => (
@@ -606,7 +601,7 @@ export function EditTermForm({
             <div className="form-group">
               <label className="form-label">
                 <Tag size={16} />
-                Danh mục <span className="required">*</span>
+                {t("category")} <span className="required">{t("required")}</span>
               </label>
               <select
                 value={categoryId}
@@ -614,7 +609,7 @@ export function EditTermForm({
                 className="form-select"
                 disabled={submitting || loadingCategories}
               >
-                <option value="">Chọn danh mục</option>
+                <option value="">{t("selectCategory")}</option>
                 {categories.map((cat) => (
                   <option key={cat.id || cat._id} value={cat.id || cat._id}>
                     {getCategoryName(cat.name)}
@@ -625,16 +620,16 @@ export function EditTermForm({
 
             {/* Part of Speech */}
             <div className="form-group">
-              <label className="form-label">Từ loại</label>
+              <label className="form-label">{t("partOfSpeech")}</label>
               <select
                 value={partOfSpeech}
                 onChange={(e) => setPartOfSpeech(e.target.value)}
                 className="form-select"
                 disabled={submitting}
               >
-                {PART_OF_SPEECH_OPTIONS.map((opt) => (
+                {PART_OF_SPEECH_KEYS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </option>
                 ))}
               </select>
@@ -642,7 +637,7 @@ export function EditTermForm({
 
             {/* Status */}
             <div className="form-group">
-              <label className="form-label">Trạng thái</label>
+              <label className="form-label">{t("status")}</label>
               <select
                 value={status}
                 onChange={(e) =>
@@ -653,9 +648,9 @@ export function EditTermForm({
                 className={`form-select status-select status-select--${status}`}
                 disabled={submitting}
               >
-                {STATUS_OPTIONS.map((opt) => (
+                {STATUS_KEYS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </option>
                 ))}
               </select>
@@ -664,8 +659,8 @@ export function EditTermForm({
             {/* Tags */}
             <div className="form-group">
               <label className="form-label">
-                Thẻ (Tags)
-                <span className="optional">(không bắt buộc)</span>
+                {t("tags")}
+                <span className="optional">{t("optional")}</span>
               </label>
               <div className="tags-input-wrapper">
                 <div className="tags-list">
@@ -688,7 +683,7 @@ export function EditTermForm({
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleTagKeyDown}
-                    placeholder="Nhập tag và nhấn Enter"
+                    placeholder={t("tagPlaceholder")}
                     className="form-input"
                     disabled={submitting}
                   />
@@ -708,8 +703,8 @@ export function EditTermForm({
             <div className="form-group">
               <label className="form-label">
                 <Link2 size={16} />
-                Thuật ngữ liên quan
-                <span className="optional">(không bắt buộc)</span>
+                {t("relatedTerms")}
+                <span className="optional">{t("optional")}</span>
               </label>
               {relatedTermObjects.length > 0 && (
                 <div className="tags-list related-terms-list">
@@ -748,7 +743,7 @@ export function EditTermForm({
                     onBlur={() =>
                       setTimeout(() => setShowRelatedDropdown(false), 150)
                     }
-                    placeholder="Tìm và thêm thuật ngữ liên quan..."
+                    placeholder={t("searchRelated")}
                     className="form-input"
                     disabled={submitting}
                   />
@@ -815,7 +810,7 @@ export function EditTermForm({
             onClick={handleCancel}
             disabled={submitting}
           >
-            Hủy
+            {t("cancel", { ns: "common" })}
           </button>
           <button
             type="submit"
@@ -825,12 +820,12 @@ export function EditTermForm({
             {submitting ? (
               <>
                 <Loader2 size={18} className="spin" />
-                Đang lưu...
+                {t("saving")}
               </>
             ) : (
               <>
                 <Save size={18} />
-                Cập nhật thuật ngữ
+                {t("save")}
               </>
             )}
           </button>

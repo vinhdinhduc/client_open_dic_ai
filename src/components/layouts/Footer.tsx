@@ -48,6 +48,9 @@ export function Footer() {
               <li>
                 <Link href="/about">{d("about")}</Link>
               </li>
+              <li>
+                <Link href="/contact">{d("contact")}</Link>
+              </li>
             </ul>
           </div>
 
@@ -80,16 +83,7 @@ export function Footer() {
                   opendict@utb.edu.vn
                 </a>
               </li>
-              <li>
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Github className="icon" />
-                  GitHub
-                </a>
-              </li>
+
               <li>
                 <a
                   href="https://www.utb.edu.vn/"
@@ -107,7 +101,7 @@ export function Footer() {
         <div className="footer-bottom">
           <p>
             &copy; {currentYear} {t("common.appName")}. All rights reserved. Dev
-            by Đinh Đức Vình - K63 ĐHCNTT-A - Trường Đại học Tây Bắc.
+            by Đinh Đức Vình - K63ĐHCNTT-A -- Trường Đại học Tây Bắc.
           </p>
         </div>
       </div>
