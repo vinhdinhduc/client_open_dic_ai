@@ -34,6 +34,7 @@ import {
   Area,
 } from "recharts";
 import "./reports.scss";
+import { useTranslations } from "next-intl";
 
 const COLORS = [
   "#667eea",
@@ -49,6 +50,7 @@ const COLORS = [
 ];
 
 export default function ReportsPage() {
+  const t = useTranslations("adminReports");
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState<FullReport | null>(null);
   const [period, setPeriod] = useState("month");
@@ -74,7 +76,7 @@ export default function ReportsPage() {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
-        <p>Đang tải báo cáo...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -82,9 +84,9 @@ export default function ReportsPage() {
   if (!report) {
     return (
       <div className="admin-empty">
-        <p className="admin-empty__text">Không thể tải dữ liệu báo cáo</p>
+        <p className="admin-empty__text">{t("loadError")}</p>
         <button className="admin-btn admin-btn--primary" onClick={loadReport}>
-          Thử lại
+          {t("retry")}
         </button>
       </div>
     );
@@ -93,9 +95,9 @@ export default function ReportsPage() {
   const { overview } = report;
 
   const roleLabels: Record<string, string> = {
-    admin: "Quản trị viên",
-    moderator: "Kiểm duyệt viên",
-    user: "Người dùng",
+    admin: t("roleAdmin"),
+    moderator: t("roleModerator"),
+    user: t("roleUser"),
   };
 
   return (
@@ -105,10 +107,10 @@ export default function ReportsPage() {
         <div>
           <h1 className="admin-page-header__title">
             <BarChart3 size={28} />
-            Báo cáo & Thống kê
+            {t("title")}
           </h1>
           <p className="admin-page-header__subtitle">
-            Tổng quan dữ liệu và hiệu suất hệ thống
+            {t("subtitle")}
           </p>
         </div>
         <div className="admin-page-header__actions">
@@ -117,25 +119,25 @@ export default function ReportsPage() {
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
           >
-            <option value="day">Theo ngày</option>
-            <option value="week">Theo tuần</option>
-            <option value="month">Theo tháng</option>
+            <option value="day">{t("daily")}</option>
+            <option value="week">{t("weekly")}</option>
+            <option value="month">{t("monthly")}</option>
           </select>
           <select
             className="admin-form__select reports-select"
             value={months}
             onChange={(e) => setMonths(Number(e.target.value))}
           >
-            <option value={3}>3 tháng</option>
-            <option value={6}>6 tháng</option>
-            <option value={12}>12 tháng</option>
+            <option value={3}>{t("threeMonths")}</option>
+            <option value={6}>{t("sixMonths")}</option>
+            <option value={12}>{t("twelveMonths")}</option>
           </select>
           <button
             className="admin-btn admin-btn--secondary"
             onClick={loadReport}
           >
             <RefreshCw size={16} />
-            Làm mới
+            {t("refresh")}
           </button>
         </div>
       </div>
@@ -150,9 +152,9 @@ export default function ReportsPage() {
             <div className="admin-stat-card__value">
               {overview.totalUsers.toLocaleString()}
             </div>
-            <div className="admin-stat-card__label">Tổng người dùng</div>
+            <div className="admin-stat-card__label">{t("totalUsers")}</div>
             <div className="admin-stat-card__trend admin-stat-card__trend--up">
-              {overview.activeUsers} đang hoạt động
+              {overview.activeUsers} {t("activeLabel")}
             </div>
           </div>
         </div>
@@ -164,9 +166,9 @@ export default function ReportsPage() {
             <div className="admin-stat-card__value">
               {overview.totalTerms.toLocaleString()}
             </div>
-            <div className="admin-stat-card__label">Tổng thuật ngữ</div>
+            <div className="admin-stat-card__label">{t("totalTerms")}</div>
             <div className="admin-stat-card__trend admin-stat-card__trend--up">
-              {overview.approvedTerms} đã duyệt
+              {overview.approvedTerms} {t("approvedLabel")}
             </div>
           </div>
         </div>
@@ -178,9 +180,9 @@ export default function ReportsPage() {
             <div className="admin-stat-card__value">
               {overview.totalContributions.toLocaleString()}
             </div>
-            <div className="admin-stat-card__label">Tổng đóng góp</div>
+            <div className="admin-stat-card__label">{t("totalContributions")}</div>
             <div className="admin-stat-card__trend admin-stat-card__trend--down">
-              {overview.pendingContributions} chờ duyệt
+              {overview.pendingContributions} {t("pendingLabel")}
             </div>
           </div>
         </div>
@@ -192,7 +194,7 @@ export default function ReportsPage() {
             <div className="admin-stat-card__value">
               {overview.totalComments.toLocaleString()}
             </div>
-            <div className="admin-stat-card__label">Tổng bình luận</div>
+            <div className="admin-stat-card__label">{t("totalComments")}</div>
           </div>
         </div>
       </div>
@@ -204,7 +206,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <TrendingUp size={18} />
-              Thuật ngữ theo thời gian
+              {t("termsOverTime")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -233,7 +235,7 @@ export default function ReportsPage() {
                   <Area
                     type="monotone"
                     dataKey="approved"
-                    name="Đã duyệt"
+                    name={t("approved")}
                     stroke="#10b981"
                     fill="rgba(16, 185, 129, 0.2)"
                     strokeWidth={2}
@@ -241,7 +243,7 @@ export default function ReportsPage() {
                   <Area
                     type="monotone"
                     dataKey="pending"
-                    name="Chờ duyệt"
+                    name={t("pending")}
                     stroke="#f59e0b"
                     fill="rgba(245, 158, 11, 0.2)"
                     strokeWidth={2}
@@ -249,7 +251,7 @@ export default function ReportsPage() {
                   <Area
                     type="monotone"
                     dataKey="rejected"
-                    name="Từ chối"
+                    name={t("rejected")}
                     stroke="#ef4444"
                     fill="rgba(239, 68, 68, 0.1)"
                     strokeWidth={2}
@@ -265,7 +267,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <Users size={18} />
-              Người dùng mới theo tháng
+              {t("newUsersByMonth")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -293,7 +295,7 @@ export default function ReportsPage() {
                   <Line
                     type="monotone"
                     dataKey="count"
-                    name="Người dùng mới"
+                    name={t("newUsers")}
                     stroke="#667eea"
                     strokeWidth={2}
                     dot={{ r: 4 }}
@@ -310,7 +312,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <BookOpen size={18} />
-              Thuật ngữ theo danh mục
+              {t("termsByCategory")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -355,7 +357,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <FileCheck size={18} />
-              Đóng góp theo thời gian
+              {t("contributionsOverTime")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -383,19 +385,19 @@ export default function ReportsPage() {
                   <Legend />
                   <Bar
                     dataKey="approved"
-                    name="Đã duyệt"
+                    name={t("approved")}
                     fill="#10b981"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="pending"
-                    name="Chờ duyệt"
+                    name={t("pending")}
                     fill="#f59e0b"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="rejected"
-                    name="Từ chối"
+                    name={t("rejected")}
                     fill="#ef4444"
                     radius={[4, 4, 0, 0]}
                   />
@@ -410,7 +412,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <Users size={18} />
-              Người dùng theo vai trò
+              {t("usersByRole")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -456,7 +458,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <Award size={18} />
-              Top người đóng góp
+              {t("topContributors")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -475,12 +477,12 @@ export default function ReportsPage() {
                     <span className="top-list__meta">{contributor.email}</span>
                   </div>
                   <span className="top-list__value">
-                    {contributor.count} đóng góp
+                    {contributor.count} {t("contributionsCount")}
                   </span>
                 </div>
               ))}
               {report.topContributors.length === 0 && (
-                <p className="admin-empty__text">Chưa có dữ liệu</p>
+                <p className="admin-empty__text">{t("noData")}</p>
               )}
             </div>
           </div>
@@ -491,7 +493,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <Eye size={18} />
-              Thuật ngữ được xem nhiều nhất
+              {t("mostViewedTerms")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -523,7 +525,7 @@ export default function ReportsPage() {
                 </div>
               ))}
               {report.topViewedTerms.length === 0 && (
-                <p className="admin-empty__text">Chưa có dữ liệu</p>
+                <p className="admin-empty__text">{t("noData")}</p>
               )}
             </div>
           </div>
@@ -534,7 +536,7 @@ export default function ReportsPage() {
           <div className="admin-card__header">
             <h3 className="admin-card__title">
               <Calendar size={18} />
-              Hoạt động gần đây
+              {t("recentActivity")}
             </h3>
           </div>
           <div className="admin-card__body">
@@ -547,10 +549,10 @@ export default function ReportsPage() {
                   <div className="activity-timeline__content">
                     <div className="activity-timeline__header">
                       <span className="activity-timeline__type">
-                        {activity.type === "term" && " Thuật ngữ"}
-                        {activity.type === "contribution" && " Đóng góp"}
-                        {activity.type === "comment" && " Bình luận"}
-                        {activity.type === "new_user" && " Người dùng mới"}
+                        {activity.type === "term" && ` ${t("activityTerm")}`}
+                        {activity.type === "contribution" && ` ${t("activityContribution")}`}
+                        {activity.type === "comment" && ` ${t("activityComment")}`}
+                        {activity.type === "new_user" && ` ${t("activityNewUser")}`}
                       </span>
                       {activity.status && (
                         <span
@@ -563,10 +565,10 @@ export default function ReportsPage() {
                           }`}
                         >
                           {activity.status === "approved"
-                            ? "Đã duyệt"
+                            ? t("approved")
                             : activity.status === "pending"
-                              ? "Chờ duyệt"
-                              : "Từ chối"}
+                              ? t("pending")
+                              : t("rejected")}
                         </span>
                       )}
                     </div>

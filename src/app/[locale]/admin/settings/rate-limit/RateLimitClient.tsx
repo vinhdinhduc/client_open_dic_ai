@@ -1,15 +1,19 @@
+"use client";
+
 import { AdminRateLimitSettings } from "@/components/admin";
 import { Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function SettingsRateLimitPage() {
+  const t = useTranslations("adminSettings");
   return (
     <div className="admin-settings__rate-limit">
       <div className="admin-settings__header">
         <h1>
           <Shield size={28} />
-          Cấu hình Rate Limit
+          {t("rateLimitConfigTitle")}
         </h1>
-        <p>Quản lý giới hạn số lượng request để bảo vệ hệ thống</p>
+        <p>{t("rateLimitConfigSubtitle")}</p>
       </div>
       <AdminRateLimitSettings />
     </div>

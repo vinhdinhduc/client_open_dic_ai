@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import contactService from "@/services/contactService";
+import { useTranslations } from "next-intl";
 
 interface Feedback {
   _id: string;
@@ -38,6 +39,7 @@ interface ModeratorApp {
 type TabType = "feedback" | "moderator";
 
 export default function AdminFeedbackClient() {
+  const t = useTranslations("adminFeedback");
   const [activeTab, setActiveTab] = useState<TabType>("feedback");
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [applications, setApplications] = useState<ModeratorApp[]>([]);
@@ -55,7 +57,7 @@ export default function AdminFeedbackClient() {
       });
       setFeedbacks(res.data.feedbacks);
     } catch (err: any) {
-      toast.error(err.message || "Lỗi tải phản hồi");
+      toast.error(err.message || t("loadFeedbackError"));
     }
   }, [statusFilter]);
 
@@ -66,7 +68,7 @@ export default function AdminFeedbackClient() {
       });
       setApplications(res.data.applications);
     } catch (err: any) {
-      toast.error(err.message || "Lỗi tải đơn đăng ký");
+      toast.error(err.message || t("loadApplicationsError"));
     }
   }, [statusFilter]);
 
@@ -82,12 +84,12 @@ export default function AdminFeedbackClient() {
   const handleUpdateFeedback = async (id: string, status: string) => {
     try {
       await contactService.updateFeedbackStatus(id, { status, adminNote });
-      toast.success("Cập nhật thành công");
+      toast.success(t("updateSuccess"));
       setSelectedItem(null);
       setAdminNote("");
       loadFeedbacks();
     } catch {
-      toast.error("Lỗi cập nhật");
+      toast.error(t("updateError"));
     }
   };
 
@@ -99,14 +101,14 @@ export default function AdminFeedbackClient() {
       });
       toast.success(
         status === "approved"
-          ? "Đã duyệt đơn đăng ký"
-          : "Đã từ chối đơn đăng ký",
+          ? t("applicationApproved")
+          : t("applicationRejected"),
       );
       setSelectedItem(null);
       setAdminNote("");
       loadApplications();
     } catch {
-      toast.error("Lỗi xử lý đơn đăng ký");
+      toast.error(t("applicationError"));
     }
   };
 
@@ -117,27 +119,27 @@ export default function AdminFeedbackClient() {
     > = {
       pending: {
         icon: <Clock size={14} />,
-        label: "Chờ xử lý",
+        label: t("statusPending"),
         cls: "badge--warning",
       },
       reviewed: {
         icon: <Eye size={14} />,
-        label: "Đã xem",
+        label: t("statusReviewed"),
         cls: "badge--info",
       },
       resolved: {
         icon: <CheckCircle size={14} />,
-        label: "Đã xử lý",
+        label: t("statusResolved"),
         cls: "badge--success",
       },
       approved: {
         icon: <CheckCircle size={14} />,
-        label: "Đã duyệt",
+        label: t("statusApproved"),
         cls: "badge--success",
       },
       rejected: {
         icon: <XCircle size={14} />,
-        label: "Từ chối",
+        label: t("statusRejected"),
         cls: "badge--danger",
       },
     };
@@ -150,16 +152,16 @@ export default function AdminFeedbackClient() {
   };
 
   const typeLabels: Record<string, string> = {
-    feedback: "Góp ý",
-    bug: "Báo lỗi",
-    feature: "Đề xuất",
-    other: "Khác",
+    feedback: t("typeFeedback"),
+    bug: t("typeBugReport"),
+    feature: t("typeSuggestion"),
+    other: t("typeOther"),
   };
 
   return (
     <div className="admin-feedback">
       <div className="admin-feedback__header">
-        <h1>Phản hồi & Đăng ký kiểm duyệt</h1>
+        <h1>{t("title")}</h1>
       </div>
 
       {/* Tabs */}
@@ -171,7 +173,7 @@ export default function AdminFeedbackClient() {
             setStatusFilter("");
           }}
         >
-          <MessageSquare size={18} /> Phản hồi
+          <MessageSquare size={18} /> {t("tabFeedback")}
         </button>
         <button
           className={`admin-tab ${activeTab === "moderator" ? "admin-tab--active" : ""}`}
@@ -180,7 +182,7 @@ export default function AdminFeedbackClient() {
             setStatusFilter("");
           }}
         >
-          <UserPlus size={18} /> Đơn đăng ký kiểm duyệt
+          <UserPlus size={18} /> {t("tabApplications")}
         </button>
       </div>
 
@@ -190,18 +192,18 @@ export default function AdminFeedbackClient() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
+          <option value="">{t("allStatuses")}</option>
           {activeTab === "feedback" ? (
             <>
-              <option value="pending">Chờ xử lý</option>
-              <option value="reviewed">Đã xem</option>
-              <option value="resolved">Đã xử lý</option>
+              <option value="pending">{t("statusPending")}</option>
+              <option value="reviewed">{t("statusReviewed")}</option>
+              <option value="resolved">{t("statusResolved")}</option>
             </>
           ) : (
             <>
-              <option value="pending">Chờ xử lý</option>
-              <option value="approved">Đã duyệt</option>
-              <option value="rejected">Từ chối</option>
+              <option value="pending">{t("statusPending")}</option>
+              <option value="approved">{t("statusApproved")}</option>
+              <option value="rejected">{t("statusRejected")}</option>
             </>
           )}
         </select>
@@ -211,12 +213,12 @@ export default function AdminFeedbackClient() {
       {loading ? (
         <div className="admin-feedback__loading">
           <RefreshCw className="spin" size={24} />
-          <p>Đang tải...</p>
+          <p>{t("loading")}</p>
         </div>
       ) : activeTab === "feedback" ? (
         <div className="admin-feedback__list">
           {feedbacks.length === 0 ? (
-            <p className="admin-feedback__empty">Chưa có phản hồi nào.</p>
+            <p className="admin-feedback__empty">{t("noFeedback")}</p>
           ) : (
             feedbacks.map((fb) => (
               <div
@@ -246,7 +248,7 @@ export default function AdminFeedbackClient() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <textarea
-                      placeholder="Ghi chú admin..."
+                      placeholder={t("adminNotePlaceholder")}
                       value={adminNote}
                       onChange={(e) => setAdminNote(e.target.value)}
                       rows={2}
@@ -256,13 +258,13 @@ export default function AdminFeedbackClient() {
                         className="admin-btn admin-btn--secondary"
                         onClick={() => handleUpdateFeedback(fb._id, "reviewed")}
                       >
-                        <Eye size={16} /> Đánh dấu đã xem
+                        <Eye size={16} /> {t("markReviewed")}
                       </button>
                       <button
                         className="admin-btn admin-btn--primary"
                         onClick={() => handleUpdateFeedback(fb._id, "resolved")}
                       >
-                        <CheckCircle size={16} /> Đã xử lý
+                        <CheckCircle size={16} /> {t("resolved")}
                       </button>
                     </div>
                   </div>
@@ -274,7 +276,7 @@ export default function AdminFeedbackClient() {
       ) : (
         <div className="admin-feedback__list">
           {applications.length === 0 ? (
-            <p className="admin-feedback__empty">Chưa có đơn đăng ký nào.</p>
+            <p className="admin-feedback__empty">{t("noApplications")}</p>
           ) : (
             applications.map((app) => (
               <div
@@ -291,11 +293,11 @@ export default function AdminFeedbackClient() {
                 </div>
                 <p className="admin-feedback__item-email">{app.email}</p>
                 <p className="admin-feedback__item-message">
-                  <strong>Lý do:</strong> {app.reason}
+                  <strong>{t("reason")}</strong> {app.reason}
                 </p>
                 {app.experience && (
                   <p className="admin-feedback__item-message">
-                    <strong>Kinh nghiệm:</strong> {app.experience}
+                    <strong>{t("experience")}</strong> {app.experience}
                   </p>
                 )}
                 <time className="admin-feedback__item-date">
@@ -308,7 +310,7 @@ export default function AdminFeedbackClient() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <textarea
-                      placeholder="Ghi chú admin..."
+                      placeholder={t("adminNotePlaceholder")}
                       value={adminNote}
                       onChange={(e) => setAdminNote(e.target.value)}
                       rows={2}
@@ -320,7 +322,7 @@ export default function AdminFeedbackClient() {
                           handleReviewApplication(app._id, "rejected")
                         }
                       >
-                        <XCircle size={16} /> Từ chối
+                        <XCircle size={16} /> {t("reject")}
                       </button>
                       <button
                         className="admin-btn admin-btn--primary"
@@ -328,7 +330,7 @@ export default function AdminFeedbackClient() {
                           handleReviewApplication(app._id, "approved")
                         }
                       >
-                        <CheckCircle size={16} /> Duyệt
+                        <CheckCircle size={16} /> {t("approve")}
                       </button>
                     </div>
                   </div>

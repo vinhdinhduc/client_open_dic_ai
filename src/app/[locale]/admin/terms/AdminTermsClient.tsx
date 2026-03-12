@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import {
   getAllTerms,
   getModeratorTerms,
@@ -81,6 +82,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
   });
   const { currentLanguage } = useLanguage();
   const router = useRouter();
+  const t = useTranslations("adminTerms");
 
   // Debounce search
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -187,12 +189,12 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
         setTotalItems(resultTerm.data.pagination.total);
       } else {
         toast.error(
-          resultTerm.message || "Đã xảy ra lỗi khi tải danh sách thuật ngữ.",
+          resultTerm.message || t("loadError"),
         );
       }
     } catch (error) {
       console.error("Error fetching terms:", error);
-      toast.error("Đã xảy ra lỗi khi tải danh sách thuật ngữ.");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -233,14 +235,14 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
     switch (status) {
       case "approved":
         return (
-          <span className="admin-badge admin-badge--success">Đã duyệt</span>
+          <span className="admin-badge admin-badge--success">{t("approved")}</span>
         );
       case "pending":
         return (
-          <span className="admin-badge admin-badge--warning">Chờ duyệt</span>
+          <span className="admin-badge admin-badge--warning">{t("pending")}</span>
         );
       case "rejected":
-        return <span className="admin-badge admin-badge--danger">Từ chối</span>;
+        return <span className="admin-badge admin-badge--danger">{t("rejected")}</span>;
       default:
         return null;
     }
@@ -264,14 +266,14 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
       try {
         const res = await deleteTerm(selectedTerm._id);
         if (res.success) {
-          toast.success("Đã xóa thuật ngữ thành công.");
+          toast.success(t("deleteSuccess"));
 
           fetchTerms();
         } else {
-          toast.error(res.message || "Đã xảy ra lỗi khi xóa thuật ngữ.");
+          toast.error(res.message || t("deleteError"));
         }
       } catch (error) {
-        toast.error("Đã xảy ra lỗi khi xóa thuật ngữ.");
+        toast.error(t("deleteError"));
       } finally {
         setLoading(false);
       }
@@ -289,7 +291,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
-        <p>Đang tải danh sách thuật ngữ...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -299,11 +301,11 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
       {/* Page Header */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-header__title">Quản lý thuật ngữ</h1>
+          <h1 className="admin-page-header__title">{t("title")}</h1>
           <p className="admin-page-header__subtitle">
             {isModerator
-              ? "Quản lý thuật ngữ trong danh mục được phân công"
-              : "Quản lý tất cả thuật ngữ trong hệ thống từ điển"}
+              ? t("subtitleModerator")
+              : t("subtitleAdmin")}
           </p>
         </div>
         <div className="admin-page-header__actions">
@@ -312,21 +314,21 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
             onClick={() => setShowExportModal(true)}
           >
             <Download size={16} />
-            Xuất Excel
+            {t("exportExcel")}
           </button>
           <Link
             href={isModerator ? "/moderator/import" : "/admin/import"}
             className="admin-btn admin-btn--secondary"
           >
             <Upload size={16} />
-            Nhập dữ liệu
+            {t("importData")}
           </Link>
           <Link
             href="/admin/terms/new"
             className="admin-btn admin-btn--primary"
           >
             <Plus size={16} />
-            Thêm thuật ngữ
+            {t("addTerm")}
           </Link>
         </div>
       </div>
@@ -335,25 +337,25 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
       <div className="terms-stats">
         <div className="terms-stat">
           <span className="terms-stat__value">{stats.total}</span>
-          <span className="terms-stat__label">Tổng thuật ngữ</span>
+          <span className="terms-stat__label">{t("totalTerms")}</span>
         </div>
         <div className="terms-stat">
           <span className="terms-stat__value terms-stat__value--success">
             {stats.approved}
           </span>
-          <span className="terms-stat__label">Đã duyệt</span>
+          <span className="terms-stat__label">{t("approved")}</span>
         </div>
         <div className="terms-stat">
           <span className="terms-stat__value terms-stat__value--warning">
             {stats.pending}
           </span>
-          <span className="terms-stat__label">Chờ duyệt</span>
+          <span className="terms-stat__label">{t("pending")}</span>
         </div>
         <div className="terms-stat">
           <span className="terms-stat__value terms-stat__value--danger">
             {stats.rejected}
           </span>
-          <span className="terms-stat__label">Từ chối</span>
+          <span className="terms-stat__label">{t("rejected")}</span>
         </div>
       </div>
 
@@ -365,7 +367,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
             <Search size={18} />
             <input
               type="text"
-              placeholder="Tìm thuật ngữ..."
+              placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -376,7 +378,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
-            <option value="all">Tất cả danh mục</option>
+            <option value="all">{t("allCategories")}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {getCategoryName(cat.name)}
@@ -389,10 +391,10 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="approved">Đã duyệt</option>
-            <option value="pending">Chờ duyệt</option>
-            <option value="rejected">Từ chối</option>
+            <option value="all">{t("allStatuses")}</option>
+            <option value="approved">{t("approved")}</option>
+            <option value="pending">{t("pending")}</option>
+            <option value="rejected">{t("rejected")}</option>
           </select>
         </div>
 
@@ -401,13 +403,13 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Thuật ngữ</th>
-                <th>Danh mục</th>
-                <th>Trạng thái</th>
-                <th>Người tạo</th>
-                <th>Thống kê</th>
-                <th>Ngày tạo</th>
-                <th>Thao tác</th>
+                <th>{t("term")}</th>
+                <th>{t("category")}</th>
+                <th>{t("status")}</th>
+                <th>{t("creator")}</th>
+                <th>{t("stats")}</th>
+                <th>{t("createdDate")}</th>
+                <th>{t("actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -427,13 +429,13 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
                     <span className="category-cell">
                       <Tag size={14} />
                       {term.category?.name?.[currentLanguage] ||
-                        "Không có danh mục"}
+                        t("noCategory")}
                     </span>
                   </td>
                   <td>{getStatusBadge(term.status || "pending")}</td>
                   <td>
                     <div className="creator-cell">
-                      <span>{term.createdBy?.fullName || "Ẩn danh"}</span>
+                      <span>{term.createdBy?.fullName || t("anonymous")}</span>
                     </div>
                   </td>
                   <td>
@@ -459,14 +461,14 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
                       <button
                         className="action-btn action-btn--view"
                         onClick={() => handleViewTerm(term)}
-                        title="Xem chi tiết"
+                        title={t("viewDetails")}
                       >
                         <Eye size={16} color="blue" />
                       </button>
                       <button
                         className="action-btn action-btn--edit"
                         onClick={() => handleEditTerm(term)}
-                        title="Chỉnh sửa"
+                        title={t("edit")}
                       >
                         <Edit size={16} color="orange" />
                       </button>
@@ -477,7 +479,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
                             onClick={() =>
                               handleStatusChange(term._id, "approved")
                             }
-                            title="Duyệt"
+                            title={t("approve")}
                           >
                             <Check size={16} color="green" />
                           </button>
@@ -486,7 +488,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
                             onClick={() =>
                               handleStatusChange(term._id, "rejected")
                             }
-                            title="Từ chối"
+                            title={t("reject")}
                           >
                             <XCircle size={16} />
                           </button>
@@ -498,7 +500,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
                           setSelectedTerm(term);
                           setShowDeleteConfirm(true);
                         }}
-                        title="Xóa"
+                        title={t("delete")}
                       >
                         <Trash2 size={16} color="red" />
                       </button>
@@ -513,7 +515,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
         {/* Pagination */}
         <div className="admin-pagination">
           <div className="admin-pagination__info">
-            <label htmlFor="itemsPerPage">Số lượng mỗi trang </label>
+            <label htmlFor="itemsPerPage">{t("perPage")} </label>
             <select
               name="itemsPerPage"
               id="itemsPerPage"
@@ -525,9 +527,9 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
               <option value="20">20</option>
             </select>
             <p>
-              Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-              {Math.min(currentPage * itemsPerPage, totalItems)} trong{" "}
-              {totalItems} thuật ngữ
+              {t("showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+              {Math.min(currentPage * itemsPerPage, totalItems)} {t("of")}{" "}
+              {totalItems} {t("termsLabel")}
             </p>
           </div>
           <div className="admin-pagination__controls">
@@ -549,7 +551,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
               className="admin-pagination__btn"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
-              title="Trang trước"
+              title={t("previousPage")}
             >
               <ChevronLeft
                 size={16}
@@ -577,7 +579,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
               className="admin-pagination__btn"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
-              title="Trang sau"
+              title={t("nextPage")}
             >
               <ChevronRight
                 size={16}
@@ -588,7 +590,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
               className="admin-pagination__btn"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(totalPages)}
-              title="Trang cuối"
+              title={t("lastPage")}
             >
               <ChevronRight
                 size={16}
@@ -611,7 +613,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
         >
           <div className="modal modal--sm" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
-              <h2>Xác nhận xóa</h2>
+              <h2>{t("confirmDelete")}</h2>
               <button
                 className="modal__close"
                 onClick={() => setShowDeleteConfirm(false)}
@@ -621,23 +623,23 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
             </div>
             <div className="modal__body">
               <p>
-                Bạn có chắc chắn muốn xóa thuật ngữ{" "}
+                {t("confirmDeleteMsg")}{" "}
                 <strong>{selectedTerm.term.vi}</strong>?
               </p>
-              <p className="text-danger">Hành động này không thể hoàn tác.</p>
+              <p className="text-danger">{t("deleteIrreversible")}</p>
             </div>
             <div className="modal__footer">
               <button
                 className="admin-btn admin-btn--secondary"
                 onClick={() => setShowDeleteConfirm(false)}
               >
-                Hủy
+                {t("cancel")}
               </button>
               <button
                 className="admin-btn admin-btn--danger"
                 onClick={handleDelete}
               >
-                Xóa
+                {t("delete")}
               </button>
             </div>
           </div>

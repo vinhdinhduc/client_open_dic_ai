@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "@/lib/axios";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
 
 // Types
 interface ImportFile {
@@ -42,6 +43,7 @@ interface CategoryOption {
 }
 
 export default function ImportPage() {
+  const t = useTranslations("adminImport");
   const [files, setFiles] = useState<ImportFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -169,13 +171,13 @@ export default function ImportPage() {
       );
 
       if (result.success > 0) {
-        toast.success(`Nhập thành công ${result.success} thuật ngữ`);
+        toast.success(t("importSuccess", { count: result.success }));
       }
       if (result.failed > 0) {
-        toast.error(`${result.failed} bản ghi bị lỗi`);
+        toast.error(t("importPartialError", { count: result.failed }));
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || "Lỗi nhập dữ liệu";
+      const message = error.response?.data?.message || t("importError");
       setFiles((prev) =>
         prev.map((f) =>
           f.id === fileItem.id
@@ -239,9 +241,9 @@ export default function ImportPage() {
       {/* Page Header */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-header__title">Nhập dữ liệu</h1>
+          <h1 className="admin-page-header__title">{t("title")}</h1>
           <p className="admin-page-header__subtitle">
-            Nhập thuật ngữ từ file Excel hoặc CSV
+            {t("subtitle")}
           </p>
         </div>
         <div className="admin-page-header__actions">
@@ -265,14 +267,14 @@ export default function ImportPage() {
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
-                toast.success("Đã tải mẫu Excel");
+                toast.success(t("downloadSuccess"));
               } catch {
-                toast.error("Không thể tải mẫu Excel");
+                toast.error(t("downloadError"));
               }
             }}
           >
             <Download size={16} />
-            Tải mẫu Excel
+            {t("downloadTemplate")}
           </button>
         </div>
       </div>
@@ -283,7 +285,7 @@ export default function ImportPage() {
           <div className="import-guide__header">
             <div className="import-guide__title">
               <HelpCircle size={20} />
-              <span>Hướng dẫn nhập dữ liệu</span>
+              <span>{t("instructions")}</span>
             </div>
             <button
               className="import-guide__close"
@@ -296,26 +298,25 @@ export default function ImportPage() {
             <div className="guide-step">
               <span className="guide-step__number">1</span>
               <div className="guide-step__content">
-                <h4>Tải file mẫu</h4>
-                <p>Tải file Excel mẫu và điền dữ liệu theo cấu trúc có sẵn</p>
+                <h4>{t("step1Title")}</h4>
+                <p>{t("step1Desc")}</p>
               </div>
             </div>
             <div className="guide-step">
               <span className="guide-step__number">2</span>
               <div className="guide-step__content">
-                <h4>Chuẩn bị dữ liệu</h4>
+                <h4>{t("step2Title")}</h4>
                 <p>
-                  Đảm bảo các cột: term_vi, term_en, term_lo, definition_vi,
-                  definition_en, category
+                  {t("step2Desc")}
                 </p>
               </div>
             </div>
             <div className="guide-step">
               <span className="guide-step__number">3</span>
               <div className="guide-step__content">
-                <h4>Tải lên và nhập</h4>
+                <h4>{t("step3Title")}</h4>
                 <p>
-                  Kéo thả file hoặc chọn từ máy tính, sau đó bấm Nhập dữ liệu
+                  {t("step3Desc")}
                 </p>
               </div>
             </div>
@@ -336,11 +337,11 @@ export default function ImportPage() {
             <div className="drop-zone__icon">
               <Upload size={48} />
             </div>
-            <h3>Kéo thả file vào đây</h3>
-            <p>hoặc</p>
+            <h3>{t("dropzone")}</h3>
+            <p>{t("or")}</p>
             <label className="admin-btn admin-btn--primary">
               <FileSpreadsheet size={16} />
-              Chọn file từ máy tính
+              {t("browseFiles")}
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"
@@ -350,19 +351,19 @@ export default function ImportPage() {
               />
             </label>
             <span className="drop-zone__hint">
-              Hỗ trợ: Excel (.xlsx, .xls), CSV
+              {t("supportedFormats")}
             </span>
           </div>
 
           {/* Category Selection */}
           <div className="import-options">
             <div className="option-group">
-              <label>Danh mục mặc định (tùy chọn)</label>
+              <label>{t("defaultCategory")}</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
-                <option value="">-- Chọn danh mục --</option>
+                <option value="">{t("selectCategory")}</option>
                 {categories.map((cat) => (
                   <option key={cat._id} value={cat._id}>
                     {cat.name.vi}
@@ -370,7 +371,7 @@ export default function ImportPage() {
                 ))}
               </select>
               <span className="option-hint">
-                Áp dụng cho các thuật ngữ không có danh mục trong file
+                {t("defaultCategoryHint")}
               </span>
             </div>
           </div>
@@ -379,7 +380,7 @@ export default function ImportPage() {
           {files.length > 0 && (
             <div className="file-list">
               <div className="file-list__header">
-                <h3>Danh sách file ({files.length})</h3>
+                <h3>{t("fileList", { count: files.length })}</h3>
                 {files.some(
                   (f) => f.status === "success" || f.status === "error",
                 ) && (
@@ -387,7 +388,7 @@ export default function ImportPage() {
                     className="admin-btn admin-btn--ghost"
                     onClick={clearCompleted}
                   >
-                    Xóa đã xử lý
+                    {t("clearProcessed")}
                   </button>
                 )}
               </div>
@@ -444,7 +445,7 @@ export default function ImportPage() {
                 <div className="error-details">
                   <h4>
                     <AlertCircle size={16} />
-                    Chi tiết lỗi
+                    {t("errorDetails")}
                   </h4>
                   {files
                     .filter((f) => f.result?.errors)
@@ -456,7 +457,7 @@ export default function ImportPage() {
                             <li key={idx}>
                               {typeof error === "string"
                                 ? error
-                                : `Dòng ${error.row}: ${error.error}`}
+                                : t("rowError", { row: error.row, error: error.error })}
                             </li>
                           ))}
                         </ul>
@@ -473,7 +474,7 @@ export default function ImportPage() {
                   disabled={!files.some((f) => f.status === "pending")}
                 >
                   <Upload size={18} />
-                  Nhập dữ liệu
+                  {t("importButton")}
                 </button>
               </div>
             </div>
@@ -485,36 +486,35 @@ export default function ImportPage() {
           <div className="sidebar-card">
             <h3>
               <Info size={18} />
-              Định dạng file
+              {t("fileFormat")}
             </h3>
             <div className="format-info">
-              <h4>Các cột bắt buộc:</h4>
+              <h4>{t("requiredColumns")}</h4>
               <ul>
                 <li>
-                  <code>term_xx</code> - Thuật ngữ 1 trong 3 ngôn ngữ (vi, en,
+                  <code>term_xx</code> - {t("requiredCol1")} (vi, en,
                   lo)
                 </li>
                 <li>
-                  <code>definition_xx</code> - Định nghĩa 1 trong 3 ngôn ngữ
+                  <code>definition_xx</code> - {t("requiredCol2")}
                   (vi, en, lo)
                 </li>
                 <li>
-                  <code>category</code> - Tên danh mục
+                  <code>category</code> - {t("requiredCol3")}
                 </li>
               </ul>
-              <h4>Các cột tùy chọn:</h4>
+              <h4>{t("optionalColumns")}</h4>
               <ul>
                 <li>
-                  <code>term_xx</code> - Thuật ngữ 2 ngôn ngữ còn lại (nếu có)
+                  <code>term_xx</code> - {t("optionalColTermOther")}
                 </li>
 
                 <li>
-                  <code>definition_xx</code> - Định nghĩa 2 ngôn ngữ còn lại
-                  (nếu có)
+                  <code>definition_xx</code> - {t("optionalColDefOther")}
                 </li>
 
                 <li>
-                  <code>example</code> - Ví dụ sử dụng
+                  <code>example</code> - {t("optionalCol1")}
                 </li>
                 <li>
                   <code>Tags</code>
@@ -523,7 +523,7 @@ export default function ImportPage() {
                   <code>Related Terms</code>
                 </li>
                 <li>
-                  <code>Loại từ</code>
+                  <code>{t("optionalCol2")}</code>
                 </li>
               </ul>
             </div>
@@ -532,26 +532,26 @@ export default function ImportPage() {
           <div className="sidebar-card">
             <h3>
               <BookOpen size={18} />
-              Thống kê nhập liệu
+              {t("importStats")}
             </h3>
             <div className="import-stats">
               <div className="import-stat">
                 <span className="import-stat__value">
                   {files.reduce((sum, f) => sum + (f.result?.success || 0), 0)}
                 </span>
-                <span className="import-stat__label">Thành công</span>
+                <span className="import-stat__label">{t("success")}</span>
               </div>
               <div className="import-stat import-stat--danger">
                 <span className="import-stat__value">
                   {files.reduce((sum, f) => sum + (f.result?.failed || 0), 0)}
                 </span>
-                <span className="import-stat__label">Thất bại</span>
+                <span className="import-stat__label">{t("failed")}</span>
               </div>
               <div className="import-stat import-stat--pending">
                 <span className="import-stat__value">
                   {files.filter((f) => f.status === "pending").length}
                 </span>
-                <span className="import-stat__label">Chờ xử lý</span>
+                <span className="import-stat__label">{t("pendingStatus")}</span>
               </div>
             </div>
           </div>

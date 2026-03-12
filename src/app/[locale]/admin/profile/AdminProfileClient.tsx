@@ -17,11 +17,13 @@ import {
   EyeOff,
   KeyRound,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import "../settings/settings.scss";
 import "./profile.scss";
 
 export default function AdminProfileClient() {
   const { user, updateUser, refreshProfile } = useAuth();
+  const t = useTranslations("adminProfile");
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,7 +47,7 @@ export default function AdminProfileClient() {
 
   const handleSaveProfile = async () => {
     if (!fullName.trim()) {
-      toast.error("Họ tên là bắt buộc");
+      toast.error(t("nameRequired"));
       return;
     }
     setIsSaving(true);
@@ -53,11 +55,11 @@ export default function AdminProfileClient() {
       const response = await authService.updateProfile({ fullName: fullName.trim() } as any);
       if (response.success) {
         updateUser({ fullName: fullName.trim() } as any);
-        toast.success("Cập nhật thành công");
+        toast.success(t("updateSuccess"));
         setIsEditing(false);
       }
     } catch {
-      toast.error("Cập nhật thất bại");
+      toast.error(t("updateError"));
     } finally {
       setIsSaving(false);
     }
@@ -68,19 +70,19 @@ export default function AdminProfileClient() {
     const isGoogleOnly = (user as any)?.authProvider === "google" && !(user as any)?.hasPassword;
 
     if (!isGoogleOnly && !currentPassword) {
-      toast.error("Vui lòng nhập mật khẩu hiện tại");
+      toast.error(t("currentPasswordRequired"));
       return;
     }
     if (!newPassword || !confirmPassword) {
-      toast.error("Vui lòng điền đầy đủ thông tin");
+      toast.error(t("fillAllFields"));
       return;
     }
     if (newPassword.length < 6) {
-      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự");
+      toast.error(t("passwordTooShort"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp");
+      toast.error(t("passwordMismatch"));
       return;
     }
 
@@ -91,13 +93,13 @@ export default function AdminProfileClient() {
         newPassword,
       );
       if (response.success) {
-        toast.success("Đổi mật khẩu thành công");
+        toast.success(t("passwordChangeSuccess"));
         setIsChangingPassword(false);
         setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
         await refreshProfile();
       }
     } catch {
-      toast.error("Đổi mật khẩu thất bại");
+      toast.error(t("passwordChangeError"));
     } finally {
       setIsSaving(false);
     }
@@ -105,17 +107,17 @@ export default function AdminProfileClient() {
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case "admin": return "Quản trị viên";
-      case "moderator": return "Kiểm duyệt viên";
-      default: return "Người dùng";
+      case "admin": return t("roleAdmin");
+      case "moderator": return t("roleModerator");
+      default: return t("roleUser");
     }
   };
 
   return (
     <div className="admin-profile">
       <div className="admin-profile__header">
-        <h1>Tài khoản</h1>
-        <p>Quản lý thông tin cá nhân và bảo mật tài khoản</p>
+        <h1>{t("title")}</h1>
+        <p>{t("subtitle")}</p>
       </div>
 
       <div className="admin-profile__grid">
@@ -124,7 +126,7 @@ export default function AdminProfileClient() {
           <div className="admin-profile__card-header">
             <div className="admin-profile__card-title">
               <User size={20} />
-              <span>Thông tin cá nhân</span>
+              <span>{t("personalInfo")}</span>
             </div>
             {!isEditing && (
               <button
@@ -132,7 +134,7 @@ export default function AdminProfileClient() {
                 onClick={() => setIsEditing(true)}
               >
                 <Edit3 size={15} />
-                Chỉnh sửa
+                {t("edit")}
               </button>
             )}
           </div>
@@ -143,13 +145,13 @@ export default function AdminProfileClient() {
                 <div className="admin-profile__form-group">
                   <label>
                     <User size={15} />
-                    Họ và tên
+                    {t("fullName")}
                   </label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Nhập họ và tên"
+                    placeholder={t("fullNamePlaceholder")}
                   />
                 </div>
 
@@ -162,7 +164,7 @@ export default function AdminProfileClient() {
                     }}
                     disabled={isSaving}
                   >
-                    Hủy
+                    {t("cancel")}
                   </button>
                   <button
                     className="admin-profile__btn admin-profile__btn--primary"
@@ -170,9 +172,9 @@ export default function AdminProfileClient() {
                     disabled={isSaving}
                   >
                     {isSaving ? (
-                      <><Loader2 size={15} className="spin" /> Đang lưu...</>
+                      <><Loader2 size={15} className="spin" /> {t("saving")}</>
                     ) : (
-                      <><Save size={15} /> Lưu thay đổi</>
+                      <><Save size={15} /> {t("saveChanges")}</>
                     )}
                   </button>
                 </div>
@@ -182,28 +184,28 @@ export default function AdminProfileClient() {
                 <div className="admin-profile__info-item">
                   <User size={17} />
                   <div>
-                    <span className="label">Họ và tên</span>
+                    <span className="label">{t("fullName")}</span>
                     <span className="value">{user?.fullName}</span>
                   </div>
                 </div>
                 <div className="admin-profile__info-item">
                   <Mail size={17} />
                   <div>
-                    <span className="label">Email</span>
+                    <span className="label">{t("email")}</span>
                     <span className="value">{user?.email}</span>
                   </div>
                 </div>
                 <div className="admin-profile__info-item">
                   <Shield size={17} />
                   <div>
-                    <span className="label">Vai trò</span>
+                    <span className="label">{t("role")}</span>
                     <span className="value value--badge">{getRoleLabel(user?.role || "user")}</span>
                   </div>
                 </div>
                 <div className="admin-profile__info-item">
                   <Calendar size={17} />
                   <div>
-                    <span className="label">Ngày tham gia</span>
+                    <span className="label">{t("joinDate")}</span>
                     <span className="value">
                       {user?.createdAt
                         ? new Date(user.createdAt).toLocaleDateString("vi-VN", {
@@ -225,7 +227,7 @@ export default function AdminProfileClient() {
           <div className="admin-profile__card-header">
             <div className="admin-profile__card-title">
               <Lock size={20} />
-              <span>Bảo mật</span>
+              <span>{t("security")}</span>
             </div>
             {!isChangingPassword && (
               <button
@@ -233,7 +235,7 @@ export default function AdminProfileClient() {
                 onClick={() => setIsChangingPassword(true)}
               >
                 <KeyRound size={15} />
-                Đổi mật khẩu
+                {t("changePassword")}
               </button>
             )}
           </div>
@@ -243,7 +245,7 @@ export default function AdminProfileClient() {
               <div className="admin-profile__edit-form">
                 {!((user as any)?.authProvider === "google" && !(user as any)?.hasPassword) && (
                   <div className="admin-profile__form-group">
-                    <label>Mật khẩu hiện tại</label>
+                    <label>{t("currentPassword")}</label>
                     <div className="admin-profile__input-wrap">
                       <input
                         type={showCurrentPassword ? "text" : "password"}
@@ -251,7 +253,7 @@ export default function AdminProfileClient() {
                         onChange={(e) =>
                           setPasswordData((p) => ({ ...p, currentPassword: e.target.value }))
                         }
-                        placeholder="Nhập mật khẩu hiện tại"
+                        placeholder={t("currentPasswordPlaceholder")}
                       />
                       <button
                         type="button"
@@ -265,7 +267,7 @@ export default function AdminProfileClient() {
                 )}
 
                 <div className="admin-profile__form-group">
-                  <label>Mật khẩu mới</label>
+                  <label>{t("newPassword")}</label>
                   <div className="admin-profile__input-wrap">
                     <input
                       type={showNewPassword ? "text" : "password"}
@@ -273,7 +275,7 @@ export default function AdminProfileClient() {
                       onChange={(e) =>
                         setPasswordData((p) => ({ ...p, newPassword: e.target.value }))
                       }
-                      placeholder="Ít nhất 6 ký tự"
+                      placeholder={t("minChars")}
                     />
                     <button
                       type="button"
@@ -286,7 +288,7 @@ export default function AdminProfileClient() {
                 </div>
 
                 <div className="admin-profile__form-group">
-                  <label>Xác nhận mật khẩu mới</label>
+                  <label>{t("confirmPassword")}</label>
                   <div className="admin-profile__input-wrap">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
@@ -294,7 +296,7 @@ export default function AdminProfileClient() {
                       onChange={(e) =>
                         setPasswordData((p) => ({ ...p, confirmPassword: e.target.value }))
                       }
-                      placeholder="Nhập lại mật khẩu mới"
+                      placeholder={t("confirmPasswordPlaceholder")}
                     />
                     <button
                       type="button"
@@ -315,7 +317,7 @@ export default function AdminProfileClient() {
                     }}
                     disabled={isSaving}
                   >
-                    Hủy
+                    {t("cancel")}
                   </button>
                   <button
                     className="admin-profile__btn admin-profile__btn--primary"
@@ -323,17 +325,16 @@ export default function AdminProfileClient() {
                     disabled={isSaving}
                   >
                     {isSaving ? (
-                      <><Loader2 size={15} className="spin" /> Đang lưu...</>
+                      <><Loader2 size={15} className="spin" /> {t("saving")}</>
                     ) : (
-                      <><Save size={15} /> Xác nhận</>
+                      <><Save size={15} /> {t("confirm")}</>
                     )}
                   </button>
                 </div>
               </div>
             ) : (
               <p className="admin-profile__security-hint">
-                Mật khẩu nên được thay đổi định kỳ để bảo vệ tài khoản. Nhấn{" "}
-                <strong>Đổi mật khẩu</strong> để cập nhật.
+                {t("passwordNote")}
               </p>
             )}
           </div>

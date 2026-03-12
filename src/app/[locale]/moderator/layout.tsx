@@ -60,38 +60,38 @@ interface MenuItem {
 const moderatorMenuItems: MenuItem[] = [
   {
     id: "dashboard",
-    label: "Dashboard",
+    label: "dashboard",
     icon: LayoutDashboard,
     href: "/moderator",
   },
   {
     id: "moderator-terms",
-    label: "Quản lý thuật ngữ",
+    label: "terms",
     icon: BookOpen,
     href: "/moderator/terms",
   },
   {
     id: "moderator-categories",
-    label: "Danh mục phụ trách",
+    label: "categories",
     icon: FolderTree,
     href: "/moderator/categories",
   },
   {
     id: "moderation",
-    label: "Kiểm duyệt",
+    label: "moderation",
     icon: FileCheck,
     badge: true,
     children: [
       {
         id: "moderation-contributions",
-        label: "Kiểm duyệt đóng góp",
+        label: "moderationContributions",
         href: "/moderator/moderation/contributions",
         icon: GitPullRequest,
         badge: true,
       },
       {
         id: "reports-moderation",
-        label: "Kiểm duyệt báo xấu",
+        label: "moderationReports",
         href: "/moderator/moderation/reports",
         icon: Flag,
         badge: true,
@@ -100,14 +100,14 @@ const moderatorMenuItems: MenuItem[] = [
   },
   {
     id: "comments",
-    label: "Kiểm duyệt bình luận",
+    label: "moderationComments",
     icon: MessageSquare,
     href: "/moderator/comments",
     badge: true,
   },
   {
     id: "import",
-    label: "Nhập dữ liệu",
+    label: "import",
     icon: Upload,
     href: "/moderator/import",
   },
@@ -118,6 +118,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("moderatorLayout");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -251,7 +252,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
-        <p>Đang kiểm tra quyền truy cập...</p>
+        <p>{t("checkingAccess")}</p>
       </div>
     );
   }
@@ -271,7 +272,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
             className="admin-sidebar__logo"
           >
             <Shield className="logo-icon" />
-            <span className="logo-text">UTB OpenDict Moderator</span>
+            <span className="logo-text">{t("logoText")}</span>
           </Link>
           <button
             className="admin-sidebar__close"
@@ -295,7 +296,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
                       onClick={() => toggleMenu(item.id)}
                     >
                       <item.icon className="menu-icon" size={20} />
-                      <span className="menu-text">{item.label}</span>
+                      <span className="menu-text">{t(item.label)}</span>
                       {item.badge && getRawBadgeCount(item.id) > 0 && (
                         <span className="menu-badge">
                           {getBadgeCount(item.id)}
@@ -321,7 +322,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
                             onClick={() => setMobileMenuOpen(false)}
                           >
                             <child.icon className="menu-icon" size={16} />
-                            <span className="menu-text">{child.label}</span>
+                            <span className="menu-text">{t(child.label)}</span>
                             {child.badge && getRawBadgeCount(child.id) > 0 && (
                               <span className="menu-badge menu-badge--small">
                                 {getBadgeCount(child.id)}
@@ -341,7 +342,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <item.icon className="menu-icon" size={20} />
-                    <span className="menu-text">{item.label}</span>
+                    <span className="menu-text">{t(item.label)}</span>
                     {item.badge && getRawBadgeCount(item.id) > 0 && (
                       <span className="menu-badge">
                         {getBadgeCount(item.id)}
@@ -358,7 +359,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
         <div className="admin-sidebar__footer">
           <Link href="/" target="_blank" className="admin-sidebar__back">
             <Home size={16} />
-            <span>Xem trang chủ</span>
+            <span>{t("viewHomepage")}</span>
           </Link>
         </div>
       </aside>
@@ -392,7 +393,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
             {/* Search */}
             <div className="admin-header__search">
               <Search size={18} />
-              <input type="text" placeholder="Tìm kiếm..." />
+              <input type="text" placeholder={t("searchPlaceholder")} />
             </div>
           </div>
 
@@ -401,7 +402,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
             <button
               className="admin-header__icon-btn"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              title="Đổi giao diện"
+              title={t("toggleTheme")}
             >
               {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -420,7 +421,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
                 </div>
                 <div className="user-info">
                   <span className="user-name">{user?.fullName || "Admin"}</span>
-                  <span className="user-role">Kiểm duyệt viên</span>
+                  <span className="user-role">{t("moderator")}</span>
                 </div>
                 <ChevronDown size={16} />
               </button>
@@ -429,13 +430,13 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
                 <div className="admin-header__dropdown">
                   <Link href="/profile" className="dropdown-item">
                     <Users size={16} />
-                    Tài khoản
+                    {t("account")}
                   </Link>
 
                   <hr />
                   <button className="dropdown-item" onClick={handleLogout}>
                     <LogOut size={16} />
-                    Đăng xuất
+                    {t("logout")}
                   </button>
                 </div>
               )}

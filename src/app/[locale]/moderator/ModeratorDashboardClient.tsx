@@ -36,6 +36,7 @@ import commentService from "@/services/commentService";
 import notificationService, {
   Notification,
 } from "@/services/notificationService";
+import { useTranslations, useLocale } from "next-intl";
 import "./moderator-dashboard.scss";
 
 interface ModeratorStats {
@@ -58,6 +59,8 @@ interface RecentActivity {
 
 export default function ModeratorDashboardPage() {
   const { user } = useAuth();
+  const t = useTranslations("moderatorDashboard");
+  const locale = useLocale();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<ModeratorStats>({
     assignedCategories: 0,
@@ -126,9 +129,9 @@ export default function ModeratorDashboardPage() {
               type: "contribution",
               title:
                 c.type === "new_term"
-                  ? `Thuật ngữ mới: ${c.term?.vi || c.term?.en || c.term?.lo || "N/A"}`
-                  : `Gợi ý sửa: ${c.term?.vi || c.term?.en || c.term?.lo || "N/A"}`,
-              user: c.contributor?.fullName || "Người dùng",
+                  ? `${t("newTermPrefix")}${c.term?.vi || c.term?.en || c.term?.lo || "N/A"}`
+                  : `${t("editSuggestionPrefix")}${c.term?.vi || c.term?.en || c.term?.lo || "N/A"}`,
+              user: c.contributor?.fullName || t("userFallback"),
               date: c.createdAt,
               status: c.status,
               categoryName:
@@ -145,8 +148,8 @@ export default function ModeratorDashboardPage() {
           activities.push({
             id: c._id,
             type: "comment",
-            title: `Bình luận: ${c.content?.substring(0, 50) || "N/A"}...`,
-            user: c.author?.fullName || "Người dùng",
+            title: `${t("commentPrefix")}${c.content?.substring(0, 50) || "N/A"}...`,
+            user: c.author?.fullName || t("userFallback"),
             date: c.createdAt,
             status: c.status,
             categoryName:
@@ -171,11 +174,11 @@ export default function ModeratorDashboardPage() {
       }
     } catch (error) {
       console.error("Error loading dashboard data:", error);
-      toast.error("Không thể tải dữ liệu dashboard");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadDashboardData();
@@ -189,11 +192,11 @@ export default function ModeratorDashboardPage() {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return "Vừa xong";
-    if (minutes < 60) return `${minutes} phút trước`;
-    if (hours < 24) return `${hours} giờ trước`;
-    if (days < 7) return `${days} ngày trước`;
-    return date.toLocaleDateString("vi-VN");
+    if (minutes < 1) return t("justNow");
+    if (minutes < 60) return t("minutesAgo", { count: minutes });
+    if (hours < 24) return t("hoursAgo", { count: hours });
+    if (days < 7) return t("daysAgo", { count: days });
+    return date.toLocaleDateString(locale);
   };
 
   const getStatusBadge = (status: string) => {
@@ -201,20 +204,20 @@ export default function ModeratorDashboardPage() {
       case "pending":
         return (
           <span className="mod-badge mod-badge--warning">
-            <Clock size={12} /> Chờ duyệt
+            <Clock size={12} /> {t("pending")}
           </span>
         );
       case "approved":
       case "resolved":
         return (
           <span className="mod-badge mod-badge--success">
-            <CheckCircle size={12} /> Đã xử lý
+            <CheckCircle size={12} /> {t("resolved")}
           </span>
         );
       case "rejected":
         return (
           <span className="mod-badge mod-badge--danger">
-            <XCircle size={12} /> Từ chối
+            <XCircle size={12} /> {t("rejected")}
           </span>
         );
       default:
@@ -272,7 +275,7 @@ export default function ModeratorDashboardPage() {
       await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
-      toast.success("Đã đánh dấu tất cả thông báo đã đọc");
+      toast.success(t("allReadSuccess"));
     } catch (error) {
       console.error("Error marking all as read:", error);
     }
@@ -283,7 +286,7 @@ export default function ModeratorDashboardPage() {
     return (
       <div className="mod-dashboard__loading">
         <Loader2 className="spin" size={32} />
-        <p>Đang tải dữ liệu...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -297,17 +300,16 @@ export default function ModeratorDashboardPage() {
             <LayoutDashboard size={24} />
           </div>
           <div className="header-text">
-            <h1>Bảng điều khiển Kiểm duyệt viên</h1>
+            <h1>{t("title")}</h1>
             <p>
-              Xin chào <strong>{user?.fullName}</strong>! Đây là tổng quan công
-              việc kiểm duyệt của bạn.
+              {t("welcome", { name: user?.fullName || "" })}
             </p>
           </div>
         </div>
         <div className="header-actions">
           <span className="header-date">
             <Calendar size={16} />
-            {new Date().toLocaleDateString("vi-VN", {
+            {new Date().toLocaleDateString(locale, {
               weekday: "long",
               year: "numeric",
               month: "long",
@@ -316,7 +318,7 @@ export default function ModeratorDashboardPage() {
           </span>
           <button className="refresh-btn" onClick={loadDashboardData}>
             <RefreshCw size={16} />
-            Làm mới
+            {t("refresh")}
           </button>
         </div>
       </div>
@@ -329,10 +331,10 @@ export default function ModeratorDashboardPage() {
           </div>
           <div className="stat-card__content">
             <span className="stat-card__value">{stats.assignedCategories}</span>
-            <span className="stat-card__label">Danh mục phụ trách</span>
+            <span className="stat-card__label">{t("assignedCategories")}</span>
           </div>
           <Link href="/moderator/categories" className="stat-card__link">
-            Xem chi tiết <ArrowRight size={14} />
+            {t("viewDetails")} <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -344,13 +346,13 @@ export default function ModeratorDashboardPage() {
             <span className="stat-card__value">
               {stats.pendingContributions}
             </span>
-            <span className="stat-card__label">Đóng góp chờ duyệt</span>
+            <span className="stat-card__label">{t("pendingContributions")}</span>
           </div>
           <Link
             href="/moderator/moderation/contributions"
             className="stat-card__link"
           >
-            Kiểm duyệt <ArrowRight size={14} />
+            {t("moderate")} <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -360,13 +362,13 @@ export default function ModeratorDashboardPage() {
           </div>
           <div className="stat-card__content">
             <span className="stat-card__value">{stats.pendingReports}</span>
-            <span className="stat-card__label">Báo xấu chờ xử lý</span>
+            <span className="stat-card__label">{t("pendingReports")}</span>
           </div>
           <Link
             href="/moderator/moderation/reports"
             className="stat-card__link"
           >
-            Xử lý <ArrowRight size={14} />
+            {t("resolve")} <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -376,10 +378,10 @@ export default function ModeratorDashboardPage() {
           </div>
           <div className="stat-card__content">
             <span className="stat-card__value">{stats.pendingComments}</span>
-            <span className="stat-card__label">Bình luận chờ duyệt</span>
+            <span className="stat-card__label">{t("pendingComments")}</span>
           </div>
           <Link href="/moderator/comments" className="stat-card__link">
-            Kiểm duyệt <ArrowRight size={14} />
+            {t("moderate")} <ArrowRight size={14} />
           </Link>
         </div>
       </div>
@@ -391,13 +393,9 @@ export default function ModeratorDashboardPage() {
         <div className="mod-dashboard__alert">
           <AlertTriangle size={20} />
           <span>
-            Bạn có{" "}
-            <strong>
-              {stats.pendingContributions +
-                stats.pendingReports +
-                stats.pendingComments}
-            </strong>{" "}
-            nội dung cần kiểm duyệt
+            {t("pendingAlert", {
+              count: stats.pendingContributions + stats.pendingReports + stats.pendingComments,
+            })}
           </span>
           <div className="alert-actions">
             {stats.pendingContributions > 0 && (
@@ -405,17 +403,17 @@ export default function ModeratorDashboardPage() {
                 href="/moderator/moderation/contributions"
                 className="alert-link"
               >
-                {stats.pendingContributions} đóng góp
+                {t("contributionsCount", { count: stats.pendingContributions })}
               </Link>
             )}
             {stats.pendingReports > 0 && (
               <Link href="/moderator/moderation/reports" className="alert-link">
-                {stats.pendingReports} báo xấu
+                {t("reportsCount", { count: stats.pendingReports })}
               </Link>
             )}
             {stats.pendingComments > 0 && (
               <Link href="/moderator/comments" className="alert-link">
-                {stats.pendingComments} bình luận
+                {t("commentsCount", { count: stats.pendingComments })}
               </Link>
             )}
           </div>
@@ -428,14 +426,14 @@ export default function ModeratorDashboardPage() {
         <div className="mod-dashboard__section">
           <div className="section-header">
             <h2>
-              <Clock size={20} /> Hoạt động gần đây
+              <Clock size={20} /> {t("recentActivity")}
             </h2>
           </div>
           <div className="section-content">
             {recentActivities.length === 0 ? (
               <div className="empty-state">
                 <CheckCircle size={32} />
-                <p>Không có hoạt động nào cần xử lý</p>
+                <p>{t("noActivity")}</p>
               </div>
             ) : (
               <div className="activity-list">
@@ -482,14 +480,14 @@ export default function ModeratorDashboardPage() {
         <div className="mod-dashboard__section">
           <div className="section-header">
             <h2>
-              <Bell size={20} /> Thông báo
+              <Bell size={20} /> {t("notifications")}
               {unreadCount > 0 && (
                 <span className="notification-badge">{unreadCount}</span>
               )}
             </h2>
             {unreadCount > 0 && (
               <button className="mark-all-read-btn" onClick={handleMarkAllRead}>
-                Đánh dấu tất cả đã đọc
+                {t("markAllRead")}
               </button>
             )}
           </div>
@@ -497,7 +495,7 @@ export default function ModeratorDashboardPage() {
             {notifications.length === 0 ? (
               <div className="empty-state">
                 <Bell size={32} />
-                <p>Không có thông báo mới</p>
+                <p>{t("noNotifications")}</p>
               </div>
             ) : (
               <div className="notification-list">
@@ -540,14 +538,14 @@ export default function ModeratorDashboardPage() {
 
       {/* Quick Actions */}
       <div className="mod-dashboard__quick-actions">
-        <h2>Hành động nhanh</h2>
+        <h2>{t("quickActions")}</h2>
         <div className="quick-actions-grid">
           <Link
             href="/moderator/moderation/contributions"
             className="quick-action-card quick-action-card--contributions"
           >
             <GitPullRequest size={24} />
-            <span>Kiểm duyệt đóng góp</span>
+            <span>{t("moderateContributions")}</span>
             {stats.pendingContributions > 0 && (
               <span className="quick-action-badge">
                 {stats.pendingContributions}
@@ -559,7 +557,7 @@ export default function ModeratorDashboardPage() {
             className="quick-action-card quick-action-card--reports"
           >
             <Flag size={24} />
-            <span>Xử lý báo xấu</span>
+            <span>{t("handleReports")}</span>
             {stats.pendingReports > 0 && (
               <span className="quick-action-badge">{stats.pendingReports}</span>
             )}
@@ -569,7 +567,7 @@ export default function ModeratorDashboardPage() {
             className="quick-action-card quick-action-card--comments"
           >
             <MessageSquare size={24} />
-            <span>Kiểm duyệt bình luận</span>
+            <span>{t("moderateComments")}</span>
             {stats.pendingComments > 0 && (
               <span className="quick-action-badge">
                 {stats.pendingComments}
@@ -581,7 +579,7 @@ export default function ModeratorDashboardPage() {
             className="quick-action-card quick-action-card--categories"
           >
             <FolderTree size={24} />
-            <span>Danh mục phụ trách</span>
+            <span>{t("assignedCategoriesAction")}</span>
           </Link>
         </div>
       </div>

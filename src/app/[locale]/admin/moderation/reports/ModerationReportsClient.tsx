@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   Flag,
   Search,
@@ -26,6 +27,7 @@ import "../moderation.scss";
 import ConfirmModal from "@/components/common/ConfirmModal";
 
 export default function ReportsModerationPage() {
+  const t = useTranslations("moderationReports");
   const [reports, setReports] = useState<Report[]>([]);
   const [stats, setStats] = useState<ReportStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ export default function ReportsModerationPage() {
       }
     } catch (error) {
       console.error("Error fetching reports:", error);
-      toast.error("Không thể tải danh sách báo cáo");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -103,7 +105,7 @@ export default function ReportsModerationPage() {
       });
 
       if (response.success) {
-        toast.success("Báo cáo đã được xử lý thành công");
+        toast.success(t("resolveSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         setSelectedAction("none");
@@ -112,7 +114,7 @@ export default function ReportsModerationPage() {
       }
     } catch (error) {
       console.error("Error resolving report:", error);
-      toast.error("Không thể xử lý báo cáo");
+      toast.error(t("resolveError"));
     } finally {
       setActionLoading(null);
     }
@@ -127,7 +129,7 @@ export default function ReportsModerationPage() {
       });
 
       if (response.success) {
-        toast.success("Báo cáo đã được bỏ qua");
+        toast.success(t("dismissSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         fetchReports();
@@ -135,7 +137,7 @@ export default function ReportsModerationPage() {
       }
     } catch (error) {
       console.error("Error dismissing report:", error);
-      toast.error("Không thể bỏ qua báo cáo");
+      toast.error(t("dismissError"));
     } finally {
       setActionLoading(null);
     }
@@ -159,15 +161,15 @@ export default function ReportsModerationPage() {
   const getReasonText = (reason: string) => {
     switch (reason) {
       case "duplicate":
-        return "Thuật ngữ trùng lặp";
+        return t("reasonDuplicate");
       case "incorrect":
-        return "Thông tin không chính xác";
+        return t("reasonInaccurate");
       case "spam":
-        return "Spam hoặc quảng cáo";
+        return t("reasonSpam");
       case "inappropriate":
-        return "Nội dung không phù hợp";
+        return t("reasonInappropriate");
       case "other":
-        return "Lý do khác";
+        return t("reasonOther");
       default:
         return reason;
     }
@@ -175,9 +177,9 @@ export default function ReportsModerationPage() {
 
   const getStatusBadge = (status: Report["status"]) => {
     const statusConfig = {
-      pending: { label: "Chờ xử lý", className: "badge--warning" },
-      resolved: { label: "Đã xử lý", className: "badge--success" },
-      rejected: { label: "Đã từ chối", className: "badge--secondary" },
+      pending: { label: t("pending"), className: "badge--warning" },
+      resolved: { label: t("resolved"), className: "badge--success" },
+      rejected: { label: t("rejected"), className: "badge--secondary" },
     };
     return statusConfig[status] || statusConfig.pending;
   };
@@ -224,14 +226,14 @@ export default function ReportsModerationPage() {
   const getTargetTitle = (report: Report) => {
     if (report.targetTerm) {
       return (
-        report.targetTerm.term?.vi || report.targetTerm.term?.en || "Thuật ngữ"
+        report.targetTerm.term?.vi || report.targetTerm.term?.en || t("termLabel")
       );
     }
-    return "Không xác định";
+    return t("unknown");
   };
 
   const getReporterName = (report: Report) => {
-    return report.reporter?.fullName || "Ẩn danh";
+    return report.reporter?.fullName || t("anonymous");
   };
 
   // Filter reports by search term (client-side)
@@ -256,15 +258,15 @@ export default function ReportsModerationPage() {
             <Flag size={24} />
           </div>
           <div className="header-text">
-            <h1>Kiểm duyệt báo xấu</h1>
-            <p>Quản lý và xử lý các báo cáo vi phạm từ người dùng</p>
+            <h1>{t("title")}</h1>
+            <p>{t("subtitle")}</p>
           </div>
         </div>
         <div className="header-actions">
           {pendingCount > 0 && (
             <div className="header-badge">
               <AlertTriangle size={16} />
-              <span>{pendingCount} báo cáo chờ xử lý</span>
+              <span>{t("pendingCount", { count: pendingCount })}</span>
             </div>
           )}
           <button
@@ -285,19 +287,19 @@ export default function ReportsModerationPage() {
         <div className="moderation-page__stats">
           <div className="stat-card">
             <div className="stat-value">{stats.total}</div>
-            <div className="stat-label">Tổng báo cáo</div>
+            <div className="stat-label">{t("totalReports")}</div>
           </div>
           <div className="stat-card stat-card--warning">
             <div className="stat-value">{stats.pending}</div>
-            <div className="stat-label">Chờ xử lý</div>
+            <div className="stat-label">{t("pending")}</div>
           </div>
           <div className="stat-card stat-card--success">
             <div className="stat-value">{stats.resolved}</div>
-            <div className="stat-label">Đã xử lý</div>
+            <div className="stat-label">{t("resolved")}</div>
           </div>
           <div className="stat-card stat-card--secondary">
             <div className="stat-value">{stats.rejected}</div>
-            <div className="stat-label">Đã từ chối</div>
+            <div className="stat-label">{t("rejected")}</div>
           </div>
         </div>
       )}
@@ -308,7 +310,7 @@ export default function ReportsModerationPage() {
           <Search size={18} />
           <input
             type="text"
-            placeholder="Tìm kiếm báo cáo..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -320,10 +322,10 @@ export default function ReportsModerationPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="pending">Chờ xử lý</option>
-            <option value="resolved">Đã xử lý</option>
-            <option value="rejected">Đã từ chối</option>
+            <option value="all">{t("allStatuses")}</option>
+            <option value="pending">{t("pending")}</option>
+            <option value="resolved">{t("resolved")}</option>
+            <option value="rejected">{t("rejected")}</option>
           </select>
         </div>
       </div>
@@ -333,19 +335,19 @@ export default function ReportsModerationPage() {
         {loading ? (
           <div className="loading-state">
             <Loader2 size={48} className="spinning" />
-            <p>Đang tải dữ liệu...</p>
+            <p>{t("loading")}</p>
           </div>
         ) : (
           <>
             <table>
               <thead>
                 <tr>
-                  <th>Thuật ngữ bị báo cáo</th>
-                  <th>Lý do</th>
-                  <th>Người báo cáo</th>
-                  <th>Ngày báo cáo</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
+                  <th>{t("reportedTerm")}</th>
+                  <th>{t("reason")}</th>
+                  <th>{t("reporter")}</th>
+                  <th>{t("reportDate")}</th>
+                  <th>{t("status")}</th>
+                  <th>{t("actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -353,7 +355,7 @@ export default function ReportsModerationPage() {
                   <tr>
                     <td colSpan={6} className="empty-state">
                       <Flag size={48} />
-                      <p>Không có báo cáo nào</p>
+                      <p>{t("noReports")}</p>
                     </td>
                   </tr>
                 ) : (
@@ -389,7 +391,7 @@ export default function ReportsModerationPage() {
                         <td className="actions-cell">
                           <button
                             className="action-btn action-btn--view"
-                            title="Xem chi tiết"
+                            title={t("viewDetails")}
                             onClick={() => {
                               setSelectedReport(report);
                               setShowDetailModal(true);
@@ -401,7 +403,7 @@ export default function ReportsModerationPage() {
                             <>
                               <button
                                 className="action-btn action-btn--approve"
-                                title="Xử lý"
+                                title={t("resolve")}
                                 disabled={actionLoading === report._id}
                                 onClick={() => {
                                   setSelectedReport(report);
@@ -416,7 +418,7 @@ export default function ReportsModerationPage() {
                               </button>
                               <button
                                 className="action-btn action-btn--reject"
-                                title="Bỏ qua"
+                                title={t("dismiss")}
                                 disabled={actionLoading === report._id}
                                 onClick={() => handleShowConfirmDismiss(report)}
                               >
@@ -436,7 +438,7 @@ export default function ReportsModerationPage() {
             {totalPages > 1 && (
               <div className="admin-pagination">
                 <div className="admin-pagination__info">
-                  <label htmlFor="itemsPerPage">Số lượng mỗi trang</label>
+                  <label htmlFor="itemsPerPage">{t("perPage")}</label>
                   <select
                     name="itemsPerPage"
                     id="itemsPerPage"
@@ -448,9 +450,9 @@ export default function ReportsModerationPage() {
                     <option value="20">20</option>
                   </select>
                   <p>
-                    Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                    {Math.min(currentPage * itemsPerPage, totalItems)} trong{" "}
-                    {totalItems} báo cáo
+                    {t("showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                    {Math.min(currentPage * itemsPerPage, totalItems)} {t("of")}{" "}
+                    {totalItems} {t("reportsLabel")}
                   </p>
                 </div>
                 <div className="admin-pagination__controls">
@@ -458,7 +460,7 @@ export default function ReportsModerationPage() {
                     className="admin-pagination__btn"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(1)}
-                    title="Trang đầu"
+                    title={t("firstPage")}
                   >
                     <ChevronLeft size={16} />
                     <ChevronLeft size={16} />
@@ -467,7 +469,7 @@ export default function ReportsModerationPage() {
                     className="admin-pagination__btn"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((p) => p - 1)}
-                    title="Trang trước"
+                    title={t("previousPage")}
                   >
                     <ChevronLeft size={16} />
                   </button>
@@ -494,7 +496,7 @@ export default function ReportsModerationPage() {
                     className="admin-pagination__btn"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage((p) => p + 1)}
-                    title="Trang sau"
+                    title={t("nextPage")}
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -502,7 +504,7 @@ export default function ReportsModerationPage() {
                     className="admin-pagination__btn"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(totalPages)}
-                    title="Trang cuối"
+                    title={t("lastPage")}
                   >
                     <ChevronRight size={16} />
                     <ChevronRight size={16} />
@@ -526,7 +528,7 @@ export default function ReportsModerationPage() {
         >
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
-              <h2>Chi tiết báo cáo</h2>
+              <h2>{t("reportDetails")}</h2>
               <button
                 className="modal__close"
                 onClick={() => {
@@ -540,9 +542,9 @@ export default function ReportsModerationPage() {
             </div>
             <div className="modal__body">
               <div className="detail-section">
-                <h3>Thuật ngữ bị báo cáo</h3>
+                <h3>{t("reportedTerm")}</h3>
                 <div className="detail-item">
-                  <span className="badge badge--primary">Thuật ngữ</span>
+                  <span className="badge badge--primary">{t("termLabel")}</span>
                   <p className="detail-title">
                     {getTargetTitle(selectedReport)}
                   </p>
@@ -554,33 +556,33 @@ export default function ReportsModerationPage() {
                       className="view-link"
                     >
                       <ExternalLink size={14} />
-                      Xem thuật ngữ
+                      {t("viewTerm")}
                     </a>
                   )}
                 </div>
               </div>
 
               <div className="detail-section">
-                <h3>Thông tin báo cáo</h3>
+                <h3>{t("reportInfo")}</h3>
                 <div className="detail-grid">
                   <div className="detail-item">
-                    <label>Lý do:</label>
+                    <label>{t("reasonLabel")}</label>
                     <p>{selectedReport.reason}</p>
                   </div>
                   <div className="detail-item">
-                    <label>Mô tả chi tiết:</label>
-                    <p>{selectedReport.description || "Không có mô tả"}</p>
+                    <label>{t("descriptionLabel")}</label>
+                    <p>{selectedReport.description || t("noDescription")}</p>
                   </div>
                   <div className="detail-item">
-                    <label>Người báo cáo:</label>
+                    <label>{t("reporterLabel")}</label>
                     <p>{getReporterName(selectedReport)}</p>
                   </div>
                   <div className="detail-item">
-                    <label>Thời gian:</label>
+                    <label>{t("timeLabel")}</label>
                     <p>{formatDate(selectedReport.createdAt)}</p>
                   </div>
                   <div className="detail-item">
-                    <label>Trạng thái:</label>
+                    <label>{t("statusLabel")}</label>
                     <span
                       className={`badge ${getStatusBadge(selectedReport.status).className}`}
                     >
@@ -589,11 +591,11 @@ export default function ReportsModerationPage() {
                   </div>
                   {selectedReport.category && (
                     <div className="detail-item">
-                      <label>Danh mục:</label>
+                      <label>{t("categoryLabel")}</label>
                       <p>
                         {selectedReport.category.name?.vi ||
                           selectedReport.category.name?.en ||
-                          "Không xác định"}
+                          t("unknown")}
                       </p>
                     </div>
                   )}
@@ -602,26 +604,26 @@ export default function ReportsModerationPage() {
 
               {selectedReport.status === "pending" && (
                 <div className="detail-section">
-                  <h3>Xử lý báo cáo</h3>
+                  <h3>{t("resolveReport")}</h3>
                   <div className="form-group">
-                    <label>Hành động:</label>
+                    <label>{t("actionLabel")}</label>
                     <select
                       value={selectedAction}
                       onChange={(e) => setSelectedAction(e.target.value)}
                       className="form-select"
                     >
-                      <option value="none">Không có hành động</option>
-                      <option value="edit">Yêu cầu chỉnh sửa</option>
-                      <option value="delete">Xóa nội dung vi phạm</option>
-                      <option value="warning">Cảnh cáo người dùng</option>
+                      <option value="none">{t("actionNone")}</option>
+                      <option value="edit">{t("actionRequestEdit")}</option>
+                      <option value="delete">{t("actionDeleteContent")}</option>
+                      <option value="warning">{t("actionWarnUser")}</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Ghi chú của kiểm duyệt viên:</label>
+                    <label>{t("moderatorNote")}</label>
                     <textarea
                       value={moderatorNote}
                       onChange={(e) => setModeratorNote(e.target.value)}
-                      placeholder="Nhập ghi chú về cách xử lý báo cáo này..."
+                      placeholder={t("moderatorNotePlaceholder")}
                       rows={3}
                       className="form-textarea"
                     />
@@ -631,14 +633,14 @@ export default function ReportsModerationPage() {
 
               {selectedReport.moderator && (
                 <div className="detail-section">
-                  <h3>Thông tin xử lý</h3>
+                  <h3>{t("resolveInfo")}</h3>
                   <div className="detail-grid">
                     <div className="detail-item">
-                      <label>Người xử lý:</label>
+                      <label>{t("resolvedBy")}</label>
                       <p>{selectedReport.moderator.fullName}</p>
                     </div>
                     <div className="detail-item">
-                      <label>Thời gian xử lý:</label>
+                      <label>{t("resolvedAt")}</label>
                       <p>
                         {selectedReport.resolvedAt
                           ? formatDate(selectedReport.resolvedAt)
@@ -647,21 +649,21 @@ export default function ReportsModerationPage() {
                     </div>
                     {selectedReport.moderatorNote && (
                       <div className="detail-item detail-item--full">
-                        <label>Ghi chú:</label>
+                        <label>{t("noteLabel")}</label>
                         <p>{selectedReport.moderatorNote}</p>
                       </div>
                     )}
                     {selectedReport.actionTaken && (
                       <div className="detail-item">
-                        <label>Hành động:</label>
+                        <label>{t("actionTaken")}</label>
                         <p>
                           {selectedReport.actionTaken === "delete"
-                            ? "Xóa nội dung"
+                            ? t("actionDeleteLabel")
                             : selectedReport.actionTaken === "edit"
-                              ? "Yêu cầu chỉnh sửa"
+                              ? t("actionEditLabel")
                               : selectedReport.actionTaken === "warning"
-                                ? "Cảnh cáo"
-                                : "Không có"}
+                                ? t("actionWarnLabel")
+                                : t("actionNoneLabel")}
                         </p>
                       </div>
                     )}
@@ -678,12 +680,12 @@ export default function ReportsModerationPage() {
                 >
                   {actionLoading === selectedReport._id ? (
                     <>
-                      <Loader2 size={16} className="spinning" /> Đang xử lý...
+                      <Loader2 size={16} className="spinning" /> {t("processing")}
                     </>
                   ) : (
                     <XCircle size={16} />
                   )}
-                  Bỏ qua
+                  {t("dismissBtn")}
                 </button>
                 <button
                   className="btn btn--primary"
@@ -692,12 +694,12 @@ export default function ReportsModerationPage() {
                 >
                   {actionLoading === selectedReport._id ? (
                     <>
-                      <Loader2 size={16} className="spinning" /> Đang xử lý...
+                      <Loader2 size={16} className="spinning" /> {t("processing")}
                     </>
                   ) : (
                     <CheckCircle size={16} />
                   )}
-                  Xử lý báo cáo
+                  {t("resolveBtn")}
                 </button>
               </div>
             )}
@@ -709,10 +711,10 @@ export default function ReportsModerationPage() {
       <ConfirmModal
         isOpen={showConfirmDismiss}
         type="reject"
-        title="Xác nhận từ chối"
-        message="Bạn có chắc chắn muốn từ chối báo cáo này? Hành động này không thể hoàn tác."
-        confirmText="Từ chối"
-        cancelText="Hủy"
+        title={t("confirmDismiss")}
+        message={t("confirmDismissMsg")}
+        confirmText={t("reject")}
+        cancelText={t("cancel")}
         onConfirm={handleConfirmDismiss}
         onCancel={handleCancelDismiss}
         loading={actionLoading === reportToDismiss?._id}

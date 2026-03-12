@@ -202,6 +202,7 @@ export default function RegisterPage() {
               src="/images/logo.png"
               alt="UTB OpenDict"
               className="auth-card__logo-img"
+              onClick={() => router.push("/")}
             />
             <span className="auth-card__logo-text">UTB OpenDict</span>
           </div>

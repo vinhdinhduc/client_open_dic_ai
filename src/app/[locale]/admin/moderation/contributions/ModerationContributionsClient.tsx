@@ -17,6 +17,7 @@ import {
   Plus,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import contributionService, {
   Contribution,
 } from "@/services/contributionService";
@@ -27,6 +28,7 @@ import ConfirmModal, {
 import "../moderation.scss";
 
 export default function ContributionsModerationPage() {
+  const t = useTranslations("moderationContributions");
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -41,11 +43,11 @@ export default function ContributionsModerationPage() {
 
   // Quick rejection reasons
   const quickRejectionReasons = [
-    "Nội dung không chính xác",
-    "Thiếu thông tin bắt buộc",
-    "Trùng lặp với thuật ngữ hiện tại",
-    "Không phù hợp với quy định",
-    "Cần bổ sung thêm thông tin",
+    t("quickRejectReasons.inaccurate"),
+    t("quickRejectReasons.missingInfo"),
+    t("quickRejectReasons.duplicate"),
+    t("quickRejectReasons.inappropriate"),
+    t("quickRejectReasons.needsMore"),
   ];
 
   // Confirm Modal
@@ -108,7 +110,7 @@ export default function ContributionsModerationPage() {
       }
     } catch (error) {
       console.error("Error fetching contributions:", error);
-      toast.error("Không thể tải danh sách đóng góp");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -151,7 +153,7 @@ export default function ContributionsModerationPage() {
       );
 
       if (response.success) {
-        toast.success("Đóng góp đã được phê duyệt");
+        toast.success(t("approveSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         setSelectedContribution(null);
@@ -159,7 +161,7 @@ export default function ContributionsModerationPage() {
       }
     } catch (error) {
       console.error("Error approving contribution:", error);
-      toast.error("Không thể phê duyệt đóng góp");
+      toast.error(t("approveError"));
     } finally {
       setActionLoading(null);
     }
@@ -171,7 +173,7 @@ export default function ContributionsModerationPage() {
 
     // Validate rejection reason
     if (!rejectionReason.trim()) {
-      toast.error("Vui lòng nhập lý do từ chối");
+      toast.error(t("rejectReasonRequired"));
       return;
     }
 
@@ -187,7 +189,7 @@ export default function ContributionsModerationPage() {
       );
 
       if (response.success) {
-        toast.success("Đóng góp đã bị từ chối");
+        toast.success(t("rejectSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         setRejectionReason("");
@@ -196,7 +198,7 @@ export default function ContributionsModerationPage() {
       }
     } catch (error) {
       console.error("Error rejecting contribution:", error);
-      toast.error("Không thể từ chối đóng góp");
+      toast.error(t("rejectError"));
     } finally {
       setActionLoading(null);
     }
@@ -231,13 +233,13 @@ export default function ContributionsModerationPage() {
         moderatorNote || undefined,
       );
       if (res.success) {
-        toast.success(`Đã phê duyệt ${res.data.approved} đóng góp`);
+        toast.success(t("bulkApproveSuccess", { count: res.data.approved }));
         setSelectedIds(new Set());
         setModeratorNote("");
         fetchContributions();
       }
     } catch {
-      toast.error("Không thể phê duyệt hàng loạt");
+      toast.error(t("bulkApproveError"));
     } finally {
       setBulkLoading(false);
     }
@@ -246,7 +248,7 @@ export default function ContributionsModerationPage() {
   const handleBulkReject = async () => {
     if (selectedIds.size === 0) return;
     if (!bulkRejectNote.trim()) {
-      toast.error("Vui lòng nhập lý do từ chối");
+      toast.error(t("rejectReasonRequired"));
       return;
     }
     try {
@@ -256,14 +258,14 @@ export default function ContributionsModerationPage() {
         bulkRejectNote,
       );
       if (res.success) {
-        toast.success(`Đã từ chối ${res.data.rejected} đóng góp`);
+        toast.success(t("bulkRejectSuccess", { count: res.data.rejected }));
         setSelectedIds(new Set());
         setBulkRejectNote("");
         setShowBulkRejectModal(false);
         fetchContributions();
       }
     } catch {
-      toast.error("Không thể từ chối hàng loạt");
+      toast.error(t("bulkRejectError"));
     } finally {
       setBulkLoading(false);
     }
@@ -298,17 +300,17 @@ export default function ContributionsModerationPage() {
 
   const getStatusBadge = (status: Contribution["status"]) => {
     const statusConfig = {
-      pending: { label: "Chờ duyệt", className: "badge--warning" },
-      approved: { label: "Đã duyệt", className: "badge--success" },
-      rejected: { label: "Đã từ chối", className: "badge--danger" },
+      pending: { label: t("pending"), className: "badge--warning" },
+      approved: { label: t("approved"), className: "badge--success" },
+      rejected: { label: t("rejected"), className: "badge--danger" },
     };
     return statusConfig[status] || statusConfig.pending;
   };
 
   const getTypeBadge = (type: Contribution["type"]) => {
     const typeConfig = {
-      edit_term: { label: "Chỉnh sửa", className: "badge--info", icon: Edit3 },
-      new_term: { label: "Thêm mới", className: "badge--success", icon: Plus },
+      edit_term: { label: t("typeEdit"), className: "badge--info", icon: Edit3 },
+      new_term: { label: t("typeNew"), className: "badge--success", icon: Plus },
     };
     return typeConfig[type] || typeConfig.new_term;
   };
@@ -329,19 +331,19 @@ export default function ContributionsModerationPage() {
   };
 
   const getContributorName = (contribution: Contribution) => {
-    return contribution.contributor?.fullName || "Ẩn danh";
+    return contribution.contributor?.fullName || t("anonymous");
   };
 
   const getFieldLabel = (key: string) => {
     const labels: Record<string, string> = {
-      vi: "Tiếng Việt",
-      lo: "Tiếng Lào",
-      en: "Tiếng Anh",
-      term: "Thuật ngữ",
-      definition: "Định nghĩa",
-      detailedExplanation: "Giải thích chi tiết",
-      examples: "Ví dụ",
-      contributorNote: "Ghi chú",
+      vi: t("vietnamese"),
+      lo: t("lao"),
+      en: t("english"),
+      term: t("termLabel"),
+      definition: t("definitionLabel"),
+      detailedExplanation: t("detailLabel"),
+      examples: t("exampleLabel"),
+      contributorNote: t("noteLabel"),
     };
     return labels[key] || key;
   };
@@ -376,16 +378,16 @@ export default function ContributionsModerationPage() {
     if (confirmAction === "approve") {
       return {
         type: "approve",
-        title: "Xác nhận phê duyệt",
-        message: `Bạn có chắc chắn muốn phê duyệt đóng góp "${selectedContribution ? getTermName(selectedContribution) : ""}"?`,
-        confirmText: "Phê duyệt",
+        title: t("confirmApprove"),
+        message: t("confirmApproveMsg"),
+        confirmText: t("approve"),
       };
     }
     return {
       type: "reject",
-      title: "Xác nhận từ chối",
-      message: `Bạn có chắc chắn muốn từ chối đóng góp "${selectedContribution ? getTermName(selectedContribution) : ""}"? Vui lòng nhập lý do từ chối.`,
-      confirmText: "Từ chối",
+      title: t("confirmReject"),
+      message: t("confirmRejectMsg"),
+      confirmText: t("reject"),
     };
   };
 
@@ -398,15 +400,15 @@ export default function ContributionsModerationPage() {
             <GitPullRequest size={24} />
           </div>
           <div className="header-text">
-            <h1>Kiểm duyệt nội dung đóng góp</h1>
-            <p>Xem xét và phê duyệt các đóng góp từ cộng đồng</p>
+            <h1>{t("title")}</h1>
+            <p>{t("subtitle")}</p>
           </div>
         </div>
         <div className="header-actions">
           {pendingCount > 0 && (
             <div className="header-badge header-badge--contribution">
               <AlertTriangle size={16} />
-              <span>{pendingCount} gợi ý chờ duyệt</span>
+              <span>{t("pendingCount", { count: pendingCount })}</span>
             </div>
           )}
           <button
@@ -423,11 +425,11 @@ export default function ContributionsModerationPage() {
       <div className="moderation-page__stats">
         <div className="stat-card stat-card--warning">
           <div className="stat-value">{pendingCount}</div>
-          <div className="stat-label">Chờ duyệt</div>
+          <div className="stat-label">{t("pending")}</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{totalItems}</div>
-          <div className="stat-label">Tổng đóng góp</div>
+          <div className="stat-label">{t("totalContributions")}</div>
         </div>
       </div>
 
@@ -437,7 +439,7 @@ export default function ContributionsModerationPage() {
           <Search size={18} />
           <input
             type="text"
-            placeholder="Tìm kiếm theo thuật ngữ hoặc người đóng góp..."
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -449,19 +451,19 @@ export default function ContributionsModerationPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="pending">Chờ duyệt</option>
-            <option value="approved">Đã duyệt</option>
-            <option value="rejected">Đã từ chối</option>
+            <option value="all">{t("allStatuses")}</option>
+            <option value="pending">{t("pending")}</option>
+            <option value="approved">{t("approved")}</option>
+            <option value="rejected">{t("rejected")}</option>
           </select>
 
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
           >
-            <option value="all">Tất cả loại</option>
-            <option value="edit_term">Chỉnh sửa</option>
-            <option value="new_term">Thêm mới</option>
+            <option value="all">{t("allTypes")}</option>
+            <option value="edit_term">{t("typeEdit")}</option>
+            <option value="new_term">{t("typeNew")}</option>
           </select>
         </div>
       </div>
@@ -470,7 +472,7 @@ export default function ContributionsModerationPage() {
       {selectedIds.size > 0 && (
         <div className="bulk-action-bar">
           <span className="bulk-action-bar__count">
-            Đã chọn <strong>{selectedIds.size}</strong> đóng góp
+            {t("selectedCount", { count: selectedIds.size })}
           </span>
           <div className="bulk-action-bar__actions">
             <button
@@ -483,7 +485,7 @@ export default function ContributionsModerationPage() {
               ) : (
                 <CheckCircle size={14} />
               )}
-              Duyệt tất cả
+              {t("approveAll")}
             </button>
             <button
               className="btn btn--danger btn--sm"
@@ -491,13 +493,13 @@ export default function ContributionsModerationPage() {
               disabled={bulkLoading}
             >
               <XCircle size={14} />
-              Từ chối tất cả
+              {t("rejectAll")}
             </button>
             <button
               className="btn btn--secondary btn--sm"
               onClick={() => setSelectedIds(new Set())}
             >
-              Bỏ chọn
+              {t("deselect")}
             </button>
           </div>
         </div>
@@ -510,17 +512,17 @@ export default function ContributionsModerationPage() {
           onClick={() => setShowBulkRejectModal(false)}
         >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Từ chối {selectedIds.size} đóng góp</h3>
+            <h3>{t("bulkRejectTitle", { count: selectedIds.size })}</h3>
             <div className="form-group" style={{ marginTop: "1rem" }}>
               <label>
-                Lý do từ chối <span style={{ color: "red" }}>*</span>
+                {t("rejectReason")} <span style={{ color: "red" }}>*</span>
               </label>
               <textarea
                 className="form-control"
                 rows={3}
                 value={bulkRejectNote}
                 onChange={(e) => setBulkRejectNote(e.target.value)}
-                placeholder="Nhập lý do từ chối..."
+                placeholder={t("rejectReasonPlaceholder")}
               />
             </div>
             <div
@@ -536,7 +538,7 @@ export default function ContributionsModerationPage() {
                 className="btn btn--secondary btn--sm"
                 onClick={() => setShowBulkRejectModal(false)}
               >
-                Hủy
+                {t("cancel")}
               </button>
               <button
                 className="btn btn--danger btn--sm"
@@ -548,7 +550,7 @@ export default function ContributionsModerationPage() {
                 ) : (
                   <XCircle size={14} />
                 )}
-                Xác nhận từ chối
+                {t("confirmReject")}
               </button>
             </div>
           </div>
@@ -560,7 +562,7 @@ export default function ContributionsModerationPage() {
         {loading ? (
           <div className="loading-state">
             <Loader2 size={48} className="spinning" />
-            <p>Đang tải dữ liệu...</p>
+            <p>{t("loading")}</p>
           </div>
         ) : (
           <>
@@ -577,13 +579,13 @@ export default function ContributionsModerationPage() {
                       onChange={toggleSelectAll}
                     />
                   </th>
-                  <th>Thuật ngữ</th>
-                  <th>Loại</th>
-                  <th>Danh mục</th>
-                  <th>Người đóng góp</th>
-                  <th>Ngày gửi</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
+                  <th>{t("term")}</th>
+                  <th>{t("type")}</th>
+                  <th>{t("category")}</th>
+                  <th>{t("contributor")}</th>
+                  <th>{t("submitDate")}</th>
+                  <th>{t("status")}</th>
+                  <th>{t("actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -591,7 +593,7 @@ export default function ContributionsModerationPage() {
                   <tr>
                     <td colSpan={8} className="empty-state">
                       <GitPullRequest size={48} />
-                      <p>Không có gợi ý nào</p>
+                      <p>{t("noContributions")}</p>
                     </td>
                   </tr>
                 ) : (
@@ -642,7 +644,7 @@ export default function ContributionsModerationPage() {
                         <td className="actions-cell">
                           <button
                             className="action-btn action-btn--view"
-                            title="Xem chi tiết"
+                            title={t("viewDetails")}
                             onClick={() => {
                               setSelectedContribution(contribution);
                               setShowDetailModal(true);
@@ -654,7 +656,7 @@ export default function ContributionsModerationPage() {
                             <>
                               <button
                                 className="action-btn action-btn--approve"
-                                title="Duyệt"
+                                title={t("approve")}
                                 disabled={actionLoading === contribution._id}
                                 onClick={() => {
                                   setSelectedContribution(contribution);
@@ -670,7 +672,7 @@ export default function ContributionsModerationPage() {
                               </button>
                               <button
                                 className="action-btn action-btn--reject"
-                                title="Từ chối"
+                                title={t("reject")}
                                 disabled={actionLoading === contribution._id}
                                 onClick={() => {
                                   setSelectedContribution(contribution);
@@ -694,7 +696,7 @@ export default function ContributionsModerationPage() {
             {totalPages > 1 && (
               <div className="admin-pagination">
                 <div className="admin-pagination__info">
-                  <label htmlFor="itemsPerPage">Số lượng mỗi trang</label>
+                  <label htmlFor="itemsPerPage">{t("perPage")}</label>
                   <select
                     id="itemsPerPage"
                     className="admin-pagination__options"
@@ -706,9 +708,9 @@ export default function ContributionsModerationPage() {
                     <option value={20}>20</option>
                   </select>
                   <p>
-                    Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                    {Math.min(currentPage * itemsPerPage, totalItems)} /{" "}
-                    {totalItems} đóng góp
+                    {t("showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                    {Math.min(currentPage * itemsPerPage, totalItems)} {t("of")}{" "}
+                    {totalItems} {t("contributionsLabel")}
                   </p>
                 </div>
                 <div className="admin-pagination__controls">
@@ -785,7 +787,7 @@ export default function ContributionsModerationPage() {
           title={getConfirmModalConfig().title}
           message={getConfirmModalConfig().message}
           confirmText={getConfirmModalConfig().confirmText}
-          cancelText="Hủy"
+          cancelText={t("cancel")}
           onConfirm={confirmAction === "approve" ? handleApprove : handleReject}
           onCancel={() => {
             setShowConfirmModal(false);

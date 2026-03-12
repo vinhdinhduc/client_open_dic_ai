@@ -66,6 +66,7 @@ import {
 } from "lucide-react";
 import categoryService, { CategoryFormData } from "@/services/categoryService";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import CategoryFormModal from "@/components/forms/manage_categories/CategoryFormModal";
 import "./categories.scss";
 
@@ -159,6 +160,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+  const t = useTranslations("adminCategories");
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -222,7 +224,7 @@ export default function CategoriesPage() {
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
-      toast.error("Không thể tải danh sách danh mục");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -289,7 +291,7 @@ export default function CategoriesPage() {
     isActive: boolean;
   }) => {
     if (!data.name.vi.trim()) {
-      toast.error("Vui lòng nhập tên danh mục tiếng Việt");
+      toast.error(t("nameViRequired"));
       return;
     }
 
@@ -316,7 +318,7 @@ export default function CategoriesPage() {
 
         const res = await categoryService.createCategory(categoryData);
         if (res.success) {
-          toast.success("Tạo danh mục thành công");
+          toast.success(t("createSuccess"));
           onClose();
           fetchCategories();
         }
@@ -341,7 +343,7 @@ export default function CategoriesPage() {
           updateData,
         );
         if (res.success) {
-          toast.success("Cập nhật danh mục thành công");
+          toast.success(t("updateSuccess"));
           onClose();
           fetchCategories();
         }
@@ -350,8 +352,8 @@ export default function CategoriesPage() {
       const message =
         error.response?.data?.message ||
         (mode === "create"
-          ? "Không thể tạo danh mục"
-          : "Không thể cập nhật danh mục");
+          ? t("createError")
+          : t("updateError"));
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -366,13 +368,13 @@ export default function CategoriesPage() {
     try {
       const res = await categoryService.deleteCategory(selectedCategory._id);
       if (res.success) {
-        toast.success("Xóa danh mục thành công");
+        toast.success(t("deleteSuccess"));
         setShowDeleteConfirm(false);
         setSelectedCategory(null);
         fetchCategories();
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || "Không thể xóa danh mục";
+      const message = error.response?.data?.message || t("deleteError");
       setDeleteErrorMsg(message);
     } finally {
       setSubmitting(false);
@@ -388,14 +390,14 @@ export default function CategoriesPage() {
         selectedCategory._id,
       );
       if (res.success) {
-        toast.success("Đã ẩn danh mục thành công");
+        toast.success(t("hiddenSuccess"));
         setShowDeleteConfirm(false);
         setSelectedCategory(null);
         setDeleteErrorMsg(null);
         fetchCategories();
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || "Không thể ẩn danh mục";
+      const message = error.response?.data?.message || t("hideError");
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -405,7 +407,7 @@ export default function CategoriesPage() {
   const handleToggleActive = async (category: Category) => {
     if (
       !confirm(
-        `Bạn có chắc muốn ${category.isActive ? "ẩn" : "kích hoạt"} danh mục "${category.name.vi}" không?`,
+        `${category.isActive ? t("confirmToggleHide") : t("confirmToggleActivate")} "${category.name.vi}"?`,
       )
     ) {
       return;
@@ -416,13 +418,13 @@ export default function CategoriesPage() {
       });
       if (res.success) {
         toast.success(
-          category.isActive ? "Đã ẩn danh mục" : "Đã kích hoạt danh mục",
+          category.isActive ? t("hiddenCategory") : t("activatedCategory"),
         );
         fetchCategories();
       }
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Không thể cập nhật trạng thái";
+        error.response?.data?.message || t("toggleStatusError");
       toast.error(message);
     }
   };
@@ -431,7 +433,7 @@ export default function CategoriesPage() {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
-        <p>Đang tải danh sách danh mục...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -442,9 +444,9 @@ export default function CategoriesPage() {
         {/* Page Header */}
         <div className="admin-page-header">
           <div>
-            <h1 className="admin-page-header__title">Quản lý danh mục</h1>
+            <h1 className="admin-page-header__title">{t("title")}</h1>
             <p className="admin-page-header__subtitle">
-              Tổ chức và quản lý các danh mục thuật ngữ
+              {t("subtitle")}
             </p>
           </div>
           <div className="admin-page-header__actions">
@@ -453,7 +455,7 @@ export default function CategoriesPage() {
               onClick={handleShowAddModal}
             >
               <Plus size={16} />
-              Thêm danh mục
+              {t("addCategory")}
             </button>
           </div>
         </div>
@@ -466,7 +468,7 @@ export default function CategoriesPage() {
             </div>
             <div className="category-stat__content">
               <span className="category-stat__value">{categories.length}</span>
-              <span className="category-stat__label">Tổng danh mục</span>
+              <span className="category-stat__label">{t("totalCategories")}</span>
             </div>
           </div>
           <div className="category-stat">
@@ -475,7 +477,7 @@ export default function CategoriesPage() {
             </div>
             <div className="category-stat__content">
               <span className="category-stat__value">{totalTerms}</span>
-              <span className="category-stat__label">Tổng thuật ngữ</span>
+              <span className="category-stat__label">{t("totalTerms")}</span>
             </div>
           </div>
           <div className="category-stat">
@@ -486,7 +488,7 @@ export default function CategoriesPage() {
               <span className="category-stat__value">
                 {categories.filter((c) => c.isActive).length}
               </span>
-              <span className="category-stat__label">Đang hoạt động</span>
+              <span className="category-stat__label">{t("activeCount")}</span>
             </div>
           </div>
         </div>
@@ -499,7 +501,7 @@ export default function CategoriesPage() {
               <Search size={18} />
               <input
                 type="text"
-                placeholder="Tìm danh mục..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -536,7 +538,7 @@ export default function CategoriesPage() {
                       <button
                         className="action-btn"
                         onClick={() => handleShowEditModal(category)}
-                        title="Chỉnh sửa"
+                        title={t("edit")}
                       >
                         <Edit size={16} />
                       </button>
@@ -546,7 +548,7 @@ export default function CategoriesPage() {
                           setSelectedCategory(category);
                           setShowDeleteConfirm(true);
                         }}
-                        title="Xóa"
+                        title={t("delete")}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -568,14 +570,14 @@ export default function CategoriesPage() {
                   <div className="category-card__footer">
                     <span className="category-card__count">
                       <BookOpen size={14} />
-                      {category.termCount} thuật ngữ
+                      {category.termCount} {t("termsCount")}
                     </span>
                     <button
                       className={`status-toggle ${category.isActive ? "active" : ""}`}
                       onClick={() => handleToggleActive(category)}
                     >
                       <span className="status-toggle__dot"></span>
-                      <span>{category.isActive ? "Hoạt động" : "Ẩn"}</span>
+                      <span>{category.isActive ? t("active") : t("hidden")}</span>
                     </button>
                   </div>
                 </div>
@@ -603,14 +605,14 @@ export default function CategoriesPage() {
                       {category.name.en && <span>{category.name.en}</span>}
                     </div>
                     <span className="category-list-item__count">
-                      {category.termCount} thuật ngữ
+                      {category.termCount} {t("termsCount")}
                     </span>
                     <button
                       className={`status-toggle ${category.isActive ? "active" : ""}`}
                       onClick={() => handleToggleActive(category)}
                     >
                       <span className="status-toggle__dot"></span>
-                      <span>{category.isActive ? "Hoạt động" : "Ẩn"}</span>
+                      <span>{category.isActive ? t("active") : t("hidden")}</span>
                     </button>
                     <div className="category-list-item__actions">
                       <button
@@ -646,11 +648,11 @@ export default function CategoriesPage() {
                   </div>
                   {expandedCard === category._id && (
                     <div className="category-list-item__expanded">
-                      <p>{category.description?.vi || "Chưa có mô tả"}</p>
+                      <p>{category.description?.vi || t("noDescription")}</p>
                       <div className="expanded-meta">
-                        <span>Thứ tự: {category.order}</span>
+                        <span>{t("order")} {category.order}</span>
                         <span>
-                          Ngày tạo:{" "}
+                          {t("createdDate")}{" "}
                           {new Date(category.createdAt).toLocaleDateString(
                             "vi-VN",
                           )}
@@ -667,8 +669,8 @@ export default function CategoriesPage() {
           {filteredCategories.length === 0 && (
             <div className="admin-empty">
               <FolderTree size={48} />
-              <h3>Không tìm thấy danh mục</h3>
-              <p>Thử thay đổi từ khóa tìm kiếm hoặc thêm danh mục mới</p>
+              <h3>{t("noCategories")}</h3>
+              <p>{t("noCategoriesHint")}</p>
             </div>
           )}
         </div>
@@ -687,7 +689,7 @@ export default function CategoriesPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal__header">
-                <h2>Xác nhận xóa</h2>
+                <h2>{t("confirmDelete")}</h2>
                 <button
                   className="modal__close"
                   onClick={() => {
@@ -702,12 +704,11 @@ export default function CategoriesPage() {
                 {!deleteErrorMsg ? (
                   <>
                     <p>
-                      Bạn có chắc chắn muốn xóa danh mục{" "}
+                      {t("confirmDeleteMsg")}{" "}
                       <strong>{selectedCategory.name.vi}</strong>?
                     </p>
                     <p className="text-warning" style={{ marginTop: 8 }}>
-                      Hành động này không thể hoàn tác. Bạn có thể chọn &quot;Ẩn
-                      danh mục&quot; để giữ lại dữ liệu.
+                      {t("deleteIrreversible")}
                     </p>
                   </>
                 ) : (
@@ -727,15 +728,13 @@ export default function CategoriesPage() {
                         marginBottom: 6,
                       }}
                     >
-                      ⚠️ Không thể xóa
+                      ⚠️ {t("cannotDelete")}
                     </p>
                     <p style={{ color: "#9a3412", fontSize: 14 }}>
                       {deleteErrorMsg}
                     </p>
                     <p style={{ color: "#78350f", fontSize: 13, marginTop: 8 }}>
-                      Bạn có muốn <strong>ẩn danh mục</strong> thay thế? Danh
-                      mục sẽ không hiển thị với người dùng nhưng vẫn giữ nguyên
-                      dữ liệu.
+                      {t("hideInstead")}
                     </p>
                   </div>
                 )}
@@ -749,7 +748,7 @@ export default function CategoriesPage() {
                   }}
                   disabled={submitting}
                 >
-                  Hủy
+                  {t("cancel")}
                 </button>
                 {deleteErrorMsg ? (
                   <button
@@ -757,7 +756,7 @@ export default function CategoriesPage() {
                     onClick={handleDeactivate}
                     disabled={submitting}
                   >
-                    {submitting ? "Đang xử lý..." : "Ẩn danh mục"}
+                    {submitting ? t("processing") : t("hideCategory")}
                   </button>
                 ) : (
                   <button
@@ -765,7 +764,7 @@ export default function CategoriesPage() {
                     onClick={handleDelete}
                     disabled={submitting}
                   >
-                    {submitting ? "Đang xóa..." : "Xóa danh mục"}
+                    {submitting ? t("deleting") : t("deleteCategory")}
                   </button>
                 )}
               </div>

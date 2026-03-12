@@ -37,18 +37,7 @@ import "./page.scss";
 import { AddUser } from "@/components/forms/manage_users/AddUser";
 import { EditUser } from "@/components/forms/manage_users/EditUser";
 import toast from "react-hot-toast";
-
-// Constants
-const permissionOptions = [
-  { value: "reports", label: "Kiểm duyệt báo xấu", icon: <Flag size={18} /> },
-  { value: "suggestions", label: "Gợi ý sửa", icon: <Lightbulb size={18} /> },
-  {
-    value: "contributions",
-    label: "Đóng góp từ",
-    icon: <BookPlus size={18} />,
-  },
-  { value: "comments", label: "Bình luận", icon: <MessageSquare size={18} /> },
-];
+import { useTranslations } from "next-intl";
 
 const getLanguageFlag = (lang: string) => {
   switch (lang) {
@@ -70,6 +59,19 @@ interface ModerationPermissions {
 }
 
 export default function UsersPage() {
+  const t = useTranslations("adminUsers");
+
+  const permissionOptions = [
+    { value: "reports", label: t("permReviewReports"), icon: <Flag size={18} /> },
+    { value: "suggestions", label: t("permSuggestEdits"), icon: <Lightbulb size={18} /> },
+    {
+      value: "contributions",
+      label: t("permContributeTerms"),
+      icon: <BookPlus size={18} />,
+    },
+    { value: "comments", label: t("permComments"), icon: <MessageSquare size={18} /> },
+  ];
+
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -273,7 +275,7 @@ export default function UsersPage() {
   };
   const handleExportUser = async () => {
     if (
-      !confirm("Bạn có chắc chắn muốn xuất tất cả người dùng ra file Excel?")
+      !confirm(t("confirmExport"))
     ) {
       return;
     }
@@ -295,9 +297,9 @@ export default function UsersPage() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success("Xuất người dùng thành công");
+      toast.success(t("exportSuccess"));
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi xuất người dùng");
+      toast.error(t("exportError"));
     } finally {
       setTableLoading(false);
     }
@@ -307,16 +309,16 @@ export default function UsersPage() {
     switch (status) {
       case "active":
         return (
-          <span className="admin-badge admin-badge--success">Hoạt động</span>
+          <span className="admin-badge admin-badge--success">{t("active")}</span>
         );
       case "inactive":
         return (
           <span className="admin-badge admin-badge--warning">
-            Chưa kích hoạt
+            {t("inactive")}
           </span>
         );
       case "banned":
-        return <span className="admin-badge admin-badge--danger">Bị khóa</span>;
+        return <span className="admin-badge admin-badge--danger">{t("locked")}</span>;
       default:
         return null;
     }
@@ -338,13 +340,13 @@ export default function UsersPage() {
         if (res.success) {
           toast.success(
             newStatus === "banned"
-              ? "Đã khóa tài khoản"
-              : "Đã mở khóa tài khoản",
+              ? t("lockedSuccess")
+              : t("unlockedSuccess"),
           );
           refreshUsers();
         }
       } catch (error) {
-        toast.error("Có lỗi xảy ra khi cập nhật trạng thái");
+        toast.error(t("statusUpdateError"));
       } finally {
         setTableLoading(false);
         setShowLockConfirm(false);
@@ -360,11 +362,11 @@ export default function UsersPage() {
       try {
         const res = await userService.deleteUser(selectedUser._id);
         if (res.success) {
-          toast.success("Xóa người dùng thành công");
+          toast.success(t("deleteSuccess"));
           refreshUsers();
         }
       } catch (error) {
-        toast.error("Có lỗi xảy ra khi xóa người dùng");
+        toast.error(t("deleteError"));
       } finally {
         setTableLoading(false);
         setSelectedUser(null);
@@ -450,13 +452,13 @@ export default function UsersPage() {
           },
         });
         if (res.success) {
-          toast.success("Cập nhật quyền kiểm duyệt thành công");
+          toast.success(t("permissionsUpdateSuccess"));
           refreshUsers();
           setShowPermissionsModal(false);
           setSelectedUser(null);
         }
       } catch (error) {
-        toast.error("Có lỗi xảy ra khi cập nhật quyền");
+        toast.error(t("permissionsUpdateError"));
       } finally {
         setSavingPermissions(false);
       }
@@ -470,11 +472,11 @@ export default function UsersPage() {
   const handleResetPassword = async () => {
     if (!selectedUser || !newPassword) return;
     if (newPassword !== confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp");
+      toast.error(t("passwordMismatch"));
       return;
     }
     if (newPassword.length < 6) {
-      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+      toast.error(t("passwordTooShort"));
       return;
     }
 
@@ -485,7 +487,7 @@ export default function UsersPage() {
         newPassword,
       );
       if (res.success) {
-        toast.success("Đặt lại mật khẩu thành công");
+        toast.success(t("resetPasswordSuccess"));
         setShowResetPasswordModal(false);
         setNewPassword("");
         setConfirmPassword("");
@@ -494,7 +496,7 @@ export default function UsersPage() {
         setSelectedUser(null);
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi đặt lại mật khẩu");
+      toast.error(t("resetPasswordError"));
     } finally {
       setLoadingResetPassword(false);
     }
@@ -508,12 +510,12 @@ export default function UsersPage() {
     if (/[A-Z]/.test(pwd)) score++;
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    if (score <= 1) return { level: score, label: "Rất yếu", color: "#ef4444" };
-    if (score === 2) return { level: score, label: "Yếu", color: "#f97316" };
+    if (score <= 1) return { level: score, label: t("passwordVeryWeak"), color: "#ef4444" };
+    if (score === 2) return { level: score, label: t("passwordWeak"), color: "#f97316" };
     if (score === 3)
-      return { level: score, label: "Trung bình", color: "#eab308" };
-    if (score === 4) return { level: score, label: "Mạnh", color: "#22c55e" };
-    return { level: score, label: "Rất mạnh", color: "#16a34a" };
+      return { level: score, label: t("passwordMedium"), color: "#eab308" };
+    if (score === 4) return { level: score, label: t("passwordStrong"), color: "#22c55e" };
+    return { level: score, label: t("passwordVeryStrong"), color: "#16a34a" };
   };
 
   // Handle resend verification email
@@ -521,17 +523,17 @@ export default function UsersPage() {
     try {
       const res = await userService.resendVerificationEmail(user._id);
       if (res.success) {
-        toast.success("Đã gửi lại email xác thực");
+        toast.success(t("verificationResent"));
       }
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Có lỗi xảy ra");
+      toast.error(error?.response?.data?.message || t("genericError"));
     }
   };
 
   // Handle batch update status
   const handleBatchUpdateStatus = async () => {
     if (selectedUsers.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một người dùng");
+      toast.error(t("selectAtLeastOne"));
       return;
     }
 
@@ -547,7 +549,7 @@ export default function UsersPage() {
         refreshUsers();
       }
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Có lỗi xảy ra");
+      toast.error(error?.response?.data?.message || t("genericError"));
     }
   };
 
@@ -566,7 +568,7 @@ export default function UsersPage() {
         setActivityData(res.data);
       }
     } catch (error) {
-      toast.error("Không thể tải lịch sử hoạt động");
+      toast.error(t("activityLoadError"));
     } finally {
       setLoadingActivity(false);
     }
@@ -595,7 +597,7 @@ export default function UsersPage() {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
-        <p>Đang tải danh sách người dùng...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -606,9 +608,9 @@ export default function UsersPage() {
         {/* Page Header */}
         <div className="admin-page-header">
           <div>
-            <h1 className="admin-page-header__title">Quản lý người dùng</h1>
+            <h1 className="admin-page-header__title">{t("title")}</h1>
             <p className="admin-page-header__subtitle">
-              Quản lý tài khoản và phân quyền người dùng hệ thống
+              {t("subtitle")}
             </p>
           </div>
           <div className="admin-page-header__actions">
@@ -617,14 +619,14 @@ export default function UsersPage() {
               onClick={handleExportUser}
             >
               <Download size={16} />
-              Xuất Excel
+              {t("exportExcel")}
             </button>
             <button
               className="admin-btn admin-btn--primary"
               onClick={handleShowModalAddUser}
             >
               <Plus size={16} />
-              Thêm người dùng
+              {t("addUser")}
             </button>
           </div>
         </div>
@@ -637,7 +639,7 @@ export default function UsersPage() {
               <Search size={18} />
               <input
                 type="text"
-                placeholder="Tìm theo tên hoặc email..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -648,7 +650,7 @@ export default function UsersPage() {
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
             >
-              <option value="all">Tất cả vai trò</option>
+              <option value="all">{t("allRoles")}</option>
               <option value="user">User</option>
               <option value="moderator">Moderator</option>
               <option value="admin">Admin</option>
@@ -659,10 +661,10 @@ export default function UsersPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">Hoạt động</option>
-              <option value="inactive">Không hoạt động</option>
-              <option value="banned">Bị khóa</option>
+              <option value="all">{t("allStatuses")}</option>
+              <option value="active">{t("active")}</option>
+              <option value="inactive">{t("inactive")}</option>
+              <option value="banned">{t("locked")}</option>
             </select>
 
             {selectedUsers.length > 0 && (
@@ -670,7 +672,7 @@ export default function UsersPage() {
                 className="admin-btn admin-btn--warning"
                 onClick={() => setShowBatchActionsModal(true)}
               >
-                Thao tác ({selectedUsers.length})
+                {t("actionsCount", { count: selectedUsers.length })}
               </button>
             )}
           </div>
@@ -697,12 +699,12 @@ export default function UsersPage() {
                       onChange={handleSelectAllUsers}
                     />
                   </th>
-                  <th>Người dùng</th>
-                  <th>Vai trò</th>
-                  <th>Trạng thái</th>
-                  <th>Đóng góp</th>
-                  <th>Đăng nhập cuối</th>
-                  <th>Thao tác</th>
+                  <th>{t("user")}</th>
+                  <th>{t("role")}</th>
+                  <th>{t("status")}</th>
+                  <th>{t("contributions")}</th>
+                  <th>{t("lastLogin")}</th>
+                  <th>{t("actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -734,14 +736,14 @@ export default function UsersPage() {
 
                     <td>
                       <div className="contribution-cell">
-                        <span>{user.contributionCount} thuật ngữ</span>
-                        <span>{user.commentCount} bình luận</span>
+                        <span>{user.contributionCount} {t("terms")}</span>
+                        <span>{user.commentCount} {t("comments")}</span>
                       </div>
                     </td>
                     <td>
                       {user.lastLogin
                         ? new Date(user.lastLogin).toLocaleDateString("vi-VN")
-                        : "Chưa đăng nhập"}
+                        : t("notLoggedIn")}
                     </td>
                     <td>
                       <div className="action-cell">
@@ -751,7 +753,7 @@ export default function UsersPage() {
                             setSelectedUser(user);
                             setShowDetailModal(true);
                           }}
-                          title="Xem chi tiết"
+                          title={t("viewDetails")}
                         >
                           <Eye size={16} color="blue" />
                         </button>
@@ -761,7 +763,7 @@ export default function UsersPage() {
                             setSelectedUser(user);
                             setShowEditModal(true);
                           }}
-                          title="Chỉnh sửa"
+                          title={t("editUser")}
                         >
                           <Edit size={16} color="orange" />
                         </button>
@@ -769,7 +771,7 @@ export default function UsersPage() {
                           <button
                             className="action-btn action-btn--primary"
                             onClick={() => openPermissionsModal(user)}
-                            title="Phân quyền kiểm duyệt"
+                            title={t("assignModPermissions")}
                           >
                             <Shield size={16} color="#11998e" />
                           </button>
@@ -784,7 +786,7 @@ export default function UsersPage() {
                                 showMoreMenu === user._id ? null : user._id,
                               )
                             }
-                            title="Thêm"
+                            title={t("more")}
                           >
                             <MoreVertical size={16} />
                           </button>
@@ -797,7 +799,7 @@ export default function UsersPage() {
                                 }}
                               >
                                 <History size={14} />
-                                Xem hoạt động
+                                {t("viewActivity")}
                               </button>
                               <button
                                 onClick={() => {
@@ -807,7 +809,7 @@ export default function UsersPage() {
                                 }}
                               >
                                 <Key size={14} />
-                                Đặt lại mật khẩu
+                                {t("resetPassword")}
                               </button>
                               {!user.emailVerified && (
                                 <button
@@ -817,7 +819,7 @@ export default function UsersPage() {
                                   }}
                                 >
                                   <Send size={14} />
-                                  Gửi lại email xác thực
+                                  {t("resendVerification")}
                                 </button>
                               )}
                               <button
@@ -829,12 +831,12 @@ export default function UsersPage() {
                                 {user.status === "banned" ? (
                                   <>
                                     <Unlock size={14} />
-                                    Mở khóa
+                                    {t("unlock")}
                                   </>
                                 ) : (
                                   <>
                                     <Lock size={14} />
-                                    Khóa tài khoản
+                                    {t("lockAccount")}
                                   </>
                                 )}
                               </button>
@@ -847,7 +849,7 @@ export default function UsersPage() {
                                 }}
                               >
                                 <Trash2 size={14} />
-                                Xóa người dùng
+                                {t("deleteUser")}
                               </button>
                             </div>
                           )}
@@ -864,7 +866,7 @@ export default function UsersPage() {
           {totalUsers > 0 && (
             <div className="admin-pagination">
               <div className="admin-pagination__info">
-                <label htmlFor="itemsPerPage">Số lượng mỗi trang</label>
+                <label htmlFor="itemsPerPage">{t("perPage")}</label>
                 <select
                   name="itemsPerPage"
                   id="itemsPerPage"
@@ -877,9 +879,9 @@ export default function UsersPage() {
                   <option value="20">20</option>
                 </select>
                 <p>
-                  Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                  {Math.min(currentPage * itemsPerPage, totalUsers)} trong{" "}
-                  {totalUsers} người dùng
+                  {t("showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                  {Math.min(currentPage * itemsPerPage, totalUsers)} {t("of")}{" "}
+                  {totalUsers} {t("usersLabel")}
                 </p>
               </div>
               <div className="admin-pagination__controls">
@@ -887,7 +889,7 @@ export default function UsersPage() {
                   className="admin-pagination__btn"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(1)}
-                  title="Trang đầu"
+                  title={t("firstPage")}
                 >
                   <ChevronLeft size={16} color="blue" />
                   <ChevronLeft
@@ -900,7 +902,7 @@ export default function UsersPage() {
                   className="admin-pagination__btn"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => p - 1)}
-                  title="Trang trước"
+                  title={t("previousPage")}
                 >
                   <ChevronLeft size={16} color="blue" />
                 </button>
@@ -928,7 +930,7 @@ export default function UsersPage() {
                   className="admin-pagination__btn"
                   disabled={currentPage === totalPages || totalPages === 0}
                   onClick={() => setCurrentPage((p) => p + 1)}
-                  title="Trang sau"
+                  title={t("nextPage")}
                 >
                   <ChevronRight size={16} color="blue" />
                 </button>
@@ -936,7 +938,7 @@ export default function UsersPage() {
                   className="admin-pagination__btn"
                   disabled={currentPage === totalPages || totalPages === 0}
                   onClick={() => setCurrentPage(totalPages)}
-                  title="Trang cuối"
+                  title={t("lastPage")}
                 >
                   <ChevronRight size={16} color="blue" />
                   <ChevronRight
@@ -953,8 +955,8 @@ export default function UsersPage() {
           {users.length === 0 && !tableLoading && (
             <div className="admin-empty-state">
               <UserIcon size={48} />
-              <h3>Không tìm thấy người dùng</h3>
-              <p>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+              <h3>{t("noUsersFound")}</h3>
+              <p>{t("noUsersHint")}</p>
             </div>
           )}
         </div>
@@ -967,7 +969,7 @@ export default function UsersPage() {
           >
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal__header">
-                <h2>Chi tiết người dùng</h2>
+                <h2>{t("userDetails")}</h2>
                 <button
                   className="modal__close"
                   onClick={() => setShowDetailModal(false)}
@@ -989,7 +991,7 @@ export default function UsersPage() {
                 </div>
                 <div className="user-detail__stats">
                   <div className="stat-item">
-                    <span className="stat-label">Ngày tham gia</span>
+                    <span className="stat-label">{t("joinDate")}</span>
                     <span className="stat-value">
                       {new Date(selectedUser.createdAt).toLocaleDateString(
                         "vi-VN",
@@ -997,29 +999,29 @@ export default function UsersPage() {
                     </span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Đăng nhập cuối</span>
+                    <span className="stat-label">{t("lastLogin")}</span>
                     <span className="stat-value">
                       {selectedUser.lastLogin
                         ? new Date(selectedUser.lastLogin).toLocaleDateString(
                             "vi-VN",
                           )
-                        : "Chưa đăng nhập"}
+                        : t("notLoggedIn")}
                     </span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Thuật ngữ đóng góp</span>
+                    <span className="stat-label">{t("termsContributed")}</span>
                     <span className="stat-value">
                       {selectedUser.contributionCount}
                     </span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Bình luận</span>
+                    <span className="stat-label">{t("commentsActivity")}</span>
                     <span className="stat-value">
                       {selectedUser.commentCount}
                     </span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Ngôn ngữ ưa thích</span>
+                    <span className="stat-label">{t("preferredLanguage")}</span>
                     <span className="stat-value">
                       {getLanguageFlag(selectedUser.preferredLanguage || "vi")}{" "}
                       {(selectedUser.preferredLanguage || "vi").toUpperCase()}
@@ -1032,7 +1034,7 @@ export default function UsersPage() {
                   <div className="moderation-permissions-detail">
                     <h4>
                       <Shield size={16} />
-                      Quyền kiểm duyệt
+                      {t("moderatorPermissions")}
                     </h4>
                     <div className="permissions-tags">
                       {selectedUser.moderationPermissions?.permissions
@@ -1053,12 +1055,12 @@ export default function UsersPage() {
                         )
                       ) : (
                         <span className="no-permissions">
-                          Chưa được phân quyền
+                          {t("notAssigned")}
                         </span>
                       )}
                     </div>
                     <div className="categories-tags">
-                      <span className="categories-label">Danh mục:</span>
+                      <span className="categories-label">{t("categoryLabel")}</span>
                       {selectedUser.moderationPermissions?.categories
                         ?.length ? (
                         selectedUser.moderationPermissions.categories.map(
@@ -1074,7 +1076,7 @@ export default function UsersPage() {
                           },
                         )
                       ) : (
-                        <span className="all-categories">Tất cả danh mục</span>
+                        <span className="all-categories">{t("allCategories")}</span>
                       )}
                     </div>
                   </div>
@@ -1085,7 +1087,7 @@ export default function UsersPage() {
                   className="admin-btn admin-btn--secondary"
                   onClick={() => setShowDetailModal(false)}
                 >
-                  Đóng
+                  {t("close")}
                 </button>
                 {selectedUser.role === "moderator" && (
                   <button
@@ -1096,7 +1098,7 @@ export default function UsersPage() {
                     }}
                   >
                     <Shield size={16} />
-                    Phân quyền
+                    {t("assignPermissions")}
                   </button>
                 )}
                 <button
@@ -1106,7 +1108,7 @@ export default function UsersPage() {
                     setShowEditModal(true);
                   }}
                 >
-                  Chỉnh sửa
+                  {t("editUser")}
                 </button>
               </div>
             </div>
@@ -1126,8 +1128,8 @@ export default function UsersPage() {
               <div className="modal__header">
                 <h2>
                   {selectedUser.status === "banned"
-                    ? "Xác nhận mở khóa"
-                    : "Xác nhận khóa tài khoản"}
+                    ? t("confirmUnlock")
+                    : t("confirmLock")}
                 </h2>
                 <button
                   className="modal__close"
@@ -1138,13 +1140,13 @@ export default function UsersPage() {
               </div>
               <div className="modal__body">
                 <p>
-                  Bạn có chắc chắn muốn{" "}
-                  {selectedUser.status === "banned" ? "mở khóa" : "khóa"} tài
-                  khoản <strong>{selectedUser.fullName}</strong>?
+                  {selectedUser.status === "banned"
+                    ? t("confirmUnlockMsg", { name: selectedUser.fullName })
+                    : t("confirmLockMsg", { name: selectedUser.fullName })}
                 </p>
                 {selectedUser.status !== "banned" && (
                   <p className="text-warning">
-                    Người dùng sẽ không thể đăng nhập khi tài khoản bị khóa.
+                    {t("lockWarning")}
                   </p>
                 )}
               </div>
@@ -1153,7 +1155,7 @@ export default function UsersPage() {
                   className="admin-btn admin-btn--secondary"
                   onClick={() => setShowLockConfirm(false)}
                 >
-                  Hủy
+                  {t("cancel")}
                 </button>
                 <button
                   className={`admin-btn ${
@@ -1165,10 +1167,10 @@ export default function UsersPage() {
                   disabled={tableLoading}
                 >
                   {tableLoading
-                    ? "Đang xử lý..."
+                    ? t("processing")
                     : selectedUser.status === "banned"
-                      ? "Mở khóa"
-                      : "Khóa tài khoản"}
+                      ? t("unlock")
+                      : t("lockAccount")}
                 </button>
               </div>
             </div>
@@ -1186,7 +1188,7 @@ export default function UsersPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal__header">
-                <h2>Xác nhận xóa</h2>
+                <h2>{t("confirmDelete")}</h2>
                 <button
                   className="modal__close"
                   onClick={() => setShowDeleteConfirm(false)}
@@ -1196,24 +1198,23 @@ export default function UsersPage() {
               </div>
               <div className="modal__body">
                 <p>
-                  Bạn có chắc chắn muốn xóa người dùng{" "}
-                  <strong>{selectedUser.fullName}</strong>?
+                  {t("confirmDeleteMsg", { name: selectedUser.fullName })}
                 </p>
-                <p className="text-danger">Hành động này không thể hoàn tác.</p>
+                <p className="text-danger">{t("deleteIrreversible")}</p>
               </div>
               <div className="modal__footer">
                 <button
                   className="admin-btn admin-btn--secondary"
                   onClick={() => setShowDeleteConfirm(false)}
                 >
-                  Hủy
+                  {t("cancel")}
                 </button>
                 <button
                   className="admin-btn admin-btn--danger"
                   onClick={handleDelete}
                   disabled={tableLoading}
                 >
-                  {tableLoading ? "Đang xóa..." : "Xóa người dùng"}
+                  {tableLoading ? t("deleting") : t("deleteUser")}
                 </button>
               </div>
             </div>
@@ -1233,7 +1234,7 @@ export default function UsersPage() {
               <div className="modal__header">
                 <h2>
                   <Shield size={20} />
-                  Phân quyền kiểm duyệt
+                  {t("modPermissionsTitle")}
                 </h2>
                 <button
                   className="modal__close"
@@ -1259,10 +1260,9 @@ export default function UsersPage() {
                 <div className="permissions-section">
                   <div className="permissions-section__header">
                     <div>
-                      <h4>Loại kiểm duyệt được phép</h4>
+                      <h4>{t("allowedModTypes")}</h4>
                       <p className="permissions-section__desc">
-                        Chọn các loại nội dung mà kiểm duyệt viên được phép xem
-                        xét
+                        {t("allowedModTypesHint")}
                       </p>
                     </div>
                     <div className="permissions-section__actions">
@@ -1271,14 +1271,14 @@ export default function UsersPage() {
                         className="admin-btn admin-btn--sm admin-btn--ghost"
                         onClick={handleSelectAllPermissions}
                       >
-                        Chọn tất cả
+                        {t("selectAll")}
                       </button>
                       <button
                         type="button"
                         className="admin-btn admin-btn--sm admin-btn--ghost"
                         onClick={handleClearAllPermissions}
                       >
-                        Bỏ chọn
+                        {t("deselectAll")}
                       </button>
                     </div>
                   </div>
@@ -1318,10 +1318,9 @@ export default function UsersPage() {
                 <div className="permissions-section">
                   <div className="permissions-section__header">
                     <div>
-                      <h4>Danh mục được phân công</h4>
+                      <h4>{t("assignedCategories")}</h4>
                       <p className="permissions-section__desc">
-                        Kiểm duyệt viên chỉ được kiểm duyệt nội dung trong các
-                        danh mục được chọn
+                        {t("assignedCategoriesHint")}
                       </p>
                     </div>
                     <div className="permissions-section__actions">
@@ -1330,14 +1329,14 @@ export default function UsersPage() {
                         className="admin-btn admin-btn--sm admin-btn--ghost"
                         onClick={handleSelectAllCategories}
                       >
-                        Chọn tất cả
+                        {t("selectAll")}
                       </button>
                       <button
                         type="button"
                         className="admin-btn admin-btn--sm admin-btn--ghost"
                         onClick={handleClearAllCategories}
                       >
-                        Bỏ chọn
+                        {t("deselectAll")}
                       </button>
                     </div>
                   </div>
@@ -1372,10 +1371,10 @@ export default function UsersPage() {
                 {/* Summary */}
                 <div className="permissions-summary">
                   <div className="summary-item">
-                    <span className="summary-label">Quyền:</span>
+                    <span className="summary-label">{t("permissionsSummary")}</span>
                     <span className="summary-value">
                       {editingPermissions.permissions.length === 0
-                        ? "Chưa chọn"
+                        ? t("notSelected")
                         : editingPermissions.permissions
                             .map(
                               (p) =>
@@ -1386,11 +1385,11 @@ export default function UsersPage() {
                     </span>
                   </div>
                   <div className="summary-item">
-                    <span className="summary-label">Danh mục:</span>
+                    <span className="summary-label">{t("categoryLabel")}</span>
                     <span className="summary-value">
                       {editingPermissions.categories.length === 0
-                        ? "Tất cả danh mục"
-                        : `${editingPermissions.categories.length} danh mục`}
+                        ? t("allCategories")
+                        : t("nCategories", { count: editingPermissions.categories.length })}
                     </span>
                   </div>
                 </div>
@@ -1400,7 +1399,7 @@ export default function UsersPage() {
                   className="admin-btn admin-btn--secondary"
                   onClick={() => setShowPermissionsModal(false)}
                 >
-                  Hủy
+                  {t("cancel")}
                 </button>
                 <button
                   className="admin-btn admin-btn--primary"
@@ -1408,11 +1407,11 @@ export default function UsersPage() {
                   disabled={savingPermissions}
                 >
                   {savingPermissions ? (
-                    <>Đang lưu...</>
+                    <>{t("saving")}</>
                   ) : (
                     <>
                       <Shield size={16} />
-                      Lưu phân quyền
+                      {t("savePermissions")}
                     </>
                   )}
                 </button>
@@ -1456,7 +1455,7 @@ export default function UsersPage() {
             <div className="modal__header">
               <h2>
                 <Key size={20} />
-                Đặt lại mật khẩu
+                {t("resetPasswordTitle")}
               </h2>
               <button
                 className="modal__close"
@@ -1489,14 +1488,14 @@ export default function UsersPage() {
 
               {/* New password */}
               <div className="reset-pw__field">
-                <label className="reset-pw__label">Mật khẩu mới</label>
+                <label className="reset-pw__label">{t("newPassword")}</label>
                 <div className="reset-pw__input-wrap">
                   <input
                     type={showNewPassword ? "text" : "password"}
                     className="reset-pw__input"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Ít nhất 6 ký tự"
+                    placeholder={t("minChars")}
                     autoComplete="new-password"
                   />
                   <button
@@ -1541,7 +1540,7 @@ export default function UsersPage() {
 
               {/* Confirm password */}
               <div className="reset-pw__field">
-                <label className="reset-pw__label">Xác nhận mật khẩu</label>
+                <label className="reset-pw__label">{t("confirmPassword")}</label>
                 <div className="reset-pw__input-wrap">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -1554,7 +1553,7 @@ export default function UsersPage() {
                     }`}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Nhập lại mật khẩu"
+                    placeholder={t("reenterPassword")}
                     autoComplete="new-password"
                   />
                   <button
@@ -1580,12 +1579,12 @@ export default function UsersPage() {
                   )}
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && (
-                  <p className="reset-pw__error-msg">Mật khẩu không khớp</p>
+                  <p className="reset-pw__error-msg">{t("passwordNotMatch")}</p>
                 )}
               </div>
 
               <p className="reset-pw__hint">
-                Mật khẩu mới sẽ được áp dụng ngay lập tức sau khi lưu.
+                {t("passwordApplyNote")}
               </p>
             </div>
             <div className="modal__footer">
@@ -1599,7 +1598,7 @@ export default function UsersPage() {
                   setShowConfirmPassword(false);
                 }}
               >
-                Hủy
+                {t("cancel")}
               </button>
               <button
                 className="admin-btn admin-btn--primary"
@@ -1614,11 +1613,11 @@ export default function UsersPage() {
                 {loadingResetPassword ? (
                   <>
                     <div className="admin-loading__spinner admin-loading__spinner--sm" />{" "}
-                    Đang lưu...
+                    {t("saving")}
                   </>
                 ) : (
                   <>
-                    <Key size={16} /> Đặt lại mật khẩu
+                    <Key size={16} /> {t("resetPassword")}
                   </>
                 )}
               </button>
@@ -1640,7 +1639,7 @@ export default function UsersPage() {
             <div className="modal__header">
               <h2>
                 <History size={20} />
-                Lịch sử hoạt động
+                {t("activityHistory")}
               </h2>
               <button
                 className="modal__close"
@@ -1671,7 +1670,7 @@ export default function UsersPage() {
               {loadingActivity ? (
                 <div className="activity-modal__loading">
                   <div className="admin-loading__spinner" />
-                  <p>Đang tải lịch sử hoạt động...</p>
+                  <p>{t("loadingActivity")}</p>
                 </div>
               ) : activityData ? (
                 <>
@@ -1679,25 +1678,25 @@ export default function UsersPage() {
                   <div className="activity-modal__stats">
                     {[
                       {
-                        label: "Thuật ngữ",
+                        label: t("termsActivity"),
                         value: activityData.stats?.terms ?? 0,
                         icon: <BookPlus size={18} />,
                         color: "#6366f1",
                       },
                       {
-                        label: "Bình luận",
+                        label: t("commentsActivity"),
                         value: activityData.stats?.comments ?? 0,
                         icon: <MessageSquare size={18} />,
                         color: "#0ea5e9",
                       },
                       {
-                        label: "Đóng góp",
+                        label: t("contributionsActivity"),
                         value: activityData.stats?.contributions ?? 0,
                         icon: <Lightbulb size={18} />,
                         color: "#f59e0b",
                       },
                       {
-                        label: "Báo cáo",
+                        label: t("reportsActivity"),
                         value: activityData.stats?.reports ?? 0,
                         icon: <Flag size={18} />,
                         color: "#ef4444",
@@ -1744,27 +1743,27 @@ export default function UsersPage() {
                                   ? activity.term?.vi ||
                                     activity.term?.en ||
                                     activity.term?.lo ||
-                                    "Thuật ngữ"
-                                  : activity.term || "Thuật ngữ",
+                                    t("termsActivity")
+                                  : activity.term || t("termsActivity"),
                               color: "#6366f1",
                             },
                             comment: {
                               icon: <MessageSquare size={15} />,
-                              label: "Bình luận",
+                              label: t("commentsActivity"),
                               color: "#0ea5e9",
                             },
                             contribution: {
                               icon: <Lightbulb size={15} />,
-                              label: "Đóng góp",
+                              label: t("contributionsActivity"),
                               color: "#f59e0b",
                             },
                             report: {
                               icon: <Flag size={15} />,
-                              label: "Báo cáo",
+                              label: t("reportsActivity"),
                               color: "#ef4444",
                             },
                           };
-                          const t = typeMap[activity.type] ?? {
+                          const actType = typeMap[activity.type] ?? {
                             icon: <History size={15} />,
                             label: activity.type,
                             color: "#6b7280",
@@ -1775,23 +1774,23 @@ export default function UsersPage() {
                             { label: string; cls: string }
                           > = {
                             approved: {
-                              label: "Đã duyệt",
+                              label: t("approved"),
                               cls: "status--approved",
                             },
                             rejected: {
-                              label: "Từ chối",
+                              label: t("rejected"),
                               cls: "status--rejected",
                             },
                             pending: {
-                              label: "Chờ duyệt",
+                              label: t("pending"),
                               cls: "status--pending",
                             },
                             active: {
-                              label: "Hoạt động",
+                              label: t("activeStatus"),
                               cls: "status--approved",
                             },
                             resolved: {
-                              label: "Đã xử lý",
+                              label: t("resolved"),
                               cls: "status--approved",
                             },
                           };
@@ -1808,16 +1807,16 @@ export default function UsersPage() {
                               <div
                                 className="activity-modal__item-icon"
                                 style={{
-                                  color: t.color,
-                                  background: `${t.color}18`,
+                                  color: actType.color,
+                                  background: `${actType.color}18`,
                                 }}
                               >
-                                {t.icon}
+                                {actType.icon}
                               </div>
                               <div className="activity-modal__item-body">
                                 <div className="activity-modal__item-header">
                                   <span className="activity-modal__item-title">
-                                    {t.label}
+                                    {actType.label}
                                   </span>
                                   <span
                                     className={`activity-modal__status ${s.cls}`}
@@ -1844,14 +1843,14 @@ export default function UsersPage() {
                   ) : (
                     <div className="activity-modal__empty">
                       <History size={40} />
-                      <p>Người dùng chưa có hoạt động nào</p>
+                      <p>{t("noActivity")}</p>
                     </div>
                   )}
                 </>
               ) : (
                 <div className="activity-modal__empty">
                   <AlertCircle size={40} />
-                  <p>Không thể tải dữ liệu hoạt động</p>
+                  <p>{t("activityDataError")}</p>
                 </div>
               )}
             </div>
@@ -1863,7 +1862,7 @@ export default function UsersPage() {
                   setActivityData(null);
                 }}
               >
-                Đóng
+                {t("close")}
               </button>
             </div>
           </div>

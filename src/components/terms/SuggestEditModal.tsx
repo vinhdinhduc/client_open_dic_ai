@@ -185,6 +185,8 @@ export default function SuggestEditModal({
 
     setSubmitting(true);
     try {
+      console.log("Check data send from client", data);
+      
       await suggestEdit(data);
       toast.success(tEdit("success"));
       onClose();

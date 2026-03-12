@@ -132,6 +132,9 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+  const handleGoHome = () => {
+    router.push("/");
+  };
 
   return (
     <div className="auth-page">
@@ -158,6 +161,7 @@ export default function LoginPage() {
               src="/images/logo.png"
               alt="UTB OpenDict"
               className="auth-card__logo-img"
+              onClick={handleGoHome}
             />
             <span className="auth-card__logo-text">UTB OpenDict</span>
           </div>

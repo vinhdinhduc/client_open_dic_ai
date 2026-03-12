@@ -910,12 +910,12 @@
     "assignPermissions": "Assign Permissions",
     "confirmUnlock": "Confirm Unlock",
     "confirmLock": "Confirm Lock Account",
-    "confirmUnlockMsg": "Are you sure you want to unlock this account?",
-    "confirmLockMsg": "Are you sure you want to lock this account?",
+    "confirmUnlockMsg": "Are you sure you want to unlock the account {name}?",
+    "confirmLockMsg": "Are you sure you want to lock the account {name}?",
     "lockWarning": "The user will not be able to log in when the account is locked.",
     "processing": "Processing...",
     "confirmDelete": "Confirm Delete",
-    "confirmDeleteMsg": "Are you sure you want to delete this user?",
+    "confirmDeleteMsg": "Are you sure you want to delete user {name}?",
     "deleteIrreversible": "This action cannot be undone.",
     "deleting": "Deleting...",
     "modPermissionsTitle": "Assign Moderator Permissions",
@@ -959,7 +959,14 @@
     "passwordWeak": "Weak",
     "passwordMedium": "Medium",
     "passwordStrong": "Strong",
-    "passwordVeryStrong": "Very Strong"
+    "passwordVeryStrong": "Very Strong",
+    "cancel": "Cancel",
+    "firstPage": "First page",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page",
+    "more": "More",
+    "genericError": "An error occurred"
   },
   "adminTerms": {
     "loading": "Loading terms...",
@@ -1000,7 +1007,10 @@
     "deleteIrreversible": "This action cannot be undone.",
     "cancel": "Cancel",
     "deleteSuccess": "Term deleted successfully.",
-    "deleteError": "An error occurred while deleting the term."
+    "deleteError": "An error occurred while deleting the term.",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page"
   },
   "adminCategories": {
     "loading": "Loading categories...",
@@ -1043,7 +1053,9 @@
     "confirmToggleActivate": "Are you sure you want to activate the category",
     "hiddenCategory": "Category hidden",
     "activatedCategory": "Category activated",
-    "toggleStatusError": "Could not update status"
+    "toggleStatusError": "Could not update status",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "adminComments": {
     "loading": "Loading comments...",
@@ -1076,7 +1088,21 @@
     "rejectSuccess": "Comment rejected",
     "rejectError": "Could not reject comment",
     "deleteSuccess": "Comment deleted",
-    "deleteError": "Could not delete comment"
+    "deleteError": "Could not delete comment",
+    "term": "Term",
+    "commentContent": "Comment Content",
+    "info": "Information",
+    "createdDate": "Created:",
+    "statusLabel": "Status:",
+    "moderatorNoteLabel": "Moderator note (required for rejection)",
+    "moderatorNotePlaceholder": "Enter reason if rejecting comment...",
+    "moderatorNoteTitle": "Moderator Note",
+    "close": "Close",
+    "confirmDelete": "Confirm Delete",
+    "deleteWarning": "Are you sure you want to delete this comment? This action cannot be undone.",
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "deletePermanent": "Delete permanently"
   },
   "adminFeedback": {
     "title": "Feedback & Moderator Applications",
@@ -1188,6 +1214,8 @@
     "optionalColumns": "Optional columns:",
     "optionalCol1": "Usage examples",
     "optionalCol2": "Part of speech",
+    "optionalColTermOther": "Terms in remaining 2 languages (if available)",
+    "optionalColDefOther": "Definitions in remaining 2 languages (if available)",
     "importStats": "Import Statistics",
     "success": "Success",
     "failed": "Failed",
@@ -1268,6 +1296,8 @@
     "detailLabel": "Detailed Explanation",
     "exampleLabel": "Example",
     "noteLabel": "Note",
+    "anonymous": "Anonymous",
+    "viewDetails": "View Details",
     "confirmApprove": "Confirm Approval",
     "confirmApproveMsg": "Are you sure you want to approve this contribution?",
     "approve": "Approve",
@@ -1363,7 +1393,14 @@
     "reasonInaccurate": "Inaccurate information",
     "reasonSpam": "Spam or advertising",
     "reasonInappropriate": "Inappropriate content",
-    "reasonOther": "Other reason"
+    "reasonOther": "Other reason",
+    "termLabel": "Term",
+    "unknown": "Unknown",
+    "anonymous": "Anonymous",
+    "firstPage": "First page",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page"
   },
   "adminSettings": {
     "title": "System Settings",
@@ -1379,6 +1416,8 @@
     "rateLimitConfigSubtitle": "Manage request limits to protect the system"
   },
   "moderatorLayout": {
+    "dashboard": "Dashboard",
+    "logoText": "UTB OpenDict Moderator",
     "terms": "Term Management",
     "categories": "Assigned Categories",
     "moderation": "Moderation",
@@ -1396,6 +1435,7 @@
   },
   "moderatorDashboard": {
     "loadError": "Could not load dashboard data",
+    "loading": "Loading data...",
     "title": "Moderator Dashboard",
     "welcome": "Hello {name}! Here is your moderation work overview.",
     "refresh": "Refresh",
@@ -1437,7 +1477,7 @@
     "loading": "Loading assigned categories...",
     "loadError": "Could not load assigned categories",
     "title": "Assigned Categories",
-    "welcome": "Hello {name}, you are managing {count} categories",
+    "welcome": "Hello <strong>{name}</strong>, you are managing <strong>{count}</strong> categories",
     "refresh": "Refresh",
     "totalCategories": "Categories",
     "totalTerms": "Terms",

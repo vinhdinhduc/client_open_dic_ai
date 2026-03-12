@@ -909,12 +909,12 @@
     "assignPermissions": "Phân quyền",
     "confirmUnlock": "Xác nhận mở khóa",
     "confirmLock": "Xác nhận khóa tài khoản",
-    "confirmUnlockMsg": "Bạn có chắc chắn muốn mở khóa tài khoản này?",
-    "confirmLockMsg": "Bạn có chắc chắn muốn khóa tài khoản này?",
+    "confirmUnlockMsg": "Bạn có chắc chắn muốn mở khóa tài khoản {name}?",
+    "confirmLockMsg": "Bạn có chắc chắn muốn khóa tài khoản {name}?",
     "lockWarning": "Người dùng sẽ không thể đăng nhập khi tài khoản bị khóa.",
     "processing": "Đang xử lý...",
     "confirmDelete": "Xác nhận xóa",
-    "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa người dùng này?",
+    "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa người dùng {name}?",
     "deleteIrreversible": "Hành động này không thể hoàn tác.",
     "deleting": "Đang xóa...",
     "modPermissionsTitle": "Phân quyền kiểm duyệt",
@@ -958,7 +958,14 @@
     "passwordWeak": "Yếu",
     "passwordMedium": "Trung bình",
     "passwordStrong": "Mạnh",
-    "passwordVeryStrong": "Rất mạnh"
+    "passwordVeryStrong": "Rất mạnh",
+    "cancel": "Hủy",
+    "firstPage": "Trang đầu",
+    "previousPage": "Trang trước",
+    "nextPage": "Trang sau",
+    "lastPage": "Trang cuối",
+    "more": "Thêm",
+    "genericError": "Có lỗi xảy ra"
   },
   "adminTerms": {
     "loading": "Đang tải danh sách thuật ngữ...",
@@ -999,7 +1006,10 @@
     "deleteIrreversible": "Hành động này không thể hoàn tác.",
     "cancel": "Hủy",
     "deleteSuccess": "Đã xóa thuật ngữ thành công.",
-    "deleteError": "Đã xảy ra lỗi khi xóa thuật ngữ."
+    "deleteError": "Đã xảy ra lỗi khi xóa thuật ngữ.",
+    "previousPage": "Trang trước",
+    "nextPage": "Trang sau",
+    "lastPage": "Trang cuối"
   },
   "adminCategories": {
     "loading": "Đang tải danh sách danh mục...",
@@ -1042,7 +1052,9 @@
     "confirmToggleActivate": "Bạn có chắc muốn kích hoạt danh mục",
     "hiddenCategory": "Đã ẩn danh mục",
     "activatedCategory": "Đã kích hoạt danh mục",
-    "toggleStatusError": "Không thể cập nhật trạng thái"
+    "toggleStatusError": "Không thể cập nhật trạng thái",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa"
   },
   "adminComments": {
     "loading": "Đang tải danh sách bình luận...",
@@ -1075,7 +1087,21 @@
     "rejectSuccess": "Đã từ chối bình luận",
     "rejectError": "Không thể từ chối bình luận",
     "deleteSuccess": "Đã xóa bình luận",
-    "deleteError": "Không thể xóa bình luận"
+    "deleteError": "Không thể xóa bình luận",
+    "term": "Thuật ngữ",
+    "commentContent": "Nội dung bình luận",
+    "info": "Thông tin",
+    "createdDate": "Ngày tạo:",
+    "statusLabel": "Trạng thái:",
+    "moderatorNoteLabel": "Ghi chú kiểm duyệt (bắt buộc khi từ chối)",
+    "moderatorNotePlaceholder": "Nhập lý do nếu từ chối bình luận...",
+    "moderatorNoteTitle": "Ghi chú của kiểm duyệt viên",
+    "close": "Đóng",
+    "confirmDelete": "Xác nhận xóa",
+    "deleteWarning": "Bạn có chắc chắn muốn xóa bình luận này? Hành động này không thể hoàn tác.",
+    "cancel": "Hủy",
+    "deleting": "Đang xóa...",
+    "deletePermanent": "Xóa vĩnh viễn"
   },
   "adminFeedback": {
     "title": "Phản hồi & Đăng ký kiểm duyệt",
@@ -1187,6 +1213,8 @@
     "optionalColumns": "Các cột tùy chọn:",
     "optionalCol1": "Ví dụ sử dụng",
     "optionalCol2": "Loại từ",
+    "optionalColTermOther": "Thuật ngữ 2 ngôn ngữ còn lại (nếu có)",
+    "optionalColDefOther": "Định nghĩa 2 ngôn ngữ còn lại (nếu có)",
     "importStats": "Thống kê nhập liệu",
     "success": "Thành công",
     "failed": "Thất bại",
@@ -1267,6 +1295,8 @@
     "detailLabel": "Giải thích chi tiết",
     "exampleLabel": "Ví dụ",
     "noteLabel": "Ghi chú",
+    "anonymous": "Ẩn danh",
+    "viewDetails": "Xem chi tiết",
     "confirmApprove": "Xác nhận phê duyệt",
     "confirmApproveMsg": "Bạn có chắc chắn muốn phê duyệt đóng góp này?",
     "approve": "Phê duyệt",
@@ -1362,7 +1392,14 @@
     "reasonInaccurate": "Thông tin không chính xác",
     "reasonSpam": "Spam hoặc quảng cáo",
     "reasonInappropriate": "Nội dung không phù hợp",
-    "reasonOther": "Lý do khác"
+    "reasonOther": "Lý do khác",
+    "termLabel": "Thuật ngữ",
+    "unknown": "Không xác định",
+    "anonymous": "Ẩn danh",
+    "firstPage": "Trang đầu",
+    "previousPage": "Trang trước",
+    "nextPage": "Trang sau",
+    "lastPage": "Trang cuối"
   },
   "adminSettings": {
     "title": "Cài đặt hệ thống",
@@ -1378,6 +1415,8 @@
     "rateLimitConfigSubtitle": "Quản lý giới hạn số lượng request để bảo vệ hệ thống"
   },
   "moderatorLayout": {
+    "dashboard": "Dashboard",
+    "logoText": "UTB OpenDict Moderator",
     "terms": "Quản lý thuật ngữ",
     "categories": "Danh mục phụ trách",
     "moderation": "Kiểm duyệt",
@@ -1395,6 +1434,7 @@
   },
   "moderatorDashboard": {
     "loadError": "Không thể tải dữ liệu dashboard",
+    "loading": "Đang tải dữ liệu...",
     "title": "Bảng điều khiển Kiểm duyệt viên",
     "welcome": "Xin chào {name}! Đây là tổng quan công việc kiểm duyệt của bạn.",
     "refresh": "Làm mới",
@@ -1436,7 +1476,7 @@
     "loading": "Đang tải danh mục phụ trách...",
     "loadError": "Không thể tải danh mục phụ trách",
     "title": "Danh mục phụ trách",
-    "welcome": "Xin chào {name}, bạn đang phụ trách {count} danh mục",
+    "welcome": "Xin chào <strong>{name}</strong>, bạn đang phụ trách <strong>{count}</strong> danh mục",
     "refresh": "Làm mới",
     "totalCategories": "Danh mục",
     "totalTerms": "Thuật ngữ",

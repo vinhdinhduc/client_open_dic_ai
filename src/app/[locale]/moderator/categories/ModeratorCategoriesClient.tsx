@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import axiosInstance from "@/lib/axios";
 import "./moderator-categories.scss";
@@ -52,6 +53,7 @@ interface ModeratorCategory {
 
 export default function ModeratorCategoriesPage() {
   const { user } = useAuth();
+  const t = useTranslations("moderatorCategories");
   const [categories, setCategories] = useState<ModeratorCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,7 +69,7 @@ export default function ModeratorCategoriesPage() {
       }
     } catch (error) {
       console.error("Error fetching moderator categories:", error);
-      toast.error("Không thể tải danh mục phụ trách");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -104,7 +106,7 @@ export default function ModeratorCategoriesPage() {
       <div className="moderator-categories">
         <div className="moderator-categories__loading">
           <Loader2 className="spin" size={32} />
-          <p>Đang tải danh mục phụ trách...</p>
+          <p>{t("loading")}</p>
         </div>
       </div>
     );
@@ -119,16 +121,19 @@ export default function ModeratorCategoriesPage() {
             <FolderTree size={24} />
           </div>
           <div className="header-text">
-            <h1>Danh mục phụ trách</h1>
+            <h1>{t("title")}</h1>
             <p>
-              Xin chào <strong>{user?.fullName}</strong>, bạn đang phụ trách{" "}
-              <strong>{categories.length}</strong> danh mục
+              {t.rich("welcome", {
+                name: user?.fullName || "",
+                count: categories.length,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </p>
           </div>
         </div>
         <button className="refresh-btn" onClick={fetchCategories}>
           <RefreshCw size={16} />
-          Làm mới
+          {t("refresh")}
         </button>
       </div>
 
@@ -140,7 +145,7 @@ export default function ModeratorCategoriesPage() {
           </div>
           <div className="stat-card__content">
             <span className="stat-card__value">{categories.length}</span>
-            <span className="stat-card__label">Danh mục</span>
+            <span className="stat-card__label">{t("totalCategories")}</span>
           </div>
         </div>
         <div className="stat-card stat-card--terms">
@@ -149,7 +154,7 @@ export default function ModeratorCategoriesPage() {
           </div>
           <div className="stat-card__content">
             <span className="stat-card__value">{totalStats.totalTerms}</span>
-            <span className="stat-card__label">Thuật ngữ</span>
+            <span className="stat-card__label">{t("totalTerms")}</span>
           </div>
         </div>
         <div className="stat-card stat-card--contributions">
@@ -160,7 +165,7 @@ export default function ModeratorCategoriesPage() {
             <span className="stat-card__value">
               {totalStats.totalPendingContributions}
             </span>
-            <span className="stat-card__label">Đóng góp chờ duyệt</span>
+            <span className="stat-card__label">{t("pendingContributions")}</span>
           </div>
         </div>
         <div className="stat-card stat-card--reports">
@@ -171,7 +176,7 @@ export default function ModeratorCategoriesPage() {
             <span className="stat-card__value">
               {totalStats.totalPendingReports}
             </span>
-            <span className="stat-card__label">Báo xấu chờ xử lý</span>
+            <span className="stat-card__label">{t("pendingReports")}</span>
           </div>
         </div>
       </div>
@@ -181,7 +186,7 @@ export default function ModeratorCategoriesPage() {
         <Search size={18} />
         <input
           type="text"
-          placeholder="Tìm kiếm danh mục..."
+          placeholder={t("searchPlaceholder")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -193,13 +198,13 @@ export default function ModeratorCategoriesPage() {
           <AlertTriangle size={48} />
           <h3>
             {searchTerm
-              ? "Không tìm thấy danh mục phù hợp"
-              : "Bạn chưa được phân quyền danh mục nào"}
+              ? t("noMatchingCategories")
+              : t("noAssignedCategories")}
           </h3>
           <p>
             {searchTerm
-              ? "Thử tìm kiếm với từ khóa khác"
-              : "Liên hệ quản trị viên để được phân quyền"}
+              ? t("tryOtherKeyword")
+              : t("contactAdmin")}
           </p>
         </div>
       ) : (
@@ -215,7 +220,7 @@ export default function ModeratorCategoriesPage() {
                     <FolderTree size={20} />
                   </div>
                   <div className="category-text">
-                    <h3>{category.name?.vi || "Không có tên"}</h3>
+                    <h3>{category.name?.vi || t("noName")}</h3>
                     {category.name?.en && (
                       <span className="category-name-en">
                         {category.name.en}
@@ -226,13 +231,13 @@ export default function ModeratorCategoriesPage() {
                 {category.stats?.totalPending > 0 && (
                   <span className="pending-badge">
                     <Clock size={12} />
-                    {category.stats.totalPending} chờ duyệt
+                    {t("pendingBadge", { count: category.stats.totalPending })}
                   </span>
                 )}
                 {category.stats?.totalPending === 0 && (
                   <span className="ok-badge">
                     <CheckCircle size={12} />
-                    Đã xử lý
+                    {t("resolvedBadge")}
                   </span>
                 )}
               </div>
@@ -248,15 +253,14 @@ export default function ModeratorCategoriesPage() {
               <div className="category-card__stats">
                 <div className="stat-item">
                   <BookOpen size={14} />
-                  <span>{category.stats?.termCount || 0} thuật ngữ</span>
+                  <span>{t("termsCount", { count: category.stats?.termCount || 0 })}</span>
                 </div>
                 <div
                   className={`stat-item ${(category.stats?.pendingContributions || 0) > 0 ? "stat-item--warning" : ""}`}
                 >
                   <GitPullRequest size={14} />
                   <span>
-                    {category.stats?.pendingContributions || 0} đóng góp chờ
-                    duyệt
+                    {t("contributionsCount", { count: category.stats?.pendingContributions || 0 })}
                   </span>
                 </div>
                 <div
@@ -264,7 +268,7 @@ export default function ModeratorCategoriesPage() {
                 >
                   <Flag size={14} />
                   <span>
-                    {category.stats?.pendingReports || 0} báo xấu chờ xử lý
+                    {t("reportsCount", { count: category.stats?.pendingReports || 0 })}
                   </span>
                 </div>
               </div>
@@ -276,7 +280,7 @@ export default function ModeratorCategoriesPage() {
                   className="action-btn action-btn--contributions"
                 >
                   <GitPullRequest size={14} />
-                  <span>Kiểm duyệt đóng góp</span>
+                  <span>{t("moderateContributions")}</span>
                   {(category.stats?.pendingContributions || 0) > 0 && (
                     <span className="action-badge">
                       {category.stats.pendingContributions}
@@ -288,7 +292,7 @@ export default function ModeratorCategoriesPage() {
                   className="action-btn action-btn--reports"
                 >
                   <Flag size={14} />
-                  <span>Xử lý báo xấu</span>
+                  <span>{t("handleReports")}</span>
                   {(category.stats?.pendingReports || 0) > 0 && (
                     <span className="action-badge">
                       {category.stats.pendingReports}
@@ -300,7 +304,7 @@ export default function ModeratorCategoriesPage() {
                   className="action-btn action-btn--view"
                 >
                   <Eye size={14} />
-                  <span>Xem thuật ngữ</span>
+                  <span>{t("viewTerms")}</span>
                   <ChevronRight size={14} />
                 </Link>
               </div>

@@ -20,11 +20,13 @@ import {
 import Link from "next/link";
 import toast from "react-hot-toast";
 import commentService, { type Comment } from "@/services/commentService";
+import { useTranslations } from "next-intl";
 import "./comments.scss";
 
 type TabType = "pending" | "approved" | "rejected" | "all";
 
 export default function CommentsPage() {
+  const t = useTranslations("adminComments");
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,7 +61,7 @@ export default function CommentsPage() {
       setTotalPages(result.pagination.pages);
     } catch (error) {
       console.error("Error fetching comments:", error);
-      toast.error("Không thể tải danh sách bình luận");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -87,15 +89,21 @@ export default function CommentsPage() {
     switch (status) {
       case "pending":
         return (
-          <span className="admin-badge admin-badge--warning">Chờ duyệt</span>
+          <span className="admin-badge admin-badge--warning">
+            {t("pending")}
+          </span>
         );
       case "approved":
         return (
-          <span className="admin-badge admin-badge--success">Đã duyệt</span>
+          <span className="admin-badge admin-badge--success">
+            {t("approved")}
+          </span>
         );
       case "rejected":
         return (
-          <span className="admin-badge admin-badge--danger">Đã từ chối</span>
+          <span className="admin-badge admin-badge--danger">
+            {t("rejected")}
+          </span>
         );
       default:
         return null;
@@ -111,13 +119,13 @@ export default function CommentsPage() {
         moderatorNote: moderatorNote || undefined,
       });
 
-      toast.success("Đã phê duyệt bình luận");
+      toast.success(t("approveSuccess"));
       setShowDetailModal(false);
       setSelectedComment(null);
       setModeratorNote("");
       fetchComments(); // Refresh list
     } catch (error) {
-      toast.error("Không thể phê duyệt bình luận");
+      toast.error(t("approveError"));
     } finally {
       setSubmitting(false);
     }
@@ -126,7 +134,7 @@ export default function CommentsPage() {
   // Reject comment
   const handleReject = async (id: string) => {
     if (!moderatorNote.trim()) {
-      toast.error("Vui lòng nhập lý do từ chối");
+      toast.error(t("rejectReasonRequired"));
       return;
     }
 
@@ -137,13 +145,13 @@ export default function CommentsPage() {
         moderatorNote,
       });
 
-      toast.success("Đã từ chối bình luận");
+      toast.success(t("rejectSuccess"));
       setShowDetailModal(false);
       setSelectedComment(null);
       setModeratorNote("");
       fetchComments(); // Refresh list
     } catch (error) {
-      toast.error("Không thể từ chối bình luận");
+      toast.error(t("rejectError"));
     } finally {
       setSubmitting(false);
     }
@@ -157,13 +165,13 @@ export default function CommentsPage() {
     try {
       await commentService.deleteComment(selectedComment._id);
 
-      toast.success("Đã xóa bình luận");
+      toast.success(t("deleteSuccess"));
       setShowDeleteConfirm(false);
       setShowDetailModal(false);
       setSelectedComment(null);
       fetchComments(); // Refresh list
     } catch (error) {
-      toast.error("Không thể xóa bình luận");
+      toast.error(t("deleteError"));
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +188,7 @@ export default function CommentsPage() {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
-        <p>Đang tải danh sách bình luận...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -190,10 +198,8 @@ export default function CommentsPage() {
       {/* Page Header */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-header__title">Kiểm duyệt bình luận</h1>
-          <p className="admin-page-header__subtitle">
-            Phê duyệt, từ chối hoặc xóa bình luận không phù hợp
-          </p>
+          <h1 className="admin-page-header__title">{t("title")}</h1>
+          <p className="admin-page-header__subtitle">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -205,7 +211,7 @@ export default function CommentsPage() {
           </div>
           <div>
             <span className="comment-stat__value">{stats.total}</span>
-            <span className="comment-stat__label">Tổng bình luận</span>
+            <span className="comment-stat__label">{t("totalComments")}</span>
           </div>
         </div>
         <div className="comment-stat comment-stat--warning">
@@ -214,7 +220,7 @@ export default function CommentsPage() {
           </div>
           <div>
             <span className="comment-stat__value">{stats.pending}</span>
-            <span className="comment-stat__label">Chờ duyệt</span>
+            <span className="comment-stat__label">{t("pending")}</span>
           </div>
         </div>
         <div className="comment-stat comment-stat--success">
@@ -223,7 +229,7 @@ export default function CommentsPage() {
           </div>
           <div>
             <span className="comment-stat__value">{stats.approved}</span>
-            <span className="comment-stat__label">Đã duyệt</span>
+            <span className="comment-stat__label">{t("approved")}</span>
           </div>
         </div>
         <div className="comment-stat comment-stat--danger">
@@ -232,7 +238,7 @@ export default function CommentsPage() {
           </div>
           <div>
             <span className="comment-stat__value">{stats.rejected}</span>
-            <span className="comment-stat__label">Đã từ chối</span>
+            <span className="comment-stat__label">{t("rejected")}</span>
           </div>
         </div>
       </div>
@@ -249,7 +255,7 @@ export default function CommentsPage() {
             }}
           >
             <Clock size={16} />
-            Chờ duyệt
+            {t("pending")}
             {stats.pending > 0 && (
               <span className="badge badge--warning">{stats.pending}</span>
             )}
@@ -262,7 +268,7 @@ export default function CommentsPage() {
             }}
           >
             <Check size={16} />
-            Đã duyệt
+            {t("approved")}
             <span className="badge badge--success">{stats.approved}</span>
           </button>
           <button
@@ -273,7 +279,7 @@ export default function CommentsPage() {
             }}
           >
             <XCircle size={16} />
-            Đã từ chối
+            {t("rejected")}
             <span className="badge badge--danger">{stats.rejected}</span>
           </button>
           <button
@@ -284,7 +290,7 @@ export default function CommentsPage() {
             }}
           >
             <MessageSquare size={16} />
-            Tất cả
+            {t("all")}
           </button>
         </div>
 
@@ -294,7 +300,7 @@ export default function CommentsPage() {
             <Search size={18} />
             <input
               type="text"
-              placeholder="Tìm kiếm bình luận..."
+              placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -338,7 +344,7 @@ export default function CommentsPage() {
                   target="_blank"
                 >
                   <ExternalLink size={12} />
-                  {comment.term?.term?.vi || "Không xác định"}
+                  {comment.term?.term?.vi || t("unknown")}
                 </Link>
               </div>
 
@@ -352,7 +358,7 @@ export default function CommentsPage() {
                 {comment.moderator && (
                   <span className="meta-item meta-item--success">
                     <User size={14} />
-                    Duyệt bởi: {comment.moderator.fullName}
+                    {t("approvedBy")} {comment.moderator.fullName}
                   </span>
                 )}
               </div>
@@ -363,7 +369,7 @@ export default function CommentsPage() {
                   onClick={() => openDetailModal(comment)}
                 >
                   <Eye size={16} />
-                  Chi tiết
+                  {t("details")}
                 </button>
 
                 {comment.status === "pending" && (
@@ -374,14 +380,14 @@ export default function CommentsPage() {
                       disabled={submitting}
                     >
                       <Check size={16} />
-                      Phê duyệt
+                      {t("approve")}
                     </button>
                     <button
                       className="admin-btn admin-btn--warning"
                       onClick={() => openDetailModal(comment)}
                     >
                       <XCircle size={16} />
-                      Từ chối
+                      {t("reject")}
                     </button>
                   </>
                 )}
@@ -394,7 +400,7 @@ export default function CommentsPage() {
                   }}
                 >
                   <Trash2 size={16} />
-                  Xóa
+                  {t("delete")}
                 </button>
               </div>
             </div>
@@ -405,11 +411,11 @@ export default function CommentsPage() {
         {comments.length === 0 && (
           <div className="admin-empty">
             <MessageSquare size={48} />
-            <h3>Không có bình luận nào</h3>
+            <h3>{t("noComments")}</h3>
             <p>
               {activeTab === "pending"
-                ? "Không có bình luận nào đang chờ duyệt"
-                : "Chưa có bình luận nào phù hợp với bộ lọc hiện tại"}
+                ? t("noPendingComments")
+                : t("noMatchingComments")}
             </p>
           </div>
         )}
@@ -418,9 +424,9 @@ export default function CommentsPage() {
         {comments.length > 0 && totalPages > 0 && (
           <div className="admin-pagination">
             <div className="admin-pagination__info">
-              Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-              {Math.min(currentPage * itemsPerPage, stats.total)} trong{" "}
-              {stats.total} bình luận
+              {t("showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+              {Math.min(currentPage * itemsPerPage, stats.total)} {t("of")}{" "}
+              {stats.total} {t("commentsLabel")}
             </div>
             <div className="admin-pagination__controls">
               <button
@@ -464,7 +470,7 @@ export default function CommentsPage() {
         >
           <div className="modal modal--md" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
-              <h2>Chi tiết bình luận</h2>
+              <h2>{t("commentDetails")}</h2>
               <button
                 className="modal__close"
                 onClick={() => setShowDetailModal(false)}
@@ -477,7 +483,7 @@ export default function CommentsPage() {
               <div className="detail-section">
                 <h4>
                   <User size={16} />
-                  Người bình luận
+                  {t("commenter")}
                 </h4>
                 <div className="author-detail">
                   <div className="author-avatar-lg">
@@ -498,14 +504,14 @@ export default function CommentsPage() {
               <div className="detail-section">
                 <h4>
                   <ExternalLink size={16} />
-                  Thuật ngữ
+                  {t("term")}
                 </h4>
                 <Link
                   href={`/terms/${selectedComment.term?._id || ""}`}
                   className="term-detail-link"
                   target="_blank"
                 >
-                  {selectedComment.term?.term?.vi || "Không xác định"}
+                  {selectedComment.term?.term?.vi || t("unknown")}
                   {selectedComment.term?.term?.en &&
                     ` (${selectedComment.term.term.en})`}
                 </Link>
@@ -515,7 +521,7 @@ export default function CommentsPage() {
               <div className="detail-section">
                 <h4>
                   <MessageSquare size={16} />
-                  Nội dung bình luận
+                  {t("commentContent")}
                 </h4>
                 <div className="comment-content-box">
                   <p>{selectedComment.content}</p>
@@ -526,13 +532,13 @@ export default function CommentsPage() {
               <div className="detail-section">
                 <h4>
                   <Calendar size={16} />
-                  Thông tin
+                  {t("info")}
                 </h4>
                 <div className="comment-stats-detail">
                   <div className="stat-item">
                     <Calendar size={16} />
                     <span>
-                      Ngày tạo:{" "}
+                      {t("createdDate")}{" "}
                       {new Date(selectedComment.createdAt).toLocaleDateString(
                         "vi-VN",
                         {
@@ -546,7 +552,7 @@ export default function CommentsPage() {
                     </span>
                   </div>
                   <div className="stat-item">
-                    Trạng thái: {getStatusBadge(selectedComment.status)}
+                    {t("statusLabel")} {getStatusBadge(selectedComment.status)}
                   </div>
                 </div>
               </div>
@@ -554,11 +560,11 @@ export default function CommentsPage() {
               {/* Moderator Note Input (for pending comments) */}
               {selectedComment.status === "pending" && (
                 <div className="moderator-note-section">
-                  <label>Ghi chú kiểm duyệt (bắt buộc khi từ chối)</label>
+                  <label>{t("moderatorNoteLabel")}</label>
                   <textarea
                     value={moderatorNote}
                     onChange={(e) => setModeratorNote(e.target.value)}
-                    placeholder="Nhập lý do nếu từ chối bình luận..."
+                    placeholder={t("moderatorNotePlaceholder")}
                     rows={3}
                   />
                 </div>
@@ -569,7 +575,7 @@ export default function CommentsPage() {
                 <div className="detail-section">
                   <h4>
                     <AlertTriangle size={16} />
-                    Ghi chú của kiểm duyệt viên
+                    {t("moderatorNoteTitle")}
                   </h4>
                   <div className="comment-content-box">
                     <p>{selectedComment.moderatorNote}</p>
@@ -582,7 +588,7 @@ export default function CommentsPage() {
                 className="admin-btn admin-btn--secondary"
                 onClick={() => setShowDetailModal(false)}
               >
-                Đóng
+                                {t("close")}
               </button>
 
               {selectedComment.status === "pending" && (
@@ -593,7 +599,7 @@ export default function CommentsPage() {
                     disabled={submitting}
                   >
                     <XCircle size={16} />
-                    Từ chối
+                    {t("reject")}
                   </button>
                   <button
                     className="admin-btn admin-btn--success"
@@ -601,7 +607,7 @@ export default function CommentsPage() {
                     disabled={submitting}
                   >
                     <Check size={16} />
-                    Phê duyệt
+                    {t("approve")}
                   </button>
                 </>
               )}
@@ -611,7 +617,7 @@ export default function CommentsPage() {
                 onClick={() => setShowDeleteConfirm(true)}
               >
                 <Trash2 size={16} />
-                Xóa
+                {t("delete")}
               </button>
             </div>
           </div>
@@ -626,7 +632,7 @@ export default function CommentsPage() {
         >
           <div className="modal modal--sm" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
-              <h2>Xác nhận xóa</h2>
+              <h2>{t("confirmDelete")}</h2>
               <button
                 className="modal__close"
                 onClick={() => setShowDeleteConfirm(false)}
@@ -638,8 +644,7 @@ export default function CommentsPage() {
               <div className="delete-warning">
                 <AlertTriangle size={48} />
                 <p>
-                  Bạn có chắc chắn muốn xóa bình luận này? Hành động này không
-                  thể hoàn tác.
+                  {t("deleteWarning")}
                 </p>
                 <div className="delete-preview">
                   <p>
@@ -658,14 +663,14 @@ export default function CommentsPage() {
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={submitting}
               >
-                Hủy
+                {t("cancel")}
               </button>
               <button
                 className="admin-btn admin-btn--danger"
                 onClick={handleDelete}
                 disabled={submitting}
               >
-                {submitting ? "Đang xóa..." : "Xóa vĩnh viễn"}
+                {submitting ? t("deleting") : t("deletePermanent")}
               </button>
             </div>
           </div>
