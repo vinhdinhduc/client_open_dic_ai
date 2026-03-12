@@ -477,9 +477,9 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
                 className="form-select"
                 disabled={submitting}
               >
-                {PART_OF_SPEECH_OPTIONS.map((opt) => (
+                {PART_OF_SPEECH_KEYS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </option>
                 ))}
               </select>
