@@ -15,8 +15,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Trash2,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import contributionService, {
   Contribution,
 } from "@/services/contributionService";
@@ -26,7 +30,14 @@ import ConfirmModal, {
 } from "../../../../../components/common/ConfirmModal";
 import "../../../admin/moderation/moderation.scss";
 
-export default function ModeratorContributionPage() {
+interface ModeratorContributionsClientProps {
+  trashMode?: boolean;
+}
+
+export default function ModeratorContributionPage({
+  trashMode = false,
+}: ModeratorContributionsClientProps) {
+  const t = useTranslations("moderationContributions");
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -41,11 +52,11 @@ export default function ModeratorContributionPage() {
 
   // Quick rejection reasons
   const quickRejectionReasons = [
-    "Nội dung không chính xác",
-    "Thiếu thông tin bắt buộc",
-    "Trùng lặp với thuật ngữ hiện tại",
-    "Không phù hợp với quy định",
-    "Cần bổ sung thêm thông tin",
+    t("quickRejectReasons.inaccurate"),
+    t("quickRejectReasons.missingInfo"),
+    t("quickRejectReasons.duplicate"),
+    t("quickRejectReasons.inappropriate"),
+    t("quickRejectReasons.needsMore"),
   ];
 
   // Confirm Modal
@@ -53,6 +64,12 @@ export default function ModeratorContributionPage() {
   const [confirmAction, setConfirmAction] = useState<"approve" | "reject">(
     "approve",
   );
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkRejectNote, setBulkRejectNote] = useState("");
+  const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
+  const listPath = "/moderator/moderation/contributions";
+  const trashPath = "/moderator/moderation/contributions/trash";
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,8 +88,12 @@ export default function ModeratorContributionPage() {
         limit: itemsPerPage,
       };
 
-      if (statusFilter !== "all") {
+      if (statusFilter !== "all" && !trashMode) {
         params.status = statusFilter;
+      }
+      if (trashMode) {
+        params.includeDeleted = true;
+        params.onlyDeleted = true;
       }
       if (typeFilter !== "all") {
         params.type = typeFilter;
@@ -88,7 +109,9 @@ export default function ModeratorContributionPage() {
         setTotalItems(response.data.pagination?.total || 0);
 
         // Calculate pending count
-        if (statusFilter === "all") {
+        if (trashMode) {
+          setPendingCount(0);
+        } else if (statusFilter === "all") {
           const pendingRes = await contributionService.getContributions({
             status: "pending",
             limit: 1,
@@ -102,11 +125,11 @@ export default function ModeratorContributionPage() {
       }
     } catch (error) {
       console.error("Error fetching contributions:", error);
-      toast.error("Không thể tải danh sách đóng góp");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, typeFilter, itemsPerPage]);
+  }, [currentPage, statusFilter, typeFilter, itemsPerPage, trashMode, t]);
 
   useEffect(() => {
     fetchContributions();
@@ -145,7 +168,7 @@ export default function ModeratorContributionPage() {
       );
 
       if (response.success) {
-        toast.success("Đóng góp đã được phê duyệt");
+        toast.success(t("approveSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         setSelectedContribution(null);
@@ -153,7 +176,7 @@ export default function ModeratorContributionPage() {
       }
     } catch (error) {
       console.error("Error approving contribution:", error);
-      toast.error("Không thể phê duyệt đóng góp");
+      toast.error(t("approveError"));
     } finally {
       setActionLoading(null);
     }
@@ -165,7 +188,7 @@ export default function ModeratorContributionPage() {
 
     // Validate rejection reason
     if (!rejectionReason.trim()) {
-      toast.error("Vui lòng nhập lý do từ chối");
+      toast.error(t("rejectReasonRequired"));
       return;
     }
 
@@ -181,7 +204,7 @@ export default function ModeratorContributionPage() {
       );
 
       if (response.success) {
-        toast.success("Đóng góp đã bị từ chối");
+        toast.success(t("rejectSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         setRejectionReason("");
@@ -190,9 +213,125 @@ export default function ModeratorContributionPage() {
       }
     } catch (error) {
       console.error("Error rejecting contribution:", error);
-      toast.error("Không thể từ chối đóng góp");
+      toast.error(t("rejectError"));
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (
+      selectedIds.size === pendingFilteredIds.length &&
+      pendingFilteredIds.length > 0
+    ) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pendingFilteredIds));
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      setBulkLoading(true);
+      const res = await contributionService.bulkApprove(
+        Array.from(selectedIds),
+        moderatorNote || undefined,
+      );
+      if (res.success) {
+        toast.success(t("bulkApproveSuccess", { count: res.data.approved }));
+        setSelectedIds(new Set());
+        setModeratorNote("");
+        fetchContributions();
+      }
+    } catch {
+      toast.error(t("bulkApproveError"));
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    if (selectedIds.size === 0) return;
+    if (!bulkRejectNote.trim()) {
+      toast.error(t("rejectReasonRequired"));
+      return;
+    }
+    try {
+      setBulkLoading(true);
+      const res = await contributionService.bulkReject(
+        Array.from(selectedIds),
+        bulkRejectNote,
+      );
+      if (res.success) {
+        toast.success(t("bulkRejectSuccess", { count: res.data.rejected }));
+        setSelectedIds(new Set());
+        setBulkRejectNote("");
+        setShowBulkRejectModal(false);
+        fetchContributions();
+      }
+    } catch {
+      toast.error(t("bulkRejectError"));
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleMoveToTrash = async (contributionId: string) => {
+    if (!confirm(t("confirmMoveToTrash"))) {
+      return;
+    }
+
+    try {
+      const res = await contributionService.deleteContribution(contributionId);
+      if (res.success) {
+        toast.success(t("moveToTrashSuccess"));
+        fetchContributions();
+      } else {
+        toast.error(res.message || t("moveToTrashError"));
+      }
+    } catch {
+      toast.error(t("moveToTrashError"));
+    }
+  };
+
+  const handleRestore = async (contributionId: string) => {
+    try {
+      const res = await contributionService.restoreContribution(contributionId);
+      if (res.success) {
+        toast.success(t("restoreSuccess"));
+        fetchContributions();
+      } else {
+        toast.error(res.message || t("restoreError"));
+      }
+    } catch {
+      toast.error(t("restoreError"));
+    }
+  };
+
+  const handleEmptyTrash = async () => {
+    if (!confirm(t("confirmEmptyTrash"))) {
+      return;
+    }
+    try {
+      const res = await contributionService.emptyContributionTrash();
+      if (res.success) {
+        toast.success(t("emptyTrashSuccess", { count: res.data.deletedCount }));
+        fetchContributions();
+      } else {
+        toast.error(res.message || t("emptyTrashError"));
+      }
+    } catch {
+      toast.error(t("emptyTrashError"));
     }
   };
 
@@ -268,6 +407,10 @@ export default function ModeratorContributionPage() {
     );
   });
 
+  const pendingFilteredIds = filteredContributions
+    .filter((c) => c.status === "pending")
+    .map((c) => c._id);
+
   const closeModal = () => {
     setShowDetailModal(false);
     setModeratorNote("");
@@ -311,7 +454,33 @@ export default function ModeratorContributionPage() {
           </div>
         </div>
         <div className="header-actions">
-          {pendingCount > 0 && (
+          {trashMode ? (
+            <>
+              <button
+                className="btn btn--danger btn--icon"
+                onClick={handleEmptyTrash}
+                title="Lam rong thung rac"
+              >
+                <Trash2 size={16} />
+              </button>
+              <Link
+                href={listPath}
+                className="btn btn--secondary btn--icon"
+                title="Danh sach dong gop"
+              >
+                <GitPullRequest size={16} />
+              </Link>
+            </>
+          ) : (
+            <Link
+              href={trashPath}
+              className="btn btn--secondary btn--icon"
+              title="Thung rac"
+            >
+              <Trash2 size={16} />
+            </Link>
+          )}
+          {!trashMode && pendingCount > 0 && (
             <div className="header-badge header-badge--contribution">
               <AlertTriangle size={16} />
               <span>{pendingCount} gợi ý chờ duyệt</span>
@@ -326,6 +495,89 @@ export default function ModeratorContributionPage() {
           </button>
         </div>
       </div>
+
+      {!trashMode && selectedIds.size > 0 && (
+        <div className="bulk-action-bar">
+          <span className="bulk-action-bar__count">
+            Đã chọn {selectedIds.size} đóng góp
+          </span>
+          <div className="bulk-action-bar__actions">
+            <button
+              className="btn btn--success btn--sm"
+              onClick={handleBulkApprove}
+              disabled={bulkLoading}
+            >
+              {bulkLoading ? (
+                <Loader2 size={14} className="spinning" />
+              ) : (
+                <CheckCircle size={14} />
+              )}
+              Duyệt đã chọn
+            </button>
+            <button
+              className="btn btn--danger btn--sm"
+              onClick={() => setShowBulkRejectModal(true)}
+              disabled={bulkLoading}
+            >
+              <XCircle size={14} />
+              Từ chối đã chọn
+            </button>
+            <button
+              className="btn btn--secondary btn--sm"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Bỏ chọn
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!trashMode && showBulkRejectModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowBulkRejectModal(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Từ chối {selectedIds.size} đóng góp</h3>
+            <div className="form-group" style={{ marginTop: "1rem" }}>
+              <label>
+                Lý do từ chối <span style={{ color: "red" }}>*</span>
+              </label>
+              <textarea
+                value={bulkRejectNote}
+                onChange={(e) => setBulkRejectNote(e.target.value)}
+                rows={4}
+                placeholder="Nhập lý do từ chối hàng loạt..."
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "0.5rem",
+                justifyContent: "flex-end",
+                marginTop: "1rem",
+              }}
+            >
+              <button
+                className="btn btn--secondary"
+                onClick={() => setShowBulkRejectModal(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="btn btn--danger"
+                onClick={handleBulkReject}
+                disabled={bulkLoading}
+              >
+                {bulkLoading ? (
+                  <Loader2 size={14} className="spinning" />
+                ) : null}
+                Xác nhận từ chối
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="moderation-page__stats">
@@ -352,16 +604,20 @@ export default function ModeratorContributionPage() {
         </div>
 
         <div className="filter-group">
-          <Filter size={18} />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="pending">Chờ duyệt</option>
-            <option value="approved">Đã duyệt</option>
-            <option value="rejected">Đã từ chối</option>
-          </select>
+          {!trashMode && (
+            <>
+              <Filter size={18} />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="approved">Đã duyệt</option>
+                <option value="rejected">Đã từ chối</option>
+              </select>
+            </>
+          )}
 
           <select
             value={typeFilter}
@@ -386,6 +642,19 @@ export default function ModeratorContributionPage() {
             <table>
               <thead>
                 <tr>
+                  {!trashMode && (
+                    <th>
+                      <input
+                        type="checkbox"
+                        checked={
+                          pendingFilteredIds.length > 0 &&
+                          selectedIds.size === pendingFilteredIds.length
+                        }
+                        onChange={toggleSelectAll}
+                        aria-label="Chọn tất cả đóng góp chờ duyệt"
+                      />
+                    </th>
+                  )}
                   <th>Thuật ngữ</th>
                   <th>Loại</th>
                   <th>Danh mục</th>
@@ -398,7 +667,7 @@ export default function ModeratorContributionPage() {
               <tbody>
                 {filteredContributions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="empty-state">
+                    <td colSpan={trashMode ? 7 : 8} className="empty-state">
                       <GitPullRequest size={48} />
                       <p>Không có gợi ý nào</p>
                     </td>
@@ -407,9 +676,21 @@ export default function ModeratorContributionPage() {
                   filteredContributions.map((contribution) => {
                     const statusBadge = getStatusBadge(contribution.status);
                     const typeBadge = getTypeBadge(contribution.type);
+                    const isPending = contribution.status === "pending";
 
                     return (
                       <tr key={contribution._id}>
+                        {!trashMode && (
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(contribution._id)}
+                              disabled={!isPending}
+                              onChange={() => toggleSelect(contribution._id)}
+                              aria-label={`Chọn đóng góp ${getTermName(contribution)}`}
+                            />
+                          </td>
+                        )}
                         <td className="target-cell">
                           <span className="target-title">
                             {getTermName(contribution)}
@@ -450,7 +731,7 @@ export default function ModeratorContributionPage() {
                           >
                             <Eye size={16} />
                           </button>
-                          {contribution.status === "pending" && (
+                          {contribution.status === "pending" && !trashMode && (
                             <>
                               <button
                                 className="action-btn action-btn--approve"
@@ -481,6 +762,26 @@ export default function ModeratorContributionPage() {
                                 <XCircle size={16} />
                               </button>
                             </>
+                          )}
+                          {!trashMode && contribution.status !== "approved" && (
+                            <button
+                              className="action-btn action-btn--reject"
+                              title="Chuyển vào thùng rác"
+                              onClick={() =>
+                                handleMoveToTrash(contribution._id)
+                              }
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                          {trashMode && (
+                            <button
+                              className="action-btn action-btn--approve"
+                              title="Khôi phục"
+                              onClick={() => handleRestore(contribution._id)}
+                            >
+                              <RotateCcw size={16} />
+                            </button>
                           )}
                         </td>
                       </tr>
@@ -531,7 +832,9 @@ export default function ModeratorContributionPage() {
                   </button>
                   {getPageNumbers().map((page, index) =>
                     page === "..." ? (
-                      <span key={index} className="admin-pagination__ellipsis">...</span>
+                      <span key={index} className="admin-pagination__ellipsis">
+                        ...
+                      </span>
                     ) : (
                       <button
                         key={index}

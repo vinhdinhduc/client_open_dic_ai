@@ -14,10 +14,14 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { Report, ReportStats } from "@/services/reportService";
 import {
+  deleteReport,
   getReports,
   getReportStats,
   resolveReport,
@@ -27,6 +31,7 @@ import ConfirmModal from "@/components/common/ConfirmModal";
 import "../../../admin/moderation/moderation.scss";
 
 export default function ModeratorReportPage() {
+  const t = useTranslations("moderationReports");
   const [reports, setReports] = useState<Report[]>([]);
   const [stats, setStats] = useState<ReportStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,11 +72,11 @@ export default function ModeratorReportPage() {
       }
     } catch (error) {
       console.error("Error fetching reports:", error);
-      toast.error("Không thể tải danh sách báo cáo");
+      toast.error(t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, itemsPerPage]);
+  }, [currentPage, statusFilter, itemsPerPage, t]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -104,7 +109,7 @@ export default function ModeratorReportPage() {
       });
 
       if (response.success) {
-        toast.success("Báo cáo đã được xử lý thành công");
+        toast.success(t("resolveSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         setSelectedAction("none");
@@ -113,7 +118,7 @@ export default function ModeratorReportPage() {
       }
     } catch (error) {
       console.error("Error resolving report:", error);
-      toast.error("Không thể xử lý báo cáo");
+      toast.error(t("resolveError"));
     } finally {
       setActionLoading(null);
     }
@@ -128,7 +133,7 @@ export default function ModeratorReportPage() {
       });
 
       if (response.success) {
-        toast.success("Báo cáo đã được bỏ qua");
+        toast.success(t("dismissSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
         fetchReports();
@@ -136,7 +141,7 @@ export default function ModeratorReportPage() {
       }
     } catch (error) {
       console.error("Error dismissing report:", error);
-      toast.error("Không thể bỏ qua báo cáo");
+      toast.error(t("dismissError"));
     } finally {
       setActionLoading(null);
     }
@@ -158,18 +163,37 @@ export default function ModeratorReportPage() {
     setReportToDismiss(null);
   };
 
+  const handleMoveToTrash = async (reportId: string) => {
+    if (!confirm(t("confirmMoveToTrash"))) {
+      return;
+    }
+
+    try {
+      const res = await deleteReport(reportId);
+      if (res.success) {
+        toast.success(t("moveToTrashSuccess"));
+        fetchReports();
+        fetchStats();
+      } else {
+        toast.error(res.message || t("moveToTrashError"));
+      }
+    } catch {
+      toast.error(t("moveToTrashError"));
+    }
+  };
+
   const getReasonText = (reason: string) => {
     switch (reason) {
       case "duplicate":
-        return "Thuật ngữ trùng lặp";
+        return t("reasonDuplicate");
       case "incorrect":
-        return "Thông tin không chính xác";
+        return t("reasonInaccurate");
       case "spam":
-        return "Spam hoặc quảng cáo";
+        return t("reasonSpam");
       case "inappropriate":
-        return "Nội dung không phù hợp";
+        return t("reasonInappropriate");
       case "other":
-        return "Lý do khác";
+        return t("reasonOther");
       default:
         return reason;
     }
@@ -177,9 +201,9 @@ export default function ModeratorReportPage() {
 
   const getStatusBadge = (status: Report["status"]) => {
     const statusConfig = {
-      pending: { label: "Chờ xử lý", className: "badge--warning" },
-      resolved: { label: "Đã xử lý", className: "badge--success" },
-      rejected: { label: "Đã từ chối", className: "badge--secondary" },
+      pending: { label: t("pending"), className: "badge--warning" },
+      resolved: { label: t("resolved"), className: "badge--success" },
+      rejected: { label: t("rejected"), className: "badge--secondary" },
     };
     return statusConfig[status] || statusConfig.pending;
   };
@@ -263,6 +287,13 @@ export default function ModeratorReportPage() {
           </div>
         </div>
         <div className="header-actions">
+          <Link
+            href="/moderator/moderation/reports/trash"
+            className="btn btn--secondary btn--icon"
+            title="Thung rac"
+          >
+            <Trash2 size={16} />
+          </Link>
           {pendingCount > 0 && (
             <div className="header-badge">
               <AlertTriangle size={16} />
@@ -425,6 +456,15 @@ export default function ModeratorReportPage() {
                                 <XCircle size={16} />
                               </button>
                             </>
+                          )}
+                          {report.status !== "pending" && (
+                            <button
+                              className="action-btn action-btn--reject"
+                              title="Chuyen vao thung rac"
+                              onClick={() => handleMoveToTrash(report._id)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           )}
                         </td>
                       </tr>

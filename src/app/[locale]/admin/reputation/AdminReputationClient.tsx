@@ -6,6 +6,7 @@ import reputationService, {
   LeaderboardEntry,
   RedemptionRequest,
 } from "@/services/reputationService";
+import { getUsers } from "@/services/userService";
 import { toast } from "react-hot-toast";
 import {
   Award,
@@ -17,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  User,
 } from "lucide-react";
 import "./admin-reputation.scss";
 
@@ -37,6 +39,12 @@ export default function AdminReputationClient() {
 
   // Adjust form
   const [adjustUserId, setAdjustUserId] = useState("");
+  const [adjustUserName, setAdjustUserName] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [userOptions, setUserOptions] = useState<
+    Array<{ _id: string; fullName: string; email: string }>
+  >([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [adjustPoints, setAdjustPoints] = useState(0);
   const [adjustDesc, setAdjustDesc] = useState("");
   const [adjusting, setAdjusting] = useState(false);
@@ -87,6 +95,35 @@ export default function AdminReputationClient() {
     if (activeTab === "redemptions") loadRedemptions();
   }, [activeTab, loadRedemptions]);
 
+  useEffect(() => {
+    if (activeTab !== "adjust") return;
+
+    const timer = setTimeout(async () => {
+      try {
+        setLoadingUsers(true);
+        const res = await getUsers({
+          page: 1,
+          limit: 20,
+          search: userSearch || undefined,
+        });
+        const users = res.data?.users || [];
+        setUserOptions(
+          users.map((u) => ({
+            _id: u._id,
+            fullName: u.fullName,
+            email: u.email,
+          })),
+        );
+      } catch {
+        setUserOptions([]);
+      } finally {
+        setLoadingUsers(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [activeTab, userSearch]);
+
   const handleAdjust = async () => {
     if (!adjustUserId.trim() || !adjustDesc.trim()) return;
     setAdjusting(true);
@@ -96,12 +133,14 @@ export default function AdminReputationClient() {
         points: adjustPoints,
         description: adjustDesc.trim(),
       });
-      toast.success(t("adjustSubmit"));
+      toast.success(t("toastAdjustSuccess"));
       setAdjustUserId("");
+      setAdjustUserName("");
+      setUserSearch("");
       setAdjustPoints(0);
       setAdjustDesc("");
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error");
+      toast.error(err.response?.data?.message || t("toastErrorDefault"));
     } finally {
       setAdjusting(false);
     }
@@ -113,12 +152,16 @@ export default function AdminReputationClient() {
         status,
         note: reviewNote,
       });
-      toast.success(status === "approved" ? t("approved") : t("rejected"));
+      toast.success(
+        status === "approved"
+          ? t("toastReviewApproved")
+          : t("toastReviewRejected"),
+      );
       setReviewingId(null);
       setReviewNote("");
       loadRedemptions();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error");
+      toast.error(err.response?.data?.message || t("toastErrorDefault"));
     }
   };
 
@@ -132,9 +175,9 @@ export default function AdminReputationClient() {
       a.download = `certificate-${id}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(t("certificateDownloaded"));
+      toast.success(t("toastCertificateDownloaded"));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error");
+      toast.error(err.response?.data?.message || t("toastErrorDefault"));
     } finally {
       setDownloadingId(null);
     }
@@ -378,13 +421,42 @@ export default function AdminReputationClient() {
           <div className="adjust-form">
             <h3>{t("adminAdjust")}</h3>
             <div className="form-group">
-              <label>User ID</label>
-              <input
-                type="text"
-                value={adjustUserId}
-                onChange={(e) => setAdjustUserId(e.target.value)}
-                placeholder="MongoDB User ID"
-              />
+              <label>{t("adjustUser")}</label>
+              <div className="user-picker">
+                <div className="user-picker__search-wrap">
+                  <input
+                    type="text"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder={t("adjustSearchPlaceholder")}
+                  />
+                  {loadingUsers && (
+                    <Loader2 className="spin user-picker__loading" size={14} />
+                  )}
+                </div>
+                <select
+                  className="user-picker__select"
+                  value={adjustUserId}
+                  onChange={(e) => {
+                    const userId = e.target.value;
+                    setAdjustUserId(userId);
+                    const selected = userOptions.find((u) => u._id === userId);
+                    setAdjustUserName(selected?.fullName || "");
+                  }}
+                >
+                  <option value="">{t("adjustSelectUser")}</option>
+                  {userOptions.map((u) => (
+                    <option key={u._id} value={u._id}>
+                      {u.fullName} - {u.email}
+                    </option>
+                  ))}
+                </select>
+                {adjustUserName && (
+                  <small className="user-picker__selected">
+                    {t("adjustSelectedUser", { user: adjustUserName })}
+                  </small>
+                )}
+              </div>
             </div>
             <div className="form-group">
               <label>{t("adjustPoints")}</label>
@@ -400,7 +472,7 @@ export default function AdminReputationClient() {
                 type="text"
                 value={adjustDesc}
                 onChange={(e) => setAdjustDesc(e.target.value)}
-                placeholder="Lý do điều chỉnh..."
+                placeholder={t("adjustDescriptionPlaceholder")}
               />
             </div>
             <button

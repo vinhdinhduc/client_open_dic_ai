@@ -37,6 +37,8 @@ export interface TermCardData {
   favoritesCount?: number; // Alias for backward compatibility
   commentCount?: number;
   status?: "pending" | "approved" | "rejected";
+  isDeleted?: boolean;
+  deletedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
   relatedTerms?: RelatedTerm[];

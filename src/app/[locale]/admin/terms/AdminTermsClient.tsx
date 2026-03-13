@@ -19,6 +19,7 @@ import {
   Tag,
   Heart,
   MessageCircle,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -28,6 +29,8 @@ import {
   getModeratorTerms,
   getTermStats,
   deleteTerm,
+  restoreTerm,
+  emptyTermTrash,
 } from "@/services/termService";
 import categoryService, { Category } from "@/services/categoryService";
 import { useLanguage } from "@/hooks";
@@ -56,15 +59,22 @@ const getCategoryName = (
 
 interface TermsPageProps {
   isModerator?: boolean;
+  initialStatusFilter?: "all" | "approved" | "pending" | "rejected" | "trash";
 }
 
-export default function TermsPage({ isModerator = false }: TermsPageProps) {
+type StatusFilter = NonNullable<TermsPageProps["initialStatusFilter"]>;
+
+export default function TermsPage({
+  isModerator = false,
+  initialStatusFilter = "all",
+}: TermsPageProps) {
   const [terms, setTerms] = useState<Term[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] =
+    useState<StatusFilter>(initialStatusFilter);
   const [selectedTerm, setSelectedTerm] = useState<Term | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -83,6 +93,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
   const { currentLanguage } = useLanguage();
   const router = useRouter();
   const t = useTranslations("adminTerms");
+  const termsBasePath = isModerator ? "/moderator/terms" : "/admin/terms";
 
   // Debounce search
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -175,12 +186,18 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
     setLoading(true);
     try {
       const fetchFn = isModerator ? getModeratorTerms : getAllTerms;
+      const isTrashMode = statusFilter === "trash";
+      const apiStatus = isTrashMode ? "all" : statusFilter;
       const resultTerm: ApiResponse<GetTermsAdminResponse> = await fetchFn(
         categoryFilter,
-        statusFilter,
+        apiStatus,
         currentPage,
         itemsPerPage,
         debouncedSearch,
+        {
+          includeDeleted: isTrashMode,
+          onlyDeleted: isTrashMode,
+        },
       );
 
       if (resultTerm.success) {
@@ -188,9 +205,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
         setTotalPages(resultTerm.data.pagination.pages);
         setTotalItems(resultTerm.data.pagination.total);
       } else {
-        toast.error(
-          resultTerm.message || t("loadError"),
-        );
+        toast.error(resultTerm.message || t("loadError"));
       }
     } catch (error) {
       console.error("Error fetching terms:", error);
@@ -235,14 +250,22 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
     switch (status) {
       case "approved":
         return (
-          <span className="admin-badge admin-badge--success">{t("approved")}</span>
+          <span className="admin-badge admin-badge--success">
+            {t("approved")}
+          </span>
         );
       case "pending":
         return (
-          <span className="admin-badge admin-badge--warning">{t("pending")}</span>
+          <span className="admin-badge admin-badge--warning">
+            {t("pending")}
+          </span>
         );
       case "rejected":
-        return <span className="admin-badge admin-badge--danger">{t("rejected")}</span>;
+        return (
+          <span className="admin-badge admin-badge--danger">
+            {t("rejected")}
+          </span>
+        );
       default:
         return null;
     }
@@ -279,6 +302,38 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
       }
     }
   };
+
+  const handleRestore = async (termId: string) => {
+    try {
+      const res = await restoreTerm(termId);
+      if (res.success) {
+        toast.success(t("restoreSuccess"));
+        fetchTerms();
+      } else {
+        toast.error(res.message || t("restoreError"));
+      }
+    } catch {
+      toast.error(t("restoreError"));
+    }
+  };
+
+  const handleEmptyTrash = async () => {
+    if (!confirm(t("confirmEmptyTrash"))) {
+      return;
+    }
+
+    try {
+      const res = await emptyTermTrash();
+      if (res.success) {
+        toast.success(t("emptyTrashSuccess", { count: res.data.deletedCount }));
+        fetchTerms();
+      } else {
+        toast.error(res.message || t("emptyTrashError"));
+      }
+    } catch {
+      toast.error(t("emptyTrashError"));
+    }
+  };
   const handleEditTerm = (term: Term) => {
     router.push(`/admin/terms/edit/${term._id}`);
   };
@@ -303,12 +358,27 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
         <div>
           <h1 className="admin-page-header__title">{t("title")}</h1>
           <p className="admin-page-header__subtitle">
-            {isModerator
-              ? t("subtitleModerator")
-              : t("subtitleAdmin")}
+            {isModerator ? t("subtitleModerator") : t("subtitleAdmin")}
           </p>
         </div>
         <div className="admin-page-header__actions">
+          {statusFilter === "trash" ? (
+            <Link
+              href={termsBasePath}
+              className="admin-btn admin-btn--secondary"
+            >
+              <BookOpen size={16} />
+              Danh sách thuật ngữ
+            </Link>
+          ) : (
+            <Link
+              href={`${termsBasePath}/trash`}
+              className="admin-btn admin-btn--secondary"
+            >
+              <Trash2 size={16} />
+              Thùng rác
+            </Link>
+          )}
           <button
             className="admin-btn admin-btn--secondary"
             onClick={() => setShowExportModal(true)}
@@ -323,6 +393,15 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
             <Upload size={16} />
             {t("importData")}
           </Link>
+          {statusFilter === "trash" && (
+            <button
+              className="admin-btn admin-btn--secondary"
+              onClick={handleEmptyTrash}
+            >
+              <Trash2 size={16} />
+              Làm rỗng thùng rác
+            </button>
+          )}
           <Link
             href="/admin/terms/new"
             className="admin-btn admin-btn--primary"
@@ -389,12 +468,13 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
           <select
             className={`admin-filters__select ${statusFilter !== "all" ? "has-value" : ""}`}
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
           >
             <option value="all">{t("allStatuses")}</option>
             <option value="approved">{t("approved")}</option>
             <option value="pending">{t("pending")}</option>
             <option value="rejected">{t("rejected")}</option>
+            <option value="trash">Thùng rác</option>
           </select>
         </div>
 
@@ -494,16 +574,27 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
                           </button>
                         </>
                       )}
-                      <button
-                        className="action-btn action-btn--danger"
-                        onClick={() => {
-                          setSelectedTerm(term);
-                          setShowDeleteConfirm(true);
-                        }}
-                        title={t("delete")}
-                      >
-                        <Trash2 size={16} color="red" />
-                      </button>
+                      {statusFilter !== "trash" && (
+                        <button
+                          className="action-btn action-btn--danger"
+                          onClick={() => {
+                            setSelectedTerm(term);
+                            setShowDeleteConfirm(true);
+                          }}
+                          title={t("delete")}
+                        >
+                          <Trash2 size={16} color="red" />
+                        </button>
+                      )}
+                      {statusFilter === "trash" && (
+                        <button
+                          className="action-btn action-btn--success"
+                          onClick={() => handleRestore(term._id)}
+                          title="Khôi phục"
+                        >
+                          <RotateCcw size={16} color="green" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -623,8 +714,7 @@ export default function TermsPage({ isModerator = false }: TermsPageProps) {
             </div>
             <div className="modal__body">
               <p>
-                {t("confirmDeleteMsg")}{" "}
-                <strong>{selectedTerm.term.vi}</strong>?
+                {t("confirmDeleteMsg")} <strong>{selectedTerm.term.vi}</strong>?
               </p>
               <p className="text-danger">{t("deleteIrreversible")}</p>
             </div>

@@ -15,9 +15,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Trash2,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import contributionService, {
   Contribution,
 } from "@/services/contributionService";
@@ -27,7 +30,13 @@ import ConfirmModal, {
 } from "../../../../../components/common/ConfirmModal";
 import "../moderation.scss";
 
-export default function ContributionsModerationPage() {
+interface ModerationContributionsClientProps {
+  trashMode?: boolean;
+}
+
+export default function ContributionsModerationPage({
+  trashMode = false,
+}: ModerationContributionsClientProps) {
   const t = useTranslations("moderationContributions");
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +70,8 @@ export default function ContributionsModerationPage() {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkRejectNote, setBulkRejectNote] = useState("");
   const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
+  const listPath = "/admin/moderation/contributions";
+  const trashPath = "/admin/moderation/contributions/trash";
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,8 +90,12 @@ export default function ContributionsModerationPage() {
         limit: itemsPerPage,
       };
 
-      if (statusFilter !== "all") {
+      if (statusFilter !== "all" && !trashMode) {
         params.status = statusFilter;
+      }
+      if (trashMode) {
+        params.includeDeleted = true;
+        params.onlyDeleted = true;
       }
       if (typeFilter !== "all") {
         params.type = typeFilter;
@@ -96,7 +111,9 @@ export default function ContributionsModerationPage() {
         setTotalItems(response.data.pagination?.total || 0);
 
         // Calculate pending count
-        if (statusFilter === "all") {
+        if (trashMode) {
+          setPendingCount(0);
+        } else if (statusFilter === "all") {
           const pendingRes = await contributionService.getContributions({
             status: "pending",
             limit: 1,
@@ -114,7 +131,7 @@ export default function ContributionsModerationPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, typeFilter, itemsPerPage]);
+  }, [currentPage, statusFilter, typeFilter, itemsPerPage, trashMode, t]);
 
   useEffect(() => {
     fetchContributions();
@@ -271,6 +288,55 @@ export default function ContributionsModerationPage() {
     }
   };
 
+  const handleMoveToTrash = async (contributionId: string) => {
+    if (!confirm(t("confirmMoveToTrash"))) {
+      return;
+    }
+
+    try {
+      const res = await contributionService.deleteContribution(contributionId);
+      if (res.success) {
+        toast.success(t("moveToTrashSuccess"));
+        fetchContributions();
+      } else {
+        toast.error(res.message || t("moveToTrashError"));
+      }
+    } catch {
+      toast.error(t("moveToTrashError"));
+    }
+  };
+
+  const handleRestore = async (contributionId: string) => {
+    try {
+      const res = await contributionService.restoreContribution(contributionId);
+      if (res.success) {
+        toast.success(t("restoreSuccess"));
+        fetchContributions();
+      } else {
+        toast.error(res.message || t("restoreError"));
+      }
+    } catch {
+      toast.error(t("restoreError"));
+    }
+  };
+
+  const handleEmptyTrash = async () => {
+    if (!confirm(t("confirmEmptyTrash"))) {
+      return;
+    }
+    try {
+      const res = await contributionService.emptyContributionTrash();
+      if (res.success) {
+        toast.success(t("emptyTrashSuccess", { count: res.data.deletedCount }));
+        fetchContributions();
+      } else {
+        toast.error(res.message || t("emptyTrashError"));
+      }
+    } catch {
+      toast.error(t("emptyTrashError"));
+    }
+  };
+
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxPagesToShow = 5;
@@ -309,8 +375,16 @@ export default function ContributionsModerationPage() {
 
   const getTypeBadge = (type: Contribution["type"]) => {
     const typeConfig = {
-      edit_term: { label: t("typeEdit"), className: "badge--info", icon: Edit3 },
-      new_term: { label: t("typeNew"), className: "badge--success", icon: Plus },
+      edit_term: {
+        label: t("typeEdit"),
+        className: "badge--info",
+        icon: Edit3,
+      },
+      new_term: {
+        label: t("typeNew"),
+        className: "badge--success",
+        icon: Plus,
+      },
     };
     return typeConfig[type] || typeConfig.new_term;
   };
@@ -405,7 +479,33 @@ export default function ContributionsModerationPage() {
           </div>
         </div>
         <div className="header-actions">
-          {pendingCount > 0 && (
+          {trashMode ? (
+            <>
+              <button
+                className="btn btn--danger btn--icon"
+                onClick={handleEmptyTrash}
+                title="Lam rong thung rac"
+              >
+                <Trash2 size={16} />
+              </button>
+              <Link
+                href={listPath}
+                className="btn btn--secondary btn--icon"
+                title="Danh sach dong gop"
+              >
+                <GitPullRequest size={16} />
+              </Link>
+            </>
+          ) : (
+            <Link
+              href={trashPath}
+              className="btn btn--secondary btn--icon"
+              title="Thung rac"
+            >
+              <Trash2 size={16} />
+            </Link>
+          )}
+          {!trashMode && pendingCount > 0 && (
             <div className="header-badge header-badge--contribution">
               <AlertTriangle size={16} />
               <span>{t("pendingCount", { count: pendingCount })}</span>
@@ -423,10 +523,12 @@ export default function ContributionsModerationPage() {
 
       {/* Stats Cards */}
       <div className="moderation-page__stats">
-        <div className="stat-card stat-card--warning">
-          <div className="stat-value">{pendingCount}</div>
-          <div className="stat-label">{t("pending")}</div>
-        </div>
+        {!trashMode && (
+          <div className="stat-card stat-card--warning">
+            <div className="stat-value">{pendingCount}</div>
+            <div className="stat-label">{t("pending")}</div>
+          </div>
+        )}
         <div className="stat-card">
           <div className="stat-value">{totalItems}</div>
           <div className="stat-label">{t("totalContributions")}</div>
@@ -446,16 +548,20 @@ export default function ContributionsModerationPage() {
         </div>
 
         <div className="filter-group">
-          <Filter size={18} />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">{t("allStatuses")}</option>
-            <option value="pending">{t("pending")}</option>
-            <option value="approved">{t("approved")}</option>
-            <option value="rejected">{t("rejected")}</option>
-          </select>
+          {!trashMode && (
+            <>
+              <Filter size={18} />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">{t("allStatuses")}</option>
+                <option value="pending">{t("pending")}</option>
+                <option value="approved">{t("approved")}</option>
+                <option value="rejected">{t("rejected")}</option>
+              </select>
+            </>
+          )}
 
           <select
             value={typeFilter}
@@ -469,7 +575,7 @@ export default function ContributionsModerationPage() {
       </div>
 
       {/* Bulk Action Bar */}
-      {selectedIds.size > 0 && (
+      {!trashMode && selectedIds.size > 0 && (
         <div className="bulk-action-bar">
           <span className="bulk-action-bar__count">
             {t("selectedCount", { count: selectedIds.size })}
@@ -506,7 +612,7 @@ export default function ContributionsModerationPage() {
       )}
 
       {/* Bulk Reject Modal */}
-      {showBulkRejectModal && (
+      {!trashMode && showBulkRejectModal && (
         <div
           className="modal-overlay"
           onClick={() => setShowBulkRejectModal(false)}
@@ -569,16 +675,18 @@ export default function ContributionsModerationPage() {
             <table>
               <thead>
                 <tr>
-                  <th className="checkbox-cell">
-                    <input
-                      type="checkbox"
-                      checked={
-                        selectedIds.size === pendingFilteredIds.length &&
-                        pendingFilteredIds.length > 0
-                      }
-                      onChange={toggleSelectAll}
-                    />
-                  </th>
+                  {!trashMode && (
+                    <th className="checkbox-cell">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedIds.size === pendingFilteredIds.length &&
+                          pendingFilteredIds.length > 0
+                        }
+                        onChange={toggleSelectAll}
+                      />
+                    </th>
+                  )}
                   <th>{t("term")}</th>
                   <th>{t("type")}</th>
                   <th>{t("category")}</th>
@@ -591,7 +699,7 @@ export default function ContributionsModerationPage() {
               <tbody>
                 {filteredContributions.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="empty-state">
+                    <td colSpan={trashMode ? 7 : 8} className="empty-state">
                       <GitPullRequest size={48} />
                       <p>{t("noContributions")}</p>
                     </td>
@@ -603,15 +711,17 @@ export default function ContributionsModerationPage() {
 
                     return (
                       <tr key={contribution._id}>
-                        <td className="checkbox-cell">
-                          {contribution.status === "pending" && (
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.has(contribution._id)}
-                              onChange={() => toggleSelect(contribution._id)}
-                            />
-                          )}
-                        </td>
+                        {!trashMode && (
+                          <td className="checkbox-cell">
+                            {contribution.status === "pending" && (
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.has(contribution._id)}
+                                onChange={() => toggleSelect(contribution._id)}
+                              />
+                            )}
+                          </td>
+                        )}
                         <td className="target-cell">
                           <span className="target-title">
                             {getTermName(contribution)}
@@ -652,7 +762,7 @@ export default function ContributionsModerationPage() {
                           >
                             <Eye size={16} />
                           </button>
-                          {contribution.status === "pending" && (
+                          {contribution.status === "pending" && !trashMode && (
                             <>
                               <button
                                 className="action-btn action-btn--approve"
@@ -683,6 +793,26 @@ export default function ContributionsModerationPage() {
                                 <XCircle size={16} />
                               </button>
                             </>
+                          )}
+                          {!trashMode && contribution.status !== "approved" && (
+                            <button
+                              className="action-btn action-btn--reject"
+                              title="Chuyen vao thung rac"
+                              onClick={() =>
+                                handleMoveToTrash(contribution._id)
+                              }
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                          {trashMode && (
+                            <button
+                              className="action-btn action-btn--approve"
+                              title="Khoi phuc"
+                              onClick={() => handleRestore(contribution._id)}
+                            >
+                              <RotateCcw size={16} />
+                            </button>
                           )}
                         </td>
                       </tr>

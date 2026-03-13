@@ -57,6 +57,33 @@ export default function ReputationClient() {
   const [redeeming, setRedeeming] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
+  const semesterOptions = [
+    t("semesterOption1"),
+    t("semesterOption2"),
+    t("semesterOption3"),
+    t("semesterOption4"),
+  ];
+  const studentIdOptions = [
+    t("studentIdOption1"),
+    t("studentIdOption2"),
+    t("studentIdOption3"),
+  ];
+  const classOptions = [
+    t("classOption1"),
+    t("classOption2"),
+    t("classOption3"),
+  ];
+  const facultyOptions = [
+    t("facultyOption1"),
+    t("facultyOption2"),
+    t("facultyOption3"),
+  ];
+  const phoneOptions = [
+    t("phoneOption1"),
+    t("phoneOption2"),
+    t("phoneOption3"),
+  ];
+
   const loadReputation = useCallback(async () => {
     try {
       const data = await reputationService.getMyReputation();
@@ -127,10 +154,10 @@ export default function ReputationClient() {
     setVerifying(true);
     try {
       await reputationService.verifyUtbStudent();
-      toast.success(t("verified"));
+      toast.success(t("toastVerifySuccess"));
       loadReputation();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error");
+      toast.error(err.response?.data?.message || t("toastErrorDefault"));
     } finally {
       setVerifying(false);
     }
@@ -148,7 +175,7 @@ export default function ReputationClient() {
         faculty: redeemFaculty.trim() || undefined,
         phone: redeemPhone.trim() || undefined,
       });
-      toast.success(t("requestRedemption"));
+      toast.success(t("toastRedemptionSuccess"));
       setRedeemSemester("");
       setRedeemStudentId("");
       setRedeemStudentClass("");
@@ -157,7 +184,7 @@ export default function ReputationClient() {
       loadRedemptions();
       loadReputation();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error");
+      toast.error(err.response?.data?.message || t("toastErrorDefault"));
     } finally {
       setRedeeming(false);
     }
@@ -173,9 +200,9 @@ export default function ReputationClient() {
       a.download = `certificate-${id}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(t("certificateDownloaded"));
+      toast.success(t("toastCertificateDownloaded"));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error");
+      toast.error(err.response?.data?.message || t("toastErrorDefault"));
     } finally {
       setDownloadingId(null);
     }
@@ -556,48 +583,77 @@ export default function ReputationClient() {
                   </p>
                   <div className="form-group">
                     <label>{t("semester")}</label>
-                    <input
-                      type="text"
-                      placeholder="VD: 2024-2025 HK1"
+                    <select
                       value={redeemSemester}
                       onChange={(e) => setRedeemSemester(e.target.value)}
-                    />
+                    >
+                      <option value="">{t("selectSemester")}</option>
+                      {semesterOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="form-group">
                     <label>{t("studentId")}</label>
                     <input
                       type="text"
+                      list="redeem-student-id-options"
                       placeholder={t("studentIdPlaceholder")}
                       value={redeemStudentId}
                       onChange={(e) => setRedeemStudentId(e.target.value)}
                     />
+                    <datalist id="redeem-student-id-options">
+                      {studentIdOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
                   </div>
                   <div className="form-group">
                     <label>{t("studentClass")}</label>
                     <input
                       type="text"
+                      list="redeem-class-options"
                       placeholder={t("studentClassPlaceholder")}
                       value={redeemStudentClass}
                       onChange={(e) => setRedeemStudentClass(e.target.value)}
                     />
+                    <datalist id="redeem-class-options">
+                      {classOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
                   </div>
                   <div className="form-group">
                     <label>{t("faculty")}</label>
                     <input
                       type="text"
+                      list="redeem-faculty-options"
                       placeholder={t("facultyPlaceholder")}
                       value={redeemFaculty}
                       onChange={(e) => setRedeemFaculty(e.target.value)}
                     />
+                    <datalist id="redeem-faculty-options">
+                      {facultyOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
                   </div>
                   <div className="form-group">
                     <label>{t("phone")}</label>
                     <input
                       type="text"
+                      list="redeem-phone-options"
                       placeholder={t("phonePlaceholder")}
                       value={redeemPhone}
                       onChange={(e) => setRedeemPhone(e.target.value)}
                     />
+                    <datalist id="redeem-phone-options">
+                      {phoneOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
                   </div>
                   <button
                     className="btn-redeem"

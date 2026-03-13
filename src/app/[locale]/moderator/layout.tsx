@@ -118,7 +118,7 @@ const moderatorMenuItems: MenuItem[] = [
 export default function ModeratorLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const t = useTranslations("moderatorLayout");
   const { currentLanguage, changeLanguage } = useLanguage();
@@ -177,8 +177,10 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
 
   // Check moderator access
   useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
-      router.push("/login?redirect=/moderator");
+      router.push("/login?returnUrl=/moderator");
       return;
     }
     if (user?.role === "admin") {
@@ -189,7 +191,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
       router.push("/");
       return;
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
   const isActiveRoute = (href: string) => {
     if (href === "/admin") {

@@ -30,9 +30,12 @@ export interface Category {
 }
 
 // Lấy tất cả danh mục
-const getCategories = async (includeInactive: boolean = false): Promise<ApiResponse<Category[]>> => {
+const getCategories = async (
+    includeInactive: boolean = false,
+    language?: "vi" | "en" | "lo" | "all"
+): Promise<ApiResponse<Category[]>> => {
     const res = await axiosInstance.get<ApiResponse<Category[]>>("/categories", {
-        params: { includeInactive }
+        params: { includeInactive, language }
     });
     return res.data;
 };

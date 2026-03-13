@@ -305,6 +305,22 @@ export default function AIChat({
               <option value="en">🇬🇧 English</option>
               <option value="lo">🇱🇦 ພາສາລາວ</option>
             </select>
+            <div className="ai-chat__quick-langs">
+              <button
+                type="button"
+                onClick={() => handleLanguageChange("en")}
+                disabled={isLoading || selectedLang === "en"}
+              >
+                +🇬🇧 English
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLanguageChange("lo")}
+                disabled={isLoading || selectedLang === "lo"}
+              >
+                +🇱🇦 ພາສາລາວ
+              </button>
+            </div>
           </div>
           <button
             className="ai-chat__close-btn"

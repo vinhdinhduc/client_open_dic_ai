@@ -65,7 +65,8 @@ const getAllTerms = async (
   status: string,
   page: number,
   limit: number,
-  search?: string
+  search?: string,
+  options?: { includeDeleted?: boolean; onlyDeleted?: boolean }
 ): Promise<ApiResponse<GetTermsResponse>> => {
   try {
     const params: Record<string, string | number> = {
@@ -81,6 +82,12 @@ const getAllTerms = async (
     }
     if (search && search.trim()) {
       params.search = search.trim();
+    }
+    if (options?.includeDeleted) {
+      params.includeDeleted = "true";
+    }
+    if (options?.onlyDeleted) {
+      params.onlyDeleted = "true";
     }
 
     const res = await axiosInstance.get<ApiResponse<GetTermsResponse>>('/terms', {
@@ -103,13 +110,16 @@ const getModeratorTerms = async (
   status: string,
   page: number,
   limit: number,
-  search?: string
+  search?: string,
+  options?: { includeDeleted?: boolean; onlyDeleted?: boolean }
 ): Promise<ApiResponse<GetTermsResponse>> => {
   try {
     const params: Record<string, string | number> = { page, limit };
     if (category && category !== 'all') params.category = category;
     if (status && status !== 'all') params.status = status;
     if (search && search.trim()) params.search = search.trim();
+    if (options?.includeDeleted) params.includeDeleted = "true";
+    if (options?.onlyDeleted) params.onlyDeleted = "true";
     const res = await axiosInstance.get<ApiResponse<GetTermsResponse>>('/terms/moderator-terms', { params });
     return res.data;
   } catch (error) {
@@ -296,6 +306,16 @@ const deleteTerm = async (id: string): Promise<ApiResponse<null>> => {
   }
 }
 
+const restoreTerm = async (id: string): Promise<ApiResponse<TermDetail>> => {
+  const res = await axiosInstance.put<ApiResponse<TermDetail>>(`/terms/${id}/restore`);
+  return res.data;
+}
+
+const emptyTermTrash = async (): Promise<ApiResponse<{ deletedCount: number }>> => {
+  const res = await axiosInstance.delete<ApiResponse<{ deletedCount: number }>>(`/terms/trash/empty`);
+  return res.data;
+}
+
 // Export options interface
 export interface ExportTermsOptions {
   category?: string;
@@ -384,6 +404,8 @@ export {
   createTerm,
   updateTerm,
   deleteTerm,
+  restoreTerm,
+  emptyTermTrash,
   exportTermsToExcel,
   saveSearchHistory
 };

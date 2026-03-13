@@ -24,6 +24,9 @@ export interface Report {
         avatar?: string;
     };
     status: "pending" | "resolved" | "rejected";
+    isDeleted?: boolean;
+    deletedAt?: string | null;
+    deletedBy?: string | null;
     moderator?: {
         _id: string;
         fullName: string;
@@ -59,6 +62,8 @@ export interface GetReportsParams {
     limit?: number;
     status?: string;
     category?: string;
+    includeDeleted?: boolean;
+    onlyDeleted?: boolean;
 }
 
 
@@ -120,6 +125,21 @@ const getReportStats = async (): Promise<ApiResponse<ReportStats>> => {
     return response.data;
 }
 
+const deleteReport = async (id: string): Promise<ApiResponse<Report>> => {
+    const response = await axiosInstance.delete<ApiResponse<Report>>(`/reports/${id}`);
+    return response.data;
+}
+
+const restoreReport = async (id: string): Promise<ApiResponse<Report>> => {
+    const response = await axiosInstance.put<ApiResponse<Report>>(`/reports/${id}/restore`);
+    return response.data;
+}
+
+const emptyReportTrash = async (): Promise<ApiResponse<{ deletedCount: number }>> => {
+    const response = await axiosInstance.delete<ApiResponse<{ deletedCount: number }>>(`/reports/trash/empty`);
+    return response.data;
+}
 
 
-export { reportTerm, getReports, getReportById, resolveReport, getReportStats };
+
+export { reportTerm, getReports, getReportById, resolveReport, getReportStats, deleteReport, restoreReport, emptyReportTrash };

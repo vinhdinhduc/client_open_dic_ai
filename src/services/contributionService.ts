@@ -69,6 +69,9 @@ export interface Contribution {
     };
     contributorNote?: string;
     status: "pending" | "approved" | "rejected";
+    isDeleted?: boolean;
+    deletedAt?: string | null;
+    deletedBy?: string | null;
     moderator?: {
         _id: string;
         fullName: string;
@@ -121,6 +124,8 @@ export interface GetContributionsParams {
     status?: string;
     type?: string;
     category?: string;
+    includeDeleted?: boolean;
+    onlyDeleted?: boolean;
 }
 
 export interface ModerateContributionData {
@@ -212,6 +217,20 @@ const deleteContribution = async (id: string): Promise<ApiResponse<void>> => {
     return response.data;
 }
 
+const restoreContribution = async (id: string): Promise<ApiResponse<Contribution>> => {
+    const response = await axiosInstance.put<ApiResponse<Contribution>>(
+        `/contributions/${id}/restore`
+    );
+    return response.data;
+}
+
+const emptyContributionTrash = async (): Promise<ApiResponse<{ deletedCount: number }>> => {
+    const response = await axiosInstance.delete<ApiResponse<{ deletedCount: number }>>(
+        `/contributions/trash/empty`
+    );
+    return response.data;
+}
+
 
 const bulkApprove = async (
     ids: string[],
@@ -240,6 +259,8 @@ export const contributionService = {
     approveContribution,
     rejectContribution,
     deleteContribution,
+    restoreContribution,
+    emptyContributionTrash,
     bulkApprove,
     bulkReject,
 };

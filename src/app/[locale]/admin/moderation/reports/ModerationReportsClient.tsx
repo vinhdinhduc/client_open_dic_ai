@@ -15,10 +15,13 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 import { Report, ReportStats } from "@/services/reportService";
 import {
+  deleteReport,
   getReports,
   getReportStats,
   resolveReport,
@@ -72,7 +75,7 @@ export default function ReportsModerationPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, itemsPerPage]);
+  }, [currentPage, statusFilter, itemsPerPage, t]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -158,6 +161,25 @@ export default function ReportsModerationPage() {
     setShowConfirmDismiss(false);
     setReportToDismiss(null);
   };
+
+  const handleMoveToTrash = async (reportId: string) => {
+    if (!confirm(t("confirmMoveToTrash"))) {
+      return;
+    }
+
+    try {
+      const res = await deleteReport(reportId);
+      if (res.success) {
+        toast.success(t("moveToTrashSuccess"));
+        fetchReports();
+        fetchStats();
+      } else {
+        toast.error(res.message || t("moveToTrashError"));
+      }
+    } catch {
+      toast.error(t("moveToTrashError"));
+    }
+  };
   const getReasonText = (reason: string) => {
     switch (reason) {
       case "duplicate":
@@ -226,7 +248,9 @@ export default function ReportsModerationPage() {
   const getTargetTitle = (report: Report) => {
     if (report.targetTerm) {
       return (
-        report.targetTerm.term?.vi || report.targetTerm.term?.en || t("termLabel")
+        report.targetTerm.term?.vi ||
+        report.targetTerm.term?.en ||
+        t("termLabel")
       );
     }
     return t("unknown");
@@ -263,6 +287,13 @@ export default function ReportsModerationPage() {
           </div>
         </div>
         <div className="header-actions">
+          <Link
+            href="/admin/moderation/reports/trash"
+            className="btn btn--secondary btn--icon"
+            title="Thung rac"
+          >
+            <Trash2 size={16} />
+          </Link>
           {pendingCount > 0 && (
             <div className="header-badge">
               <AlertTriangle size={16} />
@@ -425,6 +456,15 @@ export default function ReportsModerationPage() {
                                 <XCircle size={16} />
                               </button>
                             </>
+                          )}
+                          {report.status !== "pending" && (
+                            <button
+                              className="action-btn action-btn--reject"
+                              title="Chuyen vao thung rac"
+                              onClick={() => handleMoveToTrash(report._id)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           )}
                         </td>
                       </tr>
@@ -680,7 +720,8 @@ export default function ReportsModerationPage() {
                 >
                   {actionLoading === selectedReport._id ? (
                     <>
-                      <Loader2 size={16} className="spinning" /> {t("processing")}
+                      <Loader2 size={16} className="spinning" />{" "}
+                      {t("processing")}
                     </>
                   ) : (
                     <XCircle size={16} />
@@ -694,7 +735,8 @@ export default function ReportsModerationPage() {
                 >
                   {actionLoading === selectedReport._id ? (
                     <>
-                      <Loader2 size={16} className="spinning" /> {t("processing")}
+                      <Loader2 size={16} className="spinning" />{" "}
+                      {t("processing")}
                     </>
                   ) : (
                     <CheckCircle size={16} />

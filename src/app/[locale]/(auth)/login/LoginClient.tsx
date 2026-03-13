@@ -34,7 +34,8 @@ export default function LoginPage() {
     message: string;
   } | null>(null);
 
-  const redirect = searchParams.get("returnUrl");
+  const redirect =
+    searchParams.get("returnUrl") || searchParams.get("redirect");
   // Check if already logged in
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
@@ -103,7 +104,7 @@ export default function LoginPage() {
         } else if (user?.role === "moderator") {
           router.push("/moderator");
         } else {
-          router.push("/");
+          router.push(redirect || "/");
         }
       }
     } catch (error: unknown) {

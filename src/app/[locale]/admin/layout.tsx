@@ -175,7 +175,7 @@ const adminMenuItems: MenuItem[] = [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const t = useTranslations("adminLayout");
   const { currentLanguage, changeLanguage } = useLanguage();
@@ -231,15 +231,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Check admin access
   useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
-      router.push("/login?redirect=/admin");
+      router.push("/login?returnUrl=/admin");
       return;
     }
     if (user?.role !== "admin") {
       router.push("/");
       return;
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
   const isActiveRoute = (href: string) => {
     if (href === "/admin") {

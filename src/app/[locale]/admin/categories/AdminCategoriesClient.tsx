@@ -62,6 +62,26 @@ import {
   MemoryStick,
   CircuitBoard,
   Network,
+  Car,
+  Bus,
+  Train,
+  Plane,
+  Ship,
+  Building2,
+  School,
+  Briefcase,
+  PenTool,
+  Camera,
+  Music2,
+  Film,
+  Headphones,
+  Heart,
+  FlaskConical,
+  Microscope,
+  Calculator,
+  Gavel,
+  Landmark,
+  Palette,
   type LucideIcon,
 } from "lucide-react";
 import categoryService, { CategoryFormData } from "@/services/categoryService";
@@ -122,6 +142,26 @@ const iconMap: Record<string, LucideIcon> = {
   memory: MemoryStick,
   circuit: CircuitBoard,
   network: Network,
+  car: Car,
+  bus: Bus,
+  train: Train,
+  plane: Plane,
+  ship: Ship,
+  building: Building2,
+  school: School,
+  briefcase: Briefcase,
+  "pen-tool": PenTool,
+  camera: Camera,
+  music: Music2,
+  film: Film,
+  headphones: Headphones,
+  heart: Heart,
+  flask: FlaskConical,
+  microscope: Microscope,
+  calculator: Calculator,
+  gavel: Gavel,
+  landmark: Landmark,
+  palette: Palette,
 };
 
 // Helper function to render icon
@@ -200,7 +240,7 @@ export default function CategoriesPage() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await categoryService.getCategories(true);
+      const res = await categoryService.getCategories(true, "all");
       if (res.success && Array.isArray(res.data)) {
         const mappedCategories: Category[] = res.data.map((cat: any) => ({
           _id: cat.id || cat._id,
@@ -351,9 +391,7 @@ export default function CategoriesPage() {
     } catch (error: any) {
       const message =
         error.response?.data?.message ||
-        (mode === "create"
-          ? t("createError")
-          : t("updateError"));
+        (mode === "create" ? t("createError") : t("updateError"));
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -423,8 +461,7 @@ export default function CategoriesPage() {
         fetchCategories();
       }
     } catch (error: any) {
-      const message =
-        error.response?.data?.message || t("toggleStatusError");
+      const message = error.response?.data?.message || t("toggleStatusError");
       toast.error(message);
     }
   };
@@ -445,9 +482,7 @@ export default function CategoriesPage() {
         <div className="admin-page-header">
           <div>
             <h1 className="admin-page-header__title">{t("title")}</h1>
-            <p className="admin-page-header__subtitle">
-              {t("subtitle")}
-            </p>
+            <p className="admin-page-header__subtitle">{t("subtitle")}</p>
           </div>
           <div className="admin-page-header__actions">
             <button
@@ -468,7 +503,9 @@ export default function CategoriesPage() {
             </div>
             <div className="category-stat__content">
               <span className="category-stat__value">{categories.length}</span>
-              <span className="category-stat__label">{t("totalCategories")}</span>
+              <span className="category-stat__label">
+                {t("totalCategories")}
+              </span>
             </div>
           </div>
           <div className="category-stat">
@@ -577,7 +614,9 @@ export default function CategoriesPage() {
                       onClick={() => handleToggleActive(category)}
                     >
                       <span className="status-toggle__dot"></span>
-                      <span>{category.isActive ? t("active") : t("hidden")}</span>
+                      <span>
+                        {category.isActive ? t("active") : t("hidden")}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -612,7 +651,9 @@ export default function CategoriesPage() {
                       onClick={() => handleToggleActive(category)}
                     >
                       <span className="status-toggle__dot"></span>
-                      <span>{category.isActive ? t("active") : t("hidden")}</span>
+                      <span>
+                        {category.isActive ? t("active") : t("hidden")}
+                      </span>
                     </button>
                     <div className="category-list-item__actions">
                       <button
@@ -650,7 +691,9 @@ export default function CategoriesPage() {
                     <div className="category-list-item__expanded">
                       <p>{category.description?.vi || t("noDescription")}</p>
                       <div className="expanded-meta">
-                        <span>{t("order")} {category.order}</span>
+                        <span>
+                          {t("order")} {category.order}
+                        </span>
                         <span>
                           {t("createdDate")}{" "}
                           {new Date(category.createdAt).toLocaleDateString(
