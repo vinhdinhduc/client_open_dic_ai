@@ -474,8 +474,8 @@ export default function ContributionsModerationPage({
             <GitPullRequest size={24} />
           </div>
           <div className="header-text">
-            <h1>{t("title")}</h1>
-            <p>{t("subtitle")}</p>
+            <h1>{trashMode ? t("trashTitle") : t("title")}</h1>
+            <p>{trashMode ? t("trashSubtitle") : t("subtitle")}</p>
           </div>
         </div>
         <div className="header-actions">

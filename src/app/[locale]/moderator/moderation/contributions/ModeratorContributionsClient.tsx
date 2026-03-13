@@ -449,8 +449,12 @@ export default function ModeratorContributionPage({
             <GitPullRequest size={24} />
           </div>
           <div className="header-text">
-            <h1>Kiểm duyệt đóng góp</h1>
-            <p>Xem xét và phê duyệt các đóng góp từ cộng đồng</p>
+            <h1>{trashMode ? t("trashTitle") : "Kiểm duyệt đóng góp"}</h1>
+            <p>
+              {trashMode
+                ? t("trashSubtitle")
+                : "Xem xét và phê duyệt các đóng góp từ cộng đồng"}
+            </p>
           </div>
         </div>
         <div className="header-actions">

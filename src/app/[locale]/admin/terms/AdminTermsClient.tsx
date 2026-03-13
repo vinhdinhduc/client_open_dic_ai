@@ -356,7 +356,9 @@ export default function TermsPage({
       {/* Page Header */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-header__title">{t("title")}</h1>
+          <h1 className="admin-page-header__title">
+            {statusFilter === "trash" ? t("trashTitle") : t("title")}
+          </h1>
           <p className="admin-page-header__subtitle">
             {isModerator ? t("subtitleModerator") : t("subtitleAdmin")}
           </p>

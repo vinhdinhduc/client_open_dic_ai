@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import ReportsTrashClient from "../ReportsTrashClient";
 
 export const metadata: Metadata = {
-  title: "Thung rac bao xau - Moderator | OpenDict",
-  description: "Quan ly bao xau da xoa mem trong danh muc duoc phan cong",
+  title: "Thùng rác báo cáo - Moderator | OpenDict",
+  description: "Quản lý báo cáo đã xoá mềm trong danh mục được phân công",
 };
 
 export default function ModeratorReportsTrashPage() {

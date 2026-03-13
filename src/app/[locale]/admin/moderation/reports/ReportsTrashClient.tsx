@@ -91,8 +91,8 @@ export default function ReportsTrashClient() {
             <Trash2 size={24} />
           </div>
           <div className="header-text">
-            <h1>Thung rac bao xau</h1>
-            <p>Quan ly bao xau da xoa mem va khoi phuc khi can</p>
+            <h1>Thùng rác báo cáo</h1>
+            <p>Quản lý báo cáo đã xoá mềm và khôi phục khi cần</p>
           </div>
         </div>
         <div className="header-actions">

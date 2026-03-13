@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import ContributionsTrashClient from "../ContributionsTrashClient";
 
 export const metadata: Metadata = {
-  title: "Thung rac dong gop - Admin | OpenDict",
-  description: "Quan ly dong gop da xoa mem va khoi phuc khi can",
+  title: "Thùng rác đóng góp - Admin | OpenDict",
+  description: "Quản lý đóng góp đã xoá mềm và khôi phục khi cần",
 };
 
 export default function AdminModerationContributionsTrashPage() {

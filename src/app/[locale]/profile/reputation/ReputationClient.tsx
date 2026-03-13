@@ -63,25 +63,15 @@ export default function ReputationClient() {
     t("semesterOption3"),
     t("semesterOption4"),
   ];
-  const studentIdOptions = [
-    t("studentIdOption1"),
-    t("studentIdOption2"),
-    t("studentIdOption3"),
-  ];
-  const classOptions = [
-    t("classOption1"),
-    t("classOption2"),
-    t("classOption3"),
-  ];
+
   const facultyOptions = [
-    t("facultyOption1"),
-    t("facultyOption2"),
-    t("facultyOption3"),
-  ];
-  const phoneOptions = [
-    t("phoneOption1"),
-    t("phoneOption2"),
-    t("phoneOption3"),
+    "Khoa KHTN-CN",
+    "Khoa Tiểu học - Mầm Non",
+    "Khoa Nông Lâm",
+    "Khoa Cơ Sở",
+    "Khoa Kinh Tế",
+    "Khoa Khoa học Xã Hội",
+    "Khoa Dinh Dưỡng",
   ];
 
   const loadReputation = useCallback(async () => {
@@ -581,79 +571,62 @@ export default function ReputationClient() {
                     {t("totalPoints")}:{" "}
                     <strong>{reputation.totalPoints} ĐUT</strong>
                   </p>
-                  <div className="form-group">
-                    <label>{t("semester")}</label>
-                    <select
-                      value={redeemSemester}
-                      onChange={(e) => setRedeemSemester(e.target.value)}
-                    >
-                      <option value="">{t("selectSemester")}</option>
-                      {semesterOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>{t("studentId")}</label>
-                    <input
-                      type="text"
-                      list="redeem-student-id-options"
-                      placeholder={t("studentIdPlaceholder")}
-                      value={redeemStudentId}
-                      onChange={(e) => setRedeemStudentId(e.target.value)}
-                    />
-                    <datalist id="redeem-student-id-options">
-                      {studentIdOptions.map((option) => (
-                        <option key={option} value={option} />
-                      ))}
-                    </datalist>
-                  </div>
-                  <div className="form-group">
-                    <label>{t("studentClass")}</label>
-                    <input
-                      type="text"
-                      list="redeem-class-options"
-                      placeholder={t("studentClassPlaceholder")}
-                      value={redeemStudentClass}
-                      onChange={(e) => setRedeemStudentClass(e.target.value)}
-                    />
-                    <datalist id="redeem-class-options">
-                      {classOptions.map((option) => (
-                        <option key={option} value={option} />
-                      ))}
-                    </datalist>
-                  </div>
-                  <div className="form-group">
-                    <label>{t("faculty")}</label>
-                    <input
-                      type="text"
-                      list="redeem-faculty-options"
-                      placeholder={t("facultyPlaceholder")}
-                      value={redeemFaculty}
-                      onChange={(e) => setRedeemFaculty(e.target.value)}
-                    />
-                    <datalist id="redeem-faculty-options">
-                      {facultyOptions.map((option) => (
-                        <option key={option} value={option} />
-                      ))}
-                    </datalist>
-                  </div>
-                  <div className="form-group">
-                    <label>{t("phone")}</label>
-                    <input
-                      type="text"
-                      list="redeem-phone-options"
-                      placeholder={t("phonePlaceholder")}
-                      value={redeemPhone}
-                      onChange={(e) => setRedeemPhone(e.target.value)}
-                    />
-                    <datalist id="redeem-phone-options">
-                      {phoneOptions.map((option) => (
-                        <option key={option} value={option} />
-                      ))}
-                    </datalist>
+                  <div className="redeem-form__grid">
+                    <div className="form-group">
+                      <label>{t("semester")}</label>
+                      <select
+                        value={redeemSemester}
+                        onChange={(e) => setRedeemSemester(e.target.value)}
+                      >
+                        <option value="">{t("selectSemester")}</option>
+                        {semesterOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>{t("faculty")}</label>
+                      <select
+                        value={redeemFaculty}
+                        onChange={(e) => setRedeemFaculty(e.target.value)}
+                      >
+                        <option value="">{t("facultyPlaceholder")}</option>
+                        {facultyOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>{t("studentId")}</label>
+                      <input
+                        type="text"
+                        placeholder={t("studentIdPlaceholder")}
+                        value={redeemStudentId}
+                        onChange={(e) => setRedeemStudentId(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>{t("studentClass")}</label>
+                      <input
+                        type="text"
+                        placeholder={t("studentClassPlaceholder")}
+                        value={redeemStudentClass}
+                        onChange={(e) => setRedeemStudentClass(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group form-group--full">
+                      <label>{t("phone")}</label>
+                      <input
+                        type="text"
+                        placeholder={t("phonePlaceholder")}
+                        value={redeemPhone}
+                        onChange={(e) => setRedeemPhone(e.target.value)}
+                      />
+                    </div>
                   </div>
                   <button
                     className="btn-redeem"
