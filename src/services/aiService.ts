@@ -181,6 +181,21 @@ class AIService {
             );
         }
     }
+
+    /**
+     * Lấy thống kê sử dụng API trong ngày (Admin only)
+     */
+    async getAPIUsage(): Promise<any> {
+        try {
+            const response = await axiosInstance.get(`${this.baseUrl}/usage`);
+            return response.data.data;
+        } catch (error: any) {
+            console.error('Get API Usage Error:', error);
+            throw new Error(
+                error.response?.data?.message || 'Không thể lấy thống kê API'
+            );
+        }
+    }
 }
 
 export const aiService = new AIService();

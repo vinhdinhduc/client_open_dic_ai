@@ -30,8 +30,10 @@ import {
   GitPullRequest,
   LucideIcon,
   Home,
+  Globe,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useLanguage } from "@/hooks/useLanguage";
 import NotificationBell from "@/components/common/NotificationBell";
 import "../admin/admin.scss";
 
@@ -119,9 +121,11 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const t = useTranslations("moderatorLayout");
+  const { currentLanguage, changeLanguage } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(["moderation"]);
   const [pendingCount, setPendingCount] = useState(0);
   const [reportCount, setReportCount] = useState(0);
@@ -398,6 +402,41 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
           </div>
 
           <div className="admin-header__right">
+            {/* Language Dropdown */}
+            <div className="admin-header__lang">
+              <button
+                className="admin-header__icon-btn"
+                onClick={() => {
+                  setLangMenuOpen(!langMenuOpen);
+                  setUserMenuOpen(false);
+                }}
+                title={t("language")}
+              >
+                <Globe size={20} />
+              </button>
+              {langMenuOpen && (
+                <div className="admin-header__dropdown admin-header__dropdown--lang">
+                  {[
+                    { code: "vi" as const, label: t("vietnamese"), flag: "🇻🇳" },
+                    { code: "en" as const, label: t("english"), flag: "🇬🇧" },
+                    { code: "lo" as const, label: t("lao"), flag: "🇱🇦" },
+                  ].map((lang) => (
+                    <button
+                      key={lang.code}
+                      className={`dropdown-item ${currentLanguage === lang.code ? "active" : ""}`}
+                      onClick={() => {
+                        changeLanguage(lang.code);
+                        setLangMenuOpen(false);
+                      }}
+                    >
+                      <span className="dropdown-flag">{lang.flag}</span>
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Theme Toggle */}
             <button
               className="admin-header__icon-btn"
@@ -414,7 +453,10 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
             <div className="admin-header__user">
               <button
                 className="admin-header__user-btn"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                onClick={() => {
+                  setUserMenuOpen(!userMenuOpen);
+                  setLangMenuOpen(false);
+                }}
               >
                 <div className="user-avatar">
                   {user?.fullName?.charAt(0) || "A"}

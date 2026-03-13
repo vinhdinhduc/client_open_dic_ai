@@ -25,6 +25,7 @@ import {
   EyeOff,
   Eye,
   Bell,
+  Award,
 } from "lucide-react";
 import "./page.scss";
 import { Layout } from "@/components/layouts";
@@ -434,6 +435,23 @@ export default function ProfilePage() {
                   <div className="mini-stat__label">{t("stats.rejected")}</div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Reputation Card */}
+          <div className="profile-card">
+            <div className="profile-card__header">
+              <h2 className="card-title">
+                <Award size={20} />
+                {t("reputation") || "Điểm uy tín"}
+              </h2>
+              <button
+                className="btn-edit"
+                onClick={() => router.push("/profile/reputation")}
+              >
+                {t("viewAll") || "Xem tất cả"}
+                <ChevronRight size={16} />
+              </button>
             </div>
           </div>
 

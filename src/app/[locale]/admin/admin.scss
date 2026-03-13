@@ -554,6 +554,27 @@ $admin-info: #3b82f6;
             border: none;
             border-top: 1px solid var(--border-color);
         }
+
+        &--lang {
+            min-width: 160px;
+
+            .dropdown-item {
+                &.active {
+                    background: var(--bg-secondary);
+                    font-weight: 600;
+                    color: var(--primary-color, #3b82f6);
+                }
+
+                .dropdown-flag {
+                    font-size: 1.2rem;
+                    line-height: 1;
+                }
+            }
+        }
+    }
+
+    &__lang {
+        position: relative;
     }
 }
 

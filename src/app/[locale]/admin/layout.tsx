@@ -34,8 +34,11 @@ import {
   MoveLeft,
   Home,
   MessageCircle,
+  Globe,
+  Award,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useLanguage } from "@/hooks/useLanguage";
 import NotificationBell from "@/components/common/NotificationBell";
 import "./admin.scss";
 
@@ -60,48 +63,48 @@ interface MenuItem {
   children?: SubMenuItem[];
 }
 
-// Menu items cho Admin
+// Menu items cho Admin - sử dụng translation keys
 const adminMenuItems: MenuItem[] = [
   {
     id: "dashboard",
-    label: "Dashboard",
+    label: "dashboard",
     icon: LayoutDashboard,
     href: "/admin",
   },
   {
     id: "users",
-    label: "Quản lý người dùng",
+    label: "users",
     icon: Users,
     href: "/admin/users",
   },
   {
     id: "terms",
-    label: "Quản lý thuật ngữ",
+    label: "terms",
     icon: BookOpen,
     href: "/admin/terms",
   },
   {
     id: "categories",
-    label: "Quản lý danh mục",
+    label: "categories",
     icon: FolderTree,
     href: "/admin/categories",
   },
   {
     id: "moderation",
-    label: "Kiểm duyệt",
+    label: "moderation",
     icon: FileCheck,
     badge: true,
     children: [
       {
         id: "moderation-contributions",
-        label: "Kiểm duyệt đóng góp",
+        label: "moderationContributions",
         href: "/admin/moderation/contributions",
         icon: GitPullRequest,
         badge: true,
       },
       {
         id: "reports-moderation",
-        label: "Kiểm duyệt báo xấu",
+        label: "moderationReports",
         href: "/admin/moderation/reports",
         icon: Flag,
         badge: true,
@@ -110,51 +113,57 @@ const adminMenuItems: MenuItem[] = [
   },
   {
     id: "comments",
-    label: "Quản lý bình luận",
+    label: "comments",
     icon: MessageSquare,
     href: "/admin/comments",
     badge: true,
   },
   {
     id: "import",
-    label: "Nhập dữ liệu",
+    label: "import",
     icon: Upload,
     href: "/admin/import",
   },
   {
     id: "reports",
-    label: "Báo cáo thống kê",
+    label: "reportStats",
     icon: BarChart3,
     href: "/admin/reports",
   },
   {
     id: "feedback",
-    label: "Phản hồi & Đăng ký",
+    label: "feedback",
     icon: MessageCircle,
     href: "/admin/feedback",
   },
   {
+    id: "reputation",
+    label: "reputation",
+    icon: Award,
+    href: "/admin/reputation",
+  },
+  {
     id: "settings",
-    label: "Cấu hình hệ thống",
+    label: "settings",
     icon: Settings,
     children: [
       {
         id: "setting-api-keys",
-        label: "Cấu hình API Key",
+        label: "settingApiKeys",
         href: "/admin/settings/api-keys",
         icon: KeyRound,
         badge: true,
       },
       {
         id: "setting-email",
-        label: "Cấu hình Email",
+        label: "settingEmail",
         href: "/admin/settings/email",
         icon: Mail,
         badge: true,
       },
       {
         id: "setting-rate-limit",
-        label: "Cấu hình Rate Limit",
+        label: "settingRateLimit",
         href: "/admin/settings/rate-limit",
         icon: Gauge,
         badge: true,
@@ -168,9 +177,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("adminLayout");
+  const { currentLanguage, changeLanguage } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(["moderation"]);
   const [pendingCount, setPendingCount] = useState(0);
   const [reportCount, setReportCount] = useState(0);
@@ -291,10 +303,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return (
       <div className="admin-loading">
         <div className="admin-loading__spinner"></div>
-        <p>Đang kiểm tra quyền truy cập...</p>
+        <p>{t("checkingAccess")}</p>
       </div>
     );
   }
+
+  const LANGUAGES = [
+    { code: "vi" as const, label: t("vietnamese"), flag: "🇻🇳" },
+    { code: "en" as const, label: t("english"), flag: "🇬🇧" },
+    { code: "lo" as const, label: t("lao"), flag: "🇱🇦" },
+  ];
 
   return (
     <div
@@ -332,7 +350,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       onClick={() => toggleMenu(item.id)}
                     >
                       <item.icon className="menu-icon" size={20} />
-                      <span className="menu-text">{item.label}</span>
+                      <span className="menu-text">{t(item.label)}</span>
                       {item.badge && getRawBadgeCount(item.id) > 0 && (
                         <span className="menu-badge">
                           {getBadgeCount(item.id)}
@@ -358,7 +376,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             onClick={() => setMobileMenuOpen(false)}
                           >
                             <child.icon className="menu-icon" size={16} />
-                            <span className="menu-text">{child.label}</span>
+                            <span className="menu-text">{t(child.label)}</span>
                             {child.badge && getRawBadgeCount(child.id) > 0 && (
                               <span className="menu-badge menu-badge--small">
                                 {getBadgeCount(child.id)}
@@ -378,7 +396,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <item.icon className="menu-icon" size={20} />
-                    <span className="menu-text">{item.label}</span>
+                    <span className="menu-text">{t(item.label)}</span>
                     {item.badge && getRawBadgeCount(item.id) > 0 && (
                       <span className="menu-badge">
                         {getBadgeCount(item.id)}
@@ -395,7 +413,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="admin-sidebar__footer">
           <Link href="/" target="_blank" className="admin-sidebar__back">
             <Home size={16} />
-            <span>Mở trang chủ</span>
+            <span>{t("viewHomepage")}</span>
           </Link>
         </div>
       </aside>
@@ -429,16 +447,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {/* Search */}
             <div className="admin-header__search">
               <Search size={18} />
-              <input type="text" placeholder="Tìm kiếm..." />
+              <input type="text" placeholder={t("searchPlaceholder")} />
             </div>
           </div>
 
           <div className="admin-header__right">
+            {/* Language Dropdown */}
+            <div className="admin-header__lang">
+              <button
+                className="admin-header__icon-btn"
+                onClick={() => {
+                  setLangMenuOpen(!langMenuOpen);
+                  setUserMenuOpen(false);
+                }}
+                title={t("language")}
+              >
+                <Globe size={20} />
+              </button>
+              {langMenuOpen && (
+                <div className="admin-header__dropdown admin-header__dropdown--lang">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      className={`dropdown-item ${currentLanguage === lang.code ? "active" : ""}`}
+                      onClick={() => {
+                        changeLanguage(lang.code);
+                        setLangMenuOpen(false);
+                      }}
+                    >
+                      <span className="dropdown-flag">{lang.flag}</span>
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Theme Toggle */}
             <button
               className="admin-header__icon-btn"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              title="Đổi giao diện"
+              title={t("toggleTheme")}
             >
               {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -450,7 +499,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="admin-header__user">
               <button
                 className="admin-header__user-btn"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                onClick={() => {
+                  setUserMenuOpen(!userMenuOpen);
+                  setLangMenuOpen(false);
+                }}
               >
                 <div className="user-avatar">
                   {user?.fullName?.charAt(0) || "A"}
@@ -458,9 +510,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <div className="user-info">
                   <span className="user-name">{user?.fullName || "Admin"}</span>
                   <span className="user-role">
-                    {user?.role === "admin"
-                      ? "Quản trị viên"
-                      : "Kiểm duyệt viên"}
+                    {user?.role === "admin" ? t("admin") : t("moderator")}
                   </span>
                 </div>
                 <ChevronDown size={16} />
@@ -470,16 +520,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <div className="admin-header__dropdown">
                   <Link href="/admin/profile" className="dropdown-item">
                     <Users size={16} />
-                    Tài khoản
+                    {t("account")}
                   </Link>
                   <Link href="/admin/settings" className="dropdown-item">
                     <Settings size={16} />
-                    Cài đặt
+                    {t("settings")}
                   </Link>
                   <hr />
                   <button className="dropdown-item" onClick={handleLogout}>
                     <LogOut size={16} />
-                    Đăng xuất
+                    {t("logout")}
                   </button>
                 </div>
               )}

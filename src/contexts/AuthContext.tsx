@@ -17,6 +17,7 @@ import {
   LoginCredentials,
   RegisterData,
 } from "@/services/authService";
+import { usePathname } from "next/navigation";
 
 interface AuthContextType {
   user: User | null;
@@ -263,7 +264,8 @@ export function withAuth<P extends object>(
   options: { redirectTo?: string; requiredRole?: "admin" | "moderator" } = {},
 ) {
   const { redirectTo = "/login", requiredRole } = options;
-
+  const pathname = usePathname();
+  const locale = pathname.split("/")[1];
   return function AuthenticatedComponent(props: P) {
     const { user, isLoading, isAuthenticated, isAdmin, isModerator } =
       useAuth();
@@ -272,18 +274,18 @@ export function withAuth<P extends object>(
     useEffect(() => {
       if (!isLoading) {
         if (!isAuthenticated) {
-          router.push(redirectTo);
+          router.push(`/${locale}${redirectTo}`);
           return;
         }
 
         if (requiredRole === "admin" && !isAdmin) {
-          router.push("/");
+          router.push(`/${locale}/`);
           toast.error("Bạn không có quyền truy cập trang này");
           return;
         }
 
         if (requiredRole === "moderator" && !isModerator) {
-          router.push("/");
+          router.push(`/${locale}/`);
           toast.error("Bạn không có quyền truy cập trang này");
           return;
         }

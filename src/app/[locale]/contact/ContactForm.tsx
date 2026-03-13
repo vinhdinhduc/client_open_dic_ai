@@ -3,41 +3,79 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import contactService from "@/services/contactService";
 
 export default function ContactForm() {
   const t = useTranslations("contactPage");
   const [activeTab, setActiveTab] = useState<"feedback" | "moderator">(
     "feedback",
   );
-
-  const [feedbackForm, setFeedbackForm] = useState({
+  const [loading, setLoading] = useState(false);
+  const [feedbackForm, setFeedbackForm] = useState<{
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }>({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
 
-  const [moderatorForm, setModeratorForm] = useState({
+  const [moderatorForm, setModeratorForm] = useState<{
+    name: string;
+    email: string;
+    reason: string;
+    languages: string;
+  }>({
     name: "",
     email: "",
     reason: "",
     languages: "",
   });
 
-  const handleFeedbackSubmit = (e: React.FormEvent) => {
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const mailtoLink = `mailto:opendict@utb.edu.vn?subject=${encodeURIComponent(feedbackForm.subject)}&body=${encodeURIComponent(`Name: ${feedbackForm.name}\nEmail: ${feedbackForm.email}\n\n${feedbackForm.message}`)}`;
-    window.open(mailtoLink, "_blank");
-    toast.success(t("feedbackSuccess"));
-    setFeedbackForm({ name: "", email: "", subject: "", message: "" });
+    setLoading(true);
+    try {
+      const res = await contactService.submitFeedback({
+        name: feedbackForm.name,
+        email: feedbackForm.email,
+        subject: feedbackForm.subject,
+        message: feedbackForm.message,
+      });
+
+      if (res.success) {
+        toast.success(t("feedbackSuccess"));
+        setFeedbackForm({ name: "", email: "", subject: "", message: "" });
+      }
+    } catch (error) {
+      toast.error(t("feedbackError"));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleModeratorSubmit = (e: React.FormEvent) => {
+  const handleModeratorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const mailtoLink = `mailto:opendict@utb.edu.vn?subject=${encodeURIComponent("Moderator Registration")}&body=${encodeURIComponent(`Name: ${moderatorForm.name}\nEmail: ${moderatorForm.email}\nLanguages: ${moderatorForm.languages}\n\nReason:\n${moderatorForm.reason}`)}`;
-    window.open(mailtoLink, "_blank");
-    toast.success(t("moderatorSuccess"));
-    setModeratorForm({ name: "", email: "", reason: "", languages: "" });
+    setLoading(true);
+    try {
+      const res = await contactService.submitModeratorApplication({
+        name: moderatorForm.name,
+        email: moderatorForm.email,
+        reason: moderatorForm.reason,
+        experience: moderatorForm.languages,
+      });
+      if (res.success) {
+        toast.success(t("moderatorSuccess"));
+        setModeratorForm({ name: "", email: "", reason: "", languages: "" });
+      }
+    } catch (error) {
+      toast.error(t("moderatorError"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,8 +146,12 @@ export default function ContactForm() {
               }
             />
           </div>
-          <button type="submit" className="contact-form__submit">
-            {t("feedbackSubmit")}
+          <button
+            type="submit"
+            className="contact-form__submit"
+            disabled={loading}
+          >
+            {loading ? t("submitting") : t("feedbackSubmit")}
           </button>
         </form>
       )}
@@ -168,8 +210,12 @@ export default function ContactForm() {
               }
             />
           </div>
-          <button type="submit" className="contact-form__submit">
-            {t("moderatorSubmit")}
+          <button
+            type="submit"
+            className="contact-form__submit"
+            disabled={loading}
+          >
+            {loading ? t("submitting") : t("moderatorSubmit")}
           </button>
         </form>
       )}
