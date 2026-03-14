@@ -3,7 +3,7 @@ import axiosInstance from '@/lib/axios';
 export interface FeedbackData {
     name: string;
     email: string;
-    subject: string;
+    type: string;
     message: string;
 }
 
