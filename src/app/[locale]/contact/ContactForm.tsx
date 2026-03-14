@@ -42,6 +42,7 @@ export default function ContactForm() {
       const res = await contactService.submitFeedback({
         name: feedbackForm.name,
         email: feedbackForm.email,
+        type: "feedback",
         subject: feedbackForm.subject,
         message: feedbackForm.message,
       });

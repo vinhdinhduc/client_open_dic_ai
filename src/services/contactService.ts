@@ -4,6 +4,7 @@ export interface FeedbackData {
     name: string;
     email: string;
     type: string;
+    subject?: string;
     message: string;
 }
 
