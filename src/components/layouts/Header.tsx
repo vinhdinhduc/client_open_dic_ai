@@ -79,7 +79,9 @@ const Header = () => {
       try {
         const [favRes, contribRes] = await Promise.all([
           getFavorites(1, 1).catch(() => null),
-          contributionService.getContributions({ limit: 1 }).catch(() => null),
+          contributionService
+            .getMyContributions({ limit: 1 })
+            .catch(() => null),
         ]);
         if (favRes?.success) {
           setFavoritesCount(favRes.data?.pagination?.total ?? null);

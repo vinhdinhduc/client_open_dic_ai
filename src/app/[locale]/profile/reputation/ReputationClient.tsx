@@ -57,6 +57,56 @@ export default function ReputationClient() {
   const [redeeming, setRedeeming] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
+  const reputationFormula = t("policyFormula");
+
+  const plusRules = [
+    { action: t("plusRule1Action"), points: t("plusRule1Points") },
+    { action: t("plusRule2Action"), points: t("plusRule2Points") },
+    { action: t("plusRule3Action"), points: t("plusRule3Points") },
+    { action: t("plusRule4Action"), points: t("plusRule4Points") },
+    { action: t("plusRule5Action"), points: t("plusRule5Points") },
+  ];
+
+  const minusRules = [
+    { action: t("minusRule1Action"), points: t("minusRule1Points") },
+    { action: t("minusRule2Action"), points: t("minusRule2Points") },
+    { action: t("minusRule3Action"), points: t("minusRule3Points") },
+    { action: t("minusRule4Action"), points: t("minusRule4Points") },
+    { action: t("minusRule5Action"), points: t("minusRule5Points") },
+  ];
+
+  const sectionSixLevels = [
+    {
+      level: t("section6Level1"),
+      range: t("section6Level1Range"),
+      rights: [t("section6Level1Right1"), t("section6Level1Right2")],
+    },
+    {
+      level: t("section6Level2"),
+      range: t("section6Level2Range"),
+      rights: [t("section6Level2Right1"), t("section6Level2Right2")],
+    },
+  ];
+
+  const rewards = [
+    {
+      title: t("reward1Title"),
+      description: t("reward1Desc"),
+    },
+    {
+      title: t("reward2Title"),
+      description: t("reward2Desc"),
+    },
+    {
+      title: t("reward3Title"),
+      description: t("reward3Desc"),
+    },
+    {
+      title: t("reward4Title"),
+      description: t("reward4Desc"),
+    },
+  ];
+
   const semesterOptions = [
     t("semesterOption1"),
     t("semesterOption2"),
@@ -65,13 +115,13 @@ export default function ReputationClient() {
   ];
 
   const facultyOptions = [
-    "Khoa KHTN-CN",
-    "Khoa Tiểu học - Mầm Non",
-    "Khoa Nông Lâm",
-    "Khoa Cơ Sở",
-    "Khoa Kinh Tế",
-    "Khoa Khoa học Xã Hội",
-    "Khoa Dinh Dưỡng",
+    t("facultyOptionA"),
+    t("facultyOptionB"),
+    t("facultyOptionC"),
+    t("facultyOptionD"),
+    t("facultyOptionE"),
+    t("facultyOptionF"),
+    t("facultyOptionG"),
   ];
 
   const loadReputation = useCallback(async () => {
@@ -263,6 +313,91 @@ export default function ReputationClient() {
 
         {activeTab === "overview" && reputation && (
           <div className="reputation-page__overview">
+            <section className="policy-hero">
+              <div className="policy-hero__badge">{t("policyBadge")}</div>
+              <h2>{t("policyTitle")}</h2>
+              <p>{t("policyDescription")}</p>
+              <div className="policy-hero__formula">{reputationFormula}</div>
+            </section>
+
+            <section className="policy-grid">
+              <div className="policy-card">
+                <h3>{t("plusTableTitle")}</h3>
+                <table className="policy-table">
+                  <thead>
+                    <tr>
+                      <th>{t("tableAction")}</th>
+                      <th>{t("tablePoints")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {plusRules.map((item) => (
+                      <tr key={item.action}>
+                        <td>{item.action}</td>
+                        <td className="positive">{item.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="policy-card">
+                <h3>{t("minusTableTitle")}</h3>
+                <table className="policy-table">
+                  <thead>
+                    <tr>
+                      <th>{t("tableAction")}</th>
+                      <th>{t("tablePoints")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {minusRules.map((item) => (
+                      <tr key={item.action}>
+                        <td>{item.action}</td>
+                        <td className="negative">{item.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section className="level-section">
+              <div className="level-section__header">
+                <h3>{t("section6Title")}</h3>
+                <p>{t("section6Description")}</p>
+              </div>
+
+              <div className="level-cards">
+                {sectionSixLevels.map((level) => (
+                  <article className="level-card" key={level.level}>
+                    <div className="level-card__top">
+                      <span className="level-name">{level.level}</span>
+                      <span className="level-range">{level.range}</span>
+                    </div>
+                    <div className="level-card__title">{t("rightsTitle")}</div>
+                    <ul>
+                      {level.rights.map((right) => (
+                        <li key={right}>{right}</li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="reward-section">
+              <h3>{t("rewardsTitle")}</h3>
+              <div className="reward-grid">
+                {rewards.map((reward) => (
+                  <article className="reward-card" key={reward.title}>
+                    <h4>{reward.title}</h4>
+                    <p>{reward.description}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
             {/* Tổng điểm + Level */}
             <div className="overview-card overview-card--main">
               <div className="overview-card__level">

@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axiosInstance from "@/lib/axios";
+import reputationService from "@/services/reputationService";
 import "./TermDetailView.scss";
 
 interface TermDetailViewProps {
@@ -238,6 +239,21 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
       toast.error(t("loginToAskAI") || "Vui lòng đăng nhập để hỏi AI");
       return;
     }
+
+    try {
+      const access = await reputationService.checkAIAccess("explanation");
+      if (!access.allowed || access.level < 2) {
+        const message =
+          "Ban can dat Level 2 (tu 100 diem uy tin) de dung AI giai thich them thuat ngu da co san.";
+        toast.error(message);
+        router.push("/profile/reputation");
+        return;
+      }
+    } catch {
+      toast.error("Khong the kiem tra quyen AI. Vui long thu lai.");
+      return;
+    }
+
     const targetLang = lang || contentLang;
     setShowAiPanel(true);
 
@@ -265,8 +281,8 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
         // Save to local cache
         setAiCache((prev) => ({ ...prev, [targetLang]: parsed }));
       }
-    } catch {
-      toast.error("Không thể kết nối với AI");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Không thể kết nối với AI");
       setAiResponse(null);
       setShowAiPanel(false);
     } finally {

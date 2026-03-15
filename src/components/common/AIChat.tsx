@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { aiService, AIResponse } from "@/services/aiService";
+import reputationService from "@/services/reputationService";
 import { saveMultiLangContributionData } from "@/utils/contributionStorage";
 import { toast } from "react-hot-toast";
 import {
@@ -53,6 +54,24 @@ export default function AIChat({
         return;
       }
 
+      try {
+        const access = await reputationService.checkAIAccess("explanation");
+        if (!access.allowed) {
+          const message =
+            access.level < 2
+              ? "Ban can dat Level 2 (tu 100 diem uy tin) de su dung AI giai thich."
+              : "Ban chua du dieu kien de su dung tinh nang AI.";
+          setError(message);
+          toast.error(message);
+          return;
+        }
+      } catch {
+        const message = "Khong the kiem tra quyen AI. Vui long thu lai.";
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
       // If already cached, just show it
       if (cachedResponses.current[askLang]) {
         setResponse(cachedResponses.current[askLang]);
@@ -72,7 +91,7 @@ export default function AIChat({
       } catch (err: any) {
         console.error("AI Chat Error:", err);
         setError(err.message || t("errorConnection"));
-        toast.error(t("errorNoResponse"));
+        toast.error(err.message || t("errorNoResponse"));
       } finally {
         setIsLoading(false);
       }

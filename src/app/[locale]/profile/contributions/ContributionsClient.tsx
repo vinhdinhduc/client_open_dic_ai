@@ -67,10 +67,19 @@ export default function MyContributionsPage() {
     try {
       // Load counts for each status in parallel
       const [allRes, pendingRes, approvedRes, rejectedRes] = await Promise.all([
-        contributionService.getContributions({ limit: 1 }),
-        contributionService.getContributions({ status: "pending", limit: 1 }),
-        contributionService.getContributions({ status: "approved", limit: 1 }),
-        contributionService.getContributions({ status: "rejected", limit: 1 }),
+        contributionService.getMyContributions({ limit: 1 }),
+        contributionService.getMyContributions({
+          status: "pending",
+          limit: 1,
+        }),
+        contributionService.getMyContributions({
+          status: "approved",
+          limit: 1,
+        }),
+        contributionService.getMyContributions({
+          status: "rejected",
+          limit: 1,
+        }),
       ]);
 
       setStats({
@@ -96,7 +105,7 @@ export default function MyContributionsPage() {
         params.status = statusFilter;
       }
 
-      const response = await contributionService.getContributions(params);
+      const response = await contributionService.getMyContributions(params);
       console.log("Check contribution my", response);
 
       if (response.success && response.data) {

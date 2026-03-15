@@ -124,6 +124,7 @@ export interface GetContributionsParams {
     status?: string;
     type?: string;
     category?: string;
+    mine?: boolean;
     includeDeleted?: boolean;
     onlyDeleted?: boolean;
 }
@@ -166,6 +167,15 @@ const getContributions = async (
     const response = await axiosInstance.get<
         ApiResponse<ContributionsResponse>
     >("/contributions", { params });
+    return response.data;
+}
+
+const getMyContributions = async (
+    params: Omit<GetContributionsParams, "mine"> = {}
+): Promise<ApiResponse<ContributionsResponse>> => {
+    const response = await axiosInstance.get<
+        ApiResponse<ContributionsResponse>
+    >("/contributions/me", { params });
     return response.data;
 }
 
@@ -255,6 +265,7 @@ const bulkReject = async (
 export const contributionService = {
     createContribution,
     getContributions,
+    getMyContributions,
     getContributionById,
     approveContribution,
     rejectContribution,

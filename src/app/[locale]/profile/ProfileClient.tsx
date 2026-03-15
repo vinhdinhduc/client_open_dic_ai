@@ -93,10 +93,19 @@ export default function ProfilePage() {
   const loadStats = async () => {
     try {
       const [allRes, pendingRes, approvedRes, rejectedRes] = await Promise.all([
-        contributionService.getContributions({ limit: 1 }),
-        contributionService.getContributions({ status: "pending", limit: 1 }),
-        contributionService.getContributions({ status: "approved", limit: 1 }),
-        contributionService.getContributions({ status: "rejected", limit: 1 }),
+        contributionService.getMyContributions({ limit: 1 }),
+        contributionService.getMyContributions({
+          status: "pending",
+          limit: 1,
+        }),
+        contributionService.getMyContributions({
+          status: "approved",
+          limit: 1,
+        }),
+        contributionService.getMyContributions({
+          status: "rejected",
+          limit: 1,
+        }),
       ]);
 
       setStats({
