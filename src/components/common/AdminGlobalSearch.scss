@@ -1,0 +1,123 @@
+.admin-global-search {
+    position: relative;
+
+    &__dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        width: 420px;
+        max-width: min(92vw, 420px);
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.14);
+        z-index: 50;
+        max-height: 70vh;
+        overflow: auto;
+        padding: 8px;
+    }
+
+    &__hint,
+    &__empty,
+    &__loading {
+        padding: 12px;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    &__loading {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .spin {
+        animation: admin-global-search-spin 1s linear infinite;
+    }
+
+    &__group {
+        padding: 6px;
+        border-bottom: 1px dashed var(--border-color);
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    &__group-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+    }
+
+    &__item {
+        width: 100%;
+        border: none;
+        background: transparent;
+        text-align: left;
+        border-radius: 8px;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        cursor: pointer;
+
+        &:hover {
+            background: var(--bg-secondary);
+        }
+    }
+
+    &__item-label {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__item-meta {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__view-all {
+        width: 100%;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 8px;
+        font-size: 0.8rem;
+        padding: 6px 8px;
+        margin-top: 6px;
+        cursor: pointer;
+
+        &:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-global-search {
+        &__dropdown {
+            width: 100%;
+            max-width: none;
+        }
+    }
+}
+
+@keyframes admin-global-search-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

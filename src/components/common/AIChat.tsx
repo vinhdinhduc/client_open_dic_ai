@@ -41,7 +41,7 @@ export default function AIChat({
   const [response, setResponse] = useState<AIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedLang, setSelectedLang] = useState(language);
-  /** Cache AI responses per language */
+
   const cachedResponses = useRef<Record<string, AIResponse>>({});
   const hasCalledAPI = useRef(false);
 
@@ -51,24 +51,6 @@ export default function AIChat({
     async (lang?: string) => {
       const askLang = lang || selectedLang;
       if (!term.trim()) {
-        return;
-      }
-
-      try {
-        const access = await reputationService.checkAIAccess("explanation");
-        if (!access.allowed) {
-          const message =
-            access.level < 2
-              ? "Ban can dat Level 2 (tu 100 diem uy tin) de su dung AI giai thich."
-              : "Ban chua du dieu kien de su dung tinh nang AI.";
-          setError(message);
-          toast.error(message);
-          return;
-        }
-      } catch {
-        const message = "Khong the kiem tra quyen AI. Vui long thu lai.";
-        setError(message);
-        toast.error(message);
         return;
       }
 

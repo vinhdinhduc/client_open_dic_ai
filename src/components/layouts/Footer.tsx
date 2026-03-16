@@ -31,8 +31,9 @@ export function Footer() {
               <span className="logo-text">{t("common.appName")}</span>
             </div>
             <p className="footer-description">
-              <strong>{d("descriptionBold")}</strong> {d("descriptionText")}
+              <b>{d("descriptionBold")}</b>
             </p>
+            <p className="footer-description-text"> {d("descriptionText")}</p>
           </div>
 
           {/* Quick Links */}

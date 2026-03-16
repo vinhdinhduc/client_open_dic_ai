@@ -125,6 +125,12 @@
                 max-width: 100%;
             }
         }
+        .footer-description-text {
+            margin-top: 0.5rem;
+            [data-theme="dark"] & {
+                color: var(--text-secondary, #a0a0a0);
+            }
+        }
     }
 
     // Title

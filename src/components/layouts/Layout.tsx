@@ -8,24 +8,26 @@ import { useAuth } from "@/hooks";
 import { HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface LayoutProps {
   children: React.ReactNode;
   className?: string;
 }
 
-const FAQ_MESSAGES = [
-  "Bạn có câu hỏi không? 💬",
-  "Cần hỗ trợ? Hỏi ngay!",
-  "Tra cứu thuật ngữ dễ dàng!",
-  "Khám phá từ điển mở UTB 📚",
-];
-
 const Layout = ({ children, className }: LayoutProps) => {
   const { user } = useAuth();
   const [messageIndex, setMessageIndex] = useState(0);
   const [bubbleVisible, setBubbleVisible] = useState(false);
 
+  const t = useTranslations("layout");
+  const FAQ_MESSAGES = [
+    t("faqPrompt1"),
+    t("faqPrompt2"),
+    t("faqPrompt3"),
+    t("faqPrompt4"),
+    t("faqPrompt5"),
+  ];
   useEffect(() => {
     // Show bubble after 3 seconds
     const showTimer = setTimeout(() => setBubbleVisible(true), 3000);

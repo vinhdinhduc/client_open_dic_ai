@@ -43,14 +43,14 @@ export default async function HomePage({ params }: Props) {
           </div>
           <div className="hero__feature">
             <div className="hero__feature-icon">
-              <Users size={24} />
+              <Sparkles size={24} />
             </div>
             <h3 className="hero__feature-title">{t("feature2Title")}</h3>
             <p className="hero__feature-desc">{t("feature2Desc")}</p>
           </div>
           <div className="hero__feature">
             <div className="hero__feature-icon">
-              <Sparkles size={24} />
+              <Users size={24} />
             </div>
             <h3 className="hero__feature-title">{t("feature3Title")}</h3>
             <p className="hero__feature-desc">{t("feature3Desc")}</p>

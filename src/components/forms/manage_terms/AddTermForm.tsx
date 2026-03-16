@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import AIFieldAssist from "@/components/common/AIFieldAssist";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
@@ -62,7 +63,11 @@ const getCategoryName = (
 
 export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations("termForm");
+  const termsBasePath = pathname?.includes("/moderator/")
+    ? "/moderator/terms"
+    : "/admin/terms";
 
   // Form state
   const [term, setTerm] = useState<MultiLangText>({ vi: "", en: "", lo: "" });
@@ -282,7 +287,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push("/admin/terms");
+          router.push(termsBasePath);
         }
       } else {
         toast.error(result.message || t("errorGeneral"));
@@ -365,10 +370,21 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
 
             {/* Definition */}
             <div className="form-group">
-              <label className="form-label">
-                <FileText size={16} />
-                Định nghĩa
-              </label>
+              <div className="form-label-row">
+                <label className="form-label">
+                  <FileText size={16} />
+                  Định nghĩa
+                </label>
+                <AIFieldAssist
+                  termContext={term[activeTab] || term.vi || ""}
+                  fieldType="definition"
+                  language={activeTab}
+                  onInsert={(content) =>
+                    handleMultiLangChange(setDefinition, activeTab, content)
+                  }
+                  disabled={!term[activeTab]?.trim() && !term.vi?.trim()}
+                />
+              </div>
               <RichTextEditor
                 value={definition[activeTab] || ""}
                 onChange={(value) =>
@@ -381,11 +397,26 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
 
             {/* Detailed Explanation */}
             <div className="form-group">
-              <label className="form-label">
-                <BookOpen size={16} />
-                Giải thích chi tiết
-                <span className="optional">(không bắt buộc)</span>
-              </label>
+              <div className="form-label-row">
+                <label className="form-label">
+                  <BookOpen size={16} />
+                  Giải thích chi tiết
+                  <span className="optional">(không bắt buộc)</span>
+                </label>
+                <AIFieldAssist
+                  termContext={term[activeTab] || term.vi || ""}
+                  fieldType="explanation"
+                  language={activeTab}
+                  onInsert={(content) =>
+                    handleMultiLangChange(
+                      setDetailedExplanation,
+                      activeTab,
+                      content,
+                    )
+                  }
+                  disabled={!term[activeTab]?.trim() && !term.vi?.trim()}
+                />
+              </div>
               <RichTextEditor
                 value={detailedExplanation[activeTab] || ""}
                 onChange={(value) =>

@@ -14,6 +14,7 @@ import {
 import { toast } from "react-hot-toast";
 import { PlusCircle, X, Send, Loader2 } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import AIFieldAssist from "@/components/common/AIFieldAssist";
 import StepGuide, { GuideStep } from "@/components/common/StepGuide";
 import "./ContributionForm.scss";
 import type { MultiLangText, Example, PartOfSpeech } from "@/types/term.types";
@@ -21,11 +22,9 @@ import type { CategoryRef } from "@/types/category.types";
 import type { NewTermContributionData } from "@/types/contribution.types";
 import { ApiResponse } from "@/types";
 
-/** Strip &nbsp; HTML entities and non-breaking spaces */
 const cleanNbsp = (s?: string) =>
   s?.replace(/&nbsp;/gi, " ").replace(/\u00A0/g, " ");
 
-// Extended form data with additional fields for UI state
 interface ContributionFormData extends Omit<
   NewTermContributionData,
   "examples"
@@ -500,9 +499,27 @@ export default function ContributionForm() {
           </div>
 
           <div className="form-group">
-            <label className="form-label required">
-              {t("definitionLabel")}
-            </label>
+            <div className="form-label-row">
+              <label className="form-label required">
+                {t("definitionLabel")}
+              </label>
+              <AIFieldAssist
+                termContext={
+                  formData.term[currentLang] || formData.term.vi || ""
+                }
+                fieldType="definition"
+                language={currentLang}
+                onInsert={(content) =>
+                  handleInputChange("definition", content, currentLang)
+                }
+                disabled={
+                  !(
+                    formData.term[currentLang]?.trim() ||
+                    formData.term.vi?.trim()
+                  )
+                }
+              />
+            </div>
             <RichTextEditor
               key={`definition-${currentLang}`}
               value={formData.definition[currentLang] || ""}
@@ -544,9 +561,27 @@ export default function ContributionForm() {
           <h2 className="form-section__title">{t("detailedInfo")}</h2>
 
           <div className="form-group">
-            <label className="form-label">
-              {t("detailedExplanationLabel")}
-            </label>
+            <div className="form-label-row">
+              <label className="form-label">
+                {t("detailedExplanationLabel")}
+              </label>
+              <AIFieldAssist
+                termContext={
+                  formData.term[currentLang] || formData.term.vi || ""
+                }
+                fieldType="explanation"
+                language={currentLang}
+                onInsert={(content) =>
+                  handleInputChange("detailedExplanation", content, currentLang)
+                }
+                disabled={
+                  !(
+                    formData.term[currentLang]?.trim() ||
+                    formData.term.vi?.trim()
+                  )
+                }
+              />
+            </div>
             <RichTextEditor
               key={`expl-${currentLang}`}
               value={formData.detailedExplanation?.[currentLang] || ""}

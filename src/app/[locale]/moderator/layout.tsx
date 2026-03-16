@@ -17,7 +17,6 @@ import {
   Menu,
   X,
   Bell,
-  Search,
   ChevronDown,
   ChevronRight,
   Sun,
@@ -35,6 +34,7 @@ import {
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/hooks/useLanguage";
 import NotificationBell from "@/components/common/NotificationBell";
+import AdminGlobalSearch from "@/components/common/AdminGlobalSearch";
 import "../admin/admin.scss";
 
 interface AdminLayoutProps {
@@ -397,10 +397,12 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
             </button>
 
             {/* Search */}
-            <div className="admin-header__search">
-              <Search size={18} />
-              <input type="text" placeholder={t("searchPlaceholder")} />
-            </div>
+            <AdminGlobalSearch
+              role="moderator"
+              basePath="/moderator"
+              language={currentLanguage}
+              placeholder={t("searchPlaceholder")}
+            />
           </div>
 
           <div className="admin-header__right">

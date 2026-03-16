@@ -638,16 +638,18 @@ export default function ProfilePage() {
             <div className="profile-card__header">
               <h2 className="card-title">
                 <Bell size={20} />
-                Cài đặt thông báo email
+                {t("settingEmail")}
               </h2>
             </div>
             <div className="profile-card__body">
               <div className="notification-settings">
                 <label className="notification-toggle">
                   <div className="notification-toggle__info">
-                    <span className="notification-toggle__label">Đóng góp</span>
+                    <span className="notification-toggle__label">
+                      {t("notifyContribution")}
+                    </span>
                     <span className="notification-toggle__desc">
-                      Nhận thông báo khi đóng góp được duyệt hoặc từ chối
+                      {t("notifyContributionDesc")}
                     </span>
                   </div>
                   <input
@@ -667,10 +669,10 @@ export default function ProfilePage() {
                   <label className="notification-toggle">
                     <div className="notification-toggle__info">
                       <span className="notification-toggle__label">
-                        Kiểm duyệt
+                        {t("notifyModeration")}
                       </span>
                       <span className="notification-toggle__desc">
-                        Nhận thông báo khi có đóng góp mới cần duyệt
+                        {t("notifyModerationDesc")}
                       </span>
                     </div>
                     <input
@@ -689,9 +691,11 @@ export default function ProfilePage() {
 
                 <label className="notification-toggle">
                   <div className="notification-toggle__info">
-                    <span className="notification-toggle__label">Hệ thống</span>
+                    <span className="notification-toggle__label">
+                      {t("notifySystem")}
+                    </span>
                     <span className="notification-toggle__desc">
-                      Nhận thông báo về cập nhật và bảo trì hệ thống
+                      {t("notifySystemDesc")}
                     </span>
                   </div>
                   <input
@@ -716,12 +720,12 @@ export default function ProfilePage() {
                     {savingNotifications ? (
                       <>
                         <Loader2 className="spinner" size={16} />
-                        Đang lưu...
+                        {t("saving")}
                       </>
                     ) : (
                       <>
                         <Save size={16} />
-                        Lưu cài đặt
+                        {t("saveSettings")}
                       </>
                     )}
                   </button>

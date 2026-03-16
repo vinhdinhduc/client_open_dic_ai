@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import AIFieldAssist from "@/components/common/AIFieldAssist";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -515,10 +516,21 @@ export function EditTermForm({
 
             {/* Definition */}
             <div className="form-group">
-              <label className="form-label">
-                <FileText size={16} />
-                {t("definition")}
-              </label>
+              <div className="form-label-row">
+                <label className="form-label">
+                  <FileText size={16} />
+                  {t("definition")}
+                </label>
+                <AIFieldAssist
+                  termContext={term[activeTab] || term.vi || ""}
+                  fieldType="definition"
+                  language={activeTab}
+                  onInsert={(content) =>
+                    handleMultiLangChange(setDefinition, activeTab, content)
+                  }
+                  disabled={!term[activeTab]?.trim() && !term.vi?.trim()}
+                />
+              </div>
               <RichTextEditor
                 value={definition[activeTab] || ""}
                 onChange={(value) =>
@@ -531,11 +543,26 @@ export function EditTermForm({
 
             {/* Detailed Explanation */}
             <div className="form-group">
-              <label className="form-label">
-                <BookOpen size={16} />
-                {t("detailedExplanation")}
-                <span className="optional">{t("optional")}</span>
-              </label>
+              <div className="form-label-row">
+                <label className="form-label">
+                  <BookOpen size={16} />
+                  {t("detailedExplanation")}
+                  <span className="optional">{t("optional")}</span>
+                </label>
+                <AIFieldAssist
+                  termContext={term[activeTab] || term.vi || ""}
+                  fieldType="explanation"
+                  language={activeTab}
+                  onInsert={(content) =>
+                    handleMultiLangChange(
+                      setDetailedExplanation,
+                      activeTab,
+                      content,
+                    )
+                  }
+                  disabled={!term[activeTab]?.trim() && !term.vi?.trim()}
+                />
+              </div>
               <RichTextEditor
                 value={detailedExplanation[activeTab] || ""}
                 onChange={(value) =>
@@ -601,7 +628,8 @@ export function EditTermForm({
             <div className="form-group">
               <label className="form-label">
                 <Tag size={16} />
-                {t("category")} <span className="required">{t("required")}</span>
+                {t("category")}{" "}
+                <span className="required">{t("required")}</span>
               </label>
               <select
                 value={categoryId}

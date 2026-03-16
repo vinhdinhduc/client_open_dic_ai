@@ -335,11 +335,11 @@ export default function TermsPage({
     }
   };
   const handleEditTerm = (term: Term) => {
-    router.push(`/admin/terms/edit/${term._id}`);
+    router.push(`${termsBasePath}/edit/${term._id}`);
   };
 
   const handleViewTerm = (term: Term) => {
-    router.push(`/admin/terms/${term._id}`);
+    router.push(`${termsBasePath}/${term._id}`);
   };
 
   if (loading) {
@@ -405,7 +405,7 @@ export default function TermsPage({
             </button>
           )}
           <Link
-            href="/admin/terms/new"
+            href={`${termsBasePath}/new`}
             className="admin-btn admin-btn--primary"
           >
             <Plus size={16} />

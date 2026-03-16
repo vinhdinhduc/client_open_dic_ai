@@ -199,6 +199,14 @@
 }
 
 // Form Labels
+.form-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-xs;
+    margin-bottom: 2px;
+}
+
 .form-label {
     font-size: $font-sm;
     font-weight: $font-medium;
