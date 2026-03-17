@@ -2,7 +2,6 @@
 
 import React from "react";
 import { XCircle, ExternalLink, CheckCircle, Loader2 } from "lucide-react";
-import RichTextEditor from "@/components/common/RichTextEditor";
 import {
   Contribution,
   ContributionOverrideData,
@@ -89,6 +88,9 @@ export default function ContributionDetailModal({
     lang: "vi" | "en" | "lo",
     value: string,
   ) => {
+    const currentValue = contributionDraft[field]?.[lang] || "";
+    if (currentValue === value) return;
+
     onContributionDraftChange({
       ...contributionDraft,
       [field]: {
@@ -104,6 +106,9 @@ export default function ContributionDetailModal({
     value: string,
   ) => {
     const nextExamples = [...(contributionDraft.examples || [])];
+    const currentValue = nextExamples[index]?.[lang] || "";
+    if (currentValue === value) return;
+
     nextExamples[index] = {
       ...(nextExamples[index] || {}),
       [lang]: value,
@@ -355,12 +360,17 @@ export default function ContributionDetailModal({
                         <span className="moderation-edit-field__lang">
                           {lang.toUpperCase()}
                         </span>
-                        <RichTextEditor
+                        <textarea
+                          className="form-textarea"
                           value={contributionDraft.definition?.[lang] || ""}
                           onChange={(value) =>
-                            updateDraftMultiLang("definition", lang, value)
+                            updateDraftMultiLang(
+                              "definition",
+                              lang,
+                              value.target.value,
+                            )
                           }
-                          minHeight={100}
+                          rows={5}
                         />
                       </div>
                     ))}
@@ -378,7 +388,8 @@ export default function ContributionDetailModal({
                         <span className="moderation-edit-field__lang">
                           {lang.toUpperCase()}
                         </span>
-                        <RichTextEditor
+                        <textarea
+                          className="form-textarea"
                           value={
                             contributionDraft.detailedExplanation?.[lang] || ""
                           }
@@ -386,10 +397,10 @@ export default function ContributionDetailModal({
                             updateDraftMultiLang(
                               "detailedExplanation",
                               lang,
-                              value,
+                              value.target.value,
                             )
                           }
-                          minHeight={120}
+                          rows={6}
                         />
                       </div>
                     ))}
@@ -479,15 +490,25 @@ export default function ContributionDetailModal({
                   <input
                     className="form-select moderation-edit-field__input"
                     value={tagInput}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const nextTags = e.target.value
+                        .split(",")
+                        .map((tag) => tag.trim())
+                        .filter(Boolean);
+                      const currentTags = contributionDraft.tags || [];
+                      const isSameTags =
+                        currentTags.length === nextTags.length &&
+                        currentTags.every(
+                          (tag, index) => tag === nextTags[index],
+                        );
+
+                      if (isSameTags) return;
+
                       onContributionDraftChange({
                         ...contributionDraft,
-                        tags: e.target.value
-                          .split(",")
-                          .map((tag) => tag.trim())
-                          .filter(Boolean),
-                      })
-                    }
+                        tags: nextTags,
+                      });
+                    }}
                     placeholder="Nhập tag, cách nhau bởi dấu phẩy"
                   />
                 </div>
@@ -498,12 +519,19 @@ export default function ContributionDetailModal({
                     className="form-textarea"
                     rows={3}
                     value={contributionDraft.contributorNote || ""}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      if (
+                        (contributionDraft.contributorNote || "") ===
+                        e.target.value
+                      ) {
+                        return;
+                      }
+
                       onContributionDraftChange({
                         ...contributionDraft,
                         contributorNote: e.target.value,
-                      })
-                    }
+                      });
+                    }}
                   />
                 </div>
               </div>
