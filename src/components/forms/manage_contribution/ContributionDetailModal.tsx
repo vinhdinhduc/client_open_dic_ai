@@ -2,22 +2,31 @@
 
 import React from "react";
 import { XCircle, ExternalLink, CheckCircle, Loader2 } from "lucide-react";
-import { Contribution } from "@/services/contributionService";
+import RichTextEditor from "@/components/common/RichTextEditor";
+import {
+  Contribution,
+  ContributionOverrideData,
+} from "@/services/contributionService";
 import DiffCompareView from "./DiffCompareView";
+import SafeHtml from "@/components/common/SafeHtml";
 
 interface ContributionDetailModalProps {
   contribution: Contribution;
+  contributionDraft: ContributionOverrideData;
   moderatorNote: string;
+  onContributionDraftChange: (draft: ContributionOverrideData) => void;
   onModeratorNoteChange: (note: string) => void;
   onClose: () => void;
-  onApprove: () => void;
+  onApprove: (draft: ContributionOverrideData) => void;
   onReject: () => void;
   actionLoading: boolean;
 }
 
 export default function ContributionDetailModal({
   contribution,
+  contributionDraft,
   moderatorNote,
+  onContributionDraftChange,
   onModeratorNoteChange,
   onClose,
   onApprove,
@@ -74,6 +83,59 @@ export default function ContributionDetailModal({
       onClose();
     }
   };
+
+  const updateDraftMultiLang = (
+    field: "term" | "definition" | "detailedExplanation",
+    lang: "vi" | "en" | "lo",
+    value: string,
+  ) => {
+    onContributionDraftChange({
+      ...contributionDraft,
+      [field]: {
+        ...(contributionDraft[field] || {}),
+        [lang]: value,
+      },
+    });
+  };
+
+  const updateDraftExample = (
+    index: number,
+    lang: "vi" | "en" | "lo",
+    value: string,
+  ) => {
+    const nextExamples = [...(contributionDraft.examples || [])];
+    nextExamples[index] = {
+      ...(nextExamples[index] || {}),
+      [lang]: value,
+    };
+
+    onContributionDraftChange({
+      ...contributionDraft,
+      examples: nextExamples,
+    });
+  };
+
+  const addDraftExample = () => {
+    onContributionDraftChange({
+      ...contributionDraft,
+      examples: [
+        ...(contributionDraft.examples || []),
+        { vi: "", en: "", lo: "" },
+      ],
+    });
+  };
+
+  const removeDraftExample = (index: number) => {
+    onContributionDraftChange({
+      ...contributionDraft,
+      examples:
+        contributionDraft.examples?.filter(
+          (_, itemIndex) => itemIndex !== index,
+        ) || [],
+    });
+  };
+
+  const tagInput = (contributionDraft.tags || []).join(", ");
   return (
     <div className="modal-overlay" onClick={handleBackdropClick}>
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
@@ -141,24 +203,57 @@ export default function ContributionDetailModal({
                   )}
                   <div className="diff-field">
                     <label>Định nghĩa (Vi):</label>
-                    <p>{contribution.definition?.vi || "-"}</p>
+                    <SafeHtml
+                      content={contribution.definition?.vi || "-"}
+                      as="p"
+                    />
                   </div>
                   {contribution.definition?.lo && (
                     <div className="diff-field">
                       <label>Định nghĩa (Lo):</label>
-                      <p>{contribution.definition.lo}</p>
+                      <SafeHtml content={contribution.definition.lo} as="p" />
                     </div>
                   )}
                   {contribution.definition?.en && (
                     <div className="diff-field">
                       <label>Định nghĩa (En):</label>
-                      <p>{contribution.definition.en}</p>
+                      <SafeHtml content={contribution.definition.en} as="p" />
                     </div>
                   )}
                   {contribution.detailedExplanation?.vi && (
                     <div className="diff-field">
                       <label>Giải thích chi tiết:</label>
-                      <p>{contribution.detailedExplanation.vi}</p>
+                      <p>
+                        <strong>🇻🇳</strong>{" "}
+                        <SafeHtml
+                          content={contribution.detailedExplanation.vi}
+                          as="span"
+                        />
+                      </p>
+                    </div>
+                  )}
+                  {contribution.detailedExplanation?.en && (
+                    <div className="diff-field">
+                      <label>Giải thích chi tiết (EN):</label>
+                      <p>
+                        <strong>🇬🇧</strong>{" "}
+                        <SafeHtml
+                          content={contribution.detailedExplanation.en}
+                          as="span"
+                        />
+                      </p>
+                    </div>
+                  )}
+                  {contribution.detailedExplanation?.lo && (
+                    <div className="diff-field">
+                      <label>Giải thích chi tiết (LO):</label>
+                      <p>
+                        <strong>🇱🇦</strong>{" "}
+                        <SafeHtml
+                          content={contribution.detailedExplanation.lo}
+                          as="span"
+                        />
+                      </p>
                     </div>
                   )}
                   {contribution.examples &&
@@ -166,7 +261,26 @@ export default function ContributionDetailModal({
                       <div className="diff-field">
                         <label>Ví dụ:</label>
                         {contribution.examples.map((ex, idx) => (
-                          <p key={idx}>{ex.vi || ex.lo || ex.en}</p>
+                          <div key={idx} className="diff-example">
+                            <span className="diff-example__num">
+                              {idx + 1}.
+                            </span>
+                            {ex.vi && (
+                              <p>
+                                🇻🇳 <SafeHtml content={ex.vi} as="span" />
+                              </p>
+                            )}
+                            {ex.en && (
+                              <p>
+                                🇬🇧 <SafeHtml content={ex.en} as="span" />
+                              </p>
+                            )}
+                            {ex.lo && (
+                              <p>
+                                🇱🇦 <SafeHtml content={ex.lo} as="span" />
+                              </p>
+                            )}
+                          </div>
                         ))}
                       </div>
                     )}
@@ -197,6 +311,200 @@ export default function ContributionDetailModal({
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {contribution.status === "pending" && (
+            <div className="detail-section">
+              <h3>Hoàn thiện nội dung trước khi duyệt</h3>
+
+              <div className="moderation-edit-grid">
+                <div className="detail-item detail-item--full">
+                  <label>Thuật ngữ</label>
+                  <div className="moderation-lang-grid">
+                    {(["vi", "en", "lo"] as const).map((lang) => (
+                      <div
+                        key={`term-${lang}`}
+                        className="moderation-edit-field"
+                      >
+                        <span className="moderation-edit-field__lang">
+                          {lang.toUpperCase()}
+                        </span>
+                        <input
+                          className="form-select moderation-edit-field__input"
+                          value={contributionDraft.term?.[lang] || ""}
+                          onChange={(e) =>
+                            updateDraftMultiLang("term", lang, e.target.value)
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="detail-item detail-item--full">
+                  <label>Định nghĩa</label>
+                  <div className="moderation-lang-stack">
+                    {(["vi", "en", "lo"] as const).map((lang) => (
+                      <div
+                        key={`definition-${lang}`}
+                        className="moderation-edit-field moderation-edit-field--editor"
+                      >
+                        <span className="moderation-edit-field__lang">
+                          {lang.toUpperCase()}
+                        </span>
+                        <RichTextEditor
+                          value={contributionDraft.definition?.[lang] || ""}
+                          onChange={(value) =>
+                            updateDraftMultiLang("definition", lang, value)
+                          }
+                          minHeight={100}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="detail-item detail-item--full">
+                  <label>Giải thích chi tiết</label>
+                  <div className="moderation-lang-stack">
+                    {(["vi", "en", "lo"] as const).map((lang) => (
+                      <div
+                        key={`detailed-${lang}`}
+                        className="moderation-edit-field moderation-edit-field--editor"
+                      >
+                        <span className="moderation-edit-field__lang">
+                          {lang.toUpperCase()}
+                        </span>
+                        <RichTextEditor
+                          value={
+                            contributionDraft.detailedExplanation?.[lang] || ""
+                          }
+                          onChange={(value) =>
+                            updateDraftMultiLang(
+                              "detailedExplanation",
+                              lang,
+                              value,
+                            )
+                          }
+                          minHeight={120}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="detail-item detail-item--full">
+                  <label>Ví dụ</label>
+                  <div className="moderation-examples">
+                    {(contributionDraft.examples || []).map(
+                      (example, index) => (
+                        <div
+                          key={`example-${index}`}
+                          className="moderation-example-card"
+                        >
+                          <div className="moderation-example-card__header">
+                            <span>Ví dụ {index + 1}</span>
+                            {(contributionDraft.examples?.length || 0) > 1 && (
+                              <button
+                                type="button"
+                                className="btn btn--secondary btn--sm"
+                                onClick={() => removeDraftExample(index)}
+                              >
+                                Xóa
+                              </button>
+                            )}
+                          </div>
+                          {(["vi", "en", "lo"] as const).map((lang) => (
+                            <div
+                              key={`example-${index}-${lang}`}
+                              className="moderation-edit-field"
+                            >
+                              <span className="moderation-edit-field__lang">
+                                {lang.toUpperCase()}
+                              </span>
+                              <input
+                                className="form-select moderation-edit-field__input"
+                                value={example?.[lang] || ""}
+                                onChange={(e) =>
+                                  updateDraftExample(
+                                    index,
+                                    lang,
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ),
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn--secondary"
+                      onClick={addDraftExample}
+                    >
+                      Thêm ví dụ
+                    </button>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <label>Từ loại</label>
+                  <select
+                    className="form-select"
+                    value={contributionDraft.partOfSpeech || ""}
+                    onChange={(e) =>
+                      onContributionDraftChange({
+                        ...contributionDraft,
+                        partOfSpeech: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Chọn từ loại</option>
+                    {Object.entries(PART_OF_SPEECH_LABELS).map(
+                      ([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </div>
+
+                <div className="detail-item">
+                  <label>Tags</label>
+                  <input
+                    className="form-select moderation-edit-field__input"
+                    value={tagInput}
+                    onChange={(e) =>
+                      onContributionDraftChange({
+                        ...contributionDraft,
+                        tags: e.target.value
+                          .split(",")
+                          .map((tag) => tag.trim())
+                          .filter(Boolean),
+                      })
+                    }
+                    placeholder="Nhập tag, cách nhau bởi dấu phẩy"
+                  />
+                </div>
+
+                <div className="detail-item detail-item--full">
+                  <label>Ghi chú người đóng góp</label>
+                  <textarea
+                    className="form-textarea"
+                    rows={3}
+                    value={contributionDraft.contributorNote || ""}
+                    onChange={(e) =>
+                      onContributionDraftChange({
+                        ...contributionDraft,
+                        contributorNote: e.target.value,
+                      })
+                    }
+                  />
                 </div>
               </div>
             </div>
@@ -294,7 +602,7 @@ export default function ContributionDetailModal({
             </button>
             <button
               className="btn btn--primary"
-              onClick={onApprove}
+              onClick={() => onApprove(contributionDraft)}
               disabled={actionLoading}
             >
               {actionLoading ? (

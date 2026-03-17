@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import "./ImportClient.scss";
 import {
   Upload,
   FileSpreadsheet,
@@ -12,13 +13,16 @@ import {
   Trash2,
   RefreshCw,
   Info,
-  ChevronRight,
   BookOpen,
   HelpCircle,
 } from "lucide-react";
-import axiosInstance from "@/lib/axios";
 import { toast } from "react-hot-toast";
-import { useTranslations } from "next-intl";
+import categoryService, { Category } from "@/services/categoryService";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  importTermsFromFile,
+  downloadImportTemplate,
+} from "@/services/termService";
 
 // Types
 interface ImportFile {
@@ -36,33 +40,27 @@ interface ImportFile {
   };
 }
 
-interface CategoryOption {
-  _id: string;
-  name: { vi: string; en?: string; lo?: string };
-  slug: string;
-}
-
 export default function ImportPage() {
   const t = useTranslations("adminImport");
+  const locale = useLocale();
   const [files, setFiles] = useState<ImportFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showGuide, setShowGuide] = useState(true);
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   // Load categories
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const res = await axiosInstance.get("/categories");
-        setCategories(res.data.data?.categories || res.data.data || []);
+        const res = await categoryService.getCategories();
+        setCategories(res.data || []);
       } catch (err) {
         console.error("Failed to load categories:", err);
       }
     };
     loadCategories();
   }, []);
-
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -133,21 +131,14 @@ export default function ImportPage() {
     );
 
     try {
-      const formData = new FormData();
-      formData.append("file", fileItem.file);
-      if (selectedCategory) {
-        formData.append("category", selectedCategory);
-      }
-
       setFiles((prev) =>
         prev.map((f) => (f.id === fileItem.id ? { ...f, progress: 60 } : f)),
       );
 
-      const response = await axiosInstance.post("/terms/import", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      const result = response.data.data;
+      const result = await importTermsFromFile(
+        fileItem.file,
+        selectedCategory || undefined,
+      );
 
       setFiles((prev) =>
         prev.map((f) =>
@@ -242,31 +233,14 @@ export default function ImportPage() {
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-header__title">{t("title")}</h1>
-          <p className="admin-page-header__subtitle">
-            {t("subtitle")}
-          </p>
+          <p className="admin-page-header__subtitle">{t("subtitle")}</p>
         </div>
         <div className="admin-page-header__actions">
           <button
             className="admin-btn admin-btn--secondary"
             onClick={async () => {
               try {
-                const response = await axiosInstance.get(
-                  "/terms/import-template",
-                  {
-                    responseType: "blob",
-                  },
-                );
-                const url = window.URL.createObjectURL(
-                  new Blob([response.data]),
-                );
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "import_template.xlsx";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
+                await downloadImportTemplate();
                 toast.success(t("downloadSuccess"));
               } catch {
                 toast.error(t("downloadError"));
@@ -306,18 +280,14 @@ export default function ImportPage() {
               <span className="guide-step__number">2</span>
               <div className="guide-step__content">
                 <h4>{t("step2Title")}</h4>
-                <p>
-                  {t("step2Desc")}
-                </p>
+                <p>{t("step2Desc")}</p>
               </div>
             </div>
             <div className="guide-step">
               <span className="guide-step__number">3</span>
               <div className="guide-step__content">
                 <h4>{t("step3Title")}</h4>
-                <p>
-                  {t("step3Desc")}
-                </p>
+                <p>{t("step3Desc")}</p>
               </div>
             </div>
           </div>
@@ -350,9 +320,7 @@ export default function ImportPage() {
                 style={{ display: "none" }}
               />
             </label>
-            <span className="drop-zone__hint">
-              {t("supportedFormats")}
-            </span>
+            <span className="drop-zone__hint">{t("supportedFormats")}</span>
           </div>
 
           {/* Category Selection */}
@@ -366,13 +334,17 @@ export default function ImportPage() {
                 <option value="">{t("selectCategory")}</option>
                 {categories.map((cat) => (
                   <option key={cat._id} value={cat._id}>
-                    {cat.name.vi}
+                    {typeof cat.name === "string"
+                      ? cat.name
+                      : (cat.name as any)[locale] ||
+                        (cat.name as any).vi ||
+                        (cat.name as any).en ||
+                        (cat.name as any).lo ||
+                        ""}
                   </option>
                 ))}
               </select>
-              <span className="option-hint">
-                {t("defaultCategoryHint")}
-              </span>
+              <span className="option-hint">{t("defaultCategoryHint")}</span>
             </div>
           </div>
 
@@ -457,7 +429,10 @@ export default function ImportPage() {
                             <li key={idx}>
                               {typeof error === "string"
                                 ? error
-                                : t("rowError", { row: error.row, error: error.error })}
+                                : t("rowError", {
+                                    row: error.row,
+                                    error: error.error,
+                                  })}
                             </li>
                           ))}
                         </ul>
@@ -492,8 +467,7 @@ export default function ImportPage() {
               <h4>{t("requiredColumns")}</h4>
               <ul>
                 <li>
-                  <code>term_xx</code> - {t("requiredCol1")} (vi, en,
-                  lo)
+                  <code>term_xx</code> - {t("requiredCol1")} (vi, en, lo)
                 </li>
                 <li>
                   <code>definition_xx</code> - {t("requiredCol2")}
@@ -557,441 +531,6 @@ export default function ImportPage() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .import-layout {
-          display: grid;
-          grid-template-columns: 1fr 320px;
-          gap: 24px;
-        }
-
-        .import-guide {
-          background: linear-gradient(
-            135deg,
-            rgba(59, 130, 246, 0.1) 0%,
-            rgba(37, 99, 235, 0.1) 100%
-          );
-          border: 1px solid rgba(59, 130, 246, 0.2);
-          border-radius: 12px;
-          margin-bottom: 24px;
-          overflow: hidden;
-        }
-
-        .import-guide__header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 16px 20px;
-          background: rgba(59, 130, 246, 0.1);
-        }
-
-        .import-guide__title {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-weight: 600;
-          color: #3b82f6;
-        }
-
-        .import-guide__close {
-          background: none;
-          border: none;
-          font-size: 24px;
-          color: #3b82f6;
-          cursor: pointer;
-          line-height: 1;
-        }
-
-        .import-guide__content {
-          display: flex;
-          gap: 24px;
-          padding: 20px;
-        }
-
-        .guide-step {
-          flex: 1;
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-        }
-
-        .guide-step__number {
-          width: 28px;
-          height: 28px;
-          background: #3b82f6;
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: 14px;
-          flex-shrink: 0;
-        }
-
-        .guide-step__content h4 {
-          margin: 0 0 4px;
-          font-size: 15px;
-          color: var(--text-primary);
-        }
-
-        .guide-step__content p {
-          margin: 0;
-          font-size: 13px;
-          color: var(--text-secondary);
-        }
-
-        .drop-zone {
-          background: var(--bg-card);
-          border: 2px dashed var(--border-color);
-          border-radius: 16px;
-          padding: 48px;
-          text-align: center;
-          transition: all 0.3s;
-        }
-
-        .drop-zone--active {
-          border-color: #667eea;
-          background: rgba(102, 126, 234, 0.05);
-        }
-
-        .drop-zone__icon {
-          color: #667eea;
-          margin-bottom: 16px;
-        }
-
-        .drop-zone h3 {
-          margin: 0 0 8px;
-          font-size: 20px;
-          color: var(--text-primary);
-        }
-
-        .drop-zone p {
-          margin: 0 0 16px;
-          color: var(--text-secondary);
-        }
-
-        .drop-zone__hint {
-          display: block;
-          margin-top: 16px;
-          font-size: 13px;
-          color: var(--text-secondary);
-        }
-
-        .import-options {
-          background: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: 12px;
-          padding: 20px;
-          margin-top: 16px;
-        }
-
-        .option-group {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .option-group label {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .option-group select {
-          padding: 10px 14px;
-          border: 1px solid var(--border-color);
-          border-radius: 8px;
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-          font-size: 14px;
-        }
-
-        .option-group select option {
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-        }
-
-        .option-hint {
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        .file-list {
-          background: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: 12px;
-          padding: 20px;
-          margin-top: 16px;
-        }
-
-        .file-list__header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-        }
-
-        .file-list__header h3 {
-          margin: 0;
-          font-size: 16px;
-        }
-
-        .file-list__items {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .file-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          background: var(--bg-secondary);
-          border-radius: 8px;
-        }
-
-        .file-item__icon {
-          flex-shrink: 0;
-        }
-
-        .status-icon--pending {
-          color: #6b7280;
-        }
-
-        .status-icon--processing {
-          color: #3b82f6;
-          animation: spin 1s linear infinite;
-        }
-
-        .status-icon--success {
-          color: #10b981;
-        }
-
-        .status-icon--error {
-          color: #ef4444;
-        }
-
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        .file-item__info {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .file-item__name {
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .file-item__size {
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
-
-        .file-item__progress {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          width: 120px;
-        }
-
-        .file-item__progress-bar {
-          flex: 1;
-          height: 4px;
-          background: #3b82f6;
-          border-radius: 2px;
-        }
-
-        .file-item__progress span {
-          font-size: 12px;
-          color: #3b82f6;
-          font-weight: 500;
-        }
-
-        .file-item__result {
-          display: flex;
-          gap: 12px;
-        }
-
-        .result-success {
-          color: #10b981;
-          font-weight: 500;
-        }
-
-        .result-failed {
-          color: #ef4444;
-          font-weight: 500;
-        }
-
-        .file-item__remove {
-          background: none;
-          border: none;
-          color: var(--text-secondary);
-          cursor: pointer;
-          padding: 4px;
-          border-radius: 4px;
-          display: flex;
-        }
-
-        .file-item__remove:hover {
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444;
-        }
-
-        .error-details {
-          margin-top: 16px;
-          padding: 16px;
-          background: rgba(239, 68, 68, 0.05);
-          border: 1px solid rgba(239, 68, 68, 0.1);
-          border-radius: 8px;
-        }
-
-        .error-details h4 {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin: 0 0 12px;
-          color: #ef4444;
-          font-size: 14px;
-        }
-
-        .error-file {
-          margin-bottom: 12px;
-        }
-
-        .error-file__name {
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-
-        .error-file ul {
-          margin: 8px 0 0;
-          padding-left: 20px;
-        }
-
-        .error-file li {
-          font-size: 13px;
-          color: #ef4444;
-          margin-bottom: 4px;
-        }
-
-        .file-list__actions {
-          margin-top: 20px;
-          text-align: center;
-        }
-
-        .admin-btn--lg {
-          padding: 14px 28px;
-          font-size: 16px;
-        }
-
-        .sidebar-card {
-          background: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 16px;
-        }
-
-        .sidebar-card h3 {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin: 0 0 16px;
-          font-size: 16px;
-          color: var(--text-primary);
-        }
-
-        .format-info h4 {
-          margin: 0 0 8px;
-          font-size: 13px;
-          font-weight: 600;
-          color: var(--text-secondary);
-        }
-
-        .format-info ul {
-          margin: 0 0 16px;
-          padding-left: 16px;
-        }
-
-        .format-info li {
-          font-size: 13px;
-          color: var(--text-primary);
-          margin-bottom: 4px;
-        }
-
-        .format-info code {
-          background: rgba(102, 126, 234, 0.1);
-          color: #667eea;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 12px;
-        }
-
-        .import-stats {
-          display: flex;
-          gap: 12px;
-        }
-
-        .import-stat {
-          flex: 1;
-          text-align: center;
-          padding: 12px;
-          background: rgba(16, 185, 129, 0.1);
-          border-radius: 8px;
-        }
-
-        .import-stat--danger {
-          background: rgba(239, 68, 68, 0.1);
-        }
-
-        .import-stat--pending {
-          background: rgba(107, 114, 128, 0.1);
-        }
-
-        .import-stat__value {
-          display: block;
-          font-size: 24px;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-
-        .import-stat__label {
-          font-size: 11px;
-          color: var(--text-secondary);
-        }
-
-        @media (max-width: 1024px) {
-          .import-layout {
-            grid-template-columns: 1fr;
-          }
-
-          .import-sidebar {
-            order: -1;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .import-guide__content {
-            flex-direction: column;
-          }
-
-          .drop-zone {
-            padding: 32px 20px;
-          }
-        }
-      `}</style>
     </div>
   );
 }

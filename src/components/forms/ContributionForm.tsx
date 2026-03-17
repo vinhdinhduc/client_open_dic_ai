@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { contributionService } from "@/services/contributionService";
 import categoryService from "@/services/categoryService";
@@ -12,10 +12,11 @@ import {
   clearContributionData,
 } from "@/utils/contributionStorage";
 import { toast } from "react-hot-toast";
-import { PlusCircle, X, Send, Loader2 } from "lucide-react";
+import { PlusCircle, X, Send, Loader2, Sparkles } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import AIFieldAssist from "@/components/common/AIFieldAssist";
 import StepGuide, { GuideStep } from "@/components/common/StepGuide";
+import { aiService } from "@/services/aiService";
 import "./ContributionForm.scss";
 import type { MultiLangText, Example, PartOfSpeech } from "@/types/term.types";
 import type { CategoryRef } from "@/types/category.types";
@@ -43,11 +44,13 @@ export default function ContributionForm() {
   const { isAuthenticated } = useAuth();
   const t = useTranslations("contribution");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
 
   const langName = (tab: LanguageTab) =>
     tab === "vi" ? t("langVi") : tab === "en" ? t("langEn") : t("langLo");
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isAISuggesting, setIsAISuggesting] = useState(false);
   const [currentLang, setCurrentLang] = useState<LanguageTab>("vi");
   const [categories, setCategories] = useState<CategoryRef[]>([]);
   const [formData, setFormData] = useState<ContributionFormData>({
@@ -243,6 +246,67 @@ export default function ContributionForm() {
         ...prev,
         [field]: value,
       }));
+    }
+  };
+
+  const handleAISuggestAll = async () => {
+    const termText =
+      formData.term[currentLang]?.trim() ||
+      formData.term.vi?.trim() ||
+      formData.term.en?.trim() ||
+      formData.term.lo?.trim();
+    if (!termText) {
+      toast.error(t("aiSuggestAllNoTerm"));
+      return;
+    }
+    if (!isAuthenticated) {
+      toast.error(t("loginRequired"));
+      return;
+    }
+    setIsAISuggesting(true);
+    try {
+      const data = await aiService.askAboutTerm({
+        term: termText,
+        language: currentLang,
+      });
+      if (data.structured) {
+        setFormData((prev) => ({
+          ...prev,
+          definition: {
+            ...prev.definition,
+            [currentLang]:
+              data.definition || prev.definition[currentLang] || "",
+          },
+          detailedExplanation: {
+            ...prev.detailedExplanation,
+            [currentLang]:
+              data.detailedExplanation ||
+              prev.detailedExplanation?.[currentLang] ||
+              "",
+          },
+          examples:
+            data.examples && data.examples.length > 0
+              ? data.examples.map((ex, i) => ({
+                  ...(prev.examples?.[i] || {}),
+                  [currentLang]: ex,
+                }))
+              : prev.examples,
+          partOfSpeech:
+            (data.partOfSpeech as PartOfSpeech) || prev.partOfSpeech,
+          relatedTerms:
+            data.relatedTerms && data.relatedTerms.length > 0
+              ? data.relatedTerms
+              : prev.relatedTerms,
+          tags: data.tags && data.tags.length > 0 ? data.tags : prev.tags,
+        }));
+        toast.success(t("aiSuggestAllSuccess"));
+      } else {
+        toast.error(t("aiDataError"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("aiDataError"));
+    } finally {
+      setIsAISuggesting(false);
     }
   };
 
@@ -445,6 +509,42 @@ export default function ContributionForm() {
       <StepGuide title={t("guide.title")} steps={guideSteps} />
 
       <form onSubmit={handleSubmit} className="contribution-form__form">
+        <div className="contribution-form__ai-banner">
+          <button
+            type="button"
+            className="btn btn--ai-suggest"
+            onClick={handleAISuggestAll}
+            disabled={
+              isAISuggesting ||
+              !(
+                formData.term[currentLang]?.trim() ||
+                formData.term.vi?.trim() ||
+                formData.term.en?.trim() ||
+                formData.term.lo?.trim()
+              )
+            }
+          >
+            {isAISuggesting ? (
+              <>
+                <Loader2 size={18} className="spinner" />
+                {t("aiSuggestAllLoading")}
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} />
+                {t("aiSuggestAll")}
+              </>
+            )}
+          </button>
+          <p className="contribution-form__ai-hint">
+            {currentLang === "vi"
+              ? "🇻🇳 Tiếng Việt"
+              : currentLang === "en"
+                ? "🇬🇧 English"
+                : "🇱🇦 ພາສາລາວ"}
+          </p>
+        </div>
+
         {/* Language Tabs */}
         <div className="language-tabs">
           <button
@@ -544,8 +644,15 @@ export default function ContributionForm() {
               <option value="">{t("categoryPlaceholder")}</option>
               {categories.map((cat) => {
                 const categoryId = (cat as any).id || cat._id;
+                const catName = cat.name;
                 const categoryName =
-                  typeof cat.name === "string" ? cat.name : cat.name.vi;
+                  typeof catName === "string"
+                    ? catName
+                    : (catName as any)[locale] ||
+                      catName.vi ||
+                      catName.en ||
+                      catName.lo ||
+                      "";
                 return (
                   <option key={categoryId} value={categoryId}>
                     {categoryName}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Edit,
@@ -58,6 +58,10 @@ export function ViewDetailTerm({
   onBack,
 }: ViewDetailTermProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const termsBasePath = pathname?.includes("/moderator/")
+    ? "/moderator/terms"
+    : "/admin/terms";
   const [term, setTerm] = useState<TermDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<LangKey>("vi");
@@ -92,7 +96,7 @@ export function ViewDetailTerm({
     if (onBack) {
       onBack();
     } else {
-      router.push("/admin/terms");
+      router.push(termsBasePath);
     }
   };
 
@@ -100,7 +104,7 @@ export function ViewDetailTerm({
     if (onEdit) {
       onEdit();
     } else {
-      router.push(`/admin/terms/edit/${termId}`);
+      router.push(`${termsBasePath}/edit/${termId}`);
     }
   };
 
@@ -113,7 +117,7 @@ export function ViewDetailTerm({
         if (onDelete) {
           onDelete();
         } else {
-          router.push("/admin/terms");
+          router.push(termsBasePath);
         }
       } else {
         toast.error(result.message || "Có lỗi xảy ra khi xóa");

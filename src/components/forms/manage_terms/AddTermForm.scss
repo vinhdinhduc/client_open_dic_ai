@@ -134,6 +134,55 @@ $admin-danger: #ef4444;
         }
     }
 
+    &__ai-banner {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        margin-bottom: $spacing-lg;
+        padding: $spacing-md $spacing-lg;
+        border: 1px solid rgba($admin-primary, 0.22);
+        border-radius: $radius-lg;
+        background: linear-gradient(135deg, rgba($admin-primary, 0.12), rgba(118, 75, 162, 0.1));
+
+        @media (max-width: $tablet) {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .ai-suggest-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: $spacing-xs;
+            padding: $spacing-sm $spacing-lg;
+            border: none;
+            border-radius: $radius-md;
+            background: linear-gradient(135deg, $admin-primary, #764ba2);
+            color: white;
+            font-size: $font-sm;
+            font-weight: $font-semibold;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba($admin-primary, 0.24);
+            transition: all $transition-fast;
+
+            &:hover:not(:disabled) {
+                transform: translateY(-1px);
+                box-shadow: 0 10px 24px rgba($admin-primary, 0.28);
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+
+        .ai-suggest-hint {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: $font-sm;
+            line-height: 1.5;
+        }
+    }
+
     // Form Content
     &__content {
         .form-grid {

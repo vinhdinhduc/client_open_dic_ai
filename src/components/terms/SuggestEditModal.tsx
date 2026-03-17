@@ -4,10 +4,20 @@ import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLanguage } from "@/hooks";
 import { suggestEdit } from "@/services/termService";
+import { aiService } from "@/services/aiService";
 import { TermDetail, SuggestEditData, MultiLangText, Example } from "./types";
-import { X, Edit3, Loader2, Plus, Trash2, Languages } from "lucide-react";
+import {
+  X,
+  Edit3,
+  Loader2,
+  Plus,
+  Trash2,
+  Languages,
+  Sparkles,
+} from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import StepGuide, { GuideStep } from "@/components/common/StepGuide";
+import AIFieldAssist from "@/components/common/AIFieldAssist";
 import { toast } from "react-hot-toast";
 import "./SuggestEditModal.scss";
 
@@ -101,6 +111,7 @@ export default function SuggestEditModal({
   const [tagInput, setTagInput] = useState("");
   const [contributorNote, setContributorNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [aiSuggesting, setAiSuggesting] = useState(false);
   const [activeTab, setActiveTab] = useState<LangKey>(
     (aiLang as LangKey) || "vi",
   );
@@ -160,6 +171,54 @@ export default function SuggestEditModal({
     { value: "abbreviation", label: tEdit("partOfSpeech.abbreviation") },
   ];
 
+  const handleAISuggestAll = async () => {
+    const termContext =
+      termText[activeTab]?.trim() || termText.vi?.trim() || term.term.vi || "";
+
+    if (!termContext) {
+      toast.error(tEdit("aiSuggestAllNoTerm"));
+      return;
+    }
+
+    setAiSuggesting(true);
+    try {
+      const data = await aiService.askAboutTerm({
+        term: termContext,
+        language: activeTab,
+      });
+
+      setDefinition((prev) => ({
+        ...prev,
+        [activeTab]: data.definition || prev[activeTab] || "",
+      }));
+      setDetailedExplanation((prev) => ({
+        ...prev,
+        [activeTab]: data.detailedExplanation || prev[activeTab] || "",
+      }));
+      if (data.examples?.length) {
+        setExamples((prev) => {
+          const next = data.examples!.map((exampleText, index) => ({
+            ...(prev[index] || { vi: "", en: "", lo: "" }),
+            [activeTab]: exampleText,
+          }));
+          return next.length > 0 ? next : prev;
+        });
+      }
+      if (data.partOfSpeech) {
+        setPartOfSpeech(data.partOfSpeech);
+      }
+      if (data.tags?.length) {
+        setTags(data.tags);
+      }
+
+      toast.success(tEdit("aiSuggestAllSuccess"));
+    } catch (error: any) {
+      toast.error(error?.message || tEdit("error"));
+    } finally {
+      setAiSuggesting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -186,7 +245,7 @@ export default function SuggestEditModal({
     setSubmitting(true);
     try {
       console.log("Check data send from client", data);
-      
+
       await suggestEdit(data);
       toast.success(tEdit("success"));
       onClose();
@@ -261,6 +320,30 @@ export default function SuggestEditModal({
 
         <StepGuide title={tEdit("guide.title")} steps={guideSteps} />
 
+        <div className="suggest-edit-modal__ai-banner">
+          <button
+            type="button"
+            className="ai-suggest-btn"
+            onClick={handleAISuggestAll}
+            disabled={aiSuggesting}
+          >
+            {aiSuggesting ? (
+              <>
+                <Loader2 size={18} className="spin" />
+                {tEdit("aiSuggestAllLoading")}
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} />
+                {tEdit("aiSuggestAll")}
+              </>
+            )}
+          </button>
+          <p className="ai-suggest-hint">
+            {tEdit("aiSuggestAllHint", { lang: langName(activeTab) })}
+          </p>
+        </div>
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="suggest-edit-modal__form">
           {/* Term Name */}
@@ -281,7 +364,18 @@ export default function SuggestEditModal({
 
           {/* Definition */}
           <div className="form-group">
-            <label className="form-label">{tEdit("definitionLabel")}</label>
+            <div className="form-label-row">
+              <label className="form-label">{tEdit("definitionLabel")}</label>
+              <AIFieldAssist
+                termContext={termText[activeTab] || termText.vi || ""}
+                fieldType="definition"
+                language={activeTab}
+                onInsert={(content) =>
+                  handleMultiLangChange(setDefinition, activeTab, content)
+                }
+                disabled={!termText[activeTab]?.trim() && !termText.vi?.trim()}
+              />
+            </div>
             <RichTextEditor
               key={`definition-${activeTab}`}
               value={definition[activeTab] || ""}
@@ -297,10 +391,25 @@ export default function SuggestEditModal({
 
           {/* Detailed Explanation */}
           <div className="form-group">
-            <label className="form-label">
-              {tEdit("detailedExplanation")}
-              <span className="optional">{tEdit("optional")}</span>
-            </label>
+            <div className="form-label-row">
+              <label className="form-label">
+                {tEdit("detailedExplanation")}
+                <span className="optional">{tEdit("optional")}</span>
+              </label>
+              <AIFieldAssist
+                termContext={termText[activeTab] || termText.vi || ""}
+                fieldType="explanation"
+                language={activeTab}
+                onInsert={(content) =>
+                  handleMultiLangChange(
+                    setDetailedExplanation,
+                    activeTab,
+                    content,
+                  )
+                }
+                disabled={!termText[activeTab]?.trim() && !termText.vi?.trim()}
+              />
+            </div>
             <RichTextEditor
               key={`expl-${activeTab}`}
               value={detailedExplanation[activeTab] || ""}

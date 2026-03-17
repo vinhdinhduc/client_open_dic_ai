@@ -640,6 +640,81 @@ $moderation-info: #3b82f6;
     }
 }
 
+.moderation-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $spacing-md;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.moderation-lang-grid,
+.moderation-lang-stack {
+    display: grid;
+    gap: $spacing-sm;
+}
+
+.moderation-lang-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.moderation-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    &__lang {
+        font-size: $font-xs;
+        font-weight: $font-semibold;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    &__input {
+        width: 100%;
+    }
+
+    &--editor {
+        padding: $spacing-sm;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: $radius-md;
+    }
+}
+
+.moderation-examples {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+.moderation-example-card {
+    padding: $spacing-md;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-sm;
+        margin-bottom: $spacing-sm;
+
+        span {
+            font-weight: $font-semibold;
+            color: var(--text-primary);
+        }
+    }
+}
+
 // ============ Diff Container ============
 .diff-container {
     display: flex;

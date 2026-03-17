@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import AIFieldAssist from "@/components/common/AIFieldAssist";
-import { useRouter } from "next/navigation";
+import { aiService } from "@/services/aiService";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
@@ -17,6 +18,7 @@ import {
   Info,
   RefreshCw,
   Link2,
+  Sparkles,
   X,
   Search,
 } from "lucide-react";
@@ -72,11 +74,16 @@ export function EditTermForm({
   onCancel,
 }: EditTermFormProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations("termForm");
+  const termsBasePath = pathname?.includes("/moderator/")
+    ? "/moderator/terms"
+    : "/admin/terms";
 
   // Loading states
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isAISuggesting, setIsAISuggesting] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Form state
@@ -207,7 +214,7 @@ export function EditTermForm({
           });
         } else {
           toast.error("Không tìm thấy thuật ngữ");
-          router.push("/admin/terms");
+          router.push(termsBasePath);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -218,7 +225,7 @@ export function EditTermForm({
     };
 
     fetchData();
-  }, [termId, router]);
+  }, [termId, router, termsBasePath]);
 
   // Debounced search for related terms
   useEffect(() => {
@@ -297,6 +304,55 @@ export function EditTermForm({
     if (e.key === "Enter") {
       e.preventDefault();
       handleAddTag();
+    }
+  };
+
+  const handleAISuggestAll = async () => {
+    const termContext = term[activeTab]?.trim() || term.vi?.trim() || "";
+
+    if (!termContext) {
+      toast.error(t("aiSuggestAllNoTerm"));
+      return;
+    }
+
+    setIsAISuggesting(true);
+    try {
+      const data = await aiService.askAboutTerm({
+        term: termContext,
+        language: activeTab,
+      });
+
+      setDefinition((prev) => ({
+        ...prev,
+        [activeTab]: data.definition || prev[activeTab] || "",
+      }));
+      setDetailedExplanation((prev) => ({
+        ...prev,
+        [activeTab]: data.detailedExplanation || prev[activeTab] || "",
+      }));
+
+      if (data.examples?.length) {
+        setExamples((prev) =>
+          data.examples!.map((exampleText, index) => ({
+            ...(prev[index] || { vi: "", en: "", lo: "" }),
+            [activeTab]: exampleText,
+          })),
+        );
+      }
+
+      if (data.partOfSpeech) {
+        setPartOfSpeech(data.partOfSpeech);
+      }
+
+      if (data.tags?.length) {
+        setTags(data.tags);
+      }
+
+      toast.success(t("aiSuggestAllSuccess"));
+    } catch (error: any) {
+      toast.error(error?.message || t("errorGeneral"));
+    } finally {
+      setIsAISuggesting(false);
     }
   };
 
@@ -408,7 +464,7 @@ export function EditTermForm({
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push("/admin/terms");
+          router.push(termsBasePath);
         }
       } else {
         toast.error(result.message || "Có lỗi xảy ra");
@@ -489,6 +545,34 @@ export function EditTermForm({
             {key === "vi" && <span className="required-indicator">*</span>}
           </button>
         ))}
+      </div>
+
+      <div className="edit-term-form__ai-banner">
+        <button
+          type="button"
+          className="ai-suggest-btn"
+          onClick={handleAISuggestAll}
+          disabled={submitting || isAISuggesting}
+        >
+          {isAISuggesting ? (
+            <>
+              <Loader2 size={18} className="spin" />
+              {t("aiSuggestAllLoading")}
+            </>
+          ) : (
+            <>
+              <Sparkles size={18} />
+              {t("aiSuggestAll")}
+            </>
+          )}
+        </button>
+        <p className="ai-suggest-hint">
+          {t("aiSuggestAllHint", {
+            lang:
+              LANG_TABS.find((item) => item.key === activeTab)?.label ||
+              activeTab,
+          })}
+        </p>
       </div>
 
       {/* Form */}

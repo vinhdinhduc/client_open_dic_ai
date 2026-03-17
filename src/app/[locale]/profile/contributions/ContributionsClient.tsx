@@ -22,6 +22,7 @@ import {
 import Pagination from "@/components/common/Pagination";
 import "./page.scss";
 import { Layout } from "@/components/layouts";
+import SafeHtml from "@/components/common/SafeHtml";
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
@@ -346,7 +347,15 @@ export default function MyContributionsPage() {
 
                 <div className="contribution-card__body">
                   <p className="contribution-definition">
-                    {contribution.definition.vi}
+                    <SafeHtml
+                      content={
+                        contribution.definition.vi ||
+                        contribution.definition.en ||
+                        contribution.definition.lo ||
+                        ""
+                      }
+                      className="lang-text"
+                    />
                   </p>
 
                   {contribution.moderatorNote && (

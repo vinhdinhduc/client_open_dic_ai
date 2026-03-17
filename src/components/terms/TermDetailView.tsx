@@ -35,6 +35,7 @@ import {
 import { toast } from "react-hot-toast";
 import axiosInstance from "@/lib/axios";
 import reputationService from "@/services/reputationService";
+import SafeHtml from "@/components/common/SafeHtml";
 import "./TermDetailView.scss";
 
 interface TermDetailViewProps {
@@ -402,7 +403,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
             {t("definition")}
           </h2>
           <div className="term-detail__definition">
-            {getText(term.definition)}
+            <SafeHtml content={getText(term.definition)} />
           </div>
           {showAiPanel && (
             <div className="term-detail__ai-inline">
@@ -416,7 +417,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
                 </div>
               ) : aiResponse?.definition ? (
                 <div className="ai-inline__content">
-                  {aiResponse.definition}
+                  <SafeHtml content={aiResponse.definition} />
                 </div>
               ) : !aiLoading ? (
                 <div className="ai-inline__empty">—</div>
@@ -432,7 +433,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
             <h2 className="section-title">{t("detailedExplanation")}</h2>
             {getText(term.detailedExplanation) && (
               <div className="term-detail__explanation">
-                {getText(term.detailedExplanation)}
+                <SafeHtml content={getText(term.detailedExplanation)} />
               </div>
             )}
             {showAiPanel && (
@@ -447,7 +448,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
                   </div>
                 ) : aiResponse?.detailedExplanation ? (
                   <div className="ai-inline__content">
-                    {aiResponse.detailedExplanation}
+                    <SafeHtml content={aiResponse.detailedExplanation} />
                   </div>
                 ) : !aiLoading ? (
                   <div className="ai-inline__empty">—</div>
@@ -466,7 +467,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
               <ul className="term-detail__examples">
                 {term.examples.map((example, index) => (
                   <li key={index} className="example-item">
-                    {getText(example)}
+                    <SafeHtml content={getText(example)} as="span" />
                   </li>
                 ))}
               </ul>
@@ -484,7 +485,9 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
                 ) : aiResponse?.examples?.length ? (
                   <ul className="ai-inline__examples">
                     {aiResponse.examples.map((ex, i) => (
-                      <li key={i}>{ex}</li>
+                      <li key={i}>
+                        <SafeHtml content={ex} as="span" />
+                      </li>
                     ))}
                   </ul>
                 ) : !aiLoading ? (
@@ -555,9 +558,12 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
             {term.createdBy && (
               <div className="contributor-item">
                 <UserIcon size={14} />
-                <span className="contributor-name">
+                <Link
+                  href={`/users/${term.createdBy._id}`}
+                  className="contributor-name contributor-name--link"
+                >
                   {term.createdBy.fullName}
-                </span>
+                </Link>
                 <span className="contributor-role">({t("created")})</span>
               </div>
             )}
@@ -565,9 +571,12 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
               term.lastModifiedBy._id !== term.createdBy?._id && (
                 <div className="contributor-item">
                   <Edit3 size={14} />
-                  <span className="contributor-name">
+                  <Link
+                    href={`/users/${term.lastModifiedBy._id}`}
+                    className="contributor-name contributor-name--link"
+                  >
                     {term.lastModifiedBy.fullName}
-                  </span>
+                  </Link>
                   <span className="contributor-role">({t("edited")})</span>
                 </div>
               )}

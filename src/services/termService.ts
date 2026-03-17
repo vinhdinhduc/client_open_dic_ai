@@ -387,6 +387,43 @@ const saveSearchHistory = async (query: string, resultCount: number): Promise<vo
   }
 }
 
+export interface ImportResult {
+  total: number;
+  success: number;
+  failed: number;
+  errors?: Array<{ row: number; error: string }>;
+}
+
+const importTermsFromFile = async (file: File, categoryId?: string): Promise<ImportResult> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (categoryId) formData.append("category", categoryId);
+  const response = await axiosInstance.post<ApiResponse<ImportResult>>("/terms/import", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data.data;
+};
+
+const downloadImportTemplate = async (): Promise<void> => {
+  const response = await axiosInstance.get("/terms/import-template", {
+    responseType: "blob",
+  });
+  let filename = "import_template.xlsx";
+  const disposition = response.headers["content-disposition"];
+  if (disposition) {
+    const match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"'\n]+)/i);
+    if (match) filename = decodeURIComponent(match[1].replace(/['"]/g, ""));
+  }
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+};
+
 export {
   getSearchSuggestions,
   searchTerms,
@@ -407,5 +444,7 @@ export {
   restoreTerm,
   emptyTermTrash,
   exportTermsToExcel,
-  saveSearchHistory
+  saveSearchHistory,
+  importTermsFromFile,
+  downloadImportTemplate,
 };

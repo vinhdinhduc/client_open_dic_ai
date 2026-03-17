@@ -129,8 +129,35 @@ export interface GetContributionsParams {
     onlyDeleted?: boolean;
 }
 
+export interface ContributionOverrideData {
+    term?: {
+        vi?: string;
+        lo?: string;
+        en?: string;
+    };
+    definition?: {
+        vi?: string;
+        lo?: string;
+        en?: string;
+    };
+    detailedExplanation?: {
+        vi?: string;
+        lo?: string;
+        en?: string;
+    };
+    examples?: Array<{
+        vi?: string;
+        lo?: string;
+        en?: string;
+    }>;
+    partOfSpeech?: string;
+    tags?: string[];
+    contributorNote?: string;
+}
+
 export interface ModerateContributionData {
     moderatorNote?: string;
+    overrideData?: ContributionOverrideData;
 }
 
 // Response type for getContributions - matches backend response

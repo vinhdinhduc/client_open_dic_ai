@@ -837,6 +837,16 @@ $color-report: #f7971e;
         .contributor-name {
             font-weight: $font-medium;
             color: var(--text-primary);
+
+            &--link {
+                text-decoration: none;
+                color: #667eea;
+
+                &:hover {
+                    text-decoration: underline;
+                    color: #5a67d8;
+                }
+            }
         }
 
         .contributor-role {

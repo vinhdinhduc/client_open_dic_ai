@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Globe,
   ShieldCheck,
+  Trophy,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -269,6 +270,15 @@ const Header = () => {
                       <span>{t("header.searchHistory")}</span>
                     </Link>
 
+                    <Link
+                      href="/leaderboard"
+                      className="header__user-item"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <Trophy size={16} />
+                      <span>{t("header.leaderboard")}</span>
+                    </Link>
+
                     <div className="header__user-divider"></div>
 
                     <button
@@ -431,6 +441,14 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {t("header.searchHistory")}
+              </Link>
+
+              <Link
+                href="/leaderboard"
+                className="header__mobile-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t("header.leaderboard")}
               </Link>
 
               <button

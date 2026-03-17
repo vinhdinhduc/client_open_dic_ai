@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AIFieldAssist from "@/components/common/AIFieldAssist";
+import { aiService } from "@/services/aiService";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -17,6 +18,7 @@ import {
   TicketPercent,
   Info,
   Link2,
+  Sparkles,
   X,
   Search,
 } from "lucide-react";
@@ -91,6 +93,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeTab, setActiveTab] = useState<LangKey>("vi");
   const [submitting, setSubmitting] = useState(false);
+  const [isAISuggesting, setIsAISuggesting] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Related terms state
@@ -201,6 +204,55 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     if (e.key === "Enter") {
       e.preventDefault();
       handleAddTag();
+    }
+  };
+
+  const handleAISuggestAll = async () => {
+    const termContext = term[activeTab]?.trim() || term.vi?.trim() || "";
+
+    if (!termContext) {
+      toast.error(t("aiSuggestAllNoTerm"));
+      return;
+    }
+
+    setIsAISuggesting(true);
+    try {
+      const data = await aiService.askAboutTerm({
+        term: termContext,
+        language: activeTab,
+      });
+
+      setDefinition((prev) => ({
+        ...prev,
+        [activeTab]: data.definition || prev[activeTab] || "",
+      }));
+      setDetailedExplanation((prev) => ({
+        ...prev,
+        [activeTab]: data.detailedExplanation || prev[activeTab] || "",
+      }));
+
+      if (data.examples?.length) {
+        setExamples((prev) =>
+          data.examples!.map((exampleText, index) => ({
+            ...(prev[index] || { vi: "", en: "", lo: "" }),
+            [activeTab]: exampleText,
+          })),
+        );
+      }
+
+      if (data.partOfSpeech) {
+        setPartOfSpeech(data.partOfSpeech);
+      }
+
+      if (data.tags?.length) {
+        setTags(data.tags);
+      }
+
+      toast.success(t("aiSuggestAllSuccess"));
+    } catch (error: any) {
+      toast.error(error?.message || t("errorGeneral"));
+    } finally {
+      setIsAISuggesting(false);
     }
   };
 
@@ -343,6 +395,34 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
             <span className="tab-label">{label}</span>
           </button>
         ))}
+      </div>
+
+      <div className="add-term-form__ai-banner">
+        <button
+          type="button"
+          className="ai-suggest-btn"
+          onClick={handleAISuggestAll}
+          disabled={submitting || isAISuggesting}
+        >
+          {isAISuggesting ? (
+            <>
+              <Loader2 size={18} className="spin" />
+              {t("aiSuggestAllLoading")}
+            </>
+          ) : (
+            <>
+              <Sparkles size={18} />
+              {t("aiSuggestAll")}
+            </>
+          )}
+        </button>
+        <p className="ai-suggest-hint">
+          {t("aiSuggestAllHint", {
+            lang:
+              LANG_TABS.find((item) => item.key === activeTab)?.label ||
+              activeTab,
+          })}
+        </p>
       </div>
 
       {/* Form */}

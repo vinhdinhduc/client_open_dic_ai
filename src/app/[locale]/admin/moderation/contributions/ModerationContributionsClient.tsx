@@ -23,6 +23,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import contributionService, {
   Contribution,
+  ContributionOverrideData,
 } from "@/services/contributionService";
 import ContributionDetailModal from "../../../../../components/forms/manage_contribution/ContributionDetailModal";
 import ConfirmModal, {
@@ -46,6 +47,8 @@ export default function ContributionsModerationPage({
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedContribution, setSelectedContribution] =
     useState<Contribution | null>(null);
+  const [approvalDraft, setApprovalDraft] =
+    useState<ContributionOverrideData | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [moderatorNote, setModeratorNote] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
@@ -81,6 +84,32 @@ export default function ContributionsModerationPage({
 
   // Stats
   const [pendingCount, setPendingCount] = useState(0);
+
+  const createContributionDraft = (
+    contribution: Contribution,
+  ): ContributionOverrideData => ({
+    term: { ...contribution.term },
+    definition: { ...contribution.definition },
+    detailedExplanation: {
+      vi: contribution.detailedExplanation?.vi || "",
+      en: contribution.detailedExplanation?.en || "",
+      lo: contribution.detailedExplanation?.lo || "",
+    },
+    examples: contribution.examples?.map((example) => ({
+      vi: example.vi || "",
+      en: example.en || "",
+      lo: example.lo || "",
+    })) || [{ vi: "", en: "", lo: "" }],
+    partOfSpeech: contribution.partOfSpeech || "",
+    tags: contribution.tags || [],
+    contributorNote: contribution.contributorNote || "",
+  });
+
+  const openContributionModal = (contribution: Contribution) => {
+    setSelectedContribution(contribution);
+    setApprovalDraft(createContributionDraft(contribution));
+    setShowDetailModal(true);
+  };
 
   const fetchContributions = useCallback(async () => {
     try {
@@ -148,6 +177,11 @@ export default function ContributionsModerationPage({
     setShowConfirmModal(true);
   };
 
+  const handleApproveRequest = (draft: ContributionOverrideData) => {
+    setApprovalDraft(draft);
+    handleApproveClick();
+  };
+
   // Show confirm modal before reject
   const handleRejectClick = () => {
     setConfirmAction("reject");
@@ -166,6 +200,7 @@ export default function ContributionsModerationPage({
         selectedContribution._id,
         {
           moderatorNote: moderatorNote || undefined,
+          overrideData: approvalDraft || undefined,
         },
       );
 
@@ -173,6 +208,7 @@ export default function ContributionsModerationPage({
         toast.success(t("approveSuccess"));
         setShowDetailModal(false);
         setModeratorNote("");
+        setApprovalDraft(null);
         setSelectedContribution(null);
         fetchContributions();
       }
@@ -210,6 +246,7 @@ export default function ContributionsModerationPage({
         setShowDetailModal(false);
         setModeratorNote("");
         setRejectionReason("");
+        setApprovalDraft(null);
         setSelectedContribution(null);
         fetchContributions();
       }
@@ -440,6 +477,7 @@ export default function ContributionsModerationPage({
     setShowDetailModal(false);
     setModeratorNote("");
     setRejectionReason("");
+    setApprovalDraft(null);
     setSelectedContribution(null);
   };
 
@@ -756,8 +794,7 @@ export default function ContributionsModerationPage({
                             className="action-btn action-btn--view"
                             title={t("viewDetails")}
                             onClick={() => {
-                              setSelectedContribution(contribution);
-                              setShowDetailModal(true);
+                              openContributionModal(contribution);
                             }}
                           >
                             <Eye size={16} />
@@ -770,6 +807,9 @@ export default function ContributionsModerationPage({
                                 disabled={actionLoading === contribution._id}
                                 onClick={() => {
                                   setSelectedContribution(contribution);
+                                  setApprovalDraft(
+                                    createContributionDraft(contribution),
+                                  );
                                   setConfirmAction("approve");
                                   setShowConfirmModal(true);
                                 }}
@@ -786,6 +826,9 @@ export default function ContributionsModerationPage({
                                 disabled={actionLoading === contribution._id}
                                 onClick={() => {
                                   setSelectedContribution(contribution);
+                                  setApprovalDraft(
+                                    createContributionDraft(contribution),
+                                  );
                                   setConfirmAction("reject");
                                   setShowConfirmModal(true);
                                 }}
@@ -900,10 +943,14 @@ export default function ContributionsModerationPage({
       {showDetailModal && selectedContribution && (
         <ContributionDetailModal
           contribution={selectedContribution}
+          contributionDraft={
+            approvalDraft || createContributionDraft(selectedContribution)
+          }
           moderatorNote={moderatorNote}
+          onContributionDraftChange={setApprovalDraft}
           onModeratorNoteChange={setModeratorNote}
           onClose={closeModal}
-          onApprove={handleApproveClick}
+          onApprove={handleApproveRequest}
           onReject={handleRejectClick}
           actionLoading={actionLoading === selectedContribution._id}
         />

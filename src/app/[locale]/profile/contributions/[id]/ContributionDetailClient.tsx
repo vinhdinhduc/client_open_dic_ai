@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import "./page.scss";
 import { Layout } from "@/components/layouts";
+import SafeHtml from "@/components/common/SafeHtml";
 
 export default function ContributionDetailPage() {
   const params = useParams();
@@ -167,18 +168,27 @@ export default function ContributionDetailPage() {
             <div className="language-content">
               <div className="lang-item">
                 <span className="lang-label">🇻🇳 Tiếng Việt:</span>
-                <p className="lang-text">{contribution.definition.vi}</p>
+                <SafeHtml
+                  content={contribution.definition.vi}
+                  className="lang-text"
+                />
               </div>
               {contribution.definition.en && (
                 <div className="lang-item">
                   <span className="lang-label">🇬🇧 English:</span>
-                  <p className="lang-text">{contribution.definition.en}</p>
+                  <SafeHtml
+                    content={contribution.definition.en}
+                    className="lang-text"
+                  />
                 </div>
               )}
               {contribution.definition.lo && (
                 <div className="lang-item">
                   <span className="lang-label">🇱🇦 ພາສາລາວ:</span>
-                  <p className="lang-text">{contribution.definition.lo}</p>
+                  <SafeHtml
+                    content={contribution.definition.lo}
+                    className="lang-text"
+                  />
                 </div>
               )}
             </div>
@@ -198,25 +208,28 @@ export default function ContributionDetailPage() {
                   {contribution.detailedExplanation.vi && (
                     <div className="lang-item">
                       <span className="lang-label">🇻🇳 Tiếng Việt:</span>
-                      <p className="lang-text">
-                        {contribution.detailedExplanation.vi}
-                      </p>
+                      <SafeHtml
+                        content={contribution.detailedExplanation.vi}
+                        className="lang-text"
+                      />
                     </div>
                   )}
                   {contribution.detailedExplanation.en && (
                     <div className="lang-item">
                       <span className="lang-label">🇬🇧 English:</span>
-                      <p className="lang-text">
-                        {contribution.detailedExplanation.en}
-                      </p>
+                      <SafeHtml
+                        content={contribution.detailedExplanation.en}
+                        className="lang-text"
+                      />
                     </div>
                   )}
                   {contribution.detailedExplanation.lo && (
                     <div className="lang-item">
                       <span className="lang-label">🇱🇦 ພາສາລາວ:</span>
-                      <p className="lang-text">
-                        {contribution.detailedExplanation.lo}
-                      </p>
+                      <SafeHtml
+                        content={contribution.detailedExplanation.lo}
+                        className="lang-text"
+                      />
                     </div>
                   )}
                 </div>
@@ -238,19 +251,28 @@ export default function ContributionDetailPage() {
                       {example.vi && (
                         <div className="lang-item">
                           <span className="lang-label">🇻🇳</span>
-                          <p className="lang-text">{example.vi}</p>
+                          <SafeHtml
+                            content={example.vi}
+                            className="lang-text"
+                          />
                         </div>
                       )}
                       {example.en && (
                         <div className="lang-item">
                           <span className="lang-label">🇬🇧</span>
-                          <p className="lang-text">{example.en}</p>
+                          <SafeHtml
+                            content={example.en}
+                            className="lang-text"
+                          />
                         </div>
                       )}
                       {example.lo && (
                         <div className="lang-item">
                           <span className="lang-label">🇱🇦</span>
-                          <p className="lang-text">{example.lo}</p>
+                          <SafeHtml
+                            content={example.lo}
+                            className="lang-text"
+                          />
                         </div>
                       )}
                     </div>
