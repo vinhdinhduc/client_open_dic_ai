@@ -25,6 +25,8 @@ import {
 import toast from "react-hot-toast";
 import { getTermById, deleteTerm, updateTerm } from "@/services/termService";
 import { TermDetail, MultiLangText, Example } from "@/components/terms/types";
+import SafeHtml from "@/components/common/SafeHtml";
+import { toPlainText } from "@/utils/safeHtml";
 import "./ViewDetailTerm.scss";
 
 interface ViewDetailTermProps {
@@ -344,11 +346,16 @@ export function ViewDetailTerm({
                 <h3>Định nghĩa</h3>
               </div>
               <div className="section-content">
-                <p>
-                  {getMultiLangValue(term.definition, activeTab) || (
+                {getMultiLangValue(term.definition, activeTab) ? (
+                  <SafeHtml
+                    content={getMultiLangValue(term.definition, activeTab)}
+                    as="div"
+                  />
+                ) : (
+                  <p>
                     <span className="empty-text">Chưa có định nghĩa</span>
-                  )}
-                </p>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -359,13 +366,21 @@ export function ViewDetailTerm({
                 <h3>Giải thích chi tiết</h3>
               </div>
               <div className="section-content">
-                <p>
-                  {getMultiLangValue(term.detailedExplanation, activeTab) || (
+                {getMultiLangValue(term.detailedExplanation, activeTab) ? (
+                  <SafeHtml
+                    content={getMultiLangValue(
+                      term.detailedExplanation,
+                      activeTab,
+                    )}
+                    as="div"
+                  />
+                ) : (
+                  <p>
                     <span className="empty-text">
                       Chưa có giải thích chi tiết
                     </span>
-                  )}
-                </p>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -382,7 +397,9 @@ export function ViewDetailTerm({
                       <li key={index} className="example-item">
                         <span className="example-number">{index + 1}</span>
                         <span className="example-text">
-                          {getMultiLangValue(example, activeTab) || (
+                          {getMultiLangValue(example, activeTab) ? (
+                            toPlainText(getMultiLangValue(example, activeTab))
+                          ) : (
                             <span className="empty-text">Chưa có nội dung</span>
                           )}
                         </span>
@@ -419,7 +436,11 @@ export function ViewDetailTerm({
                         <div className="translation-row">
                           <span className="label">Định nghĩa:</span>
                           <span className="value">
-                            {getMultiLangValue(term.definition, key) || "-"}
+                            {getMultiLangValue(term.definition, key)
+                              ? toPlainText(
+                                  getMultiLangValue(term.definition, key),
+                                )
+                              : "-"}
                           </span>
                         </div>
                       </div>

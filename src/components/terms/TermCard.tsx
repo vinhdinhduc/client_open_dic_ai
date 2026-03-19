@@ -9,6 +9,7 @@ import { TermCardProps } from "./types";
 import { Heart, Eye, ChevronRight, Tag } from "lucide-react";
 import "./TermCard.scss";
 import toast from "react-hot-toast";
+import { toPlainText } from "@/utils/safeHtml";
 
 export default function TermCard({
   term,
@@ -30,7 +31,6 @@ export default function TermCard({
   useEffect(() => {
     setFavorited(isFavorited);
   }, [isFavorited]);
-  console.log("Check term", term);
 
   //Get text by language
 
@@ -45,13 +45,14 @@ export default function TermCard({
   };
 
   const getDefinitionText = (): string => {
-    return (
+    const definition =
       term.definition[currentLanguage] ||
       term.definition["en"] ||
       term.definition["vi"] ||
       term.definition["lo"] ||
-      ""
-    );
+      "";
+
+    return toPlainText(definition);
   };
   // Get category name by language
   const getCategoryName = (): string => {

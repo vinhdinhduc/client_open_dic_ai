@@ -23,3 +23,27 @@ export function sanitizeHtml(html: string): string {
 export function containsHtml(str: string): boolean {
     return /<[a-z][\s\S]*>/i.test(str);
 }
+
+/** Convert rich HTML to readable plain text for preview cards and search snippets. */
+export function toPlainText(content: string): string {
+    if (!content) return "";
+
+    const sanitized = sanitizeHtml(content)
+        .replace(/<br\s*\/?\s*>/gi, "\n")
+        .replace(/<\/(p|div|li|h[1-6]|blockquote)>/gi, "\n")
+        .replace(/<li[^>]*>/gi, "- ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/&lt;/gi, "<")
+        .replace(/&gt;/gi, ">")
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'");
+
+    return sanitized
+        .replace(/\s+\n/g, "\n")
+        .replace(/\n\s+/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/[ \t]{2,}/g, " ")
+        .trim();
+}

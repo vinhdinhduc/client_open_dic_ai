@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TermCardData } from "@/components/terms/types";
 import TermCard from "@/components/terms/TermCard";
@@ -8,23 +8,13 @@ import { AIChat } from "@/components/common";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "react-hot-toast";
-import {
-  Bot,
-  LogIn,
-  PlusCircle,
-  ChevronRight,
-  BookOpen,
-  Search,
-} from "lucide-react";
+import { Bot, LogIn, PlusCircle, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { saveSearchHistory } from "@/services/termService";
 import {
   addFavorite,
   checkFavorite,
-  getFavorites,
   removeFavorite,
 } from "@/services/favoriteService";
-import Link from "next/link";
 import "./Term.scss";
 
 interface SearchResultsClientProps {
@@ -42,85 +32,63 @@ export default function SearchResultsClient({
   const t = useTranslations("searchResults");
   const tCommon = useTranslations("common");
   const [terms] = useState<TermCardData[]>(initialTerms);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>({});
   const [showAIChat, setShowAIChat] = useState(false);
 
-  // Track saved queries to prevent duplicate saves
-  const savedQueryRef = useRef<string>("");
-  const exactMatch = useMemo(() => {
-    if (!query || typeof query !== "string") return null;
-    const queryLower = query.toLowerCase().trim();
-    if (!queryLower) return null;
-    return terms.find(
-      (term) =>
-        (typeof term.term?.vi === "string" &&
-          term.term.vi.toLowerCase().trim() === queryLower) ||
-        (typeof term.term?.en === "string" &&
-          term.term.en.toLowerCase().trim() === queryLower) ||
-        (typeof term.term?.lo === "string" &&
-          term.term.lo.toLowerCase().trim() === queryLower),
-    );
-  }, [terms, query]);
-  // Lưu lịch sử tìm kiếm khi component mount (chỉ 1 lần per query)
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      query &&
-      query.trim() &&
-      savedQueryRef.current !== query
-    ) {
-      savedQueryRef.current = query;
-      saveSearchHistory(query, initialTerms.length);
-    }
-  }, [isAuthenticated, query, initialTerms.length]);
+    let cancelled = false;
 
-  useEffect(() => {
-    if (!isAuthenticated || !exactMatch?._id) {
-      setIsFavorited(false);
+    if (!isAuthenticated || terms.length === 0) {
+      setFavoriteMap({});
       return;
     }
-    const checkStatus = async () => {
-      try {
-        const res = await checkFavorite(exactMatch._id);
 
-        if (res.success) {
-          setIsFavorited(res.data.isFavorited);
-        }
-      } catch (error) {
-        setIsFavorited(false);
+    const loadFavoriteStatus = async () => {
+      const entries = await Promise.all(
+        terms.map(async (term) => {
+          try {
+            const res = await checkFavorite(term._id);
+            return [term._id, Boolean(res.data?.isFavorited)] as const;
+          } catch {
+            return [term._id, false] as const;
+          }
+        }),
+      );
+
+      if (!cancelled) {
+        setFavoriteMap(Object.fromEntries(entries));
       }
     };
-    checkStatus();
-  }, [isAuthenticated, exactMatch?._id]);
 
-  // Tập hợp tất cả các related terms từ exact match
-  const allRelatedTerms = useMemo(() => {
-    if (!exactMatch || !exactMatch.relatedTerms) return [];
+    loadFavoriteStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, terms]);
 
-    const uniqueTerms = new Map();
-    exactMatch.relatedTerms.forEach((related) => {
-      if (!uniqueTerms.has(related._id)) {
-        uniqueTerms.set(related._id, related);
-      }
-    });
-
-    return Array.from(uniqueTerms.values());
-  }, [exactMatch]);
-
-  const handleFavoriteToggle = async (termId: string, isFavorited: boolean) => {
+  const handleFavoriteToggle = async (
+    termId: string,
+    nextFavorited: boolean,
+  ) => {
     if (!isAuthenticated) return;
-    setFavoriteLoading(true);
+
+    setFavoriteMap((prev) => ({
+      ...prev,
+      [termId]: nextFavorited,
+    }));
+
     try {
-      if (isFavorited) {
+      if (nextFavorited) {
         await addFavorite(termId);
       } else {
         await removeFavorite(termId);
       }
-      setIsFavorited(!isFavorited);
-    } catch (error) {
-    } finally {
-      setFavoriteLoading(false);
+    } catch {
+      setFavoriteMap((prev) => ({
+        ...prev,
+        [termId]: !nextFavorited,
+      }));
+      toast.error(tCommon("error"));
     }
   };
 
@@ -166,29 +134,10 @@ export default function SearchResultsClient({
     setShowAIChat(false);
   };
 
-  const getText = (
-    multiLang: { vi?: string; en?: string; lo?: string } | undefined,
-  ): string => {
-    if (!multiLang) return "";
-    return (
-      multiLang[currentLanguage as keyof typeof multiLang] ||
-      multiLang.vi ||
-      multiLang.en ||
-      multiLang.lo ||
-      ""
-    );
-  };
-
-  const truncateText = (text: string, maxLength: number): string => {
-    if (!text) return "";
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + "...";
-  };
-
   return (
     <div className="search-results-page">
       <div className="container">
-        {!exactMatch ? (
+        {terms.length === 0 ? (
           /* =========== NO RESULTS =========== */
           <div className="search-results-page__no-results">
             <div className="search-results-page__no-results-icon">
@@ -252,51 +201,21 @@ export default function SearchResultsClient({
               </h1>
             </div>
 
-            {/* Exact Match Section */}
-            <section className="search-results-page__exact-match">
-              <TermCard
-                term={exactMatch}
-                isFavorited={isFavorited}
-                onFavoriteToggle={handleFavoriteToggle}
-                showCategory={true}
-                showMetadata={true}
-                showActions={true}
-              />
+            <section className="search-results-page__related-terms">
+              <div className="search-results-page__related-grid">
+                {terms.map((term) => (
+                  <TermCard
+                    key={term._id}
+                    term={term}
+                    isFavorited={Boolean(favoriteMap[term._id])}
+                    onFavoriteToggle={handleFavoriteToggle}
+                    showCategory={true}
+                    showMetadata={true}
+                    showActions={true}
+                  />
+                ))}
+              </div>
             </section>
-
-            {/* Related Terms Section */}
-            {allRelatedTerms.length > 0 && (
-              <section className="search-results-page__related-terms">
-                <h2 className="search-results-page__section-title">
-                  <BookOpen size={20} />
-                  {t("relatedTerms")} ({allRelatedTerms.length})
-                </h2>
-                <div className="search-results-page__related-grid">
-                  {allRelatedTerms.map((related) => (
-                    <Link
-                      key={related._id}
-                      href={`/terms/${related._id}`}
-                      className="related-term-card"
-                    >
-                      <div className="related-term-card__header">
-                        <h3 className="related-term-card__name">
-                          {getText(related.term)}
-                        </h3>
-                        <ChevronRight
-                          size={18}
-                          className="related-term-card__arrow"
-                        />
-                      </div>
-                      {related.definition && (
-                        <p className="related-term-card__definition">
-                          {truncateText(getText(related.definition), 100)}
-                        </p>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
           </>
         )}
 

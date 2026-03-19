@@ -24,6 +24,7 @@ import {
   removeFavorite,
   FavoriteItem,
 } from "@/services/favoriteService";
+import { toPlainText } from "@/utils/safeHtml";
 import "./page.scss";
 
 export default function FavoritesPage() {
@@ -95,12 +96,13 @@ export default function FavoritesPage() {
   };
 
   const getDefinition = (term: FavoriteItem["term"]) => {
-    return (
+    const definition =
       term.definition?.[lang] ||
       term.definition?.vi ||
       term.definition?.en ||
-      ""
-    );
+      "";
+
+    return toPlainText(definition);
   };
 
   const getCategoryName = (term: FavoriteItem["term"]) => {

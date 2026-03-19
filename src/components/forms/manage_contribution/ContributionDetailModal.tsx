@@ -8,6 +8,7 @@ import {
 } from "@/services/contributionService";
 import DiffCompareView from "./DiffCompareView";
 import SafeHtml from "@/components/common/SafeHtml";
+import RichTextEditor from "@/components/common/RichTextEditor";
 
 interface ContributionDetailModalProps {
   contribution: Contribution;
@@ -360,17 +361,14 @@ export default function ContributionDetailModal({
                         <span className="moderation-edit-field__lang">
                           {lang.toUpperCase()}
                         </span>
-                        <textarea
-                          className="form-textarea"
+                        <RichTextEditor
+                          key={`mod-definition-${lang}`}
                           value={contributionDraft.definition?.[lang] || ""}
-                          onChange={(value) =>
-                            updateDraftMultiLang(
-                              "definition",
-                              lang,
-                              value.target.value,
-                            )
+                          onChange={(value: string) =>
+                            updateDraftMultiLang("definition", lang, value)
                           }
-                          rows={5}
+                          placeholder={`Nhập định nghĩa (${lang.toUpperCase()})`}
+                          minHeight={120}
                         />
                       </div>
                     ))}
@@ -388,19 +386,20 @@ export default function ContributionDetailModal({
                         <span className="moderation-edit-field__lang">
                           {lang.toUpperCase()}
                         </span>
-                        <textarea
-                          className="form-textarea"
+                        <RichTextEditor
+                          key={`mod-detailed-${lang}`}
                           value={
                             contributionDraft.detailedExplanation?.[lang] || ""
                           }
-                          onChange={(value) =>
+                          onChange={(value: string) =>
                             updateDraftMultiLang(
                               "detailedExplanation",
                               lang,
-                              value.target.value,
+                              value,
                             )
                           }
-                          rows={6}
+                          placeholder={`Nhập giải thích chi tiết (${lang.toUpperCase()})`}
+                          minHeight={140}
                         />
                       </div>
                     ))}

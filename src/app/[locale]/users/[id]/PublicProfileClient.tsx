@@ -20,6 +20,7 @@ import {
 import leaderboardService, {
   PublicProfileData,
 } from "@/services/leaderboardService";
+import { toPlainText } from "@/utils/safeHtml";
 import "./PublicProfile.scss";
 
 interface PublicProfileClientProps {
@@ -66,13 +67,14 @@ export default function PublicProfileClient({
     lo?: string;
   }): string => {
     if (!multiLang) return "";
-    return (
+    const text =
       (multiLang as any)[currentLanguage] ||
       multiLang.vi ||
       multiLang.en ||
       multiLang.lo ||
-      ""
-    );
+      "";
+
+    return toPlainText(text);
   };
 
   const formatDate = (dateString?: string): string => {
