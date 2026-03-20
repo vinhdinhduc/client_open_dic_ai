@@ -31,6 +31,7 @@ import {
   deleteTerm,
   restoreTerm,
   emptyTermTrash,
+  updateTerm,
 } from "@/services/termService";
 import categoryService, { Category } from "@/services/categoryService";
 import { useLanguage } from "@/hooks";
@@ -80,6 +81,11 @@ export default function TermsPage({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedTerms, setSelectedTerms] = useState<Set<string>>(new Set());
+  const [showBulkActionConfirm, setShowBulkActionConfirm] = useState<{
+    action: "approve" | "reject" | "delete" | null;
+    count: number;
+  }>({ action: null, count: 0 });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -92,14 +98,14 @@ export default function TermsPage({
   });
   const { currentLanguage } = useLanguage();
   const router = useRouter();
-  const t = useTranslations("adminTerms");
+  const translationNamespace = isModerator ? "moderatorTerms" : "adminTerms";
+  const t = useTranslations(translationNamespace);
   const termsBasePath = isModerator ? "/moderator/terms" : "/admin/terms";
 
-  // Debounce search
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
 
-  // Fetch categories once on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -108,7 +114,6 @@ export default function TermsPage({
             "/categories/moderator/my-categories",
           );
           if (res.data?.success) {
-            // Normalize moderator categories to match Category interface
             const normalized: Category[] = (res.data.data || []).map(
               (c: any) => ({
                 id: c._id,
@@ -146,7 +151,6 @@ export default function TermsPage({
     fetchStats();
   }, []);
 
-  // Debounce search input
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -154,7 +158,6 @@ export default function TermsPage({
 
     searchTimeoutRef.current = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      // Reset to page 1 when search changes
       if (searchQuery !== debouncedSearch) {
         setCurrentPage(1);
       }
@@ -167,10 +170,24 @@ export default function TermsPage({
     };
   }, [searchQuery]);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [categoryFilter, statusFilter, itemsPerPage]);
+
+  useEffect(() => {
+    if (selectAllCheckboxRef.current) {
+      const selectableTerms =
+        statusFilter === "pending"
+          ? terms.filter((term) => term.status === "pending")
+          : terms;
+      const selectedCount = selectableTerms.filter((term) =>
+        selectedTerms.has(term._id),
+      ).length;
+
+      selectAllCheckboxRef.current.indeterminate =
+        selectedCount > 0 && selectedCount < selectableTerms.length;
+    }
+  }, [selectedTerms, terms, statusFilter]);
 
   useEffect(() => {
     fetchTerms();
@@ -217,6 +234,15 @@ export default function TermsPage({
 
   // Dữ liệu đã được filter và phân trang từ API
   const paginatedTerms = terms;
+  const pendingTermsOnPage = paginatedTerms.filter(
+    (term) => term.status === "pending",
+  );
+  const currentSelectableTerms =
+    statusFilter === "pending" ? pendingTermsOnPage : paginatedTerms;
+  const selectedInCurrentView = currentSelectableTerms.filter((term) =>
+    selectedTerms.has(term._id),
+  ).length;
+
   const getPageNum = () => {
     const pages: (string | number)[] = [];
     const maxPagesToShow = 5;
@@ -225,7 +251,6 @@ export default function TermsPage({
         pages.push(i);
       }
     } else {
-      //Luôn hiện thị trang 1 nếu số trang quá giới hạn
       pages.push(1);
 
       if (currentPage > 3) {
@@ -278,6 +303,147 @@ export default function TermsPage({
     setTerms((prev) =>
       prev.map((t) => (t._id === termId ? { ...t, status: newStatus } : t)),
     );
+  };
+
+  // New: Handle selecting/deselecting individual term
+  const handleTermSelect = (termId: string, checked: boolean) => {
+    const term = paginatedTerms.find((t) => t._id === termId);
+    if (statusFilter === "pending" && term?.status !== "pending") {
+      return;
+    }
+
+    const newSelected = new Set(selectedTerms);
+    if (checked) {
+      newSelected.add(termId);
+    } else {
+      newSelected.delete(termId);
+    }
+    setSelectedTerms(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    const selectableIds = currentSelectableTerms.map((term) => term._id);
+
+    if (checked) {
+      const allIds = new Set([...Array.from(selectedTerms)]);
+      selectableIds.forEach((id) => allIds.add(id));
+      setSelectedTerms(allIds);
+    } else {
+      const newSelected = new Set(Array.from(selectedTerms));
+      selectableIds.forEach((id) => newSelected.delete(id));
+      setSelectedTerms(newSelected);
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    const pendingSelectedCount = Array.from(selectedTerms).filter((id) => {
+      const matched = terms.find((term) => term._id === id);
+      return matched?.status === "pending";
+    }).length;
+
+    if (pendingSelectedCount === 0) {
+      toast.error(t("selectPendingOnly"));
+      return;
+    }
+
+    setShowBulkActionConfirm({
+      action: "approve",
+      count: pendingSelectedCount,
+    });
+  };
+
+  const handleBulkReject = async () => {
+    if (selectedTerms.size === 0) return;
+    setShowBulkActionConfirm({
+      action: "reject",
+      count: selectedTerms.size,
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedTerms.size === 0) return;
+    setShowBulkActionConfirm({
+      action: "delete",
+      count: selectedTerms.size,
+    });
+  };
+
+  const executeBulkAction = async () => {
+    const { action, count } = showBulkActionConfirm;
+    if (!action || count === 0) return;
+
+    setLoading(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      const targetIds =
+        action === "approve"
+          ? Array.from(selectedTerms).filter((id) => {
+              const matched = terms.find((term) => term._id === id);
+              return matched?.status === "pending";
+            })
+          : Array.from(selectedTerms);
+
+      for (const termId of targetIds) {
+        try {
+          let result;
+          if (action === "delete") {
+            result = await deleteTerm(termId);
+          } else {
+            const moderationStatus =
+              action === "approve" ? "approved" : "rejected";
+            result = await updateTerm(termId, {
+              status: moderationStatus,
+            });
+          }
+
+          if (result.success) {
+            successCount++;
+            setTerms((prev) =>
+              action === "delete"
+                ? prev.filter((t) => t._id !== termId)
+                : prev.map((t) =>
+                    t._id === termId
+                      ? {
+                          ...t,
+                          status:
+                            action === "approve" ? "approved" : "rejected",
+                        }
+                      : t,
+                  ),
+            );
+          } else {
+            errorCount++;
+          }
+        } catch (error) {
+          errorCount++;
+        }
+      }
+
+      setSelectedTerms(new Set());
+      setShowBulkActionConfirm({ action: null, count: 0 });
+
+      if (successCount > 0) {
+        const actionLabel =
+          action === "delete"
+            ? t("deleted")
+            : action === "approve"
+              ? t("approved")
+              : t("rejected");
+        toast.success(`${t("bulkSuccess")}: ${successCount} ${actionLabel}`);
+      }
+      if (errorCount > 0) {
+        toast.error(`${t("bulkPartialError")}: ${errorCount} ${t("failed")}`);
+      }
+
+      // Refresh terms list
+      fetchTerms();
+    } catch (error) {
+      toast.error(t("bulkActionError"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -370,7 +536,7 @@ export default function TermsPage({
               className="admin-btn admin-btn--secondary"
             >
               <BookOpen size={16} />
-              Danh sách thuật ngữ
+              {t("termList")}
             </Link>
           ) : (
             <Link
@@ -378,7 +544,7 @@ export default function TermsPage({
               className="admin-btn admin-btn--secondary"
             >
               <Trash2 size={16} />
-              Thùng rác
+              {t("trash")}
             </Link>
           )}
           <button
@@ -401,7 +567,7 @@ export default function TermsPage({
               onClick={handleEmptyTrash}
             >
               <Trash2 size={16} />
-              Làm rỗng thùng rác
+              {t("emptyTrash")}
             </button>
           )}
           <Link
@@ -476,15 +642,74 @@ export default function TermsPage({
             <option value="approved">{t("approved")}</option>
             <option value="pending">{t("pending")}</option>
             <option value="rejected">{t("rejected")}</option>
-            <option value="trash">Thùng rác</option>
+            <option value="trash">{t("trash")}</option>
           </select>
         </div>
+
+        {/* Bulk Actions Bar */}
+        {selectedTerms.size > 0 && (
+          <div className="bulk-actions-bar">
+            <span className="bulk-actions-bar__info">
+              {t("selected") || "Selected"} {selectedTerms.size}{" "}
+              {t("termsLabel") || "terms"}
+            </span>
+            <div className="bulk-actions-bar__actions">
+              {statusFilter === "pending" && (
+                <>
+                  <button
+                    className="admin-btn admin-btn--success"
+                    onClick={handleBulkApprove}
+                  >
+                    <Check size={16} />
+                    {t("approveAll") || "Approve All"}
+                  </button>
+                  <button
+                    className="admin-btn admin-btn--warning"
+                    onClick={handleBulkReject}
+                  >
+                    <XCircle size={16} />
+                    {t("rejectAll") || "Reject All"}
+                  </button>
+                </>
+              )}
+              {statusFilter !== "trash" && (
+                <button
+                  className="admin-btn admin-btn--danger"
+                  onClick={handleBulkDelete}
+                >
+                  <Trash2 size={16} />
+                  {t("deleteAll") || "Delete All"}
+                </button>
+              )}
+              <button
+                className="admin-btn admin-btn--ghost"
+                onClick={() => setSelectedTerms(new Set())}
+              >
+                {t("clearSelection") || "Clear"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Table */}
         <div className="table-container">
           <table className="admin-table">
             <thead>
               <tr>
+                <th style={{ width: "40px" }}>
+                  <input
+                    ref={selectAllCheckboxRef}
+                    type="checkbox"
+                    checked={
+                      currentSelectableTerms.length > 0 &&
+                      selectedInCurrentView > 0 &&
+                      selectedInCurrentView === currentSelectableTerms.length
+                    }
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    title={t("selectAll") || "Select all"}
+                    disabled={currentSelectableTerms.length === 0}
+                  />
+                </th>
                 <th>{t("term")}</th>
                 <th>{t("category")}</th>
                 <th>{t("status")}</th>
@@ -497,6 +722,18 @@ export default function TermsPage({
             <tbody>
               {paginatedTerms.map((term) => (
                 <tr key={term._id}>
+                  <td style={{ width: "40px" }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedTerms.has(term._id)}
+                      disabled={
+                        statusFilter === "pending" && term.status !== "pending"
+                      }
+                      onChange={(e) =>
+                        handleTermSelect(term._id, e.target.checked)
+                      }
+                    />
+                  </td>
                   <td>
                     <div className="term-cell">
                       <span className="term-cell__vi">
@@ -592,7 +829,7 @@ export default function TermsPage({
                         <button
                           className="action-btn action-btn--success"
                           onClick={() => handleRestore(term._id)}
-                          title="Khôi phục"
+                          title={t("restore")}
                         >
                           <RotateCcw size={16} color="green" />
                         </button>
@@ -732,6 +969,78 @@ export default function TermsPage({
                 onClick={handleDelete}
               >
                 {t("delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Action Confirmation Modal */}
+      {showBulkActionConfirm.action && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowBulkActionConfirm({ action: null, count: 0 })}
+        >
+          <div className="modal modal--sm" onClick={(e) => e.stopPropagation()}>
+            <div className="modal__header">
+              <h2>
+                {showBulkActionConfirm.action === "approve"
+                  ? t("confirmBulkApprove")
+                  : showBulkActionConfirm.action === "reject"
+                    ? t("confirmBulkReject")
+                    : t("confirmBulkDelete")}
+              </h2>
+              <button
+                className="modal__close"
+                onClick={() =>
+                  setShowBulkActionConfirm({ action: null, count: 0 })
+                }
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal__body">
+              <p>
+                {showBulkActionConfirm.action === "delete"
+                  ? t("confirmBulkDeleteMsg", {
+                      count: showBulkActionConfirm.count,
+                    })
+                  : showBulkActionConfirm.action === "reject"
+                    ? t("confirmBulkRejectMsg", {
+                        count: showBulkActionConfirm.count,
+                      })
+                    : t("confirmBulkApproveMsg", {
+                        count: showBulkActionConfirm.count,
+                      })}
+              </p>
+              {showBulkActionConfirm.action === "delete" && (
+                <p className="text-danger">{t("deleteIrreversible")}</p>
+              )}
+            </div>
+            <div className="modal__footer">
+              <button
+                className="admin-btn admin-btn--secondary"
+                onClick={() =>
+                  setShowBulkActionConfirm({ action: null, count: 0 })
+                }
+              >
+                {t("cancel")}
+              </button>
+              <button
+                className={`admin-btn ${
+                  showBulkActionConfirm.action === "delete"
+                    ? "admin-btn--danger"
+                    : showBulkActionConfirm.action === "reject"
+                      ? "admin-btn--warning"
+                      : "admin-btn--success"
+                }`}
+                onClick={executeBulkAction}
+              >
+                {showBulkActionConfirm.action === "approve"
+                  ? t("approve")
+                  : showBulkActionConfirm.action === "reject"
+                    ? t("reject")
+                    : t("delete")}
               </button>
             </div>
           </div>

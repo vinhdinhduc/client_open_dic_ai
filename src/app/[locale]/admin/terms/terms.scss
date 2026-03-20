@@ -677,3 +677,71 @@ $admin-info: #3b82f6;
         }
     }
 }
+
+// ============ Bulk Actions Bar ============
+.bulk-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, rgba($admin-primary, 0.08) 0%, rgba(#764ba2, 0.08) 100%);
+    border: 1px solid rgba($admin-primary, 0.2);
+    border-radius: 8px;
+    margin-bottom: var(--spacing-md);
+    animation: slideDown 0.3s ease-out;
+
+    &__info {
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 200px;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+
+        .admin-btn {
+            padding: 8px 14px;
+            font-size: 13px;
+            gap: 6px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+
+        &__actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// ============ Table Checkbox Column ============
+.admin-table {
+    input[type="checkbox"] {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        accent-color: $admin-primary;
+
+        &:indeterminate {
+            accent-color: $admin-warning;
+        }
+    }
+}

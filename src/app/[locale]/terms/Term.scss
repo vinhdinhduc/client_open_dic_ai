@@ -67,6 +67,54 @@
     }
 }
 
+// ============ KEYWORD MISMATCH BANNER ============
+// Shown when search results exist but none match the keyword
+.search-results-page__mismatch-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(118, 75, 162, 0.06) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+
+    @include mobile {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    @include large-screen {
+        margin-bottom: var(--spacing-2xl);
+    }
+}
+
+.search-results-page__mismatch-banner-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    flex: 1;
+}
+
+.search-results-page__mismatch-banner-icon {
+    color: #667eea;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.search-results-page__mismatch-banner-text {
+    font-size: $font-sm;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0;
+
+    span {
+        color: var(--text-tertiary);
+    }
+}
+
 // ============ EXACT MATCH SECTION ============
 .search-results-page__exact-match {
     margin-bottom: var(--spacing-2xl);
@@ -85,7 +133,7 @@
     }
 }
 
-.search-results-page__related-grid {
+.search-results-page__results-grid {
     display: grid;
     gap: var(--spacing-md);
 
@@ -94,13 +142,18 @@
         gap: var(--spacing-sm);
     }
 
+    @include tablet {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
     @include large-screen {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: 1fr;
         gap: var(--spacing-lg);
     }
 
     @include ultra-wide {
-        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        grid-template-columns: 1fr;
     }
 }
 
@@ -327,11 +380,13 @@
         transform: translateY(0);
     }
 
+    // Compact variant used inside the mismatch banner
     &--sm {
-        padding: 0.6rem 1.25rem;
+        padding: 0.5rem 1.1rem;
         font-size: $font-sm;
         box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
         flex-shrink: 0;
+        white-space: nowrap;
     }
 
     @include mobile {

@@ -8,7 +8,7 @@ import { AIChat } from "@/components/common";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "react-hot-toast";
-import { Bot, LogIn, PlusCircle, Search } from "lucide-react";
+import { Bot, LogIn, PlusCircle, Search, Lightbulb } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   addFavorite,
@@ -34,6 +34,16 @@ export default function SearchResultsClient({
   const [terms] = useState<TermCardData[]>(initialTerms);
   const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>({});
   const [showAIChat, setShowAIChat] = useState(false);
+
+  const isQueryMatchingAnyTerm = terms.some((term) => {
+    const q = query.trim().toLowerCase();
+    const names = Object.values(term.term ?? {}).map((v) =>
+      String(v).toLowerCase(),
+    );
+    return names.some((name) => name.includes(q) || q.includes(name));
+  });
+
+  const showSuggestedSection = terms.length > 0 && !isQueryMatchingAnyTerm;
 
   useEffect(() => {
     let cancelled = false;
@@ -197,12 +207,53 @@ export default function SearchResultsClient({
             {/* Title */}
             <div className="search-results-page__header">
               <h1 className="search-results-page__title">
-                {t("title")} &quot;{query}&quot;
+                {!isQueryMatchingAnyTerm
+                  ? t("noExactMatch", { query })
+                  : t("title", { query })}{" "}
               </h1>
             </div>
 
+            {showSuggestedSection && (
+              <div className="search-results-page__mismatch-banner">
+                <div className="search-results-page__mismatch-banner-content">
+                  <Bot
+                    size={20}
+                    className="search-results-page__mismatch-banner-icon"
+                  />
+                  <p className="search-results-page__mismatch-banner-text">
+                    {t("noExactMatch", { query })}{" "}
+                    <span>{t("tryAskingAI")}</span>
+                  </p>
+                </div>
+                <button
+                  className="search-results-page__ai-btn search-results-page__ai-btn--sm"
+                  onClick={handleAskAI}
+                >
+                  {isAuthenticated ? (
+                    <>
+                      <Bot size={16} />
+                      {t("askAI")}
+                    </>
+                  ) : (
+                    <>
+                      <LogIn size={16} />
+                      {t("loginToUseAI")}
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
             <section className="search-results-page__related-terms">
-              <div className="search-results-page__related-grid">
+              {/* Show "Terms you might know" label only on mismatch */}
+              {showSuggestedSection && (
+                <h2 className="search-results-page__section-title">
+                  <Lightbulb size={20} />
+                  {t("termsMightKnow")}
+                </h2>
+              )}
+
+              <div className="search-results-page__results-grid">
                 {terms.map((term) => (
                   <TermCard
                     key={term._id}
