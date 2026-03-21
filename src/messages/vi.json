@@ -4,7 +4,8 @@
     "faqPrompt2": "Cần hỗ trợ? Hỏi ngay!",
     "faqPrompt3": "Tra cứu thuật ngữ dễ dàng!",
     "faqPrompt4": "Khám phá từ điển mở UTB 📚",
-    "faqPrompt5": "Bạn cần đóng góp thuật ngữ!"
+    "faqPrompt5": "Bạn cần đóng góp thuật ngữ!",
+    "faqQuestionCommon": "Các câu hỏi thường gặp UTB Opendict!"
   },
   "common": {
     "appName": "UTB OpenDict",
@@ -265,6 +266,40 @@
     "responseLanguage": "Ngôn ngữ trả lời",
     "searchOtherTerms": "Tìm kiếm các thuật ngữ khác",
     "invalidFormatNotice": "AI trả về định dạng không chuẩn. Dưới đây là phản hồi gốc:"
+  },
+  "aiAgent": {
+    "agent": "Trợ lý thông minh",
+    "openAgent": "Mở trợ lý thông minh",
+    "close": "Đóng",
+    "loading": "Đang tải gợi ý...",
+    "noSuggestions": "Hiện tại không có gợi ý nào",
+    "highPriority": "Ưu tiên cao",
+    "takeAction": "Thực hiện",
+    "dismiss": "Bỏ qua",
+    "helpText": "Trợ lý AI sẽ gợi ý hành động tiếp theo phù hợp"
+  },
+  "floatingChat": {
+    "openChat": "Mở trợ lý AI",
+    "close": "Đóng",
+    "chatTitle": "Trợ lý AI OpenDict",
+    "welcome": "Chào mừng bạn!",
+    "welcomeMessage": "Hãy hỏi trợ lý AI về bất kỳ thuật ngữ hoặc chủ đề nào bạn quan tâm.",
+    "placeholder": "Nhập thuật ngữ hoặc câu hỏi của bạn...",
+    "send": "Gửi",
+    "typing": "Đang suy nghĩ...",
+    "errorSending": "Không thể gửi tin nhắn",
+    "errorResponse": "Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.",
+    "defaultResponse": "Cảm ơn bạn đã hỏi! Tôi đang xử lý yêu cầu của bạn.",
+    "promptIdea1": "Bạn muốn hỏi thuật ngữ nào hôm nay?",
+    "promptIdea2": "Mình có thể giải thích nhanh khái niệm khó cho bạn.",
+    "promptIdea3": "Chưa có từ trong hệ thống? Hỏi AI để nhận gợi ý ngay.",
+    "promptHelloName": "Xin chào {name}",
+    "promptHelloStudent": "Xin chào Sinh viên {name}",
+    "promptHelloTeacher": "Xin chào Giảng viên {name}",
+    "searchNavigateSuccess": "Đã tìm thấy thuật ngữ. Mình đang chuyển bạn tới trang chi tiết:",
+    "searchNotFound": "Không tìm thấy thuật ngữ trong hệ thống cho yêu cầu:",
+    "contributeSupport": "Tôi có thể giúp bạn đóng góp thuật ngữ này! Nhấn nút dưới đây để sang trang đóng góp.",
+    "goToContribute": "Sang trang đóng góp"
   },
   "searchResults": {
     "metaTitle": "Tìm kiếm thuật ngữ - UTB OpenDict",

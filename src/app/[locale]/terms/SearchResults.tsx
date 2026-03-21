@@ -4,17 +4,19 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TermCardData } from "@/components/terms/types";
 import TermCard from "@/components/terms/TermCard";
-import { AIChat } from "@/components/common";
+import { AIChat, AICometAgent } from "@/components/common";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "react-hot-toast";
 import { Bot, LogIn, PlusCircle, Search, Lightbulb } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AIAgentContext } from "@/services/aiAgentService";
 import {
   addFavorite,
   checkFavorite,
   removeFavorite,
 } from "@/services/favoriteService";
+import reputationService from "@/services/reputationService";
 import "./Term.scss";
 
 interface SearchResultsClientProps {
@@ -27,13 +29,16 @@ export default function SearchResultsClient({
   query,
 }: SearchResultsClientProps) {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { currentLanguage } = useLanguage();
   const t = useTranslations("searchResults");
   const tCommon = useTranslations("common");
   const [terms] = useState<TermCardData[]>(initialTerms);
   const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>({});
   const [showAIChat, setShowAIChat] = useState(false);
+  const [userReputationLevel, setUserReputationLevel] = useState<
+    number | undefined
+  >();
 
   const isQueryMatchingAnyTerm = terms.some((term) => {
     const q = query.trim().toLowerCase();
@@ -44,6 +49,27 @@ export default function SearchResultsClient({
   });
 
   const showSuggestedSection = terms.length > 0 && !isQueryMatchingAnyTerm;
+
+  // Load user reputation level for AI Agent context
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUserReputationLevel(undefined);
+      return;
+    }
+
+    const loadReputation = async () => {
+      try {
+        const userRep = await reputationService.getUserReputation(
+          user?._id || "",
+        );
+        setUserReputationLevel(userRep?.totalPoints || 0);
+      } catch (error) {
+        console.error("Failed to load reputation:", error);
+      }
+    };
+
+    loadReputation();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     let cancelled = false;
@@ -276,6 +302,23 @@ export default function SearchResultsClient({
             term={query}
             language={currentLanguage}
             onClose={handleCloseAIChat}
+          />
+        )}
+
+        {/* AI Comet Agent - Floating Assistant */}
+        {isAuthenticated && (
+          <AICometAgent
+            context={
+              {
+                currentPage: "search",
+                searchQuery: query,
+                language: currentLanguage || "vi",
+                userReputationLevel: userReputationLevel,
+                viewedTerms: terms.map((t) => t._id),
+              } as AIAgentContext
+            }
+            showOnMount={false}
+            position="bottom-right"
           />
         )}
       </div>

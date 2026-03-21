@@ -5,8 +5,8 @@ import { getTranslations } from "next-intl/server";
 import "./settings.scss";
 
 export const metadata: Metadata = {
-  title: "Settings - Admin | OpenDict",
-  description: "Manage OpenDict system settings",
+  title: "Settings - Admin | UTB OpenDict",
+  description: "Manage UTB OpenDict system settings",
 };
 
 export default async function SettingsIndexPage() {

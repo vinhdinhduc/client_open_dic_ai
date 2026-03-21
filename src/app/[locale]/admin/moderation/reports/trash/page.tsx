@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ReportsTrashClient from "../ReportsTrashClient";
 
 export const metadata: Metadata = {
-  title: "Thùng rác báo cáo - Admin | OpenDict",
+  title: "Thùng rác báo cáo - Admin | UTB OpenDict",
   description: "Quản lý báo cáo đã xoá mềm và khôi phục khi cần",
 };
 

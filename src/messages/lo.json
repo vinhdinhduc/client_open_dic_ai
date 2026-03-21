@@ -4,7 +4,8 @@
     "faqPrompt2": "ຕ້ອງການການຊ່ວຍເຫຼືອ? ຖາມໄດ້ເລີ່ມ!",
     "faqPrompt3": "ຄົ້ນຫາຄຳສັບໄດ້ງ່າຍ!",
     "faqPrompt4": "ຄົ້ນຫາວັດຈະນານໄດ້ງ່າຍ! 📚",
-    "faqPrompt5": "ເຈົ້າຕ້ອງການປະກອບສ່ວນຄຳສັບ!"
+    "faqPrompt5": "ເຈົ້າຕ້ອງການປະກອບສ່ວນຄຳສັບ!",
+     "faqQuestionCommon": "ຄຳຖາມທີ່ຖືກຖາມເລື້ອຍໆ UTB Opendict!"
   },
   "common": {
     "appName": "UTB OpenDict",
@@ -263,6 +264,40 @@
     "responseLanguage": "ພາສາຕອບກັບ",
     "searchOtherTerms": "ຄົ້ນຫາຄຳສັບອື່ນໆ",
     "invalidFormatNotice": "AI ສົ່ງກັບຮູບແບບທີ່ບໍ່ຖືກຕ້ອງ. ດ້ານລຸ່ມນີ້ແມ່ນຄຳຕອບຕົ້ນສະບັບ:"
+  },
+  "aiAgent": {
+    "agent": "ຜູ້ຊ່ວຍອັດສະລະບັນ",
+    "openAgent": "ເປີດຜູ້ຊ່ວຍອັດສະລະບັນ",
+    "close": "ປິດ",
+    "loading": "ກຳລັງໂຫລດຄຳແນະນຳ...",
+    "noSuggestions": "ໃນປັດຈຸບັນບໍ່ມີຂໍ້ແນະນຳ",
+    "highPriority": "ຄວາມສຳຄັນສູງ",
+    "takeAction": "ດຳເນີນການ",
+    "dismiss": "ປະຕິເສດ",
+    "helpText": "ຜູ້ຊ່ວຍ AI ຈະແນະນຳການດຳເນີນການຕໍ່ໄປທີ່ उपयুक्त"
+  },
+  "floatingChat": {
+    "openChat": "ເປີດຜູ້ຊ່ວຍ AI",
+    "close": "ປິດ",
+    "chatTitle": "ຜູ້ຊ່ວຍ AI ຂອງ OpenDict",
+    "welcome": "ຍິນດີຕ້ອນຮັບ!",
+    "welcomeMessage": "ຖາມຜູ້ຊ່ວຍ AI ກ່ຽວກັບຄຳສັບ ຫຼື ຫົວຂໍ້ທີ່ທ່ານສົນໃຈ.",
+    "placeholder": "ປ້ອນຄຳສັບ ຫຼື ຄຳຖາມຂອງທ່ານ...",
+    "send": "ສົ່ງ",
+    "typing": "ກຳລັງຄິດ...",
+    "errorSending": "ບໍ່ສາມາດສົ່ງຂໍ້ຄວາມ",
+    "errorResponse": "ຂໍ້ອະໄພ, ຂ້ອຍບໍ່ສາມາດປະມວນຜົນຄຳຂໍຂອງທ່ານໄດ້ໃນເວລານີ້.",
+    "defaultResponse": "ຂອບໃຈທີ່ຖາມ! ຂ້ອຍກຳລັງປະມວນຜົນຄຳຂໍຂອງທ່ານ.",
+    "promptIdea1": "ມື້ນີ້ທ່ານຢາກຖາມຄຳສັບໃດ?",
+    "promptIdea2": "ຂ້ອຍສາມາດຊ່ວຍອະທິບາຍແນວຄິດທີ່ຊັບຊ້ອນໄດ້ໄວ.",
+    "promptIdea3": "ຍັງບໍ່ພົບຄຳໃນລະບົບ? ລອງຖາມ AI ໄດ້ເລີຍ.",
+    "promptHelloName": "ສະບາຍດີ {name}",
+    "promptHelloStudent": "ສະບາຍດີ ນັກສຶກສາ {name}",
+    "promptHelloTeacher": "ສະບາຍດີ ອາຈານ {name}",
+    "searchNavigateSuccess": "ພົບຄຳສັບແລ້ວ. ກຳລັງພາທ່ານໄປໜ້າລາຍລະອຽດ:",
+    "searchNotFound": "ບໍ່ພົບຄຳສັບໃນລະບົບສຳລັບຄຳຂໍ:",
+    "contributeSupport": "ຂ້ອຍສາມາດຊ່ວຍທ່ານປະກອບສ່ວນຄຳສັບນີ້ໄດ້. ກົດປຸ່ມຂ້າງລຸ່ມເພື່ອໄປໜ້າປະກອບສ່ວນ.",
+    "goToContribute": "ໄປໜ້າປະກອບສ່ວນ"
   },
   "searchResults": {
     "metaTitle": "ຄົ້ນຫາຄຳສັບ - UTB OpenDict",

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ModerationReportsClient from "./ModerationReportsClient";
 
 export const metadata: Metadata = {
-  title: "Kiểm duyệt báo cáo - Admin | OpenDict",
+  title: "Kiểm duyệt báo cáo - Admin | UTBOpenDict",
   description: "Xem xét và xử lý các báo cáo vi phạm từ người dùng",
 };
 

@@ -22,7 +22,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "searchResults" });
   return {
     title: query
-      ? `${t("metaSearchPrefix")}: ${query} - OpenDict`
+      ? `${t("metaSearchPrefix")}: ${query} - UTB OpenDict`
       : t("metaTitle"),
     description: query
       ? `${t("metaSearchDescription")} "${query}"`

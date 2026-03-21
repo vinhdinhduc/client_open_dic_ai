@@ -6,7 +6,7 @@ interface ModeratorTermDetailPageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Chi tiết thuật ngữ - Moderator | OpenDict",
+  title: "Chi tiết thuật ngữ - Moderator |UTB OpenDict",
   description: "Xem và quản lý chi tiết thuật ngữ trong phạm vi moderator",
 };
 

@@ -4,7 +4,8 @@
     "faqPrompt2": "Need help? Ask now!",
     "faqPrompt3": "Easy term lookup!",
     "faqPrompt4": "Explore the UTB OpenDict 📚",
-    "faqPrompt5": "You need to contribute terms!"
+    "faqPrompt5": "You need to contribute terms!",
+     "faqQuestionCommon": "Frequently Asked Questions UTB Opendict!"
   },
   "common": {
     "appName": "UTB OpenDict",
@@ -263,6 +264,40 @@
     "responseLanguage": "Response language",
     "searchOtherTerms": "Search other terms",
     "invalidFormatNotice": "AI returned an invalid format. Below is the original response:"
+  },
+  "aiAgent": {
+    "agent": "Smart Assistant",
+    "openAgent": "Open smart assistant",
+    "close": "Close",
+    "loading": "Loading suggestions...",
+    "noSuggestions": "No suggestions available at the moment",
+    "highPriority": "High priority",
+    "takeAction": "Take Action",
+    "dismiss": "Dismiss",
+    "helpText": "The AI assistant will suggest appropriate next actions"
+  },
+  "floatingChat": {
+    "openChat": "Open AI Assistant",
+    "close": "Close",
+    "chatTitle": "OpenDict AI Assistant",
+    "welcome": "Welcome!",
+    "welcomeMessage": "Ask the AI assistant about any term or topic you're interested in.",
+    "placeholder": "Enter a term or question...",
+    "send": "Send",
+    "typing": "Thinking...",
+    "errorSending": "Unable to send message",
+    "errorResponse": "Sorry, I cannot process your request at this moment.",
+    "defaultResponse": "Thank you for asking! I'm processing your request.",
+    "promptIdea1": "What term do you want to ask about today?",
+    "promptIdea2": "I can quickly explain complex concepts for you.",
+    "promptIdea3": "No matching term yet? Ask AI for instant guidance.",
+    "promptHelloName": "Hello {name}",
+    "promptHelloStudent": "Hello Student {name}",
+    "promptHelloTeacher": "Hello Lecturer {name}",
+    "searchNavigateSuccess": "I found the term. Navigating you to the detail page:",
+    "searchNotFound": "No matching term was found in the system for:",
+    "contributeSupport": "I can help you contribute this term. Click the button below to open the contribution page.",
+    "goToContribute": "Go to contribution page"
   },
   "searchResults": {
     "metaTitle": "Search Terms - UTB OpenDict",

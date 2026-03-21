@@ -3,6 +3,7 @@
 import { Footer } from "./Footer";
 import Header from "./Header";
 import EmailVerificationBanner from "@/components/common/EmailVerificationBanner";
+import { FloatingChatButton } from "@/components/common";
 import "./Layout.scss";
 import { useAuth } from "@/hooks";
 import { HelpCircle } from "lucide-react";
@@ -21,13 +22,7 @@ const Layout = ({ children, className }: LayoutProps) => {
   const [bubbleVisible, setBubbleVisible] = useState(false);
 
   const t = useTranslations("layout");
-  const FAQ_MESSAGES = [
-    t("faqPrompt1"),
-    t("faqPrompt2"),
-    t("faqPrompt3"),
-    t("faqPrompt4"),
-    t("faqPrompt5"),
-  ];
+  const FAQ_MESSAGES = [t("faqQuestionCommon")];
   useEffect(() => {
     // Show bubble after 3 seconds
     const showTimer = setTimeout(() => setBubbleVisible(true), 3000);
@@ -48,6 +43,7 @@ const Layout = ({ children, className }: LayoutProps) => {
       {!user && <EmailVerificationBanner />}
       <main className="layout__main">{children}</main>
       <Footer />
+      <FloatingChatButton />
       <div className="faq-floating-wrapper">
         {bubbleVisible && (
           <div className="faq-bubble" key={messageIndex}>

@@ -18,3 +18,5 @@ export type { LoaderVariant, LoaderSize } from "./Loading";
 // AI Components
 export { default as AIChat } from "./AIChat";
 export { default as AIFieldAssist } from "./AIFieldAssist";
+export { default as AICometAgent } from "./AICometAgent";
+export { default as FloatingChatButton } from "./FloatingChatButton";

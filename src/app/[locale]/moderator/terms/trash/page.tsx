@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import TermsTrashClient from "../TermsTrashClient";
 
 export const metadata: Metadata = {
-  title: "Thùng rác thuật ngữ - Moderator | OpenDict",
+  title: "Thùng rác thuật ngữ - Moderator |UTB OpenDict",
   description: "Quản lý thuật ngữ đã xoá mềm trong danh mục được phân công",
 };
 
