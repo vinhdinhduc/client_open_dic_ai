@@ -228,7 +228,6 @@ export default function SearchResultsClient({
             </p>
           </div>
         ) : (
-          /* =========== HAS RESULTS =========== */
           <>
             {/* Title */}
             <div className="search-results-page__header">
