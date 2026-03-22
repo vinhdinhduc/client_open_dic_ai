@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -12,6 +18,7 @@ import {
   Loader2,
   ArrowRight,
   Sparkles,
+  Bot,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { aiService } from "@/services/aiService";
@@ -42,6 +49,17 @@ interface QuickNavigationTarget {
   label: string;
 }
 
+interface StructuredSection {
+  key: "definition" | "explanation" | "examples" | "relatedTerms";
+  label: string;
+  value: string;
+}
+
+interface ParsedAssistantContent {
+  intro: string;
+  sections: StructuredSection[];
+}
+
 export default function FloatingChatButton() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
@@ -54,6 +72,36 @@ export default function FloatingChatButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [promptIndex, setPromptIndex] = useState(0);
   const [showPrompt, setShowPrompt] = useState(false);
+
+  const quickPrompts = useMemo(
+    () => [
+      t("quickPrompt1"),
+      t("quickPrompt2"),
+      t("quickPrompt3"),
+      t("quickPrompt4"),
+      t("quickPrompt5"),
+      t("quickPrompt6"),
+    ],
+    [t],
+  );
+
+  const userAvatarText = useMemo(() => {
+    const fullName = user?.fullName?.trim();
+    if (fullName) {
+      const words = fullName.split(/\s+/).filter(Boolean);
+      if (words.length >= 2) {
+        return `${words[0][0]}${words[1][0]}`.toUpperCase();
+      }
+      return fullName.slice(0, 2).toUpperCase();
+    }
+
+    const email = user?.email?.trim();
+    if (email) {
+      return email[0]?.toUpperCase() || "U";
+    }
+
+    return "U";
+  }, [user?.email, user?.fullName]);
 
   const greetingPrompt = useMemo(() => {
     const fullName = user?.fullName?.trim();
@@ -334,6 +382,198 @@ export default function FloatingChatButton() {
     [t],
   );
 
+  const parseStructuredSections = useCallback(
+    (content: string): ParsedAssistantContent => {
+      const normalized = content.replace(/\r\n/g, "\n").trim();
+      if (!normalized) {
+        return { intro: "", sections: [] };
+      }
+
+      const labelFromKey: Record<StructuredSection["key"], string> = {
+        definition: t("definition"),
+        explanation: t("explanation"),
+        examples: t("examples"),
+        relatedTerms: t("relatedTerms"),
+      };
+
+      const toKey = (rawLabel: string): StructuredSection["key"] | null => {
+        const normalizedLabel = rawLabel
+          .trim()
+          .replace(/^\*+|\*+$/g, "")
+          .toLowerCase()
+          .replace(/\s+/g, "");
+
+        const cleaned = normalizedLabel.startsWith("floatingchat.")
+          ? normalizedLabel.replace("floatingchat.", "")
+          : normalizedLabel;
+
+        if (
+          cleaned === "definition" ||
+          normalizedLabel === t("definition").toLowerCase().replace(/\s+/g, "")
+        ) {
+          return "definition";
+        }
+        if (
+          cleaned === "explanation" ||
+          cleaned === "detailedexplanation" ||
+          normalizedLabel === t("explanation").toLowerCase().replace(/\s+/g, "")
+        ) {
+          return "explanation";
+        }
+        if (
+          cleaned === "examples" ||
+          normalizedLabel === t("examples").toLowerCase().replace(/\s+/g, "")
+        ) {
+          return "examples";
+        }
+        if (
+          cleaned === "relatedterms" ||
+          normalizedLabel ===
+            t("relatedTerms").toLowerCase().replace(/\s+/g, "")
+        ) {
+          return "relatedTerms";
+        }
+
+        return null;
+      };
+
+      const sections: StructuredSection[] = [];
+      const markdownSectionRegex =
+        /\*\*([^*]+)\*\*\s*:\s*([\s\S]*?)(?=\n\s*\n\*\*[^*]+\*\*\s*:|$)/g;
+
+      let intro = normalized;
+      let markdownMatch: RegExpExecArray | null = null;
+
+      while ((markdownMatch = markdownSectionRegex.exec(normalized)) !== null) {
+        const rawLabel = markdownMatch[1]?.trim() || "";
+        const key = toKey(rawLabel);
+        if (!key) {
+          continue;
+        }
+
+        const value = (markdownMatch[2] || "").trim();
+        if (!value) {
+          continue;
+        }
+
+        sections.push({
+          key,
+          label: labelFromKey[key],
+          value,
+        });
+
+        intro = intro.replace(markdownMatch[0], "").trim();
+      }
+
+      if (sections.length > 0) {
+        return { intro, sections };
+      }
+
+      const lineSections: StructuredSection[] = [];
+      const remainingLines: string[] = [];
+
+      normalized.split("\n").forEach((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return;
+        }
+
+        const lineMatch = trimmed.match(/^([^:]+):\s*(.+)$/);
+        if (!lineMatch) {
+          remainingLines.push(trimmed);
+          return;
+        }
+
+        const key = toKey(lineMatch[1]);
+        if (!key) {
+          remainingLines.push(trimmed);
+          return;
+        }
+
+        lineSections.push({
+          key,
+          label: labelFromKey[key],
+          value: lineMatch[2].trim(),
+        });
+      });
+
+      return {
+        intro: remainingLines.join("\n"),
+        sections: lineSections,
+      };
+    },
+    [t],
+  );
+
+  const splitSectionItems = (value: string): string[] => {
+    return value
+      .split(/\n|,\s*/)
+      .map((item) =>
+        item
+          .replace(/^[-•*\d.)\s]+/, "")
+          .replace(/^"|"$/g, "")
+          .trim(),
+      )
+      .filter(Boolean);
+  };
+
+  const renderMessageContent = useCallback(
+    (message: Message): ReactNode => {
+      if (message.role !== "assistant") {
+        return message.content;
+      }
+
+      const parsed = parseStructuredSections(message.content);
+      if (parsed.sections.length === 0) {
+        return message.content;
+      }
+
+      return (
+        <div className="floating-chat-sidebar__rich-content">
+          {parsed.intro && (
+            <p className="floating-chat-sidebar__intro">{parsed.intro}</p>
+          )}
+
+          {parsed.sections.map((section, index) => {
+            const shouldRenderList =
+              section.key === "examples" || section.key === "relatedTerms";
+            const items = shouldRenderList
+              ? splitSectionItems(section.value)
+              : [];
+
+            return (
+              <div
+                key={`${message.id}-${section.key}-${index}`}
+                className="floating-chat-sidebar__section"
+              >
+                <h5 className="floating-chat-sidebar__section-title">
+                  {section.label}
+                </h5>
+
+                {shouldRenderList && items.length > 0 ? (
+                  <ul className="floating-chat-sidebar__section-list">
+                    {items.map((item, itemIndex) => (
+                      <li
+                        key={`${message.id}-${section.key}-item-${itemIndex}`}
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="floating-chat-sidebar__section-text">
+                    {section.value}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    },
+    [parseStructuredSections],
+  );
+
   const openContributionWithAIPrefill = useCallback(
     async (term: string) => {
       const lang = currentLanguage || "vi";
@@ -380,233 +620,245 @@ export default function FloatingChatButton() {
     [router],
   );
 
-  const handleSendMessage = useCallback(async () => {
-    if (!inputValue.trim() || !isAuthenticated) {
-      return;
-    }
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: inputValue,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    const currentInput = inputValue;
-    setInputValue("");
-    setIsLoading(true);
-
-    try {
-      // If user wants to contribute, fetch AI definition and prefill contribution form.
-      const quickNavigation = detectQuickNavigation(currentInput);
-      if (quickNavigation) {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: `${t("quickNavigateSuccess")} \n\n${quickNavigation.label}`,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-
-        router.push(quickNavigation.path);
-        setIsOpen(false);
+  const sendMessage = useCallback(
+    async (rawInput: string) => {
+      const currentInput = rawInput.trim();
+      if (!currentInput || !isAuthenticated) {
         return;
       }
 
-      const searchTerm = extractSearchTerm(currentInput);
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: currentInput,
+        timestamp: new Date(),
+      };
 
-      const suggestEditTerm = extractSuggestEditTerm(currentInput);
+      setMessages((prev) => [...prev, userMessage]);
+      setInputValue("");
+      setIsLoading(true);
 
-      if (suggestEditTerm) {
-        const selected = await findMatchedTerm(suggestEditTerm);
-
-        if (!selected) {
+      try {
+        // If user wants to contribute, fetch AI definition and prefill contribution form.
+        const quickNavigation = detectQuickNavigation(currentInput);
+        if (quickNavigation) {
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
-            content: `${t("searchNotFound")} \n\n"${suggestEditTerm}"`,
+            content: `${t("quickNavigateSuccess")} \n\n${quickNavigation.label}`,
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, assistantMessage]);
+
+          router.push(quickNavigation.path);
+          setIsOpen(false);
           return;
         }
 
-        const lang = currentLanguage || "vi";
-        let aiEditKey = "";
+        const searchTerm = extractSearchTerm(currentInput);
 
-        try {
-          const aiData = await aiService.askAboutTerm({
-            term: suggestEditTerm,
-            language: lang,
-          });
+        const suggestEditTerm = extractSuggestEditTerm(currentInput);
 
-          const payload: EditPrefillPayload = {
-            lang,
-            definition: aiData.definition || undefined,
-            detailedExplanation: aiData.detailedExplanation || undefined,
-            examples: aiData.examples?.length ? aiData.examples : undefined,
-          };
+        if (suggestEditTerm) {
+          const selected = await findMatchedTerm(suggestEditTerm);
 
-          if (
-            payload.definition ||
-            payload.detailedExplanation ||
-            payload.examples?.length
-          ) {
-            aiEditKey = saveEditPrefillPayload(payload);
+          if (!selected) {
+            const assistantMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: "assistant",
+              content: `${t("searchNotFound")} \n\n"${suggestEditTerm}"`,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+            return;
           }
-        } catch (error) {
-          console.warn("Unable to prefill suggest-edit from AI:", error);
-        }
 
-        const selectedTermName =
-          selected.term?.[lang as "vi" | "en" | "lo"] ||
-          selected.term?.vi ||
-          selected.term?.en ||
-          selected.term?.lo ||
-          suggestEditTerm;
+          const lang = currentLanguage || "vi";
+          let aiEditKey = "";
 
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: `${t("suggestEditNavigateSuccess")} \n\n"${selectedTermName}"`,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
+          try {
+            const aiData = await aiService.askAboutTerm({
+              term: suggestEditTerm,
+              language: lang,
+            });
 
-        const searchParams = new URLSearchParams({
-          openSuggestEdit: "1",
-          source: "floating-chat",
-        });
-        if (aiEditKey) {
-          searchParams.set("aiEditKey", aiEditKey);
-        }
+            const payload: EditPrefillPayload = {
+              lang,
+              definition: aiData.definition || undefined,
+              detailedExplanation: aiData.detailedExplanation || undefined,
+              examples: aiData.examples?.length ? aiData.examples : undefined,
+            };
 
-        router.push(`/terms/${selected._id}?${searchParams.toString()}`);
-        setIsOpen(false);
-        return;
-      }
+            if (
+              payload.definition ||
+              payload.detailedExplanation ||
+              payload.examples?.length
+            ) {
+              aiEditKey = saveEditPrefillPayload(payload);
+            }
+          } catch (error) {
+            console.warn("Unable to prefill suggest-edit from AI:", error);
+          }
 
-      if (searchTerm) {
-        const lang = currentLanguage || "vi";
-        const selected = await findMatchedTerm(searchTerm);
-
-        if (selected) {
           const selectedTermName =
             selected.term?.[lang as "vi" | "en" | "lo"] ||
             selected.term?.vi ||
             selected.term?.en ||
             selected.term?.lo ||
-            searchTerm;
+            suggestEditTerm;
 
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
-            content: `${t("searchNavigateSuccess")} \n\n"${selectedTermName}"`,
+            content: `${t("suggestEditNavigateSuccess")} \n\n"${selectedTermName}"`,
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, assistantMessage]);
 
-          router.push(`/terms/${selected._id}`);
+          const searchParams = new URLSearchParams({
+            openSuggestEdit: "1",
+            source: "floating-chat",
+          });
+          if (aiEditKey) {
+            searchParams.set("aiEditKey", aiEditKey);
+          }
+
+          router.push(`/terms/${selected._id}?${searchParams.toString()}`);
           setIsOpen(false);
           return;
         }
 
+        if (searchTerm) {
+          const lang = currentLanguage || "vi";
+          const selected = await findMatchedTerm(searchTerm);
+
+          if (selected) {
+            const selectedTermName =
+              selected.term?.[lang as "vi" | "en" | "lo"] ||
+              selected.term?.vi ||
+              selected.term?.en ||
+              selected.term?.lo ||
+              searchTerm;
+
+            const assistantMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: "assistant",
+              content: `${t("searchNavigateSuccess")} \n\n"${selectedTermName}"`,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+
+            router.push(`/terms/${selected._id}`);
+            setIsOpen(false);
+            return;
+          }
+
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: `${t("searchNotFound")} \n\n"${searchTerm}"`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          return;
+        }
+
+        const contributeTerm = extractContributeTerm(currentInput);
+
+        if (contributeTerm && contributeTerm.trim().length > 0) {
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: `${t("contributeSupport")} \n\n"${contributeTerm}"`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+
+          await openContributionWithAIPrefill(contributeTerm);
+          return;
+        }
+
+        // Call AI service to get a response about the term/query
+        const response = await aiService.askAboutTerm({
+          term: currentInput,
+          language: currentLanguage || "vi",
+        });
+
+        let assistantContent = t("defaultResponse");
+
+        if (response.structured) {
+          // Build a formatted response from structured data
+          const parts: string[] = [];
+
+          if (response.definition) {
+            parts.push(`**${t("definition")}**: ${response.definition}`);
+          }
+
+          if (response.detailedExplanation) {
+            parts.push(
+              `**${t("explanation")}**: ${response.detailedExplanation}`,
+            );
+          }
+
+          if (response.examples && response.examples.length > 0) {
+            parts.push(`**${t("examples")}**: ${response.examples.join(", ")}`);
+          }
+
+          if (response.relatedTerms && response.relatedTerms.length > 0) {
+            parts.push(
+              `**${t("relatedTerms")}**: ${response.relatedTerms.join(", ")}`,
+            );
+          }
+
+          assistantContent = parts.join("\n\n") || t("defaultResponse");
+        } else if (response.response) {
+          assistantContent = response.response;
+        }
+
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: `${t("searchNotFound")} \n\n"${searchTerm}"`,
+          content: assistantContent,
           timestamp: new Date(),
         };
+
         setMessages((prev) => [...prev, assistantMessage]);
-        return;
-      }
+      } catch (error: any) {
+        console.error("Chat error:", error);
+        toast.error(error.message || t("errorSending"));
 
-      const contributeTerm = extractContributeTerm(currentInput);
-
-      if (contributeTerm && contributeTerm.trim().length > 0) {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
+        // Add error message
+        const errorMessage: Message = {
+          id: (Date.now() + 2).toString(),
           role: "assistant",
-          content: `${t("contributeSupport")} \n\n"${contributeTerm}"`,
+          content: t("errorResponse"),
           timestamp: new Date(),
         };
-        setMessages((prev) => [...prev, assistantMessage]);
-
-        await openContributionWithAIPrefill(contributeTerm);
-        return;
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [
+      isAuthenticated,
+      detectQuickNavigation,
+      t,
+      router,
+      extractSearchTerm,
+      extractSuggestEditTerm,
+      findMatchedTerm,
+      currentLanguage,
+      extractContributeTerm,
+      openContributionWithAIPrefill,
+    ],
+  );
 
-      // Call AI service to get a response about the term/query
-      const response = await aiService.askAboutTerm({
-        term: currentInput.trim(),
-        language: currentLanguage || "vi",
-      });
-
-      let assistantContent = t("defaultResponse");
-
-      if (response.structured) {
-        // Build a formatted response from structured data
-        const parts: string[] = [];
-
-        if (response.definition) {
-          parts.push(`**${t("definition")}**: ${response.definition}`);
-        }
-
-        if (response.detailedExplanation) {
-          parts.push(
-            `**${t("explanation")}**: ${response.detailedExplanation}`,
-          );
-        }
-
-        if (response.examples && response.examples.length > 0) {
-          parts.push(`**${t("examples")}**: ${response.examples.join(", ")}`);
-        }
-
-        if (response.relatedTerms && response.relatedTerms.length > 0) {
-          parts.push(
-            `**${t("relatedTerms")}**: ${response.relatedTerms.join(", ")}`,
-          );
-        }
-
-        assistantContent = parts.join("\n\n") || t("defaultResponse");
-      } else if (response.response) {
-        assistantContent = response.response;
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: assistantContent,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error: any) {
-      console.error("Chat error:", error);
-      toast.error(error.message || t("errorSending"));
-
-      // Add error message
-      const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        role: "assistant",
-        content: t("errorResponse"),
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
+  const handleSendMessage = useCallback(async () => {
+    if (!inputValue.trim()) {
+      return;
     }
-  }, [
-    inputValue,
-    isAuthenticated,
-    currentLanguage,
-    router,
-    t,
-    findMatchedTerm,
-    detectQuickNavigation,
-    openContributionWithAIPrefill,
-  ]);
+    await sendMessage(inputValue);
+  }, [inputValue, sendMessage]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -689,9 +941,21 @@ export default function FloatingChatButton() {
                   <div
                     className={`floating-chat-sidebar__message floating-chat-sidebar__message--${msg.role}`}
                   >
+                    {msg.role === "assistant" && (
+                      <div className="floating-chat-sidebar__avatar floating-chat-sidebar__avatar--assistant">
+                        <Bot size={14} />
+                      </div>
+                    )}
+
                     <div className="floating-chat-sidebar__message-content">
-                      {msg.content}
+                      {renderMessageContent(msg)}
                     </div>
+
+                    {msg.role === "user" && (
+                      <div className="floating-chat-sidebar__avatar floating-chat-sidebar__avatar--user">
+                        {userAvatarText}
+                      </div>
+                    )}
                   </div>
                   {msg.action && msg.action.type === "contribute" && (
                     <div className="floating-chat-sidebar__action-button">
@@ -711,6 +975,9 @@ export default function FloatingChatButton() {
 
               {isLoading && (
                 <div className="floating-chat-sidebar__message floating-chat-sidebar__message--assistant">
+                  <div className="floating-chat-sidebar__avatar floating-chat-sidebar__avatar--assistant">
+                    <Bot size={14} />
+                  </div>
                   <div className="floating-chat-sidebar__message-content floating-chat-sidebar__message-content--loading">
                     <Loader2
                       size={16}
@@ -723,6 +990,25 @@ export default function FloatingChatButton() {
             </div>
 
             <div className="floating-chat-sidebar__input-area">
+              <div className="floating-chat-sidebar__quick-prompts">
+                {quickPrompts.map((prompt, index) => (
+                  <button
+                    key={`quick-prompt-${index}`}
+                    type="button"
+                    className="floating-chat-sidebar__quick-prompt"
+                    onClick={() => {
+                      if (isLoading) {
+                        return;
+                      }
+                      sendMessage(prompt);
+                    }}
+                    disabled={isLoading}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+
               <textarea
                 className="floating-chat-sidebar__input"
                 placeholder={t("placeholder")}
