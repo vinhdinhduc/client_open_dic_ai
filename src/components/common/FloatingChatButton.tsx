@@ -30,6 +30,18 @@ interface Message {
   };
 }
 
+interface EditPrefillPayload {
+  lang: string;
+  definition?: string;
+  detailedExplanation?: string;
+  examples?: string[];
+}
+
+interface QuickNavigationTarget {
+  path: string;
+  label: string;
+}
+
 export default function FloatingChatButton() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
@@ -159,6 +171,169 @@ export default function FloatingChatButton() {
     return null;
   };
 
+  const extractSuggestEditTerm = (text: string): string | null => {
+    const normalized = text.trim().replace(/\s+/g, " ");
+    const patterns = [
+      /(?:tôi\s+muốn\s+)?gợi\s*ý\s+chỉnh\s*sửa(?:\s+thuật\s+ngữ)?\s+(.+)/i,
+      /(?:tôi\s+muốn\s+)?chỉnh\s*sửa(?:\s+thuật\s+ngữ)?\s+(.+)/i,
+      /(?:please\s+)?suggest\s+edits?(?:\s+for)?(?:\s+term)?\s+(.+)/i,
+      /(?:please\s+)?edit(?:\s+the)?(?:\s+term)?\s+(.+)/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = normalized.match(pattern);
+      if (match?.[1]) {
+        const rawTerm = match[1]
+          .replace(/^[:\-–]+\s*/, "")
+          .replace(/[.!?]+$/g, "")
+          .trim();
+
+        if (rawTerm.length >= 2) {
+          return rawTerm;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const findMatchedTerm = useCallback(
+    async (rawTerm: string) => {
+      const lang = currentLanguage || "vi";
+      const result = await searchTerms(rawTerm, lang);
+      const terms = result?.terms || [];
+
+      if (terms.length === 0) {
+        return null;
+      }
+
+      const exact = terms.find((item) => {
+        const values = Object.values(item.term || {}).map((v) =>
+          String(v || "")
+            .trim()
+            .toLowerCase(),
+        );
+        return values.includes(rawTerm.trim().toLowerCase());
+      });
+
+      return exact || terms[0] || null;
+    },
+    [currentLanguage],
+  );
+
+  const saveEditPrefillPayload = (payload: EditPrefillPayload): string => {
+    const key = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    sessionStorage.setItem(
+      `floating-chat:edit:${key}`,
+      JSON.stringify({ ...payload, createdAt: Date.now() }),
+    );
+    return key;
+  };
+
+  const detectQuickNavigation = useCallback(
+    (text: string): QuickNavigationTarget | null => {
+      const normalized = text
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ");
+
+      const hasAny = (keywords: string[]) =>
+        keywords.some((keyword) => normalized.includes(keyword));
+
+      const wantsPassword = hasAny([
+        "doi mat khau",
+        "thay doi mat khau",
+        "change password",
+        "set password",
+        "cap nhat mat khau",
+      ]);
+      if (wantsPassword) {
+        return {
+          path: "/profile?section=password",
+          label: t("destChangePassword"),
+        };
+      }
+
+      const wantsSearchHistory = hasAny([
+        "lich su tim kiem",
+        "lich su tra cuu",
+        "search history",
+        "history tim kiem",
+      ]);
+      if (wantsSearchHistory) {
+        return {
+          path: "/profile/search-history",
+          label: t("destSearchHistory"),
+        };
+      }
+
+      const wantsModeratorApplication = hasAny([
+        "dang ky kiem duyet vien",
+        "dang ki kiem duyet vien",
+        "dang ky lam kiem duyet vien",
+        "register moderator",
+        "become moderator",
+        "apply moderator",
+        "ung tuyen kiem duyet vien",
+      ]);
+      if (wantsModeratorApplication) {
+        return {
+          path: "/contact?tab=moderator",
+          label: t("destModeratorApplication"),
+        };
+      }
+
+      const wantsFeedback = hasAny([
+        "phan hoi",
+        "gop y",
+        "feedback",
+        "bao loi",
+        "report bug",
+        "de xuat tinh nang",
+      ]);
+      if (wantsFeedback) {
+        return {
+          path: "/contact?tab=feedback",
+          label: t("destFeedback"),
+        };
+      }
+
+      const wantsRedeem = hasAny([
+        "doi diem ren luyen",
+        "doi diem uy tin",
+        "doi diem",
+        "redeem",
+        "training points",
+        "redeem points",
+      ]);
+      if (wantsRedeem) {
+        return {
+          path: "/profile/reputation?tab=redeem",
+          label: t("destRedeemPoints"),
+        };
+      }
+
+      const wantsReputation = hasAny([
+        "diem ren luyen",
+        "diem uy tin",
+        "uy tin",
+        "reputation",
+        "xem diem",
+      ]);
+      if (wantsReputation) {
+        return {
+          path: "/profile/reputation",
+          label: t("destReputation"),
+        };
+      }
+
+      return null;
+    },
+    [t],
+  );
+
   const openContributionWithAIPrefill = useCallback(
     async (term: string) => {
       const lang = currentLanguage || "vi";
@@ -224,24 +399,99 @@ export default function FloatingChatButton() {
 
     try {
       // If user wants to contribute, fetch AI definition and prefill contribution form.
+      const quickNavigation = detectQuickNavigation(currentInput);
+      if (quickNavigation) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: `${t("quickNavigateSuccess")} \n\n${quickNavigation.label}`,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        router.push(quickNavigation.path);
+        setIsOpen(false);
+        return;
+      }
+
       const searchTerm = extractSearchTerm(currentInput);
+
+      const suggestEditTerm = extractSuggestEditTerm(currentInput);
+
+      if (suggestEditTerm) {
+        const selected = await findMatchedTerm(suggestEditTerm);
+
+        if (!selected) {
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: `${t("searchNotFound")} \n\n"${suggestEditTerm}"`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          return;
+        }
+
+        const lang = currentLanguage || "vi";
+        let aiEditKey = "";
+
+        try {
+          const aiData = await aiService.askAboutTerm({
+            term: suggestEditTerm,
+            language: lang,
+          });
+
+          const payload: EditPrefillPayload = {
+            lang,
+            definition: aiData.definition || undefined,
+            detailedExplanation: aiData.detailedExplanation || undefined,
+            examples: aiData.examples?.length ? aiData.examples : undefined,
+          };
+
+          if (
+            payload.definition ||
+            payload.detailedExplanation ||
+            payload.examples?.length
+          ) {
+            aiEditKey = saveEditPrefillPayload(payload);
+          }
+        } catch (error) {
+          console.warn("Unable to prefill suggest-edit from AI:", error);
+        }
+
+        const selectedTermName =
+          selected.term?.[lang as "vi" | "en" | "lo"] ||
+          selected.term?.vi ||
+          selected.term?.en ||
+          selected.term?.lo ||
+          suggestEditTerm;
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: `${t("suggestEditNavigateSuccess")} \n\n"${selectedTermName}"`,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        const searchParams = new URLSearchParams({
+          openSuggestEdit: "1",
+          source: "floating-chat",
+        });
+        if (aiEditKey) {
+          searchParams.set("aiEditKey", aiEditKey);
+        }
+
+        router.push(`/terms/${selected._id}?${searchParams.toString()}`);
+        setIsOpen(false);
+        return;
+      }
 
       if (searchTerm) {
         const lang = currentLanguage || "vi";
-        const result = await searchTerms(searchTerm, lang);
-        const terms = result?.terms || [];
+        const selected = await findMatchedTerm(searchTerm);
 
-        if (terms.length > 0) {
-          const exact = terms.find((item) => {
-            const values = Object.values(item.term || {}).map((v) =>
-              String(v || "")
-                .trim()
-                .toLowerCase(),
-            );
-            return values.includes(searchTerm.trim().toLowerCase());
-          });
-
-          const selected = exact || terms[0];
+        if (selected) {
           const selectedTermName =
             selected.term?.[lang as "vi" | "en" | "lo"] ||
             selected.term?.vi ||
@@ -353,6 +603,8 @@ export default function FloatingChatButton() {
     currentLanguage,
     router,
     t,
+    findMatchedTerm,
+    detectQuickNavigation,
     openContributionWithAIPrefill,
   ]);
 

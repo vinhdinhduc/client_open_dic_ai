@@ -295,9 +295,17 @@
     "promptHelloStudent": "ສະບາຍດີ ນັກສຶກສາ {name}",
     "promptHelloTeacher": "ສະບາຍດີ ອາຈານ {name}",
     "searchNavigateSuccess": "ພົບຄຳສັບແລ້ວ. ກຳລັງພາທ່ານໄປໜ້າລາຍລະອຽດ:",
+    "suggestEditNavigateSuccess": "ພົບຄຳສັບແລ້ວ. ກຳລັງພາທ່ານໄປໜ້າລາຍລະອຽດ ແລະ ເປີດແບບຟອມແນະນຳການແກ້ໄຂ:",
     "searchNotFound": "ບໍ່ພົບຄຳສັບໃນລະບົບສຳລັບຄຳຂໍ:",
     "contributeSupport": "ຂ້ອຍສາມາດຊ່ວຍທ່ານປະກອບສ່ວນຄຳສັບນີ້ໄດ້. ກົດປຸ່ມຂ້າງລຸ່ມເພື່ອໄປໜ້າປະກອບສ່ວນ.",
-    "goToContribute": "ໄປໜ້າປະກອບສ່ວນ"
+    "goToContribute": "ໄປໜ້າປະກອບສ່ວນ",
+    "quickNavigateSuccess": "ກຳລັງພາທ່ານໄປຫາ:",
+    "destChangePassword": "ໜ້າປ່ຽນລະຫັດຜ່ານ",
+    "destSearchHistory": "ໜ້າປະຫວັດການຄົ້ນຫາ",
+    "destFeedback": "ໜ້າສົ່ງຄຳເຫັນ",
+    "destModeratorApplication": "ໜ້າລົງທະບຽນເປັນຜູ້ກວດກາ",
+    "destReputation": "ໜ້າຄະແນນຄວາມນ່າເຊື່ອຖື",
+    "destRedeemPoints": "ໜ້າແລກຄະແນນຝຶກອົບຮົມ"
   },
   "searchResults": {
     "metaTitle": "ຄົ້ນຫາຄຳສັບ - UTB OpenDict",

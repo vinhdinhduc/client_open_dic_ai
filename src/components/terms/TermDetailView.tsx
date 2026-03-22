@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLanguage } from "@/hooks";
 import { useAuth } from "@/hooks/useAuth";
@@ -47,6 +47,9 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
   const tContribute = useTranslations("contribution");
   const tCommon = useTranslations("common");
   const { currentLanguage } = useLanguage();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const hasHandledModalQueryRef = useRef(false);
 
   // Content language tabs - independent from system language
   const [contentLang, setContentLang] = useState<string>(currentLanguage);
@@ -298,6 +301,77 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentLang]);
+
+  useEffect(() => {
+    hasHandledModalQueryRef.current = false;
+  }, [term._id]);
+
+  useEffect(() => {
+    if (hasHandledModalQueryRef.current) {
+      return;
+    }
+
+    const shouldOpenSuggestEdit =
+      searchParams.get("openSuggestEdit") === "1" ||
+      searchParams.get("modal") === "suggest-edit";
+
+    if (!shouldOpenSuggestEdit) {
+      return;
+    }
+
+    hasHandledModalQueryRef.current = true;
+
+    if (!isAuthenticated) {
+      toast.error(t("loginToSuggestEdit"));
+      const currentPath = `${pathname}?${searchParams.toString()}`;
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
+    const aiEditKey = searchParams.get("aiEditKey");
+    if (aiEditKey) {
+      try {
+        const raw = sessionStorage.getItem(`floating-chat:edit:${aiEditKey}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setAiContentForEdit({
+            lang: parsed.lang || contentLang,
+            definition: parsed.definition || undefined,
+            detailedExplanation: parsed.detailedExplanation || undefined,
+            examples: Array.isArray(parsed.examples)
+              ? parsed.examples
+              : undefined,
+          });
+          sessionStorage.removeItem(`floating-chat:edit:${aiEditKey}`);
+        }
+      } catch (error) {
+        console.warn("Unable to parse suggest-edit payload:", error);
+      }
+    } else {
+      setAiContentForEdit(null);
+    }
+
+    setShowEditModal(true);
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("openSuggestEdit");
+    nextParams.delete("modal");
+    nextParams.delete("source");
+    nextParams.delete("aiEditKey");
+
+    const nextUrl = nextParams.toString()
+      ? `${pathname}?${nextParams.toString()}`
+      : pathname;
+    router.replace(nextUrl, { scroll: false });
+  }, [
+    isAuthenticated,
+    pathname,
+    router,
+    searchParams,
+    t,
+    contentLang,
+    setAiContentForEdit,
+  ]);
 
   const contentLanguages = [
     { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },

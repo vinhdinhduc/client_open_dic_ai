@@ -103,6 +103,19 @@ export default function AICometAgent({
       const { action } = suggestion;
 
       try {
+        const buildTermDetailUrl = (
+          termId: string,
+          options?: { openSuggestEdit?: boolean },
+        ) => {
+          const params = new URLSearchParams();
+          if (options?.openSuggestEdit) {
+            params.set("openSuggestEdit", "1");
+            params.set("source", "ai-agent");
+          }
+          const suffix = params.toString();
+          return suffix ? `/terms/${termId}?${suffix}` : `/terms/${termId}`;
+        };
+
         if (action.type === "redirect") {
           router.push(action.target || "/");
         } else if (action.type === "suggest_term") {
@@ -122,7 +135,23 @@ export default function AICometAgent({
           );
           setIsOpen(false);
         } else if (action.type === "view_term") {
-          router.push(`/terms/${action.params?.termId || ""}`);
+          const termId = action.params?.termId || "";
+          if (!termId) {
+            throw new Error("Missing termId for view_term action");
+          }
+
+          router.push(
+            buildTermDetailUrl(termId, {
+              openSuggestEdit: Boolean(action.params?.openSuggestEdit),
+            }),
+          );
+          setIsOpen(false);
+        } else if (action.type === "suggest_edit") {
+          const termId = action.params?.termId || "";
+          if (!termId) {
+            throw new Error("Missing termId for suggest_edit action");
+          }
+          router.push(buildTermDetailUrl(termId, { openSuggestEdit: true }));
           setIsOpen(false);
         } else if (action.type === "explore_category") {
           router.push(

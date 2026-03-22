@@ -18,24 +18,6 @@ interface LayoutProps {
 
 const Layout = ({ children, className }: LayoutProps) => {
   const { user } = useAuth();
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [bubbleVisible, setBubbleVisible] = useState(false);
-
-  const t = useTranslations("layout");
-  const FAQ_MESSAGES = [t("faqQuestionCommon")];
-  useEffect(() => {
-    // Show bubble after 3 seconds
-    const showTimer = setTimeout(() => setBubbleVisible(true), 3000);
-    return () => clearTimeout(showTimer);
-  }, []);
-
-  useEffect(() => {
-    if (!bubbleVisible) return;
-    const interval = setInterval(() => {
-      setMessageIndex((i) => (i + 1) % FAQ_MESSAGES.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [bubbleVisible]);
 
   return (
     <div className={`layout${className ? ` ${className}` : ""}`}>
@@ -45,11 +27,6 @@ const Layout = ({ children, className }: LayoutProps) => {
       <Footer />
       <FloatingChatButton />
       <div className="faq-floating-wrapper">
-        {bubbleVisible && (
-          <div className="faq-bubble" key={messageIndex}>
-            {FAQ_MESSAGES[messageIndex]}
-          </div>
-        )}
         <Link href="/faq" className="faq-floating-btn" aria-label="FAQ">
           <HelpCircle size={24} />
         </Link>

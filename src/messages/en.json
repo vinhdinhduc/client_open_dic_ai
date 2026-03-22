@@ -295,9 +295,17 @@
     "promptHelloStudent": "Hello Student {name}",
     "promptHelloTeacher": "Hello Lecturer {name}",
     "searchNavigateSuccess": "I found the term. Navigating you to the detail page:",
+    "suggestEditNavigateSuccess": "I found the term. Navigating you to the detail page and opening the suggest-edit form:",
     "searchNotFound": "No matching term was found in the system for:",
     "contributeSupport": "I can help you contribute this term. Click the button below to open the contribution page.",
-    "goToContribute": "Go to contribution page"
+    "goToContribute": "Go to contribution page",
+    "quickNavigateSuccess": "Navigating you to:",
+    "destChangePassword": "Change password page",
+    "destSearchHistory": "Search history page",
+    "destFeedback": "Feedback page",
+    "destModeratorApplication": "Moderator application page",
+    "destReputation": "Reputation page",
+    "destRedeemPoints": "Training points redemption page"
   },
   "searchResults": {
     "metaTitle": "Search Terms - UTB OpenDict",

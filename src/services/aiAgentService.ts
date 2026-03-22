@@ -10,7 +10,7 @@ export interface ActionSuggestion {
     description: string;
     icon: string;
     action: {
-        type: 'redirect' | 'suggest_term' | 'ask_ai' | 'view_term' | 'explore_category';
+        type: 'redirect' | 'suggest_term' | 'ask_ai' | 'view_term' | 'explore_category' | 'suggest_edit';
         target?: string;
         params?: Record<string, any>;
     };

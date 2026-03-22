@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
+import { useSearchParams } from "next/navigation";
 import { authService } from "@/services/authService";
 import contributionService from "@/services/contributionService";
 import { toast } from "react-hot-toast";
@@ -41,6 +42,7 @@ export default function ProfilePage() {
     refreshProfile,
   } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -89,6 +91,13 @@ export default function ProfilePage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, authLoading]);
+
+  useEffect(() => {
+    const section = searchParams.get("section");
+    if (section === "password") {
+      setIsChangingPassword(true);
+    }
+  }, [searchParams]);
 
   const loadStats = async () => {
     try {

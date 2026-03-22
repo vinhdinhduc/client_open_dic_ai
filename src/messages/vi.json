@@ -297,9 +297,17 @@
     "promptHelloStudent": "Xin chào Sinh viên {name}",
     "promptHelloTeacher": "Xin chào Giảng viên {name}",
     "searchNavigateSuccess": "Đã tìm thấy thuật ngữ. Mình đang chuyển bạn tới trang chi tiết:",
+    "suggestEditNavigateSuccess": "Đã tìm thấy thuật ngữ. Mình đang mở trang chi tiết và bật form gợi ý chỉnh sửa:",
     "searchNotFound": "Không tìm thấy thuật ngữ trong hệ thống cho yêu cầu:",
     "contributeSupport": "Tôi có thể giúp bạn đóng góp thuật ngữ này! Nhấn nút dưới đây để sang trang đóng góp.",
-    "goToContribute": "Sang trang đóng góp"
+    "goToContribute": "Sang trang đóng góp",
+    "quickNavigateSuccess": "Mình đang chuyển bạn tới:",
+    "destChangePassword": "Trang đổi mật khẩu",
+    "destSearchHistory": "Trang lịch sử tìm kiếm",
+    "destFeedback": "Trang gửi phản hồi",
+    "destModeratorApplication": "Trang đăng ký kiểm duyệt viên",
+    "destReputation": "Trang điểm uy tín",
+    "destRedeemPoints": "Trang đổi điểm rèn luyện"
   },
   "searchResults": {
     "metaTitle": "Tìm kiếm thuật ngữ - UTB OpenDict",

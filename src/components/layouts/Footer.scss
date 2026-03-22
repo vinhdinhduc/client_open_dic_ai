@@ -127,6 +127,8 @@
         }
         .footer-description-text {
             margin-top: 0.5rem;
+            color: var(--text-secondary);
+
             [data-theme="dark"] & {
                 color: var(--text-secondary, #a0a0a0);
             }

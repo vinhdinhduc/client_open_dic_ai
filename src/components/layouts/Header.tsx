@@ -425,6 +425,7 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {t("header.myContributions")}
+                <span className="header__user-badge">{contributionsCount}</span>
               </Link>
 
               <Link
@@ -433,6 +434,7 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {t("header.myFavorites")}
+                <span className="header__user-badge">{favoritesCount}</span>
               </Link>
 
               <Link

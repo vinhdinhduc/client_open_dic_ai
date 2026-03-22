@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
+import { useSearchParams } from "next/navigation";
 import reputationService, {
   UserReputation,
   ReputationHistoryItem,
@@ -34,6 +35,7 @@ export default function ReputationClient() {
   const t = useTranslations("reputationPage");
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<
     "overview" | "history" | "leaderboard" | "redeem"
@@ -189,6 +191,18 @@ export default function ReputationClient() {
   useEffect(() => {
     if (activeTab === "redeem") loadRedemptions();
   }, [activeTab, loadRedemptions]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (
+      tab === "overview" ||
+      tab === "history" ||
+      tab === "leaderboard" ||
+      tab === "redeem"
+    ) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const handleVerifyUtb = async () => {
     setVerifying(true);

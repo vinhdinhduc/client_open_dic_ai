@@ -1,12 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import contactService from "@/services/contactService";
+import { useSearchParams } from "next/navigation";
 
 export default function ContactForm() {
   const t = useTranslations("contactPage");
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"feedback" | "moderator">(
     "feedback",
   );
@@ -34,6 +36,13 @@ export default function ContactForm() {
     reason: "",
     languages: "",
   });
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "feedback" || tab === "moderator") {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const handleFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

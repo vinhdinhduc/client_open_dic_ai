@@ -233,9 +233,8 @@ export default function SearchResultsClient({
             {/* Title */}
             <div className="search-results-page__header">
               <h1 className="search-results-page__title">
-                {!isQueryMatchingAnyTerm
-                  ? t("noExactMatch", { query })
-                  : t("title", { query })}{" "}
+                {!isQueryMatchingAnyTerm ? t("noExactMatch") : t("title")}
+                {query && `: "${query}"`}
               </h1>
             </div>
 
@@ -318,7 +317,7 @@ export default function SearchResultsClient({
               } as AIAgentContext
             }
             showOnMount={false}
-            position="bottom-right"
+            position="bottom-left"
           />
         )}
       </div>

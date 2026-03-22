@@ -1,6 +1,18 @@
 @import "../../styles/variables.scss";
 @import "../../styles/mixins.scss";
 
+// ─────────────────────────────────────────────────────
+// Layout — Premium Redesign
+// ─────────────────────────────────────────────────────
+
+// ── Tokens ────────────────────────────────────────────
+$faq-purple-start: #6d28d9;
+$faq-purple-end: #8b5cf6;
+$faq-glow: rgba(109, 40, 217, 0.32);
+$ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+$ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+// ── Base layout ───────────────────────────────────────
 .layout {
     display: flex;
     flex-direction: column;
@@ -40,7 +52,6 @@
         background-repeat: no-repeat;
         position: relative;
 
-        // Overlay for better text readability
         &::before {
             content: "";
             position: absolute;
@@ -71,7 +82,7 @@
     }
 }
 
-// ============ HERO SECTION ============
+// ── Hero section ──────────────────────────────────────
 .hero {
     position: relative;
     z-index: 1;
@@ -120,11 +131,9 @@
         @include mobile {
             font-size: $font-3xl;
         }
-
         @media (max-width: 480px) {
             font-size: $font-2xl;
         }
-
         @include large-screen {
             font-size: 3rem;
         }
@@ -142,11 +151,9 @@
         @include mobile {
             font-size: $font-lg;
         }
-
         @media (max-width: 480px) {
             font-size: $font-base;
         }
-
         @include large-screen {
             font-size: $font-2xl;
         }
@@ -162,7 +169,6 @@
         @include mobile {
             font-size: $font-sm;
         }
-
         @include large-screen {
             font-size: $font-lg;
             max-width: 640px;
@@ -180,13 +186,11 @@
         @include mobile {
             margin-bottom: $spacing-2xl;
         }
-
         @include large-screen {
             max-width: 780px;
         }
     }
 
-    // Features grid
     &__features {
         position: relative;
         z-index: 0;
@@ -202,11 +206,9 @@
             gap: $spacing-md;
             max-width: 400px;
         }
-
         @include tablet {
             gap: $spacing-md;
         }
-
         @include large-screen {
             max-width: 1000px;
             gap: $spacing-xl;
@@ -260,7 +262,6 @@
         @include mobile {
             width: 40px;
             height: 40px;
-
             svg {
                 width: 20px;
                 height: 20px;
@@ -302,56 +303,144 @@
     }
 }
 
-// Floating FAQ wrapper + animated bubble
+// ─────────────────────────────────────────────────────
+// FAQ Floating Button — Premium Redesign
+// ─────────────────────────────────────────────────────
+
 .faq-floating-wrapper {
     position: fixed;
-    bottom: 0.5rem;
+    bottom: 1.6rem;
     right: 2rem;
     z-index: 900;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.5rem;
+    gap: 9px;
 
     @include mobile {
-        bottom: 1.25rem;
-        right: 1.25rem;
+        bottom: 1.1rem;
+        right: 1.1rem;
     }
 }
 
+// ── Speech bubble ─────────────────────────────────────
 .faq-bubble {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0.45rem 0.85rem;
-    font-size: 0.82rem;
+    position: relative;
+    background: color-mix(in srgb, var(--bg-primary, #fff) 92%, $faq-purple-start 8%);
+    color: var(--text-primary, #1e293b);
+    border: 1px solid color-mix(in srgb, var(--border-color, #e2e8f0) 65%, $faq-purple-start 35%);
+    border-radius: 13px;
+    padding: 8px 13px;
+    font-size: 12.5px;
     font-weight: 500;
     white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    animation: faqBubbleIn 0.4s ease-out;
+    letter-spacing: 0.01em;
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: faqBubbleIn 380ms $ease-spring both;
     pointer-events: none;
 
-    // speech bubble tail
+    // Speech tail
     &::after {
         content: "";
         position: absolute;
         bottom: -6px;
-        right: 18px;
+        right: 17px;
         width: 10px;
         height: 10px;
-        background: var(--bg-card);
-        border-right: 1px solid var(--border-color);
-        border-bottom: 1px solid var(--border-color);
+        background: color-mix(in srgb, var(--bg-primary, #fff) 92%, $faq-purple-start 8%);
+        border-right: 1px solid color-mix(in srgb, var(--border-color, #e2e8f0) 65%, $faq-purple-start 35%);
+        border-bottom: 1px solid color-mix(in srgb, var(--border-color, #e2e8f0) 65%, $faq-purple-start 35%);
         transform: rotate(45deg);
     }
-    position: relative;
 }
 
+// ── FAQ trigger button ────────────────────────────────
+.faq-floating-btn {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, $faq-purple-start 0%, $faq-purple-end 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+
+    // Bright inner rim
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        pointer-events: none;
+    }
+
+    box-shadow:
+        0 6px 20px $faq-glow,
+        0 2px 6px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+
+    transition:
+        transform 200ms $ease-spring,
+        box-shadow 200ms ease;
+    outline: none;
+
+    svg {
+        position: relative;
+        z-index: 1;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
+    }
+
+    &:hover {
+        transform: translateY(-3px) scale(1.06);
+        box-shadow:
+            0 10px 28px $faq-glow,
+            0 3px 8px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.26),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+        transform: scale(0.94);
+        transition-duration: 80ms;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $faq-purple-end;
+        outline-offset: 3px;
+    }
+
+    // Pulse ring (matches chat button style)
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        animation: faqPulse 3s ease-out infinite 1.2s;
+        pointer-events: none;
+    }
+
+    @include mobile {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+// ── Keyframes ─────────────────────────────────────────
 @keyframes faqBubbleIn {
     from {
         opacity: 0;
-        transform: translateY(8px) scale(0.95);
+        transform: translateY(7px) scale(0.93);
     }
     to {
         opacity: 1;
@@ -359,29 +448,14 @@
     }
 }
 
-.faq-floating-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
-    cursor: pointer;
-    transition:
-        transform 0.2s,
-        box-shadow 0.2s;
-    text-decoration: none;
-
-    &:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+@keyframes faqPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.45);
     }
-
-    @include mobile {
-        width: 42px;
-        height: 42px;
+    65% {
+        box-shadow: 0 0 0 13px rgba(109, 40, 217, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(109, 40, 217, 0);
     }
 }
