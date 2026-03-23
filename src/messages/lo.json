@@ -200,6 +200,7 @@
      "contributors": "ຜູ້ປະກອບສ່ວນ",
     "created": "ສ້າງ",
     "edited": "ແກ້ໄຂ",
+      "system": "ລະບົບ",
     "aiThinking": "AI ກຳລັງວິເຄາະ...",
     "aiSuggestEditPrompt": "ທ່ານຕ້ອງການສະເໜີແກ້ໄຂຄຳສັບນີ້ບໍ?",
     "searchBreadcrumb": "ຄົ້ນຫາ",
@@ -297,9 +298,9 @@
     "quickPrompt1": "ຂ້ອຍຖາມທ່ານໄດ້ເລື່ອງຫຍັງແດ່?",
     "quickPrompt2": "ຊ່ວຍອະທິບາຍຄຳສັບນີ້ໃຫ້ເຂົ້າໃຈງ່າຍ",
     "quickPrompt3": "ຂໍຕົວຢ່າງການນຳໃຊ້ຈິງຂອງຫົວຂໍ້ນີ້",
-    "quickPrompt4": "ຄຳສັບທີ່ກ່ຽວຂ້ອງສຳຄັນມີຫຍັງແນ່?",
-    "quickPrompt5": "ຂ້ອຍຢາກປະກອບສ່ວນຄຳສັບ...",
-    "quickPrompt6": "ຂ້ອຍຢາກແນະນຳການແກ້ໄຂ...",
+    "quickPrompt4": "ຂ້ອຍຢາກເປີດໜ້າ",
+    "quickPrompt5": "ຂ້ອຍຢາກປະກອບສ່ວນຄຳສັບ",
+    "quickPrompt6": "ຂ້ອຍຢາກແນະນຳການແກ້ໄຂ",
     "searchNavigateSuccess": "ພົບຄຳສັບແລ້ວ. ກຳລັງພາທ່ານໄປໜ້າລາຍລະອຽດ:",
     "suggestEditNavigateSuccess": "ພົບຄຳສັບແລ້ວ. ກຳລັງພາທ່ານໄປໜ້າລາຍລະອຽດ ແລະ ເປີດແບບຟອມແນະນຳການແກ້ໄຂ:",
     "searchNotFound": "ບໍ່ພົບຄຳສັບໃນລະບົບສຳລັບຄຳຂໍ:",
@@ -311,7 +312,8 @@
     "destFeedback": "ໜ້າສົ່ງຄຳເຫັນ",
     "destModeratorApplication": "ໜ້າລົງທະບຽນເປັນຜູ້ກວດກາ",
     "destReputation": "ໜ້າຄະແນນຄວາມນ່າເຊື່ອຖື",
-    "destRedeemPoints": "ໜ້າແລກຄະແນນຝຶກອົບຮົມ"
+    "destRedeemPoints": "ໜ້າແລກຄະແນນຝຶກອົບຮົມ",
+    "relatedTerms": "ຄຳສັບທີ່ກ່ຽວຂ້ອງ" 
   },
   "searchResults": {
     "metaTitle": "ຄົ້ນຫາຄຳສັບ - UTB OpenDict",

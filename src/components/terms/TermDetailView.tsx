@@ -654,6 +654,12 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
                   <span className="contributor-role">({t("edited")})</span>
                 </div>
               )}
+            {!term.createdBy && !term.lastModifiedBy && (
+              <div className="contributor-item">
+                <UserIcon size={14} />
+                <span className="contributor-name">{t("system")}</span>
+              </div>
+            )}
           </div>
         </section>
 

@@ -7,7 +7,7 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useTranslations } from "next-intl";
@@ -22,6 +22,10 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { aiService } from "@/services/aiService";
+import aiAgentService, {
+  AgentChatRelatedTerm,
+} from "@/services/aiAgentService";
+import MarkdownRenderer from "@/components/common/MarkdownRenderer";
 import { searchTerms } from "@/services/termService";
 import { saveMultiLangContributionData } from "@/utils/contributionStorage";
 import "./FloatingChatButton.scss";
@@ -31,6 +35,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  relatedTermLinks?: AgentChatRelatedTerm[];
   action?: {
     type: "contribute";
     term?: string;
@@ -62,6 +67,7 @@ interface ParsedAssistantContent {
 
 export default function FloatingChatButton() {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated, user } = useAuth();
   const { currentLanguage } = useLanguage();
   const t = useTranslations("floatingChat");
@@ -382,6 +388,23 @@ export default function FloatingChatButton() {
     [t],
   );
 
+  const resolveCurrentPage = useCallback((rawPath: string): string => {
+    const withoutLocale = (rawPath || "")
+      .replace(/^\/(vi|en|lo)(?=\/|$)/, "")
+      .toLowerCase();
+
+    if (!withoutLocale || withoutLocale === "/") return "home";
+    if (withoutLocale.startsWith("/login")) return "login";
+    if (withoutLocale.startsWith("/register")) return "register";
+    if (withoutLocale.startsWith("/contribute")) return "contribute";
+    if (withoutLocale.startsWith("/profile")) return "profile";
+    if (withoutLocale.startsWith("/moderator")) return "moderator";
+    if (/^\/terms\/[^/]+/.test(withoutLocale)) return "term";
+    if (withoutLocale.startsWith("/terms")) return "terms";
+
+    return "home";
+  }, []);
+
   const parseStructuredSections = useCallback(
     (content: string): ParsedAssistantContent => {
       const normalized = content.replace(/\r\n/g, "\n").trim();
@@ -525,13 +548,22 @@ export default function FloatingChatButton() {
 
       const parsed = parseStructuredSections(message.content);
       if (parsed.sections.length === 0) {
-        return message.content;
+        // Render plain content with markdown support
+        return (
+          <MarkdownRenderer
+            content={message.content}
+            className="floating-chat-sidebar__plain-content"
+          />
+        );
       }
 
       return (
         <div className="floating-chat-sidebar__rich-content">
           {parsed.intro && (
-            <p className="floating-chat-sidebar__intro">{parsed.intro}</p>
+            <MarkdownRenderer
+              content={parsed.intro}
+              className="floating-chat-sidebar__intro"
+            />
           )}
 
           {parsed.sections.map((section, index) => {
@@ -556,14 +588,53 @@ export default function FloatingChatButton() {
                       <li
                         key={`${message.id}-${section.key}-item-${itemIndex}`}
                       >
-                        {item}
+                        {section.key === "relatedTerms" &&
+                        message.relatedTermLinks?.length ? (
+                          (() => {
+                            const matched = message.relatedTermLinks.find(
+                              (link) =>
+                                link.name.trim().toLowerCase() ===
+                                item.trim().toLowerCase(),
+                            );
+
+                            if (!matched) {
+                              return (
+                                <MarkdownRenderer
+                                  content={item}
+                                  inline
+                                  className="floating-chat-sidebar__list-item-text"
+                                />
+                              );
+                            }
+
+                            return (
+                              <button
+                                type="button"
+                                className="floating-chat-sidebar__related-link"
+                                onClick={() => {
+                                  router.push(matched.url);
+                                  setIsOpen(false);
+                                }}
+                              >
+                                {matched.name}
+                              </button>
+                            );
+                          })()
+                        ) : (
+                          <MarkdownRenderer
+                            content={item}
+                            inline
+                            className="floating-chat-sidebar__list-item-text"
+                          />
+                        )}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="floating-chat-sidebar__section-text">
-                    {section.value}
-                  </p>
+                  <MarkdownRenderer
+                    content={section.value}
+                    className="floating-chat-sidebar__section-text"
+                  />
                 )}
               </div>
             );
@@ -571,7 +642,7 @@ export default function FloatingChatButton() {
         </div>
       );
     },
-    [parseStructuredSections],
+    [parseStructuredSections, router],
   );
 
   const openContributionWithAIPrefill = useCallback(
@@ -740,10 +811,40 @@ export default function FloatingChatButton() {
               selected.term?.lo ||
               searchTerm;
 
+            // Get similar/related terms to display in chat
+            let similarTermsText = "";
+            if (selected.relatedTerms && selected.relatedTerms.length > 0) {
+              const similarTerms = selected.relatedTerms.slice(0, 5);
+              similarTermsText = `\n\n**${t("relatedTerms")}**: ${similarTerms
+                .map((term: any) => {
+                  const termName =
+                    term.term?.[lang as "vi" | "en" | "lo"] ||
+                    term.term?.vi ||
+                    term.term?.en ||
+                    term.term?.lo ||
+                    "";
+                  return termName;
+                })
+                .filter(Boolean)
+                .join(", ")}`;
+            }
+
             const assistantMessage: Message = {
               id: (Date.now() + 1).toString(),
               role: "assistant",
-              content: `${t("searchNavigateSuccess")} \n\n"${selectedTermName}"`,
+              content: `${t("searchNavigateSuccess")} \n\n"${selectedTermName}"${similarTermsText}`,
+              relatedTermLinks: (selected.relatedTerms || [])
+                .slice(0, 5)
+                .map((term: any) => ({
+                  id: term._id,
+                  name:
+                    term.term?.[lang as "vi" | "en" | "lo"] ||
+                    term.term?.vi ||
+                    term.term?.en ||
+                    term.term?.lo ||
+                    "",
+                  url: `/terms/${term._id}`,
+                })),
               timestamp: new Date(),
             };
             setMessages((prev) => [...prev, assistantMessage]);
@@ -778,47 +879,35 @@ export default function FloatingChatButton() {
           return;
         }
 
-        // Call AI service to get a response about the term/query
-        const response = await aiService.askAboutTerm({
-          term: currentInput,
+        // Call AI Agent service for natural, context-aware response.
+        const response = await aiAgentService.chatAssistant({
+          query: currentInput,
           language: currentLanguage || "vi",
+          context: {
+            currentPage: resolveCurrentPage(pathname || ""),
+            currentPath: pathname || "",
+            language: currentLanguage || "vi",
+          },
         });
 
-        let assistantContent = t("defaultResponse");
+        let assistantContent = response.answer || t("defaultResponse");
+        if (response.relatedTerms?.length) {
+          const hasRelatedSection = assistantContent
+            .toLowerCase()
+            .includes(t("relatedTerms").toLowerCase());
 
-        if (response.structured) {
-          // Build a formatted response from structured data
-          const parts: string[] = [];
-
-          if (response.definition) {
-            parts.push(`**${t("definition")}**: ${response.definition}`);
+          if (!hasRelatedSection) {
+            assistantContent += `\n\n**${t("relatedTerms")}**: ${response.relatedTerms
+              .map((item) => item.name)
+              .join(", ")}`;
           }
-
-          if (response.detailedExplanation) {
-            parts.push(
-              `**${t("explanation")}**: ${response.detailedExplanation}`,
-            );
-          }
-
-          if (response.examples && response.examples.length > 0) {
-            parts.push(`**${t("examples")}**: ${response.examples.join(", ")}`);
-          }
-
-          if (response.relatedTerms && response.relatedTerms.length > 0) {
-            parts.push(
-              `**${t("relatedTerms")}**: ${response.relatedTerms.join(", ")}`,
-            );
-          }
-
-          assistantContent = parts.join("\n\n") || t("defaultResponse");
-        } else if (response.response) {
-          assistantContent = response.response;
         }
 
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
           content: assistantContent,
+          relatedTermLinks: response.relatedTerms || [],
           timestamp: new Date(),
         };
 
@@ -848,6 +937,8 @@ export default function FloatingChatButton() {
       extractSuggestEditTerm,
       findMatchedTerm,
       currentLanguage,
+      pathname,
+      resolveCurrentPage,
       extractContributeTerm,
       openContributionWithAIPrefill,
     ],
@@ -996,12 +1087,7 @@ export default function FloatingChatButton() {
                     key={`quick-prompt-${index}`}
                     type="button"
                     className="floating-chat-sidebar__quick-prompt"
-                    onClick={() => {
-                      if (isLoading) {
-                        return;
-                      }
-                      sendMessage(prompt);
-                    }}
+                    onClick={() => setInputValue(prompt)}
                     disabled={isLoading}
                   >
                     {prompt}

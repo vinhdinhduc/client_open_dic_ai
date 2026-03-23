@@ -733,6 +733,21 @@ $tap-min: 44px;
         gap: 4px;
     }
 
+    &__related-link {
+        border: none;
+        background: transparent;
+        padding: 0;
+        color: $chat-blue-start;
+        text-decoration: underline;
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
+
+        &:hover {
+            color: #1e3a8a;
+        }
+    }
+
     &__spinner {
         animation: spin 0.9s linear infinite;
         color: $chat-blue-start;

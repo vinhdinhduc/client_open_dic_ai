@@ -23,6 +23,7 @@ export interface ActionSuggestion {
  */
 export interface AIAgentContext {
     currentPage: string;
+    currentPath?: string;
     searchQuery?: string;
     selectedTerm?: {
         id: string;
@@ -35,6 +36,29 @@ export interface AIAgentContext {
     viewedTerms?: string[];
     contributedTerms?: number;
     language: string;
+}
+
+export interface AgentChatRequest {
+    query: string;
+    language?: string;
+    context?: AIAgentContext;
+}
+
+export interface AgentChatRelatedTerm {
+    id: string;
+    name: string;
+    url: string;
+}
+
+export interface AgentChatResponse {
+    answer: string;
+    format: 'text' | 'list' | 'suggestions';
+    scopeStatus: 'allowed' | 'rejected';
+    relatedTerms: AgentChatRelatedTerm[];
+    suggestions?: string[];
+    provider?: string;
+    model?: string;
+    timestamp?: string;
 }
 
 /**
@@ -65,6 +89,21 @@ export interface AgentFeedback {
  */
 class AIAgentService {
     private baseUrl = '/ai/agent';
+
+    /**
+     * Chat with AI Agent (natural language, scoped, context-aware)
+     */
+    async chatAssistant(payload: AgentChatRequest): Promise<AgentChatResponse> {
+        try {
+            const response = await axiosInstance.post(`${this.baseUrl}/chat`, payload);
+            return response.data.data;
+        } catch (error: any) {
+            console.error('AI Agent Chat Error:', error);
+            throw new Error(
+                error.response?.data?.message || 'Không thể phản hồi từ AI Agent'
+            );
+        }
+    }
 
     /**
      * Lấy đề xuất hành động tiếp theo từ AI Agent
@@ -231,6 +270,94 @@ class AIAgentService {
             return {
                 recommended: true,
                 reason: 'Undefined',
+            };
+        }
+    }
+
+    /**
+     * Identify and classify terms in user input
+     */
+    async identifyTerms(
+        query: string,
+        language: string = 'vi',
+        context?: Record<string, any>
+    ): Promise<{ terms: any[]; count: number }> {
+        try {
+            const response = await axiosInstance.post(
+                `${this.baseUrl}/identify-terms`,
+                { query, language, context }
+            );
+            return response.data.data;
+        } catch (error: any) {
+            console.error('Identify Terms Error:', error);
+            return { terms: [], count: 0 };
+        }
+    }
+
+    /**
+     * Translate a term name across languages
+     */
+    async translateTerm(
+        termName: string,
+        sourceLanguage: string = 'en',
+        targetLanguages: string[] = ['vi', 'en', 'lo'],
+        domain: string = 'General'
+    ): Promise<{
+        original: string;
+        translations: Record<string, string>;
+        notes?: string;
+    }> {
+        try {
+            const response = await axiosInstance.post(
+                `${this.baseUrl}/translate-term`,
+                {
+                    termName,
+                    sourceLanguage,
+                    targetLanguages,
+                    domain,
+                }
+            );
+            return response.data.data;
+        } catch (error: any) {
+            console.error('Translate Term Error:', error);
+            return {
+                original: termName,
+                translations: { [sourceLanguage]: termName },
+                notes: 'Translation service error',
+            };
+        }
+    }
+
+    /**
+     * Get term taxonomy and classification
+     */
+    async getTermTaxonomy(
+        termName: string,
+        language: string = 'vi',
+        context?: Record<string, any>
+    ): Promise<{
+        term: string;
+        primaryField: string;
+        subCategories: string[];
+        keywords: string[];
+        difficultyLevel: string;
+        suggestedRelatedTerms: string[];
+    }> {
+        try {
+            const response = await axiosInstance.post(
+                `${this.baseUrl}/term-taxonomy`,
+                { termName, language, context }
+            );
+            return response.data.data;
+        } catch (error: any) {
+            console.error('Get Term Taxonomy Error:', error);
+            return {
+                term: termName,
+                primaryField: 'Unknown',
+                subCategories: [],
+                keywords: [],
+                difficultyLevel: 'intermediate',
+                suggestedRelatedTerms: [],
             };
         }
     }

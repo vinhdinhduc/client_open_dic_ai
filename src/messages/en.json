@@ -200,6 +200,7 @@
     "contributors": "Contributors",
     "created": "Created",
     "edited": "Edited",
+      "system": "System",
     "aiThinking": "AI is analyzing...",
     "aiSuggestEditPrompt": "Would you like to suggest an edit to this term?",
     "searchBreadcrumb": "Search",
@@ -297,9 +298,9 @@
     "quickPrompt1": "What can I ask you?",
     "quickPrompt2": "Explain this term in simple words",
     "quickPrompt3": "Give me practical examples for this topic",
-    "quickPrompt4": "What are the key related terms?",
-    "quickPrompt5": "I want to contribute a term...",
-    "quickPrompt6": "I want to suggest edits...",
+    "quickPrompt4": "I want to navigate to a page",
+    "quickPrompt5": "I want to contribute a term",
+    "quickPrompt6": "I want to suggest edits",
     "searchNavigateSuccess": "I found the term. Navigating you to the detail page:",
     "suggestEditNavigateSuccess": "I found the term. Navigating you to the detail page and opening the suggest-edit form:",
     "searchNotFound": "No matching term was found in the system for:",
@@ -311,7 +312,8 @@
     "destFeedback": "Feedback page",
     "destModeratorApplication": "Moderator application page",
     "destReputation": "Reputation page",
-    "destRedeemPoints": "Training points redemption page"
+    "destRedeemPoints": "Training points redemption page",
+    "relatedTerms":"Related Terms"
   },
   "searchResults": {
     "metaTitle": "Search Terms - UTB OpenDict",

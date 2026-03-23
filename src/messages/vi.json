@@ -196,6 +196,7 @@
      "contributors": "Người đóng góp",
     "created": "Tạo mới",
     "edited": "Chỉnh sửa",
+    "system": "Hệ thống",
     "loginToReport": "Vui lòng đăng nhập để báo cáo",
     "loginToSuggestEdit": "Vui lòng đăng nhập để gợi ý chỉnh sửa",
     "loginToAskAI": "Vui lòng đăng nhập để hỏi AI",
@@ -299,9 +300,9 @@
     "quickPrompt1": "Tôi có thể hỏi bạn những gì?",
     "quickPrompt2": "Giải thích thuật ngữ này theo cách dễ hiểu",
     "quickPrompt3": "Cho tôi ví dụ thực tế về chủ đề này",
-    "quickPrompt4": "Thuật ngữ liên quan quan trọng là gì?",
-    "quickPrompt5": "Tôi muốn đóng góp thuật ngữ...",
-    "quickPrompt6": "Tôi muốn gợi ý chỉnh sửa...",
+    "quickPrompt4": "Tôi muốn chuyển đến trang",
+    "quickPrompt5": "Tôi muốn đóng góp thuật ngữ",
+    "quickPrompt6": "Tôi muốn gợi ý chỉnh sửa",
     "searchNavigateSuccess": "Đã tìm thấy thuật ngữ. Mình đang chuyển bạn tới trang chi tiết:",
     "suggestEditNavigateSuccess": "Đã tìm thấy thuật ngữ. Mình đang mở trang chi tiết và bật form gợi ý chỉnh sửa:",
     "searchNotFound": "Không tìm thấy thuật ngữ trong hệ thống cho yêu cầu:",
@@ -313,7 +314,8 @@
     "destFeedback": "Trang gửi phản hồi",
     "destModeratorApplication": "Trang đăng ký kiểm duyệt viên",
     "destReputation": "Trang điểm uy tín",
-    "destRedeemPoints": "Trang đổi điểm rèn luyện"
+    "destRedeemPoints": "Trang đổi điểm rèn luyện",
+    "relatedTerms": "Thuật ngữ liên quan" 
   },
   "searchResults": {
     "metaTitle": "Tìm kiếm thuật ngữ - UTB OpenDict",
