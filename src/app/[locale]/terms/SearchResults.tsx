@@ -304,7 +304,7 @@ export default function SearchResultsClient({
         )}
 
         {/* AI Comet Agent - Floating Assistant */}
-        {/* {isAuthenticated && (
+        {isAuthenticated && (
           <AICometAgent
             context={
               {
@@ -318,7 +318,7 @@ export default function SearchResultsClient({
             showOnMount={false}
             position="bottom-left"
           />
-        )} */}
+        )}
       </div>
     </div>
   );
