@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { useTranslations } from "next-intl";
+import React, { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { useLanguage } from "@/hooks";
 import { suggestEdit } from "@/services/termService";
 import { aiService } from "@/services/aiService";
+import categoryService from "@/services/categoryService";
 import { TermDetail, SuggestEditData, MultiLangText, Example } from "./types";
+import type { CategoryRef } from "@/types/category.types";
 import {
   X,
   Edit3,
@@ -42,6 +44,7 @@ export default function SuggestEditModal({
   const t = useTranslations("term");
   const tEdit = useTranslations("suggestEdit");
   const tCommon = useTranslations("common");
+  const locale = useLocale() as LangKey;
   const { currentLanguage } = useLanguage();
 
   const langName = (tab: LangKey) =>
@@ -50,6 +53,17 @@ export default function SuggestEditModal({
       : tab === "en"
         ? tEdit("langEn")
         : tEdit("langLo");
+
+  const getCategoryLabel = (cat: CategoryRef) => {
+    if (typeof cat.name === "string") {
+      return cat.name;
+    }
+
+    return (
+      cat.name?.[locale] || cat.name?.vi || cat.name?.en || cat.name?.lo || ""
+    );
+  };
+  console.log("Check term form edit", term);
 
   // Form state - pre-fill with existing data, overlay AI suggestions when provided
   const aiLang = aiContent?.lang as LangKey | undefined;
@@ -115,6 +129,27 @@ export default function SuggestEditModal({
   const [activeTab, setActiveTab] = useState<LangKey>(
     (aiLang as LangKey) || "vi",
   );
+  const [categories, setCategories] = useState<CategoryRef[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await categoryService.getCategories();
+        if (response.success && response.data) {
+          const categoryList = (response.data as CategoryRef[]) || [];
+          setCategories(categoryList);
+          if (term.category) {
+            setSelectedCategory(term.category._id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   // Helpers
   const handleMultiLangChange = (
@@ -227,6 +262,11 @@ export default function SuggestEditModal({
       return;
     }
 
+    if (!selectedCategory) {
+      toast.error(tEdit("categoryRequired") || tCommon("categoryRequired"));
+      return;
+    }
+
     const data: SuggestEditData = {
       type: "edit_term",
       targetTerm: term._id,
@@ -238,7 +278,7 @@ export default function SuggestEditModal({
       examples: examples.filter((ex) => Object.values(ex).some((v) => v)),
       partOfSpeech: partOfSpeech || undefined,
       tags: tags.length ? tags : undefined,
-      category: term.category?._id || "",
+      category: selectedCategory,
       contributorNote: contributorNote.trim(),
     };
 
@@ -360,6 +400,25 @@ export default function SuggestEditModal({
               })}
               className="form-input"
             />
+          </div>
+
+          {/* Category */}
+          <div className="form-group">
+            <label className="form-label">
+              {tEdit("categoryLabel")} <span className="required">*</span>
+            </label>
+            <select
+              value={selectedCategory || ""}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="form-select"
+            >
+              <option value="">{tEdit("categoryPlaceholder")}</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {getCategoryLabel(cat)}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Definition */}

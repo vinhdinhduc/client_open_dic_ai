@@ -1536,6 +1536,43 @@
     "confirmEmptyTrash": "Bạn có chắc muốn xóa vĩnh viễn toàn bộ đóng góp trong thùng rác?",
     "emptyTrashSuccess": "Đã xóa vĩnh viễn {count} đóng góp",
     "emptyTrashError": "Không thể làm rỗng thùng rác",
+    "diffCompare": {
+      "originalContent": "Nội dung gốc",
+      "suggestedContent": "Nội dung đề xuất",
+      "legend": {
+        "removed": "bị xóa",
+        "added": "được thêm",
+        "unchanged": "không đổi"
+      },
+      "labels": {
+        "termVi": "Thuật ngữ (Vi)",
+        "termLo": "Thuật ngữ (Lo)",
+        "termEn": "Thuật ngữ (En)",
+        "definitionVi": "Định nghĩa (Vi)",
+        "definitionLo": "Định nghĩa (Lo)",
+        "definitionEn": "Định nghĩa (En)",
+        "detailedExplanation": "Giải thích chi tiết",
+        "detailedExplanationVi": "Giải thích chi tiết (Vi)",
+        "detailedExplanationEn": "Giải thích chi tiết (En)",
+        "detailedExplanationLo": "Giải thích chi tiết (Lo)",
+        "category": "Danh mục",
+        "partOfSpeech": "Từ loại",
+        "examples": "Ví dụ",
+        "examplesVi": "Ví dụ (Vi)",
+        "examplesEn": "Ví dụ (En)",
+        "examplesLo": "Ví dụ (Lo)",
+        "tags": "Tags",
+        "contributorNote": "Ghi chú người đóng góp"
+      },
+      "partOfSpeechValues": {
+        "noun": "Danh từ",
+        "verb": "Động từ",
+        "adjective": "Tính từ",
+        "adverb": "Trạng từ",
+        "phrase": "Cụm từ",
+        "abbreviation": "Từ viết tắt"
+      }
+    },
     "quickRejectReasons": {
       "inaccurate": "Nội dung không chính xác",
       "missingInfo": "Thiếu thông tin bắt buộc",

@@ -571,6 +571,9 @@
     "langLo": "Lao",
     "noteLabel": "Edit Reason",
     "notePlaceholder": "Explain why you suggest this edit...",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "Select category",
+    "categoryRequired": "Please select a category",
     "submitting": "Submitting...",
     "submit": "Submit Suggestion",
     "termViRequired": "Term is required in at least 2 languages",
@@ -1537,6 +1540,43 @@
     "confirmEmptyTrash": "Are you sure you want to permanently delete all contributions in trash?",
     "emptyTrashSuccess": "Permanently deleted {count} contributions",
     "emptyTrashError": "Could not empty trash",
+    "diffCompare": {
+      "originalContent": "Original Content",
+      "suggestedContent": "Suggested Content",
+      "legend": {
+        "removed": "removed",
+        "added": "added",
+        "unchanged": "unchanged"
+      },
+      "labels": {
+        "termVi": "Term (Vi)",
+        "termLo": "Term (Lo)",
+        "termEn": "Term (En)",
+        "definitionVi": "Definition (Vi)",
+        "definitionLo": "Definition (Lo)",
+        "definitionEn": "Definition (En)",
+        "detailedExplanation": "Detailed Explanation",
+        "detailedExplanationVi": "Detailed Explanation (Vi)",
+        "detailedExplanationEn": "Detailed Explanation (En)",
+        "detailedExplanationLo": "Detailed Explanation (Lo)",
+        "category": "Category",
+        "partOfSpeech": "Part of Speech",
+        "examples": "Examples",
+        "examplesVi": "Examples (Vi)",
+        "examplesEn": "Examples (En)",
+        "examplesLo": "Examples (Lo)",
+        "tags": "Tags",
+        "contributorNote": "Contributor Note"
+      },
+      "partOfSpeechValues": {
+        "noun": "Noun",
+        "verb": "Verb",
+        "adjective": "Adjective",
+        "adverb": "Adverb",
+        "phrase": "Phrase",
+        "abbreviation": "Abbreviation"
+      }
+    },
     "quickRejectReasons": {
       "inaccurate": "Content is inaccurate",
       "missingInfo": "Missing required information",

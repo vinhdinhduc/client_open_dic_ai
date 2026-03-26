@@ -568,6 +568,9 @@
     "langLo": "ພາສາລາວ",
     "noteLabel": "ເຫດຜົນການແກ້ໄຂ",
     "notePlaceholder": "ອະທິບາຍວ່າເປັນຫຍັງທ່ານສະເໜີການແກ້ໄຂນີ້...",
+    "categoryLabel": "ໝວດໝູ່",
+    "categoryPlaceholder": "ເລືອກໝວດໝູ່",
+    "categoryRequired": "ກະລຸນາເລືອກໝວດໝູ່",
     "submitting": "ກຳລັງສົ່ງ...",
     "submit": "ສົ່ງຂໍ້ສະເໜີ",
     "termViRequired": "ຕ້ອງໃສ່ຄຳສັບຢ່າງໜ້ອຍ 2 ພາສາ",
@@ -1532,6 +1535,43 @@
     "confirmEmptyTrash": "ທ່ານແນ່ໃຈບໍ່ວ່າຈະລຶບຖາວອນການປະກອບສ່ວນທັງໝົດໃນຖັງຂີ້ເຫຍື້ອ?",
     "emptyTrashSuccess": "ລຶບຖາວອນ {count} ການປະກອບສ່ວນແລ້ວ",
     "emptyTrashError": "ບໍ່ສາມາດເຮັດໃຫ້ຖັງຂີ້ເຫຍື້ອວ່າງ",
+    "diffCompare": {
+      "originalContent": "ເນື້ອຫາເດີມ",
+      "suggestedContent": "ເນື້ອຫາທີ່ສະເໜີ",
+      "legend": {
+        "removed": "ຖືກລຶບ",
+        "added": "ເພີ່ມໃໝ່",
+        "unchanged": "ບໍ່ປ່ຽນແປງ"
+      },
+      "labels": {
+        "termVi": "ຄຳສັບ (Vi)",
+        "termLo": "ຄຳສັບ (Lo)",
+        "termEn": "ຄຳສັບ (En)",
+        "definitionVi": "ຄຳນິຍາມ (Vi)",
+        "definitionLo": "ຄຳນິຍາມ (Lo)",
+        "definitionEn": "ຄຳນິຍາມ (En)",
+        "detailedExplanation": "ຄຳອະທິບາຍລະອຽດ",
+        "detailedExplanationVi": "ຄຳອະທິບາຍລະອຽດ (Vi)",
+        "detailedExplanationEn": "ຄຳອະທິບາຍລະອຽດ (En)",
+        "detailedExplanationLo": "ຄຳອະທິບາຍລະອຽດ (Lo)",
+        "category": "ໝວດໝູ່",
+        "partOfSpeech": "ປະເພດຄຳ",
+        "examples": "ຕົວຢ່າງ",
+        "examplesVi": "ຕົວຢ່າງ (Vi)",
+        "examplesEn": "ຕົວຢ່າງ (En)",
+        "examplesLo": "ຕົວຢ່າງ (Lo)",
+        "tags": "ແທັກ",
+        "contributorNote": "ໝາຍເຫດຂອງຜູ້ປະກອບສ່ວນ"
+      },
+      "partOfSpeechValues": {
+        "noun": "ຄຳນາມ",
+        "verb": "ຄຳກິລິຍາ",
+        "adjective": "ຄຳຄຸນນາມ",
+        "adverb": "ຄຳວິເສດ",
+        "phrase": "ວະລີ",
+        "abbreviation": "ຄຳຫຍໍ້"
+      }
+    },
     "quickRejectReasons": {
       "inaccurate": "ເນື້ອຫາບໍ່ຖືກຕ້ອງ",
       "missingInfo": "ຂາດຂໍ້ມູນທີ່ຕ້ອງການ",

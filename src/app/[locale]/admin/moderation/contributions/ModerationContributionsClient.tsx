@@ -106,6 +106,8 @@ export default function ContributionsModerationPage({
   });
 
   const openContributionModal = (contribution: Contribution) => {
+    console.log(contribution);
+
     setSelectedContribution(contribution);
     setApprovalDraft(createContributionDraft(contribution));
     setShowDetailModal(true);
@@ -522,14 +524,14 @@ export default function ContributionsModerationPage({
               <button
                 className="btn btn--danger btn--icon"
                 onClick={handleEmptyTrash}
-                title="Lam rong thung rac"
+                title="Làm rỗng thùng rác"
               >
                 <Trash2 size={16} />
               </button>
               <Link
                 href={listPath}
                 className="btn btn--secondary btn--icon"
-                title="Danh sach dong gop"
+                title="Danh sách đóng góp"
               >
                 <GitPullRequest size={16} />
               </Link>

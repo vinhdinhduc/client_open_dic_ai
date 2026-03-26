@@ -19,7 +19,7 @@ export interface Category extends BaseEntity {
 
 // Simplified Category for dropdowns/references
 export interface CategoryRef {
-    _id: string;
+    id: string;
     name: string | MultiLangText;
     slug?: string;
     icon?: string;
@@ -37,6 +37,10 @@ export interface CategoryFormData {
         en?: string;
         lo?: string;
     };
+    category: {
+        id: string;
+        name: string;
+    }
     icon?: string;
     slug?: string;
     parentCategory?: string;

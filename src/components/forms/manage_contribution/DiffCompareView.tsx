@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { FileText, Edit3 } from "lucide-react";
 import { Contribution } from "@/services/contributionService";
 import { diffWords } from "./diffWords";
@@ -73,131 +74,226 @@ interface DiffCompareViewProps {
   contribution: Contribution;
 }
 
-const PART_OF_SPEECH_LABELS: Record<string, string> = {
-  noun: "Danh từ",
-  verb: "Động từ",
-  adjective: "Tính từ",
-  adverb: "Trạng từ",
-  phrase: "Cụm từ",
-  abbreviation: "Từ viết tắt",
-};
-
 type DiffFieldDef = {
   label: string;
   oldVal?: string;
   newVal?: string;
 };
 
+type LocaleKey = "vi" | "en" | "lo";
+
+type CategoryLike =
+  | {
+      _id?: string;
+      name?: string | Partial<Record<LocaleKey, string>>;
+    }
+  | string
+  | null
+  | undefined;
+
+function toPlainText(value?: string) {
+  if (!value) return "";
+
+  if (typeof window === "undefined") {
+    return value
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  const el = document.createElement("div");
+  el.innerHTML = value;
+  return (el.textContent || el.innerText || "").replace(/\s+/g, " ").trim();
+}
+
+function getLocalizedCategoryName(category: CategoryLike, locale: LocaleKey) {
+  if (!category) return "";
+  if (typeof category === "string") return category;
+
+  if (typeof category.name === "string") {
+    return category.name;
+  }
+
+  return (
+    category.name?.[locale] ||
+    category.name?.vi ||
+    category.name?.en ||
+    category.name?.lo ||
+    ""
+  );
+}
+
 function isChanged(a?: string, b?: string) {
   return (a ?? "").trim() !== (b ?? "").trim();
 }
 
-// ─────────────────────────────────────────────
-//  DiffCompareView
-// ─────────────────────────────────────────────
+function hasAnyValue(...values: Array<string | undefined>) {
+  return values.some((value) => (value ?? "").trim() !== "");
+}
+
+function getExamplesByLang(
+  examples:
+    | Array<{
+        vi?: string;
+        en?: string;
+        lo?: string;
+      }>
+    | undefined,
+  lang: LocaleKey,
+) {
+  return (examples ?? [])
+    .map((example) => toPlainText(example?.[lang]))
+    .filter((value) => value.trim() !== "")
+    .join("\n");
+}
 
 export default function DiffCompareView({
   contribution,
 }: DiffCompareViewProps) {
+  const tModeration = useTranslations("moderationContributions");
+  const locale = useLocale() as LocaleKey;
+
   const t = contribution.targetTerm;
   const c = contribution;
 
-  // ── Build field list ──────────────────────────
+  const PART_OF_SPEECH_LABELS: Record<string, string> = {
+    noun: tModeration("diffCompare.partOfSpeechValues.noun"),
+    verb: tModeration("diffCompare.partOfSpeechValues.verb"),
+    adjective: tModeration("diffCompare.partOfSpeechValues.adjective"),
+    adverb: tModeration("diffCompare.partOfSpeechValues.adverb"),
+    phrase: tModeration("diffCompare.partOfSpeechValues.phrase"),
+    abbreviation: tModeration("diffCompare.partOfSpeechValues.abbreviation"),
+  };
+
   const diffFields: DiffFieldDef[] = [];
 
   if (t) {
     diffFields.push({
-      label: "Thuật ngữ (Vi)",
-      oldVal: t.term?.vi,
-      newVal: c.term?.vi,
+      label: tModeration("diffCompare.labels.termVi"),
+      oldVal: toPlainText(t.term?.vi),
+      newVal: toPlainText(c.term?.vi),
     });
 
-    if (t.term?.lo)
+    if (hasAnyValue(t.term?.lo, c.term?.lo))
       diffFields.push({
-        label: "Thuật ngữ (Lo)",
-        oldVal: t.term.lo,
-        newVal: c.term?.lo,
+        label: tModeration("diffCompare.labels.termLo"),
+        oldVal: toPlainText(t.term.lo),
+        newVal: toPlainText(c.term?.lo),
       });
 
-    if (t.term?.en)
+    if (hasAnyValue(t.term?.en, c.term?.en))
       diffFields.push({
-        label: "Thuật ngữ (En)",
-        oldVal: t.term.en,
-        newVal: c.term?.en,
+        label: tModeration("diffCompare.labels.termEn"),
+        oldVal: toPlainText(t.term.en),
+        newVal: toPlainText(c.term?.en),
       });
 
     diffFields.push({
-      label: "Định nghĩa (Vi)",
-      oldVal: t.definition?.vi,
-      newVal: c.definition?.vi,
+      label: tModeration("diffCompare.labels.definitionVi"),
+      oldVal: toPlainText(t.definition?.vi),
+      newVal: toPlainText(c.definition?.vi),
     });
 
-    if (t.definition?.lo)
+    if (hasAnyValue(t.definition?.lo, c.definition?.lo))
       diffFields.push({
-        label: "Định nghĩa (Lo)",
-        oldVal: t.definition.lo,
-        newVal: c.definition?.lo,
+        label: tModeration("diffCompare.labels.definitionLo"),
+        oldVal: toPlainText(t.definition?.lo),
+        newVal: toPlainText(c.definition?.lo),
       });
 
-    if (t.definition?.en)
+    if (hasAnyValue(t.definition?.en, c.definition?.en))
       diffFields.push({
-        label: "Định nghĩa (En)",
-        oldVal: t.definition.en,
-        newVal: c.definition?.en,
+        label: tModeration("diffCompare.labels.definitionEn"),
+        oldVal: toPlainText(t.definition?.en),
+        newVal: toPlainText(c.definition?.en),
       });
 
-    if (t.detailedExplanation?.vi)
+    if (hasAnyValue(t.detailedExplanation?.vi, c.detailedExplanation?.vi))
       diffFields.push({
-        label: "Giải thích chi tiết",
-        oldVal: t.detailedExplanation.vi,
-        newVal: c.detailedExplanation?.vi,
+        label: tModeration("diffCompare.labels.detailedExplanationVi"),
+        oldVal: toPlainText(t.detailedExplanation?.vi),
+        newVal: toPlainText(c.detailedExplanation?.vi),
       });
+
+    if (hasAnyValue(t.detailedExplanation?.en, c.detailedExplanation?.en))
+      diffFields.push({
+        label: tModeration("diffCompare.labels.detailedExplanationEn"),
+        oldVal: toPlainText(t.detailedExplanation?.en),
+        newVal: toPlainText(c.detailedExplanation?.en),
+      });
+
+    if (hasAnyValue(t.detailedExplanation?.lo, c.detailedExplanation?.lo))
+      diffFields.push({
+        label: tModeration("diffCompare.labels.detailedExplanationLo"),
+        oldVal: toPlainText(t.detailedExplanation?.lo),
+        newVal: toPlainText(c.detailedExplanation?.lo),
+      });
+
+    const oldCategoryName = getLocalizedCategoryName(
+      (t as { category?: CategoryLike }).category,
+      locale,
+    );
+    const newCategoryName = getLocalizedCategoryName(
+      c.category as unknown as CategoryLike,
+      locale,
+    );
+
+    if (oldCategoryName || newCategoryName) {
+      diffFields.push({
+        label: tModeration("diffCompare.labels.category"),
+        oldVal: oldCategoryName,
+        newVal: newCategoryName,
+      });
+    }
 
     if (t.partOfSpeech)
       diffFields.push({
-        label: "Từ loại",
+        label: tModeration("diffCompare.labels.partOfSpeech"),
         oldVal: PART_OF_SPEECH_LABELS[t.partOfSpeech] ?? t.partOfSpeech,
         newVal:
           PART_OF_SPEECH_LABELS[c.partOfSpeech ?? ""] ?? c.partOfSpeech ?? "",
       });
   }
 
-  // ── Examples ────────────────────────────────
-  const oldExamplesText = (t?.examples ?? [])
-    .map((e) => e.vi || e.lo || e.en)
-    .join("\n");
-  const newExamplesText = (c.examples ?? [])
-    .map((e) => e.vi || e.lo || e.en)
-    .join("\n");
-  const examplesChanged = isChanged(oldExamplesText, newExamplesText);
+  const oldExamplesVi = getExamplesByLang(t?.examples, "vi");
+  const newExamplesVi = getExamplesByLang(c.examples, "vi");
+  const oldExamplesEn = getExamplesByLang(t?.examples, "en");
+  const newExamplesEn = getExamplesByLang(c.examples, "en");
+  const oldExamplesLo = getExamplesByLang(t?.examples, "lo");
+  const newExamplesLo = getExamplesByLang(c.examples, "lo");
 
-  // ── Tags ─────────────────────────────────────
+  const examplesViChanged = isChanged(oldExamplesVi, newExamplesVi);
+  const examplesEnChanged = isChanged(oldExamplesEn, newExamplesEn);
+  const examplesLoChanged = isChanged(oldExamplesLo, newExamplesLo);
+
   const oldTags = t?.tags ?? [];
   const newTags = c.tags ?? [];
   const tagsChanged = oldTags.join(",") !== newTags.join(",");
 
-  // ── Render ───────────────────────────────────
   return (
     <>
-      {/* Legend */}
       <div className="diff-legend">
         <span className="diff-legend__item">
-          <mark className="diff-mark diff-mark--removed">bị xóa</mark>
+          <mark className="diff-mark diff-mark--removed">
+            {tModeration("diffCompare.legend.removed")}
+          </mark>
         </span>
         <span className="diff-legend__item">
-          <mark className="diff-mark diff-mark--added">được thêm</mark>
+          <mark className="diff-mark diff-mark--added">
+            {tModeration("diffCompare.legend.added")}
+          </mark>
         </span>
         <span className="diff-legend__item diff-legend__unchanged">
-          không đổi
+          {tModeration("diffCompare.legend.unchanged")}
         </span>
       </div>
 
       <div className="diff-compare">
-        {/* ── Left column: Original content ── */}
         <div className="diff-box diff-box--original">
           <div className="diff-header">
             <FileText size={16} />
-            <span>Nội dung gốc</span>
+            <span>{tModeration("diffCompare.originalContent")}</span>
           </div>
           <div className="diff-content">
             {diffFields.map((f) => {
@@ -220,31 +316,59 @@ export default function DiffCompareView({
               );
             })}
 
-            {/* Examples */}
-            {oldExamplesText && (
+            {hasAnyValue(oldExamplesVi, newExamplesVi) && (
               <div
-                className={`diff-field${examplesChanged ? " diff-field--changed" : ""}`}
+                className={`diff-field${examplesViChanged ? " diff-field--changed" : ""}`}
               >
-                <label>Ví dụ:</label>
-                {examplesChanged ? (
+                <label>{tModeration("diffCompare.labels.examplesVi")}:</label>
+                {examplesViChanged ? (
                   <OriginalText
-                    oldText={oldExamplesText}
-                    newText={newExamplesText}
+                    oldText={oldExamplesVi}
+                    newText={newExamplesVi}
                   />
                 ) : (
-                  (t?.examples ?? []).map((ex, i) => (
-                    <p key={i}>{ex.vi || ex.lo || ex.en}</p>
-                  ))
+                  <p>{oldExamplesVi || "-"}</p>
                 )}
               </div>
             )}
 
-            {/* Tags */}
+            {hasAnyValue(oldExamplesEn, newExamplesEn) && (
+              <div
+                className={`diff-field${examplesEnChanged ? " diff-field--changed" : ""}`}
+              >
+                <label>{tModeration("diffCompare.labels.examplesEn")}:</label>
+                {examplesEnChanged ? (
+                  <OriginalText
+                    oldText={oldExamplesEn}
+                    newText={newExamplesEn}
+                  />
+                ) : (
+                  <p>{oldExamplesEn || "-"}</p>
+                )}
+              </div>
+            )}
+
+            {hasAnyValue(oldExamplesLo, newExamplesLo) && (
+              <div
+                className={`diff-field${examplesLoChanged ? " diff-field--changed" : ""}`}
+              >
+                <label>{tModeration("diffCompare.labels.examplesLo")}:</label>
+                {examplesLoChanged ? (
+                  <OriginalText
+                    oldText={oldExamplesLo}
+                    newText={newExamplesLo}
+                  />
+                ) : (
+                  <p>{oldExamplesLo || "-"}</p>
+                )}
+              </div>
+            )}
+
             {oldTags.length > 0 && (
               <div
                 className={`diff-field${tagsChanged ? " diff-field--changed" : ""}`}
               >
-                <label>Tags:</label>
+                <label>{tModeration("diffCompare.labels.tags")}:</label>
                 <div className="diff-tags">
                   {oldTags.map((tag, i) => (
                     <span
@@ -264,18 +388,16 @@ export default function DiffCompareView({
           </div>
         </div>
 
-        {/* ── Divider ── */}
         <div className="diff-divider">
           <div className="diff-divider__line" />
           <span className="diff-divider__icon">→</span>
           <div className="diff-divider__line" />
         </div>
 
-        {/* ── Right column: Proposed content ── */}
         <div className="diff-box diff-box--suggested">
           <div className="diff-header">
             <Edit3 size={16} />
-            <span>Nội dung đề xuất</span>
+            <span>{tModeration("diffCompare.suggestedContent")}</span>
           </div>
           <div className="diff-content">
             {diffFields.map((f) => {
@@ -298,16 +420,15 @@ export default function DiffCompareView({
               );
             })}
 
-            {/* Examples */}
-            {oldExamplesText && (
+            {hasAnyValue(oldExamplesVi, newExamplesVi) && (
               <div
-                className={`diff-field${examplesChanged ? " diff-field--changed" : ""}`}
+                className={`diff-field${examplesViChanged ? " diff-field--changed" : ""}`}
               >
-                <label>Ví dụ:</label>
-                {examplesChanged ? (
+                <label>{tModeration("diffCompare.labels.examplesVi")}:</label>
+                {examplesViChanged ? (
                   <EditedText
-                    oldText={oldExamplesText}
-                    newText={newExamplesText}
+                    oldText={oldExamplesVi}
+                    newText={newExamplesVi}
                   />
                 ) : (
                   <p className="diff-field__unchanged">-</p>
@@ -315,20 +436,46 @@ export default function DiffCompareView({
               </div>
             )}
 
-            {/* Contributor note — right side only */}
-            {c.contributorNote && (
-              <div className="diff-field diff-field--note">
-                <label>Ghi chú người đóng góp:</label>
-                <p>{c.contributorNote}</p>
+            {hasAnyValue(oldExamplesEn, newExamplesEn) && (
+              <div
+                className={`diff-field${examplesEnChanged ? " diff-field--changed" : ""}`}
+              >
+                <label>{tModeration("diffCompare.labels.examplesEn")}:</label>
+                {examplesEnChanged ? (
+                  <EditedText oldText={oldExamplesEn} newText={newExamplesEn} />
+                ) : (
+                  <p className="diff-field__unchanged">-</p>
+                )}
               </div>
             )}
 
-            {/* Tags */}
+            {hasAnyValue(oldExamplesLo, newExamplesLo) && (
+              <div
+                className={`diff-field${examplesLoChanged ? " diff-field--changed" : ""}`}
+              >
+                <label>{tModeration("diffCompare.labels.examplesLo")}:</label>
+                {examplesLoChanged ? (
+                  <EditedText oldText={oldExamplesLo} newText={newExamplesLo} />
+                ) : (
+                  <p className="diff-field__unchanged">-</p>
+                )}
+              </div>
+            )}
+
+            {c.contributorNote && (
+              <div className="diff-field diff-field--note">
+                <label>
+                  {tModeration("diffCompare.labels.contributorNote")}:
+                </label>
+                <p>{toPlainText(c.contributorNote)}</p>
+              </div>
+            )}
+
             {oldTags.length > 0 && (
               <div
                 className={`diff-field${tagsChanged ? " diff-field--changed" : ""}`}
               >
-                <label>Tags:</label>
+                <label>{tModeration("diffCompare.labels.tags")}:</label>
                 {tagsChanged ? (
                   <div className="diff-tags">
                     {newTags.map((tag, i) => (
