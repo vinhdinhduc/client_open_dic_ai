@@ -37,7 +37,7 @@ export interface CategoryFormData {
         en?: string;
         lo?: string;
     };
-    category: {
+    category?: {
         id: string;
         name: string;
     }
@@ -46,6 +46,7 @@ export interface CategoryFormData {
     parentCategory?: string;
     order?: number;
     isActive?: boolean;
+
 }
 
 // API Parameters

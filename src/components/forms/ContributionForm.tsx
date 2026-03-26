@@ -700,7 +700,7 @@ export default function ContributionForm() {
             >
               <option value="">{t("categoryPlaceholder")}</option>
               {categories.map((cat) => {
-                const categoryId = (cat as any).id || cat._id;
+                const categoryId = (cat as any).id || (cat as any)._id || "";
                 const catName = cat.name;
                 const categoryName =
                   typeof catName === "string"
