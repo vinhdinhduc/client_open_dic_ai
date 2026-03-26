@@ -575,6 +575,7 @@
     "notePlaceholder": "Giải thích lý do bạn đề xuất chỉnh sửa này...",
     "submitting": "Đang gửi...",
     "submit": "Gửi đề xuất",
+    "categoryLabel": "Chuyên ngành",
     "termViRequired": "Cần nhập thuật ngữ ít nhất 2 ngôn ngữ",
     "definitionViRequired": "Cần nhập định nghĩa ít nhất 1 ngôn ngữ",
     "noteRequired": "Vui lòng ghi chú lý do chỉnh sửa",

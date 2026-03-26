@@ -405,7 +405,8 @@ export default function SuggestEditModal({
           {/* Category */}
           <div className="form-group">
             <label className="form-label">
-              {tEdit("categoryLabel")} <span className="required">*</span>
+              {tEdit("categoryLabel")}
+              <span className="required">*</span>
             </label>
             <select
               value={selectedCategory || ""}

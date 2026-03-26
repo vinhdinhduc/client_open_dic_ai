@@ -557,6 +557,8 @@
     "aiSuggestAllLoading": "AI is generating suggestions...",
     "aiSuggestAllSuccess": "AI has filled content for the selected language",
     "aiSuggestAllNoTerm": "Please enter the term before using AI",
+    "categoryLabel": "Category",
+
     "aiSuggestAllHint": "AI will suggest definition, explanation, examples, and related details for {lang}",
     "partOfSpeech": {
       "noun": "Noun",
@@ -571,7 +573,6 @@
     "langLo": "Lao",
     "noteLabel": "Edit Reason",
     "notePlaceholder": "Explain why you suggest this edit...",
-    "categoryLabel": "Category",
     "categoryPlaceholder": "Select category",
     "categoryRequired": "Please select a category",
     "submitting": "Submitting...",
