@@ -649,9 +649,7 @@ export default function ReputationClient() {
                   {leaderboard.map((entry) => (
                     <tr
                       key={entry.user._id}
-                      className={
-                        entry.user._id === user?._id ? "highlight" : ""
-                      }
+                      className={entry.user._id === user?.id ? "highlight" : ""}
                     >
                       <td className="rank-cell">
                         {entry.rank <= 3 ? (
