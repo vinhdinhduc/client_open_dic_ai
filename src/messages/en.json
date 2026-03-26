@@ -1084,6 +1084,8 @@
     "subtitleAdmin": "Manage all terms in the dictionary system",
     "exportExcel": "Export Excel",
     "importData": "Import Data",
+    "refresh": "Refresh",
+
     "addTerm": "Add Term",
     "totalTerms": "Total Terms",
     "approved": "Approved",
@@ -1156,6 +1158,7 @@
     "subtitleAdmin": "Manage terms in assigned categories",
     "exportExcel": "Export Excel",
     "importData": "Import Data",
+     "refresh": "Refresh",
     "addTerm": "Add Term",
     "totalTerms": "Total Terms",
     "approved": "Approved",

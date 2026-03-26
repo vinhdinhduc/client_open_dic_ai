@@ -1079,6 +1079,8 @@
     "subtitleAdmin": "ຈັດການທຸກຄຳສັບໃນລະບົບພົດຈະນານຸກົມ",
     "exportExcel": "ສົ່ງອອກ Excel",
     "importData": "ນຳເຂົ້າຂໍ້ມູນ",
+    "refresh": "ໂຫຼດໃໝ່",
+
     "addTerm": "ເພີ່ມຄຳສັບ",
     "totalTerms": "ຄຳສັບທັງໝົດ",
     "approved": "ອະນຸມັດແລ້ວ",
@@ -1154,6 +1156,7 @@
     "addTerm": "ເພີ່ມຄຳສັບ",
     "totalTerms": "ຄຳສັບທັງໝົດ",
     "approved": "ອະນຸມັດແລ້ວ",
+    "refresh": "ໂຫຼດໃໝ່",
     "pending": "ລໍຖ້າ",
     "rejected": "ຖືກປະຕິເສດ",
     "searchPlaceholder": "ຄົ້ນຫາຄຳສັບ...",
