@@ -560,18 +560,18 @@ export default function ContributionsModerationPage({
       </div>
 
       {/* Stats Cards */}
-      <div className="moderation-page__stats">
-        {!trashMode && (
+      {!trashMode && (
+        <div className="moderation-page__stats">
           <div className="stat-card stat-card--warning">
             <div className="stat-value">{pendingCount}</div>
             <div className="stat-label">{t("pending")}</div>
           </div>
-        )}
-        <div className="stat-card">
-          <div className="stat-value">{totalItems}</div>
-          <div className="stat-label">{t("totalContributions")}</div>
+          <div className="stat-card">
+            <div className="stat-value">{totalItems}</div>
+            <div className="stat-label">{t("totalContributions")}</div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Filters */}
       <div className="moderation-page__filters">
@@ -601,14 +601,16 @@ export default function ContributionsModerationPage({
             </>
           )}
 
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="all">{t("allTypes")}</option>
-            <option value="edit_term">{t("typeEdit")}</option>
-            <option value="new_term">{t("typeNew")}</option>
-          </select>
+          {!trashMode && (
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="all">{t("allTypes")}</option>
+              <option value="edit_term">{t("typeEdit")}</option>
+              <option value="new_term">{t("typeNew")}</option>
+            </select>
+          )}
         </div>
       </div>
 
@@ -726,18 +728,18 @@ export default function ContributionsModerationPage({
                     </th>
                   )}
                   <th>{t("term")}</th>
-                  <th>{t("type")}</th>
+                  {!trashMode && <th>{t("type")}</th>}
                   <th>{t("category")}</th>
                   <th>{t("contributor")}</th>
                   <th>{t("submitDate")}</th>
-                  <th>{t("status")}</th>
+                  {!trashMode && <th>{t("status")}</th>}
                   <th>{t("actions")}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredContributions.length === 0 ? (
                   <tr>
-                    <td colSpan={trashMode ? 7 : 8} className="empty-state">
+                    <td colSpan={trashMode ? 5 : 8} className="empty-state">
                       <GitPullRequest size={48} />
                       <p>{t("noContributions")}</p>
                     </td>
@@ -765,11 +767,13 @@ export default function ContributionsModerationPage({
                             {getTermName(contribution)}
                           </span>
                         </td>
-                        <td>
-                          <span className={`badge ${typeBadge.className}`}>
-                            {typeBadge.label}
-                          </span>
-                        </td>
+                        {!trashMode && (
+                          <td>
+                            <span className={`badge ${typeBadge.className}`}>
+                              {typeBadge.label}
+                            </span>
+                          </td>
+                        )}
                         <td className="field-cell">
                           {contribution.category?.name?.vi || "-"}
                         </td>
@@ -784,11 +788,13 @@ export default function ContributionsModerationPage({
                         <td className="date-cell">
                           {formatDate(contribution.createdAt)}
                         </td>
-                        <td>
-                          <span className={`badge ${statusBadge.className}`}>
-                            {statusBadge.label}
-                          </span>
-                        </td>
+                        {!trashMode && (
+                          <td>
+                            <span className={`badge ${statusBadge.className}`}>
+                              {statusBadge.label}
+                            </span>
+                          </td>
+                        )}
                         <td className="actions-cell">
                           <button
                             className="action-btn action-btn--view"

@@ -61,7 +61,7 @@ interface MenuItem {
 // Menu items cho Moderator (chỉ hiển thị các mục liên quan đến kiểm duyệt)
 const moderatorMenuItems: MenuItem[] = [
   {
-    id: "dashboard",
+    id: "dashboards",
     label: "dashboard",
     icon: LayoutDashboard,
     href: "/moderator",

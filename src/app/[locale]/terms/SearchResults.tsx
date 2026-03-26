@@ -40,17 +40,30 @@ export default function SearchResultsClient({
     number | undefined
   >();
 
+  const normalized = (str: string) => {
+    return str
+      .toLowerCase()
+      .normalize("NFC")
+      .replace(/[\u0300-\u036f]/g, "")
+
+      .trim();
+  };
+
   const isQueryMatchingAnyTerm = terms.some((term) => {
-    const q = query.trim().toLowerCase();
-    const names = Object.values(term.term ?? {}).map((v) =>
-      String(v).toLowerCase(),
-    );
-    return names.some((name) => name.includes(q) || q.includes(name));
+    const q = query.trim().toLowerCase().replace(/\s+/g, " ");
+
+    const names = Object.values(term.term ?? {})
+      .map((v) => String(v).trim().toLowerCase().replace(/\s+/g, " "))
+      .filter(Boolean);
+
+    return names.includes(q);
   });
+  console.log("isquery", isQueryMatchingAnyTerm);
+
+  console.log("Check term kq", terms);
 
   const showSuggestedSection = terms.length > 0 && !isQueryMatchingAnyTerm;
 
-  // Load user reputation level for AI Agent context
   useEffect(() => {
     if (!isAuthenticated) {
       setUserReputationLevel(undefined);
@@ -60,7 +73,7 @@ export default function SearchResultsClient({
     const loadReputation = async () => {
       try {
         const userRep = await reputationService.getUserReputation(
-          user?._id || "",
+          user?.id || "",
         );
         setUserReputationLevel(userRep?.totalPoints || 0);
       } catch (error) {
@@ -169,12 +182,11 @@ export default function SearchResultsClient({
   const handleCloseAIChat = () => {
     setShowAIChat(false);
   };
-
+  console.log(t("noExactMatch"));
   return (
     <div className="search-results-page">
       <div className="container">
         {terms.length === 0 ? (
-          /* =========== NO RESULTS =========== */
           <div className="search-results-page__no-results">
             <div className="search-results-page__no-results-icon">
               <Search size={48} />
@@ -269,7 +281,6 @@ export default function SearchResultsClient({
             )}
 
             <section className="search-results-page__related-terms">
-              {/* Show "Terms you might know" label only on mismatch */}
               {showSuggestedSection && (
                 <h2 className="search-results-page__section-title">
                   <Lightbulb size={20} />
@@ -301,22 +312,6 @@ export default function SearchResultsClient({
             onClose={handleCloseAIChat}
           />
         )}
-
-        {/* {isAuthenticated && (
-          <AICometAgent
-            context={
-              {
-                currentPage: "search",
-                searchQuery: query,
-                language: currentLanguage || "vi",
-                userReputationLevel: userReputationLevel,
-                viewedTerms: terms.map((t) => t._id),
-              } as AIAgentContext
-            }
-            showOnMount={false}
-            position="bottom-left"
-          />
-        )} */}
       </div>
     </div>
   );

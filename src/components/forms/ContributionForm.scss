@@ -63,6 +63,41 @@
         color: var(--text-secondary);
         margin: 0;
     }
+
+    &__similar-terms {
+        padding: $spacing-md $spacing-lg;
+        border: 1px solid rgba(245, 158, 11, 0.5);
+        border-radius: $radius-md;
+        background: rgba(245, 158, 11, 0.08);
+
+        h3 {
+            margin: 0 0 $spacing-xs;
+            font-size: $font-base;
+            color: var(--text-primary);
+        }
+
+        p {
+            margin: 0 0 $spacing-sm;
+            color: var(--text-secondary);
+            font-size: $font-sm;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: $spacing-lg;
+        }
+
+        li {
+            color: var(--text-primary);
+            margin-bottom: $spacing-xs;
+        }
+
+        a {
+            color: var(--primary);
+            font-weight: $font-medium;
+            text-decoration: underline;
+        }
+    }
 }
 
 // Language Tabs

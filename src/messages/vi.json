@@ -187,6 +187,7 @@
     "addToFavorite": "Thêm vào yêu thích",
     "removeFromFavorite": "Xóa khỏi yêu thích",
     "comment": "Bình luận",
+    "favorite": "Yêu thích",
     "contribute": "Đóng góp thuật ngữ",
     "viewDetails": "Xem chi tiết",
     "loginToFavorite": "Vui lòng đăng nhập để lưu yêu thích",
@@ -325,7 +326,7 @@
     "termDetailMetaTitle": "Chi tiết thuật ngữ - UTB OpenDict",
     "termDetailMetaDescription": "Xem định nghĩa và giải thích chi tiết thuật ngữ chuyên ngành trong từ điển đa ngôn ngữ Việt - Lào - Anh",
     "title": "Kết quả tìm kiếm cho",
-    "noExactMatch": "Không tìm thấy kết quả khớp chính xác với \"{query}\".",
+    "noExactMatch": "Không tìm thấy kết quả khớp chính xác với thuật ngữ bạn tìm kiếm",
     "tryAskingAI": "Bạn có thể thử hỏi AI để nhận gợi ý phù hợp hơn.",
     "termsMightKnow": "Có thể bạn đang muốn tìm",
     "backToSearch": "Quay lại tìm kiếm",
@@ -401,6 +402,8 @@
     "success": "Đã gửi đóng góp thành công",
     "error": "Gửi đóng góp thất bại",
     "loginRequired": "Vui lòng đăng nhập để đóng góp",
+    "similarTermsTitle": "Thuật ngữ tương tự",
+    "similarTermsDescription": "Thuật ngữ đã có trong danh mục này. Bạn có thể tham khảo các thuật ngữ bên dưới:",
     "viRequiredHint": "Vui lòng cung cấp thuật ngữ bằng ít nhất 2 ngôn ngữ và định nghĩa bằng ít nhất 1 ngôn ngữ.",
     "partOfSpeech": {
       "noun": "Danh từ",
@@ -1633,7 +1636,7 @@
     "rateLimitConfigSubtitle": "Quản lý giới hạn số lượng request để bảo vệ hệ thống"
   },
   "moderatorLayout": {
-    "dashboard": "Dashboard",
+    "dashboard": "Bảng điều khiển",
     "logoText": "UTB OpenDict Moderator",
     "terms": "Quản lý thuật ngữ",
     "categories": "Danh mục phụ trách",

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Filter, Loader2, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import {
@@ -15,7 +15,6 @@ export default function ReportsTrashClient() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState<string | null>(null);
-  const [reasonFilter, setReasonFilter] = useState("all");
 
   const loadReports = async () => {
     setLoading(true);
@@ -39,11 +38,6 @@ export default function ReportsTrashClient() {
   useEffect(() => {
     loadReports();
   }, []);
-
-  const filteredReports = useMemo(() => {
-    if (reasonFilter === "all") return reports;
-    return reports.filter((r) => r.reason === reasonFilter);
-  }, [reports, reasonFilter]);
 
   const handleRestore = async (id: string) => {
     try {
@@ -115,23 +109,6 @@ export default function ReportsTrashClient() {
         </div>
       </div>
 
-      <div className="moderation-page__filters">
-        <div className="filter-group">
-          <Filter size={18} />
-          <select
-            value={reasonFilter}
-            onChange={(e) => setReasonFilter(e.target.value)}
-          >
-            <option value="all">Tat ca ly do</option>
-            <option value="duplicate">Trung lap</option>
-            <option value="incorrect">Khong chinh xac</option>
-            <option value="spam">Spam</option>
-            <option value="inappropriate">Khong phu hop</option>
-            <option value="other">Khac</option>
-          </select>
-        </div>
-      </div>
-
       <div className="moderation-page__table">
         {loading ? (
           <div className="loading-state">
@@ -144,19 +121,18 @@ export default function ReportsTrashClient() {
                 <th>Thuat ngu</th>
                 <th>Ly do</th>
                 <th>Nguoi bao cao</th>
-                <th>Trang thai</th>
                 <th>Thao tac</th>
               </tr>
             </thead>
             <tbody>
-              {filteredReports.length === 0 ? (
+              {reports.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="empty-state">
+                  <td colSpan={4} className="empty-state">
                     Khong co du lieu
                   </td>
                 </tr>
               ) : (
-                filteredReports.map((report) => (
+                reports.map((report) => (
                   <tr key={report._id}>
                     <td>
                       {report.targetTerm?.term?.vi ||
@@ -165,7 +141,6 @@ export default function ReportsTrashClient() {
                     </td>
                     <td>{report.reason}</td>
                     <td>{report.reporter?.fullName || "-"}</td>
-                    <td>{report.status}</td>
                     <td className="actions-cell">
                       <button
                         className="action-btn action-btn--approve"

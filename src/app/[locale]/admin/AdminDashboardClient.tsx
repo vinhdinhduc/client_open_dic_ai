@@ -121,6 +121,9 @@ export default function AdminDashboard() {
   }
 
   const pendingContributions = overview?.pendingContributions ?? 0;
+
+  console.log("Check overview", overview);
+
   const totalReports = overview?.totalReports ?? 0;
 
   return (
@@ -129,9 +132,7 @@ export default function AdminDashboard() {
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-header__title">{t("title")}</h1>
-          <p className="admin-page-header__subtitle">
-            {t("subtitle")}
-          </p>
+          <p className="admin-page-header__subtitle">{t("subtitle")}</p>
         </div>
         <div className="admin-page-header__actions">
           <span className="dashboard__date">
@@ -156,7 +157,10 @@ export default function AdminDashboard() {
             >
               <AlertTriangle size={18} />
               <span>
-                {t.rich("pendingContributionsAlert", { count: pendingContributions, strong: (chunks) => <strong>{chunks}</strong> })}
+                {t.rich("pendingContributionsAlert", {
+                  count: pendingContributions,
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </span>
               <ArrowRight size={16} className="dashboard__alert-arrow" />
             </Link>
@@ -168,7 +172,10 @@ export default function AdminDashboard() {
             >
               <Flag size={18} />
               <span>
-                {t.rich("reportsAlert", { count: totalReports, strong: (chunks) => <strong>{chunks}</strong> })}
+                {t.rich("reportsAlert", {
+                  count: totalReports,
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </span>
               <ArrowRight size={16} className="dashboard__alert-arrow" />
             </Link>
@@ -248,7 +255,9 @@ export default function AdminDashboard() {
                       <span
                         className={`admin-badge admin-badge--${item.type === "new_term" ? "success" : "info"}`}
                       >
-                        {item.type === "new_term" ? t("newTerm") : t("editTerm")}
+                        {item.type === "new_term"
+                          ? t("newTerm")
+                          : t("editTerm")}
                       </span>
                       <span className="pending-item__title">{item.title}</span>
                     </div>
@@ -262,7 +271,9 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="admin-empty">
-                <p className="admin-empty__text">{t("noPendingContributions")}</p>
+                <p className="admin-empty__text">
+                  {t("noPendingContributions")}
+                </p>
               </div>
             )}
           </div>
@@ -279,9 +290,7 @@ export default function AdminDashboard() {
           <div className="admin-card__body">
             <div className="top-terms-list">
               <div className="top-term-item">
-                <span className="top-term-item__name">
-                  {t("activeUsers")}
-                </span>
+                <span className="top-term-item__name">{t("activeUsers")}</span>
                 <span className="top-term-item__views">
                   {(overview?.activeUsers ?? 0).toLocaleString()}
                 </span>
@@ -293,19 +302,25 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <div className="top-term-item">
-                <span className="top-term-item__name">{t("categoriesLabel")}</span>
+                <span className="top-term-item__name">
+                  {t("categoriesLabel")}
+                </span>
                 <span className="top-term-item__views">
                   {(overview?.totalCategories ?? 0).toLocaleString()}
                 </span>
               </div>
               <div className="top-term-item">
-                <span className="top-term-item__name">{t("totalContributions")}</span>
+                <span className="top-term-item__name">
+                  {t("totalContributions")}
+                </span>
                 <span className="top-term-item__views">
                   {(overview?.totalContributions ?? 0).toLocaleString()}
                 </span>
               </div>
               <div className="top-term-item">
-                <span className="top-term-item__name">{t("commentsLabel")}</span>
+                <span className="top-term-item__name">
+                  {t("commentsLabel")}
+                </span>
                 <span className="top-term-item__views">
                   {(overview?.totalComments ?? 0).toLocaleString()}
                 </span>

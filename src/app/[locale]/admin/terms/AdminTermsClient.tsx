@@ -20,6 +20,7 @@ import {
   Heart,
   MessageCircle,
   RotateCcw,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -517,6 +518,8 @@ export default function TermsPage({
     );
   }
 
+  const isTrashMode = statusFilter === "trash";
+
   return (
     <div className="terms-page">
       {/* Page Header */}
@@ -530,7 +533,7 @@ export default function TermsPage({
           </p>
         </div>
         <div className="admin-page-header__actions">
-          {statusFilter === "trash" ? (
+          {isTrashMode ? (
             <Link
               href={termsBasePath}
               className="admin-btn admin-btn--secondary"
@@ -547,21 +550,25 @@ export default function TermsPage({
               {t("trash")}
             </Link>
           )}
-          <button
-            className="admin-btn admin-btn--secondary"
-            onClick={() => setShowExportModal(true)}
-          >
-            <Download size={16} />
-            {t("exportExcel")}
-          </button>
-          <Link
-            href={isModerator ? "/moderator/import" : "/admin/import"}
-            className="admin-btn admin-btn--secondary"
-          >
-            <Upload size={16} />
-            {t("importData")}
-          </Link>
-          {statusFilter === "trash" && (
+          {!isTrashMode && (
+            <button
+              className="admin-btn admin-btn--secondary"
+              onClick={() => setShowExportModal(true)}
+            >
+              <Download size={16} />
+              {t("exportExcel")}
+            </button>
+          )}
+          {!isTrashMode && (
+            <Link
+              href={isModerator ? "/moderator/import" : "/admin/import"}
+              className="admin-btn admin-btn--secondary"
+            >
+              <Upload size={16} />
+              {t("importData")}
+            </Link>
+          )}
+          {isTrashMode && (
             <button
               className="admin-btn admin-btn--secondary"
               onClick={handleEmptyTrash}
@@ -570,41 +577,45 @@ export default function TermsPage({
               {t("emptyTrash")}
             </button>
           )}
-          <Link
-            href={`${termsBasePath}/new`}
-            className="admin-btn admin-btn--primary"
-          >
-            <Plus size={16} />
-            {t("addTerm")}
-          </Link>
+          {!isTrashMode && (
+            <Link
+              href={`${termsBasePath}/new`}
+              className="admin-btn admin-btn--primary"
+            >
+              <Plus size={16} />
+              {t("addTerm")}
+            </Link>
+          )}
         </div>
       </div>
 
       {/* Stats Summary */}
-      <div className="terms-stats">
-        <div className="terms-stat">
-          <span className="terms-stat__value">{stats.total}</span>
-          <span className="terms-stat__label">{t("totalTerms")}</span>
+      {!isTrashMode && (
+        <div className="terms-stats">
+          <div className="terms-stat">
+            <span className="terms-stat__value">{stats.total}</span>
+            <span className="terms-stat__label">{t("totalTerms")}</span>
+          </div>
+          <div className="terms-stat">
+            <span className="terms-stat__value terms-stat__value--success">
+              {stats.approved}
+            </span>
+            <span className="terms-stat__label">{t("approved")}</span>
+          </div>
+          <div className="terms-stat">
+            <span className="terms-stat__value terms-stat__value--warning">
+              {stats.pending}
+            </span>
+            <span className="terms-stat__label">{t("pending")}</span>
+          </div>
+          <div className="terms-stat">
+            <span className="terms-stat__value terms-stat__value--danger">
+              {stats.rejected}
+            </span>
+            <span className="terms-stat__label">{t("rejected")}</span>
+          </div>
         </div>
-        <div className="terms-stat">
-          <span className="terms-stat__value terms-stat__value--success">
-            {stats.approved}
-          </span>
-          <span className="terms-stat__label">{t("approved")}</span>
-        </div>
-        <div className="terms-stat">
-          <span className="terms-stat__value terms-stat__value--warning">
-            {stats.pending}
-          </span>
-          <span className="terms-stat__label">{t("pending")}</span>
-        </div>
-        <div className="terms-stat">
-          <span className="terms-stat__value terms-stat__value--danger">
-            {stats.rejected}
-          </span>
-          <span className="terms-stat__label">{t("rejected")}</span>
-        </div>
-      </div>
+      )}
 
       {/* Main Card */}
       <div className="admin-card">
@@ -644,6 +655,16 @@ export default function TermsPage({
             <option value="rejected">{t("rejected")}</option>
             <option value="trash">{t("trash")}</option>
           </select>
+
+          {isTrashMode && (
+            <button
+              className="admin-btn admin-btn--secondary"
+              onClick={fetchTerms}
+            >
+              <RefreshCw size={16} />
+              {t("refresh") || "Làm mới"}
+            </button>
+          )}
         </div>
 
         {/* Bulk Actions Bar */}
@@ -712,10 +733,10 @@ export default function TermsPage({
                 </th>
                 <th>{t("term")}</th>
                 <th>{t("category")}</th>
-                <th>{t("status")}</th>
-                <th>{t("creator")}</th>
-                <th>{t("stats")}</th>
-                <th>{t("createdDate")}</th>
+                {!isTrashMode && <th>{t("status")}</th>}
+                {!isTrashMode && <th>{t("creator")}</th>}
+                {!isTrashMode && <th>{t("stats")}</th>}
+                {!isTrashMode && <th>{t("createdDate")}</th>}
                 <th>{t("actions")}</th>
               </tr>
             </thead>
@@ -751,30 +772,40 @@ export default function TermsPage({
                         t("noCategory")}
                     </span>
                   </td>
-                  <td>{getStatusBadge(term.status || "pending")}</td>
-                  <td>
-                    <div className="creator-cell">
-                      <span>{term.createdBy?.fullName || t("anonymous")}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="stats-cell">
-                      <span className="stats-cell__item stats-cell__item--view">
-                        <Eye size={14} /> {term.viewCount}
-                      </span>
-                      <span className="stats-cell__item stats-cell__item--favorite">
-                        <Heart size={14} /> {term.favoriteCount || 0}
-                      </span>
-                      <span className="stats-cell__item stats-cell__item--comment">
-                        <MessageCircle size={14} /> {term.commentCount || 0}
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    {term.createdAt
-                      ? new Date(term.createdAt).toLocaleDateString("vi-VN")
-                      : "-"}
-                  </td>
+                  {!isTrashMode && (
+                    <td>{getStatusBadge(term.status || "pending")}</td>
+                  )}
+                  {!isTrashMode && (
+                    <td>
+                      <div className="creator-cell">
+                        <span>
+                          {term.createdBy?.fullName || t("anonymous")}
+                        </span>
+                      </div>
+                    </td>
+                  )}
+                  {!isTrashMode && (
+                    <td>
+                      <div className="stats-cell">
+                        <span className="stats-cell__item stats-cell__item--view">
+                          <Eye size={14} /> {term.viewCount}
+                        </span>
+                        <span className="stats-cell__item stats-cell__item--favorite">
+                          <Heart size={14} /> {term.favoriteCount || 0}
+                        </span>
+                        <span className="stats-cell__item stats-cell__item--comment">
+                          <MessageCircle size={14} /> {term.commentCount || 0}
+                        </span>
+                      </div>
+                    </td>
+                  )}
+                  {!isTrashMode && (
+                    <td>
+                      {term.createdAt
+                        ? new Date(term.createdAt).toLocaleDateString("vi-VN")
+                        : "-"}
+                    </td>
+                  )}
                   <td>
                     <div className="action-cell">
                       <button
@@ -784,14 +815,16 @@ export default function TermsPage({
                       >
                         <Eye size={16} color="blue" />
                       </button>
-                      <button
-                        className="action-btn action-btn--edit"
-                        onClick={() => handleEditTerm(term)}
-                        title={t("edit")}
-                      >
-                        <Edit size={16} color="orange" />
-                      </button>
-                      {term.status === "pending" && (
+                      {!isTrashMode && (
+                        <button
+                          className="action-btn action-btn--edit"
+                          onClick={() => handleEditTerm(term)}
+                          title={t("edit")}
+                        >
+                          <Edit size={16} color="orange" />
+                        </button>
+                      )}
+                      {term.status === "pending" && !isTrashMode && (
                         <>
                           <button
                             className="action-btn action-btn--success"
@@ -813,7 +846,7 @@ export default function TermsPage({
                           </button>
                         </>
                       )}
-                      {statusFilter !== "trash" && (
+                      {!isTrashMode && (
                         <button
                           className="action-btn action-btn--danger"
                           onClick={() => {
@@ -825,7 +858,7 @@ export default function TermsPage({
                           <Trash2 size={16} color="red" />
                         </button>
                       )}
-                      {statusFilter === "trash" && (
+                      {isTrashMode && (
                         <button
                           className="action-btn action-btn--success"
                           onClick={() => handleRestore(term._id)}

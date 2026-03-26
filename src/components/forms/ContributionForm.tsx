@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { contributionService } from "@/services/contributionService";
@@ -21,7 +22,6 @@ import "./ContributionForm.scss";
 import type { MultiLangText, Example, PartOfSpeech } from "@/types/term.types";
 import type { CategoryRef } from "@/types/category.types";
 import type { NewTermContributionData } from "@/types/contribution.types";
-import { ApiResponse } from "@/types";
 
 const cleanNbsp = (s?: string) =>
   s?.replace(/&nbsp;/gi, " ").replace(/\u00A0/g, " ");
@@ -38,6 +38,19 @@ interface ContributionFormData extends Omit<
 
 type LanguageTab = "vi" | "en" | "lo";
 
+interface SimilarTermSuggestion {
+  _id: string;
+  term?: MultiLangText;
+  category?: {
+    _id?: string;
+    name?: MultiLangText;
+    slug?: string;
+  };
+  url: string;
+  isSameCategory?: boolean;
+  isExactMatch?: boolean;
+}
+
 export default function ContributionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -53,6 +66,7 @@ export default function ContributionForm() {
   const [isAISuggesting, setIsAISuggesting] = useState(false);
   const [currentLang, setCurrentLang] = useState<LanguageTab>("vi");
   const [categories, setCategories] = useState<CategoryRef[]>([]);
+  const [similarTerms, setSimilarTerms] = useState<SimilarTermSuggestion[]>([]);
   const [formData, setFormData] = useState<ContributionFormData>({
     type: "new_term",
     term: { vi: "" },
@@ -233,6 +247,10 @@ export default function ContributionForm() {
     value: any,
     lang?: keyof MultiLangText,
   ) => {
+    if (field === "term" || field === "category") {
+      setSimilarTerms([]);
+    }
+
     if (lang) {
       setFormData((prev) => ({
         ...prev,
@@ -415,6 +433,7 @@ export default function ContributionForm() {
     }
 
     setIsLoading(true);
+    setSimilarTerms([]);
 
     try {
       // Clean up data
@@ -470,7 +489,14 @@ export default function ContributionForm() {
       }
     } catch (error: any) {
       console.error("Contribution error:", error);
-      toast.error(error.message || t("error"));
+      const apiError = error?.response?.data;
+      const apiSuggestions = apiError?.errors?.similarTerms;
+
+      if (Array.isArray(apiSuggestions)) {
+        setSimilarTerms(apiSuggestions);
+      }
+
+      toast.error(apiError?.message || error.message || t("error"));
     } finally {
       setIsLoading(false);
     }
@@ -544,6 +570,37 @@ export default function ContributionForm() {
                 : "🇱🇦 ພາສາລາວ"}
           </p>
         </div>
+
+        {similarTerms.length > 0 && (
+          <div className="contribution-form__similar-terms" role="alert">
+            <h3>{t("similarTermsTitle")}</h3>
+            <p>{t("similarTermsDescription")}</p>
+            <ul>
+              {similarTerms.map((item) => {
+                const termLabel =
+                  item.term?.[locale as LanguageTab] ||
+                  item.term?.vi ||
+                  item.term?.en ||
+                  item.term?.lo ||
+                  "(Không có tên)";
+
+                const categoryLabel =
+                  item.category?.name?.[locale as LanguageTab] ||
+                  item.category?.name?.vi ||
+                  item.category?.name?.en ||
+                  item.category?.name?.lo ||
+                  "Danh mục khác";
+
+                return (
+                  <li key={item._id}>
+                    <Link href={item.url}>{termLabel}</Link>
+                    <span> - {categoryLabel}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
 
         {/* Language Tabs */}
         <div className="language-tabs">

@@ -323,7 +323,7 @@
     "termDetailMetaTitle": "Term Details - UTB OpenDict",
     "termDetailMetaDescription": "View the definition and detailed explanation of the specialized term in the multilingual Vietnamese - Lao - English dictionary",
     "title": "Search results for",
-    "noExactMatch": "No exact match found for \"{query}\".",
+    "noExactMatch": "No exact match found for",
     "tryAskingAI": "You can ask AI for a more relevant explanation.",
     "termsMightKnow": "You might be looking for",
     "backToSearch": "Back to search",
@@ -399,6 +399,8 @@
     "success": "Contribution submitted successfully",
     "error": "Failed to submit contribution",
     "loginRequired": "Please login to contribute",
+    "similarTermsTitle": "Similar terms",
+    "similarTermsDescription": "This term already exists in the selected category. You can review similar terms below:",
     "viRequiredHint": "Please provide the term in at least 2 languages and the definition in at least 1 language.",
     "partOfSpeech": {
       "noun": "Noun",

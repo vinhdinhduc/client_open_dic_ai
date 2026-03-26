@@ -622,16 +622,18 @@ export default function ModeratorContributionPage({
       )}
 
       {/* Stats Cards */}
-      <div className="moderation-page__stats">
-        <div className="stat-card stat-card--warning">
-          <div className="stat-value">{pendingCount}</div>
-          <div className="stat-label">Chờ duyệt</div>
+      {!trashMode && (
+        <div className="moderation-page__stats">
+          <div className="stat-card stat-card--warning">
+            <div className="stat-value">{pendingCount}</div>
+            <div className="stat-label">Chờ duyệt</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{totalItems}</div>
+            <div className="stat-label">Tổng đóng góp</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value">{totalItems}</div>
-          <div className="stat-label">Tổng đóng góp</div>
-        </div>
-      </div>
+      )}
 
       {/* Filters */}
       <div className="moderation-page__filters">
@@ -661,14 +663,16 @@ export default function ModeratorContributionPage({
             </>
           )}
 
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="all">Tất cả loại</option>
-            <option value="edit_term">Chỉnh sửa</option>
-            <option value="new_term">Thêm mới</option>
-          </select>
+          {!trashMode && (
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="all">Tất cả loại</option>
+              <option value="edit_term">Chỉnh sửa</option>
+              <option value="new_term">Thêm mới</option>
+            </select>
+          )}
         </div>
       </div>
 
@@ -698,18 +702,18 @@ export default function ModeratorContributionPage({
                     </th>
                   )}
                   <th>Thuật ngữ</th>
-                  <th>Loại</th>
+                  {!trashMode && <th>Loại</th>}
                   <th>Danh mục</th>
                   <th>Người đóng góp</th>
                   <th>Ngày gửi</th>
-                  <th>Trạng thái</th>
+                  {!trashMode && <th>Trạng thái</th>}
                   <th>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredContributions.length === 0 ? (
                   <tr>
-                    <td colSpan={trashMode ? 7 : 8} className="empty-state">
+                    <td colSpan={trashMode ? 5 : 8} className="empty-state">
                       <GitPullRequest size={48} />
                       <p>Không có gợi ý nào</p>
                     </td>
@@ -738,11 +742,13 @@ export default function ModeratorContributionPage({
                             {getTermName(contribution)}
                           </span>
                         </td>
-                        <td>
-                          <span className={`badge ${typeBadge.className}`}>
-                            {typeBadge.label}
-                          </span>
-                        </td>
+                        {!trashMode && (
+                          <td>
+                            <span className={`badge ${typeBadge.className}`}>
+                              {typeBadge.label}
+                            </span>
+                          </td>
+                        )}
                         <td className="field-cell">
                           {contribution.category?.name?.vi || "-"}
                         </td>
@@ -757,11 +763,13 @@ export default function ModeratorContributionPage({
                         <td className="date-cell">
                           {formatDate(contribution.createdAt)}
                         </td>
-                        <td>
-                          <span className={`badge ${statusBadge.className}`}>
-                            {statusBadge.label}
-                          </span>
-                        </td>
+                        {!trashMode && (
+                          <td>
+                            <span className={`badge ${statusBadge.className}`}>
+                              {statusBadge.label}
+                            </span>
+                          </td>
+                        )}
                         <td className="actions-cell">
                           <button
                             className="action-btn action-btn--view"
