@@ -93,6 +93,8 @@ export default function ReportsPage() {
   }
 
   const { overview } = report;
+  const aiRequestsDailyData = report.aiRequestsDaily?.data || [];
+  const aiToday = report.aiRequestsDaily?.today;
 
   const roleLabels: Record<string, string> = {
     admin: t("roleAdmin"),
@@ -109,9 +111,7 @@ export default function ReportsPage() {
             <BarChart3 size={28} />
             {t("title")}
           </h1>
-          <p className="admin-page-header__subtitle">
-            {t("subtitle")}
-          </p>
+          <p className="admin-page-header__subtitle">{t("subtitle")}</p>
         </div>
         <div className="admin-page-header__actions">
           <select
@@ -180,7 +180,9 @@ export default function ReportsPage() {
             <div className="admin-stat-card__value">
               {overview.totalContributions.toLocaleString()}
             </div>
-            <div className="admin-stat-card__label">{t("totalContributions")}</div>
+            <div className="admin-stat-card__label">
+              {t("totalContributions")}
+            </div>
             <div className="admin-stat-card__trend admin-stat-card__trend--down">
               {overview.pendingContributions} {t("pendingLabel")}
             </div>
@@ -302,6 +304,94 @@ export default function ReportsPage() {
                     activeDot={{ r: 6 }}
                   />
                 </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Requests Daily Level - Bar Chart */}
+        <div className="admin-card reports-chart reports-chart--wide">
+          <div className="admin-card__header">
+            <h3 className="admin-card__title">
+              <BarChart3 size={18} />
+              {t("aiRequestsDailyLevel")}
+            </h3>
+          </div>
+          <div className="admin-card__body">
+            <div className="ai-usage-summary">
+              <div className="ai-usage-summary__item">
+                <span className="ai-usage-summary__label">
+                  {t("todayAiUsage")}
+                </span>
+                <strong className="ai-usage-summary__value">
+                  {aiToday?.requestCount || 0}/{aiToday?.maxDailyRequests || 0}
+                </strong>
+              </div>
+              <div className="ai-usage-summary__item">
+                <span className="ai-usage-summary__label">
+                  {t("requestUsagePercent")}
+                </span>
+                <strong className="ai-usage-summary__value">
+                  {Math.round(aiToday?.requestPercent || 0)}%
+                </strong>
+              </div>
+            </div>
+
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={aiRequestsDailyData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--border-color)"
+                  />
+                  <XAxis
+                    dataKey="date"
+                    stroke="var(--text-secondary)"
+                    fontSize={12}
+                    tickFormatter={(value) =>
+                      typeof value === "string" && value.length >= 10
+                        ? `${value.slice(8, 10)}/${value.slice(5, 7)}`
+                        : String(value)
+                    }
+                  />
+                  <YAxis
+                    stroke="var(--text-secondary)"
+                    fontSize={12}
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    formatter={(
+                      value: number | string | undefined,
+                      name: string | undefined,
+                      item: { payload?: any },
+                    ) => {
+                      const seriesName = name || "";
+                      if (seriesName === "requestPercent") {
+                        const payload = item?.payload || {};
+                        const percentValue = Number(value ?? 0);
+                        return [
+                          `${percentValue.toFixed(1)}% (${payload.requestCount}/${payload.maxDailyRequests})`,
+                          t("requestUsagePercent"),
+                        ];
+                      }
+                      return [value ?? 0, seriesName];
+                    }}
+                    labelFormatter={(label) => String(label)}
+                    contentStyle={{
+                      background: "var(--bg-card)",
+                      border: "1px solid var(--border-color)",
+                      borderRadius: "8px",
+                      color: "var(--text-primary)",
+                    }}
+                  />
+                  <Bar
+                    dataKey="requestPercent"
+                    name={t("requestUsagePercent")}
+                    fill="#0ea5e9"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -550,9 +640,12 @@ export default function ReportsPage() {
                     <div className="activity-timeline__header">
                       <span className="activity-timeline__type">
                         {activity.type === "term" && ` ${t("activityTerm")}`}
-                        {activity.type === "contribution" && ` ${t("activityContribution")}`}
-                        {activity.type === "comment" && ` ${t("activityComment")}`}
-                        {activity.type === "new_user" && ` ${t("activityNewUser")}`}
+                        {activity.type === "contribution" &&
+                          ` ${t("activityContribution")}`}
+                        {activity.type === "comment" &&
+                          ` ${t("activityComment")}`}
+                        {activity.type === "new_user" &&
+                          ` ${t("activityNewUser")}`}
                       </span>
                       {activity.status && (
                         <span

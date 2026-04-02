@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import {
   Shield,
@@ -15,7 +16,123 @@ import {
 import systemConfigService from "@/services/systemConfigService";
 import "./AdminRateLimitSettings.scss";
 
+type SupportedLocale = "vi" | "en" | "lo";
+
+type RateLimitText = {
+  loadConfigError: string;
+  minWindowError: string;
+  minRequestError: string;
+  saveUpdated: string;
+  saveCreated: string;
+  saveConfigError: string;
+  loadingConfig: string;
+  statusTitle: string;
+  enableRateLimiting: string;
+  enableRateLimitingDesc: string;
+  generalTitle: string;
+  generalWindow: string;
+  generalWindowDesc: string;
+  generalMaxRequests: string;
+  generalMaxRequestsDesc: string;
+  generalPreviewAllow: string;
+  generalPreviewRequests: string;
+  apiTitle: string;
+  apiWindow: string;
+  apiWindowDesc: string;
+  apiMaxRequests: string;
+  apiMaxRequestsDesc: string;
+  apiPreviewAllow: string;
+  apiPreviewCalls: string;
+  loginTitle: string;
+  loginWindow: string;
+  loginWindowDesc: string;
+  loginMaxAttempts: string;
+  loginMaxAttemptsDesc: string;
+  loginPreviewAllow: string;
+  loginPreviewAttempts: string;
+  aiTitle: string;
+  aiWindow: string;
+  aiWindowDesc: string;
+  aiMaxRequests: string;
+  aiMaxRequestsDesc: string;
+  aiPreviewAllow: string;
+  aiPreviewCalls: string;
+  reload: string;
+  saving: string;
+  save: string;
+  infoTitle: string;
+  infoGeneralLabel: string;
+  infoGeneral: string;
+  infoApiLabel: string;
+  infoApi: string;
+  infoLoginLabel: string;
+  infoLogin: string;
+  infoAiLabel: string;
+  infoAi: string;
+  info429: string;
+  infoWarning: string;
+};
+
 export default function AdminRateLimitSettings() {
+  const locale = useLocale();
+  const tr = useTranslations("adminRateLimitSettings");
+  const safeLocale: SupportedLocale =
+    locale === "en" || locale === "lo" ? locale : "vi";
+  const t: RateLimitText = {
+    loadConfigError: tr("loadConfigError"),
+    minWindowError: tr("minWindowError"),
+    minRequestError: tr("minRequestError"),
+    saveUpdated: tr("saveUpdated"),
+    saveCreated: tr("saveCreated"),
+    saveConfigError: tr("saveConfigError"),
+    loadingConfig: tr("loadingConfig"),
+    statusTitle: tr("statusTitle"),
+    enableRateLimiting: tr("enableRateLimiting"),
+    enableRateLimitingDesc: tr("enableRateLimitingDesc"),
+    generalTitle: tr("generalTitle"),
+    generalWindow: tr("generalWindow"),
+    generalWindowDesc: tr("generalWindowDesc"),
+    generalMaxRequests: tr("generalMaxRequests"),
+    generalMaxRequestsDesc: tr("generalMaxRequestsDesc"),
+    generalPreviewAllow: tr("generalPreviewAllow"),
+    generalPreviewRequests: tr("generalPreviewRequests"),
+    apiTitle: tr("apiTitle"),
+    apiWindow: tr("apiWindow"),
+    apiWindowDesc: tr("apiWindowDesc"),
+    apiMaxRequests: tr("apiMaxRequests"),
+    apiMaxRequestsDesc: tr("apiMaxRequestsDesc"),
+    apiPreviewAllow: tr("apiPreviewAllow"),
+    apiPreviewCalls: tr("apiPreviewCalls"),
+    loginTitle: tr("loginTitle"),
+    loginWindow: tr("loginWindow"),
+    loginWindowDesc: tr("loginWindowDesc"),
+    loginMaxAttempts: tr("loginMaxAttempts"),
+    loginMaxAttemptsDesc: tr("loginMaxAttemptsDesc"),
+    loginPreviewAllow: tr("loginPreviewAllow"),
+    loginPreviewAttempts: tr("loginPreviewAttempts"),
+    aiTitle: tr("aiTitle"),
+    aiWindow: tr("aiWindow"),
+    aiWindowDesc: tr("aiWindowDesc"),
+    aiMaxRequests: tr("aiMaxRequests"),
+    aiMaxRequestsDesc: tr("aiMaxRequestsDesc"),
+    aiPreviewAllow: tr("aiPreviewAllow"),
+    aiPreviewCalls: tr("aiPreviewCalls"),
+    reload: tr("reload"),
+    saving: tr("saving"),
+    save: tr("save"),
+    infoTitle: tr("infoTitle"),
+    infoGeneralLabel: tr("infoGeneralLabel"),
+    infoGeneral: tr("infoGeneral"),
+    infoApiLabel: tr("infoApiLabel"),
+    infoApi: tr("infoApi"),
+    infoLoginLabel: tr("infoLoginLabel"),
+    infoLogin: tr("infoLogin"),
+    infoAiLabel: tr("infoAiLabel"),
+    infoAi: tr("infoAi"),
+    info429: tr("info429"),
+    infoWarning: tr("infoWarning"),
+  };
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasExistingConfig, setHasExistingConfig] = useState(false);
@@ -63,13 +180,12 @@ export default function AdminRateLimitSettings() {
           rate_limit_login_max_attempts:
             configObj.rate_limit_login_max_attempts || 5,
           rate_limit_ai_window_ms: configObj.rate_limit_ai_window_ms || 60000,
-          rate_limit_ai_max_requests:
-            configObj.rate_limit_ai_max_requests || 5,
+          rate_limit_ai_max_requests: configObj.rate_limit_ai_max_requests || 5,
         });
       }
     } catch (error: any) {
       console.error("Load config error:", error);
-      toast.error(error.message || "Không thể tải cấu hình rate limit");
+      toast.error(error.message || t.loadConfigError);
     } finally {
       setIsLoading(false);
     }
@@ -81,26 +197,22 @@ export default function AdminRateLimitSettings() {
 
       // Validation
       if (formData.rate_limit_window_ms < 1000) {
-        toast.error("Thời gian cửa sổ phải ít nhất 1 giây (1000ms)");
+        toast.error(t.minWindowError);
         return;
       }
 
       if (formData.rate_limit_max_requests < 1) {
-        toast.error("Số lượng request tối đa phải lớn hơn 0");
+        toast.error(t.minRequestError);
         return;
       }
 
       await systemConfigService.updateRateLimitConfig(formData);
 
-      toast.success(
-        hasExistingConfig
-          ? "Đã cập nhật cấu hình Rate Limit thành công"
-          : "Đã tạo mới cấu hình Rate Limit thành công",
-      );
+      toast.success(hasExistingConfig ? t.saveUpdated : t.saveCreated);
       await loadConfig();
     } catch (error: any) {
       console.error("Save config error:", error);
-      toast.error(error.message || "Không thể lưu cấu hình");
+      toast.error(error.message || t.saveConfigError);
     } finally {
       setIsSaving(false);
     }
@@ -125,6 +237,26 @@ export default function AdminRateLimitSettings() {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
 
+    if (safeLocale === "en") {
+      if (hours > 0) {
+        return `${hours}h ${minutes % 60}m`;
+      }
+      if (minutes > 0) {
+        return `${minutes}m ${seconds % 60}s`;
+      }
+      return `${seconds}s`;
+    }
+
+    if (safeLocale === "lo") {
+      if (hours > 0) {
+        return `${hours} ຊົ່ວໂມງ ${minutes % 60} ນາທີ`;
+      }
+      if (minutes > 0) {
+        return `${minutes} ນາທີ ${seconds % 60} ວິນາທີ`;
+      }
+      return `${seconds} ວິນາທີ`;
+    }
+
     if (hours > 0) {
       return `${hours} giờ ${minutes % 60} phút`;
     } else if (minutes > 0) {
@@ -139,7 +271,7 @@ export default function AdminRateLimitSettings() {
       <div className="admin-settings-section">
         <div className="admin-settings-section__loading">
           <RefreshCw className="spin" size={32} />
-          <p>Đang tải cấu hình...</p>
+          <p>{t.loadingConfig}</p>
         </div>
       </div>
     );
@@ -151,7 +283,7 @@ export default function AdminRateLimitSettings() {
       <div className="admin-settings-section__group">
         <h3>
           <Shield size={20} />
-          Trạng thái Rate Limiting
+          {t.statusTitle}
         </h3>
 
         <div className="form-group">
@@ -163,11 +295,9 @@ export default function AdminRateLimitSettings() {
               onChange={handleInputChange}
             />
             <span className="switch-slider"></span>
-            <span>Bật Rate Limiting</span>
+            <span>{t.enableRateLimiting}</span>
           </label>
-          <small className="form-text">
-            Giới hạn số lượng request để bảo vệ hệ thống khỏi tấn công DDoS
-          </small>
+          <small className="form-text">{t.enableRateLimitingDesc}</small>
         </div>
       </div>
 
@@ -175,12 +305,12 @@ export default function AdminRateLimitSettings() {
       <div className="admin-settings-section__group">
         <h3>
           <Activity size={20} />
-          Rate Limit Chung
+          {t.generalTitle}
         </h3>
 
         <div className="form-group">
           <label htmlFor="rate_limit_window_ms">
-            Cửa sổ thời gian (milliseconds)
+            {t.generalWindow}
             <span className="label-badge">
               {formatTime(formData.rate_limit_window_ms)}
             </span>
@@ -196,14 +326,13 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Thời gian theo dõi request từ cùng một IP (mặc định: 15 phút =
-            900000ms)
-          </small>
+          <small className="form-text">{t.generalWindowDesc}</small>
         </div>
 
         <div className="form-group">
-          <label htmlFor="rate_limit_max_requests">Số request tối đa</label>
+          <label htmlFor="rate_limit_max_requests">
+            {t.generalMaxRequests}
+          </label>
           <input
             type="number"
             id="rate_limit_max_requests"
@@ -214,17 +343,15 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Số lượng request tối đa cho phép trong cửa sổ thời gian (mặc định:
-            100)
-          </small>
+          <small className="form-text">{t.generalMaxRequestsDesc}</small>
         </div>
 
         <div className="rate-limit-preview">
           <Activity size={16} />
           <span>
-            Cho phép <strong>{formData.rate_limit_max_requests}</strong>{" "}
-            requests trong{" "}
+            {t.generalPreviewAllow}{" "}
+            <strong>{formData.rate_limit_max_requests}</strong>{" "}
+            {t.generalPreviewRequests}{" "}
             <strong>{formatTime(formData.rate_limit_window_ms)}</strong>
           </span>
         </div>
@@ -234,12 +361,12 @@ export default function AdminRateLimitSettings() {
       <div className="admin-settings-section__group">
         <h3>
           <Clock size={20} />
-          Rate Limit API
+          {t.apiTitle}
         </h3>
 
         <div className="form-group">
           <label htmlFor="rate_limit_api_window_ms">
-            Cửa sổ thời gian API (milliseconds)
+            {t.apiWindow}
             <span className="label-badge">
               {formatTime(formData.rate_limit_api_window_ms)}
             </span>
@@ -255,14 +382,12 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Cửa sổ thời gian cho API endpoints (mặc định: 1 phút = 60000ms)
-          </small>
+          <small className="form-text">{t.apiWindowDesc}</small>
         </div>
 
         <div className="form-group">
           <label htmlFor="rate_limit_api_max_requests">
-            Số request API tối đa
+            {t.apiMaxRequests}
           </label>
           <input
             type="number"
@@ -274,16 +399,15 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Số request tối đa cho API trong cửa sổ thời gian (mặc định: 30)
-          </small>
+          <small className="form-text">{t.apiMaxRequestsDesc}</small>
         </div>
 
         <div className="rate-limit-preview">
           <Clock size={16} />
           <span>
-            Cho phép <strong>{formData.rate_limit_api_max_requests}</strong> API
-            calls trong{" "}
+            {t.apiPreviewAllow}{" "}
+            <strong>{formData.rate_limit_api_max_requests}</strong>{" "}
+            {t.apiPreviewCalls}{" "}
             <strong>{formatTime(formData.rate_limit_api_window_ms)}</strong>
           </span>
         </div>
@@ -293,12 +417,12 @@ export default function AdminRateLimitSettings() {
       <div className="admin-settings-section__group">
         <h3>
           <Lock size={20} />
-          Rate Limit Đăng Nhập
+          {t.loginTitle}
         </h3>
 
         <div className="form-group">
           <label htmlFor="rate_limit_login_window_ms">
-            Cửa sổ thời gian đăng nhập (milliseconds)
+            {t.loginWindow}
             <span className="label-badge">
               {formatTime(formData.rate_limit_login_window_ms)}
             </span>
@@ -314,15 +438,12 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Thời gian theo dõi các lần thử đăng nhập (mặc định: 15 phút =
-            900000ms)
-          </small>
+          <small className="form-text">{t.loginWindowDesc}</small>
         </div>
 
         <div className="form-group">
           <label htmlFor="rate_limit_login_max_attempts">
-            Số lần thử đăng nhập tối đa
+            {t.loginMaxAttempts}
           </label>
           <input
             type="number"
@@ -335,16 +456,15 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Số lần đăng nhập sai cho phép trước khi khóa tạm thời (mặc định: 5)
-          </small>
+          <small className="form-text">{t.loginMaxAttemptsDesc}</small>
         </div>
 
         <div className="rate-limit-preview rate-limit-preview--warning">
           <Lock size={16} />
           <span>
-            Cho phép <strong>{formData.rate_limit_login_max_attempts}</strong>{" "}
-            lần thử sai trong{" "}
+            {t.loginPreviewAllow}{" "}
+            <strong>{formData.rate_limit_login_max_attempts}</strong>{" "}
+            {t.loginPreviewAttempts}{" "}
             <strong>{formatTime(formData.rate_limit_login_window_ms)}</strong>
           </span>
         </div>
@@ -354,12 +474,12 @@ export default function AdminRateLimitSettings() {
       <div className="admin-settings-section__group">
         <h3>
           <Bot size={20} />
-          Rate Limit Gọi AI
+          {t.aiTitle}
         </h3>
 
         <div className="form-group">
           <label htmlFor="rate_limit_ai_window_ms">
-            Cửa sổ thời gian AI (milliseconds)
+            {t.aiWindow}
             <span className="label-badge">
               {formatTime(formData.rate_limit_ai_window_ms)}
             </span>
@@ -375,15 +495,11 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Thời gian theo dõi số lượt gọi AI từ một người dùng (mặc định: 1 phút = 60000ms)
-          </small>
+          <small className="form-text">{t.aiWindowDesc}</small>
         </div>
 
         <div className="form-group">
-          <label htmlFor="rate_limit_ai_max_requests">
-            Số lượt gọi AI tối đa
-          </label>
+          <label htmlFor="rate_limit_ai_max_requests">{t.aiMaxRequests}</label>
           <input
             type="number"
             id="rate_limit_ai_max_requests"
@@ -395,16 +511,15 @@ export default function AdminRateLimitSettings() {
             className="form-control"
             disabled={!formData.rate_limit_enabled}
           />
-          <small className="form-text">
-            Số lượt gọi AI tối đa trong cửa sổ thời gian (mặc định: 5 lượt / phút)
-          </small>
+          <small className="form-text">{t.aiMaxRequestsDesc}</small>
         </div>
 
         <div className="rate-limit-preview rate-limit-preview--ai">
           <Bot size={16} />
           <span>
-            Cho phép <strong>{formData.rate_limit_ai_max_requests}</strong> lượt
-            gọi AI trong{" "}
+            {t.aiPreviewAllow}{" "}
+            <strong>{formData.rate_limit_ai_max_requests}</strong>{" "}
+            {t.aiPreviewCalls}{" "}
             <strong>{formatTime(formData.rate_limit_ai_window_ms)}</strong>
           </span>
         </div>
@@ -418,7 +533,7 @@ export default function AdminRateLimitSettings() {
           disabled={isSaving}
         >
           <RefreshCw size={18} />
-          Tải lại
+          {t.reload}
         </button>
 
         <button
@@ -429,12 +544,12 @@ export default function AdminRateLimitSettings() {
           {isSaving ? (
             <>
               <RefreshCw className="spin" size={18} />
-              Đang lưu...
+              {t.saving}
             </>
           ) : (
             <>
               <Save size={18} />
-              Lưu cấu hình
+              {t.save}
             </>
           )}
         </button>
@@ -444,32 +559,24 @@ export default function AdminRateLimitSettings() {
       <div className="admin-settings-section__info">
         <AlertCircle size={20} />
         <div>
-          <h4>Thông tin Rate Limiting</h4>
+          <h4>{t.infoTitle}</h4>
           <ul>
             <li>
-              <strong>Rate Limit Chung:</strong> Áp dụng cho tất cả các requests
-              từ một IP
+              <strong>{t.infoGeneralLabel}</strong> {t.infoGeneral}
             </li>
             <li>
-              <strong>Rate Limit API:</strong> Giới hạn chặt chẽ hơn cho các API
-              endpoints
+              <strong>{t.infoApiLabel}</strong> {t.infoApi}
             </li>
             <li>
-              <strong>Rate Limit Đăng Nhập:</strong> Bảo vệ khỏi brute-force
-              attack
+              <strong>{t.infoLoginLabel}</strong> {t.infoLogin}
             </li>
             <li>
-              <strong>Rate Limit Gọi AI:</strong> Giới hạn số lần gọi AI mỗi
-              phút để kiểm soát chi phí API
+              <strong>{t.infoAiLabel}</strong> {t.infoAi}
             </li>
             <li>
-              Khi đạt giới hạn, người dùng sẽ nhận mã lỗi{" "}
-              <code>429 Too Many Requests</code>
+              {t.info429} <code>429 Too Many Requests</code>
             </li>
-            <li>
-              Cẩn thận khi thay đổi giá trị - giá trị quá thấp có thể ảnh hưởng
-              đến người dùng thật
-            </li>
+            <li>{t.infoWarning}</li>
           </ul>
         </div>
       </div>

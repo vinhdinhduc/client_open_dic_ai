@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import {
   Bot,
@@ -193,6 +194,72 @@ OUTPUT FORMAT:
   },
 };
 
+type AISettingsText = {
+  copyClipboardError: string;
+  statusDefault: string;
+  statusCustom: string;
+  resetCustomTitle: string;
+  resetCustom: string;
+  viewDefault: string;
+  previewApplied: string;
+  previewNotApplied: string;
+  copied: string;
+  copy: string;
+  appendNote: string;
+  clearedCustomToast: string;
+  loading: string;
+  title: string;
+  apiKeyConfigured: string;
+  providerTitle: string;
+  providerLabel: string;
+  providerHint: string;
+  apiConfigTitle: string;
+  getApiKey: string;
+  getApiKeyAtXai: string;
+  apiKeyLabel: string;
+  apiKeyCurrentPlaceholder: string;
+  apiKeyNewPlaceholder: string;
+  hideApiKey: string;
+  showApiKey: string;
+  apiKeyEncrypted: string;
+  apiKeyWillEncrypt: string;
+  modelLabel: string;
+  modelHintGemini: string;
+  modelHintGrok: string;
+  modelHintOpenAI: string;
+  promptTitle: string;
+  promptBadge: string;
+  promptDesc: string;
+  promptDefinition: string;
+  promptExplanation: string;
+  promptAnswer: string;
+  promptDefinitionPlaceholder: string;
+  promptExplanationPlaceholder: string;
+  promptAnswerPlaceholder: string;
+  customizedDotTitle: string;
+  advancedTitle: string;
+  maxTokensHint: string;
+  testing: string;
+  testConnection: string;
+  saving: string;
+  saveConfig: string;
+  guideTitle: string;
+  guideSdkLabel: string;
+  guideSdkText: string;
+  guideApiKeyText: string;
+  guideOrBuy: string;
+  guideSecurityLabel: string;
+  guideSecurityText: string;
+  guideTestButton: string;
+  guidePromptLabel: string;
+  guidePromptText: string;
+  invalidApiKey: string;
+  maxTokensInvalid: string;
+  saveSuccessUpdate: string;
+  saveSuccessCreate: string;
+  testSuccess: string;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-component: Default Prompt Preview Panel
 // ─────────────────────────────────────────────────────────────────────────────
@@ -201,6 +268,7 @@ interface DefaultPromptPanelProps {
   lang: string;
   customValue: string;
   onReset: () => void;
+  text: AISettingsText;
 }
 
 function DefaultPromptPanel({
@@ -208,6 +276,7 @@ function DefaultPromptPanel({
   lang,
   customValue,
   onReset,
+  text,
 }: DefaultPromptPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -225,9 +294,9 @@ function DefaultPromptPanel({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Không thể copy vào clipboard");
+      toast.error(text.copyClipboardError);
     }
-  }, [defaultText]);
+  }, [defaultText, text.copyClipboardError]);
 
   return (
     <div className="prompt-default-panel">
@@ -243,12 +312,12 @@ function DefaultPromptPanel({
           {isUsingDefault ? (
             <>
               <Code2 size={12} />
-              Đang dùng mặc định từ code
+              {text.statusDefault}
             </>
           ) : (
             <>
               <Check size={12} />
-              Đã tuỳ chỉnh
+              {text.statusCustom}
             </>
           )}
         </span>
@@ -259,10 +328,10 @@ function DefaultPromptPanel({
               type="button"
               className="prompt-default-btn prompt-default-btn--reset"
               onClick={onReset}
-              title="Xoá tuỳ chỉnh, dùng lại prompt mặc định"
+              title={text.resetCustomTitle}
             >
               <RotateCcw size={13} />
-              Xoá tuỳ chỉnh
+              {text.resetCustom}
             </button>
           )}
           <button
@@ -271,7 +340,7 @@ function DefaultPromptPanel({
             onClick={() => setIsExpanded((v) => !v)}
           >
             <Code2 size={13} />
-            Xem mặc định
+            {text.viewDefault}
             {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
           </button>
         </div>
@@ -283,9 +352,7 @@ function DefaultPromptPanel({
           <div className="prompt-default-panel__preview-header">
             <span className="prompt-default-panel__preview-label">
               <Info size={13} />
-              {isUsingDefault
-                ? "Prompt này đang được áp dụng"
-                : "Prompt mặc định (không được áp dụng vì đã có tuỳ chỉnh)"}
+              {isUsingDefault ? text.previewApplied : text.previewNotApplied}
             </span>
             <button
               type="button"
@@ -295,12 +362,12 @@ function DefaultPromptPanel({
               {copied ? (
                 <>
                   <Check size={13} />
-                  Đã copy
+                  {text.copied}
                 </>
               ) : (
                 <>
                   <Copy size={13} />
-                  Copy
+                  {text.copy}
                 </>
               )}
             </button>
@@ -309,7 +376,7 @@ function DefaultPromptPanel({
           {!isUsingDefault && (
             <p className="prompt-default-panel__append-note">
               <AlertCircle size={13} />
-              Nội dung tuỳ chỉnh của bạn sẽ được nối thêm vào sau prompt trên.
+              {text.appendNote}
             </p>
           )}
         </div>
@@ -322,6 +389,80 @@ function DefaultPromptPanel({
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
 export default function AdminAISettings() {
+  const t = useTranslations("adminAISettings");
+  const text: AISettingsText = {
+    copyClipboardError: t("copyClipboardError"),
+    statusDefault: t("statusDefault"),
+    statusCustom: t("statusCustom"),
+    resetCustomTitle: t("resetCustomTitle"),
+    resetCustom: t("resetCustom"),
+    viewDefault: t("viewDefault"),
+    previewApplied: t("previewApplied"),
+    previewNotApplied: t("previewNotApplied"),
+    copied: t("copied"),
+    copy: t("copy"),
+    appendNote: t("appendNote"),
+    clearedCustomToast: t("clearedCustomToast"),
+    loading: t("loading"),
+    title: t("title"),
+    apiKeyConfigured: t("apiKeyConfigured"),
+    providerTitle: t("providerTitle"),
+    providerLabel: t("providerLabel"),
+    providerHint: t("providerHint"),
+    apiConfigTitle: t("apiConfigTitle"),
+    getApiKey: t("getApiKey"),
+    getApiKeyAtXai: t("getApiKeyAtXai"),
+    apiKeyLabel: t("apiKeyLabel"),
+    apiKeyCurrentPlaceholder: t("apiKeyCurrentPlaceholder"),
+    apiKeyNewPlaceholder: t("apiKeyNewPlaceholder"),
+    hideApiKey: t("hideApiKey"),
+    showApiKey: t("showApiKey"),
+    apiKeyEncrypted: t("apiKeyEncrypted"),
+    apiKeyWillEncrypt: t("apiKeyWillEncrypt"),
+    modelLabel: t("modelLabel"),
+    modelHintGemini: t("modelHintGemini"),
+    modelHintGrok: t("modelHintGrok"),
+    modelHintOpenAI: t("modelHintOpenAI"),
+    promptTitle: t("promptTitle"),
+    promptBadge: t("promptBadge"),
+    promptDesc: t("promptDesc", { term: "{term}" }),
+    promptDefinition: t("promptDefinition"),
+    promptExplanation: t("promptExplanation"),
+    promptAnswer: t("promptAnswer"),
+    promptDefinitionPlaceholder: t("promptDefinitionPlaceholder", {
+      term: "{term}",
+    }),
+    promptExplanationPlaceholder: t("promptExplanationPlaceholder", {
+      term: "{term}",
+    }),
+    promptAnswerPlaceholder: t("promptAnswerPlaceholder", {
+      term: "{term}",
+      question: "{question}",
+    }),
+    customizedDotTitle: t("customizedDotTitle"),
+    advancedTitle: t("advancedTitle"),
+    maxTokensHint: t("maxTokensHint"),
+    testing: t("testing"),
+    testConnection: t("testConnection"),
+    saving: t("saving"),
+    saveConfig: t("saveConfig"),
+    guideTitle: t("guideTitle"),
+    guideSdkLabel: t("guideSdkLabel"),
+    guideSdkText: t("guideSdkText"),
+    guideApiKeyText: t("guideApiKeyText"),
+    guideOrBuy: t("guideOrBuy"),
+    guideSecurityLabel: t("guideSecurityLabel"),
+    guideSecurityText: t("guideSecurityText"),
+    guideTestButton: t("guideTestButton"),
+    guidePromptLabel: t("guidePromptLabel"),
+    guidePromptText: t("guidePromptText"),
+    invalidApiKey: t("invalidApiKey"),
+    maxTokensInvalid: t("maxTokensInvalid"),
+    saveSuccessUpdate: t("saveSuccessUpdate"),
+    saveSuccessCreate: t("saveSuccessCreate"),
+    testSuccess: t("testSuccess"),
+  };
+
   const [config, setConfig] = useState<AIConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -396,21 +537,19 @@ export default function AdminAISettings() {
       setTestResult(null);
 
       if (formData.apiKey && formData.apiKey.length < 10) {
-        toast.error("API Key không hợp lệ");
+        toast.error(text.invalidApiKey);
         return;
       }
 
       if (formData.maxTokens < 100 || formData.maxTokens > 8192) {
-        toast.error("Max Tokens phải từ 100 đến 8192");
+        toast.error(text.maxTokensInvalid);
         return;
       }
 
       await aiService.updateConfig(formData);
 
       toast.success(
-        hasExistingConfig
-          ? "Đã cập nhật cấu hình AI thành công"
-          : "Đã tạo mới cấu hình AI thành công",
+        hasExistingConfig ? text.saveSuccessUpdate : text.saveSuccessCreate,
       );
       await loadConfig();
     } catch (error: any) {
@@ -433,7 +572,7 @@ export default function AdminAISettings() {
       });
 
       if (result.success && result.configured) {
-        toast.success("Kết nối AI thành công!");
+        toast.success(text.testSuccess);
       } else {
         toast.error(result.message);
       }
@@ -489,7 +628,7 @@ export default function AdminAISettings() {
         [lang]: "",
       },
     }));
-    toast.success("Đã xoá tuỳ chỉnh — prompt mặc định sẽ được dùng");
+    toast.success(text.clearedCustomToast);
   };
 
   if (isLoading) {
@@ -497,7 +636,7 @@ export default function AdminAISettings() {
       <div className="admin-settings-section">
         <div className="admin-settings-section__loading">
           <RefreshCw className="spin" size={32} />
-          <p>Đang tải cấu hình...</p>
+          <p>{text.loading}</p>
         </div>
       </div>
     );
@@ -507,22 +646,22 @@ export default function AdminAISettings() {
     <div className="admin-settings-section">
       <div className="admin-settings-section__header">
         <Bot size={28} />
-        <h2>Cài đặt AI</h2>
+        <h2>{text.title}</h2>
       </div>
 
       {/* Status Badge */}
       {config?.hasApiKey && (
         <div className="admin-settings-section__status">
           <CheckCircle size={18} />
-          <span>API Key đã được cấu hình</span>
+          <span>{text.apiKeyConfigured}</span>
         </div>
       )}
 
       {/* Provider Selection */}
       <div className="admin-settings-section__group">
-        <h3>Nhà cung cấp AI</h3>
+        <h3>{text.providerTitle}</h3>
         <div className="form-group">
-          <label htmlFor="provider">Provider</label>
+          <label htmlFor="provider">{text.providerLabel}</label>
           <select
             id="provider"
             name="provider"
@@ -534,19 +673,17 @@ export default function AdminAISettings() {
             <option value="grok">xAI Grok</option>
             <option value="openai">OpenAI (Coming soon)</option>
           </select>
-          <small className="form-text">
-            Chọn nhà cung cấp dịch vụ AI bạn muốn sử dụng
-          </small>
+          <small className="form-text">{text.providerHint}</small>
         </div>
       </div>
 
       {/* API Configuration */}
       <div className="admin-settings-section__group">
-        <h3>Cấu hình API</h3>
+        <h3>{text.apiConfigTitle}</h3>
 
         <div className="form-group">
           <label htmlFor="apiKey">
-            API Key
+            {text.apiKeyLabel}
             {formData.provider === "gemini" && (
               <a
                 href="https://makersuite.google.com/app/apikey"
@@ -555,7 +692,7 @@ export default function AdminAISettings() {
                 className="api-key-link"
               >
                 <ExternalLink size={14} />
-                Lấy API key
+                {text.getApiKey}
               </a>
             )}
             {formData.provider === "grok" && (
@@ -566,7 +703,7 @@ export default function AdminAISettings() {
                 className="api-key-link"
               >
                 <ExternalLink size={14} />
-                Lấy API key tại x.ai
+                {text.getApiKeyAtXai}
               </a>
             )}
             {formData.provider === "openai" && (
@@ -577,7 +714,7 @@ export default function AdminAISettings() {
                 className="api-key-link"
               >
                 <ExternalLink size={14} />
-                Lấy API key
+                {text.getApiKey}
               </a>
             )}
           </label>
@@ -590,8 +727,11 @@ export default function AdminAISettings() {
               onChange={handleInputChange}
               placeholder={
                 config?.hasApiKey && !formData.apiKey
-                  ? "API key hiện tại: " + (config.apiKey || "****")
-                  : "Nhập API key mới..."
+                  ? text.apiKeyCurrentPlaceholder.replace(
+                      "{value}",
+                      config.apiKey || "****",
+                    )
+                  : text.apiKeyNewPlaceholder
               }
               className="form-control"
             />
@@ -599,7 +739,7 @@ export default function AdminAISettings() {
               type="button"
               className="input-group__btn"
               onClick={() => setShowApiKey(!showApiKey)}
-              title={showApiKey ? "Ẩn API key" : "Hiện API key"}
+              title={showApiKey ? text.hideApiKey : text.showApiKey}
             >
               {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -607,19 +747,16 @@ export default function AdminAISettings() {
           <small className="form-text">
             {config?.hasApiKey && !formData.apiKey ? (
               <span className="text-success">
-                <CheckCircle size={18} /> API key đã được mã hóa AES-256 và lưu
-                trữ an toàn. Để thay đổi, nhập API key mới.
+                <CheckCircle size={18} /> {text.apiKeyEncrypted}
               </span>
             ) : (
-              <span>
-                API key sẽ được mã hóa AES-256-GCM trước khi lưu vào database
-              </span>
+              <span>{text.apiKeyWillEncrypt}</span>
             )}
           </small>
         </div>
 
         <div className="form-group">
-          <label htmlFor="model">Model</label>
+          <label htmlFor="model">{text.modelLabel}</label>
           <select
             id="model"
             name="model"
@@ -660,11 +797,9 @@ export default function AdminAISettings() {
             )}
           </select>
           <small className="form-text">
-            {formData.provider === "gemini" &&
-              "Sử dụng Google Generative AI SDK — hỗ trợ đầy đủ các models mới nhất"}
-            {formData.provider === "grok" &&
-              "Sử dụng xAI API — cùng định dạng với OpenAI, base URL: api.x.ai"}
-            {formData.provider === "openai" && "Sử dụng OpenAI API chính thức"}
+            {formData.provider === "gemini" && text.modelHintGemini}
+            {formData.provider === "grok" && text.modelHintGrok}
+            {formData.provider === "openai" && text.modelHintOpenAI}
           </small>
         </div>
       </div>
@@ -672,20 +807,13 @@ export default function AdminAISettings() {
       {/* ─── Prompt Templates ─────────────────────────────────────────────── */}
       <div className="admin-settings-section__group">
         <div className="prompt-section-header">
-          <h3>Mẫu Prompt AI</h3>
+          <h3>{text.promptTitle}</h3>
           <span className="prompt-section-badge">
             <Code2 size={13} />
-            Prompt mặc định được nhúng từ code nguồn
+            {text.promptBadge}
           </span>
         </div>
-        <p className="prompt-section-desc">
-          Tuỳ chỉnh prompt gửi cho AI theo từng ngôn ngữ. Dùng{" "}
-          <code>{"{term}"}</code> để đại diện thuật ngữ.
-          <br />
-          <strong>Lưu ý:</strong> Nếu để trống, hệ thống sẽ tự động dùng prompt
-          mặc định được định nghĩa trong code — bấm <em>"Xem mặc định"</em> để
-          xem nội dung đang chạy.
-        </p>
+        <p className="prompt-section-desc">{text.promptDesc}</p>
 
         {/* Language Tabs */}
         <div className="prompt-lang-tabs">
@@ -705,7 +833,10 @@ export default function AdminAISettings() {
               {(formData.promptDefinition[lang.code] ||
                 formData.promptExplanation[lang.code] ||
                 formData.promptAnswer[lang.code]) && (
-                <span className="lang-tab-dot" title="Có tuỳ chỉnh" />
+                <span
+                  className="lang-tab-dot"
+                  title={text.customizedDotTitle}
+                />
               )}
             </button>
           ))}
@@ -714,7 +845,7 @@ export default function AdminAISettings() {
         {/* ── promptDefinition ── */}
         <div className="form-group">
           <label htmlFor="promptDefinition">
-            Prompt Định nghĩa (
+            {text.promptDefinition} (
             {PROMPT_LANGS.find((l) => l.code === promptLang)?.label})
           </label>
           <DefaultPromptPanel
@@ -722,6 +853,7 @@ export default function AdminAISettings() {
             lang={promptLang}
             customValue={formData.promptDefinition[promptLang] || ""}
             onReset={() => resetPrompt("promptDefinition", promptLang)}
+            text={text}
           />
           <textarea
             id="promptDefinition"
@@ -738,14 +870,14 @@ export default function AdminAISettings() {
             }}
             className="form-control"
             rows={3}
-            placeholder="Để trống → dùng prompt mặc định từ code. VD: Hãy định nghĩa thuật ngữ CNTT '{term}' bằng tiếng Việt, ngắn gọn và chính xác."
+            placeholder={text.promptDefinitionPlaceholder}
           />
         </div>
 
         {/* ── promptExplanation ── */}
         <div className="form-group">
           <label htmlFor="promptExplanation">
-            Prompt Giải thích chi tiết (
+            {text.promptExplanation} (
             {PROMPT_LANGS.find((l) => l.code === promptLang)?.label})
           </label>
           <DefaultPromptPanel
@@ -753,6 +885,7 @@ export default function AdminAISettings() {
             lang={promptLang}
             customValue={formData.promptExplanation[promptLang] || ""}
             onReset={() => resetPrompt("promptExplanation", promptLang)}
+            text={text}
           />
           <textarea
             id="promptExplanation"
@@ -769,14 +902,14 @@ export default function AdminAISettings() {
             }}
             className="form-control"
             rows={3}
-            placeholder="Để trống → dùng prompt mặc định từ code. VD: Hãy giải thích chi tiết thuật ngữ CNTT '{term}' bằng tiếng Việt."
+            placeholder={text.promptExplanationPlaceholder}
           />
         </div>
 
         {/* ── promptAnswer ── */}
         <div className="form-group">
           <label htmlFor="promptAnswer">
-            Prompt Hỏi đáp / Chat Agent (
+            {text.promptAnswer} (
             {PROMPT_LANGS.find((l) => l.code === promptLang)?.label})
           </label>
           <DefaultPromptPanel
@@ -784,6 +917,7 @@ export default function AdminAISettings() {
             lang={promptLang}
             customValue={formData.promptAnswer[promptLang] || ""}
             onReset={() => resetPrompt("promptAnswer", promptLang)}
+            text={text}
           />
           <textarea
             id="promptAnswer"
@@ -800,14 +934,14 @@ export default function AdminAISettings() {
             }}
             className="form-control"
             rows={3}
-            placeholder="Để trống → dùng prompt mặc định từ code. VD: Trả lời câu hỏi về thuật ngữ CNTT '{term}': {question}"
+            placeholder={text.promptAnswerPlaceholder}
           />
         </div>
       </div>
 
       {/* Advanced Settings */}
       <div className="admin-settings-section__group">
-        <h3>Cài đặt nâng cao</h3>
+        <h3>{text.advancedTitle}</h3>
 
         <div className="form-group">
           <label htmlFor="maxTokens">Max Tokens</label>
@@ -822,9 +956,7 @@ export default function AdminAISettings() {
             onChange={handleInputChange}
             className="form-control"
           />
-          <small className="form-text">
-            Số token tối đa cho mỗi phản hồi (100-4000)
-          </small>
+          <small className="form-text">{text.maxTokensHint}</small>
         </div>
       </div>
 
@@ -856,12 +988,12 @@ export default function AdminAISettings() {
           {isTesting ? (
             <>
               <RefreshCw className="spin" size={18} />
-              Đang test...
+              {text.testing}
             </>
           ) : (
             <>
               <RefreshCw size={18} />
-              Test kết nối
+              {text.testConnection}
             </>
           )}
         </button>
@@ -874,12 +1006,12 @@ export default function AdminAISettings() {
           {isSaving ? (
             <>
               <RefreshCw className="spin" size={18} />
-              Đang lưu...
+              {text.saving}
             </>
           ) : (
             <>
               <Save size={18} />
-              Lưu cấu hình
+              {text.saveConfig}
             </>
           )}
         </button>
@@ -889,14 +1021,13 @@ export default function AdminAISettings() {
       <div className="admin-settings-section__info">
         <AlertCircle size={20} />
         <div>
-          <h4>Hướng dẫn sử dụng</h4>
+          <h4>{text.guideTitle}</h4>
           <ul>
             <li>
-              <strong>SDK:</strong> Sử dụng @google/generative-ai SDK chính thức
-              - Hỗ trợ đầy đủ models mới nhất
+              <strong>{text.guideSdkLabel}</strong> {text.guideSdkText}
             </li>
             <li>
-              Lấy API key miễn phí tại{" "}
+              {text.guideApiKeyText}{" "}
               <a
                 href="https://makersuite.google.com/app/apikey"
                 target="_blank"
@@ -904,7 +1035,7 @@ export default function AdminAISettings() {
               >
                 Google AI Studio
               </a>{" "}
-              hoặc mua tại{" "}
+              {text.guideOrBuy}{" "}
               <a
                 href="https://console.x.ai/"
                 target="_blank"
@@ -915,13 +1046,12 @@ export default function AdminAISettings() {
               (Grok)
             </li>
             <li>
-              <strong>Bảo mật:</strong> API key được mã hóa AES-256-GCM trước
-              khi lưu
+              <strong>{text.guideSecurityLabel}</strong>{" "}
+              {text.guideSecurityText}
             </li>
-            <li>Nhấn &quot;Test kết nối&quot; để kiểm tra trước khi lưu</li>
+            <li>{text.guideTestButton}</li>
             <li>
-              <strong>Prompt:</strong> Để trống ô prompt = dùng mặc định từ
-              code. Nhập nội dung = nối thêm vào sau prompt mặc định.
+              <strong>{text.guidePromptLabel}</strong> {text.guidePromptText}
             </li>
           </ul>
         </div>

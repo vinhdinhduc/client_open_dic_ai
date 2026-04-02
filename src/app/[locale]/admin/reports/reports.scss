@@ -53,6 +53,37 @@
     }
 }
 
+.ai-usage-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    @media (max-width: $mobile) {
+        grid-template-columns: 1fr;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $spacing-sm $spacing-md;
+        border: 1px solid var(--border-color);
+        border-radius: $radius-md;
+        background: var(--bg-secondary);
+    }
+
+    &__label {
+        font-size: $font-sm;
+        color: var(--text-secondary);
+    }
+
+    &__value {
+        font-size: $font-base;
+        color: var(--text-primary);
+    }
+}
+
 // Top List
 .top-list {
     display: flex;

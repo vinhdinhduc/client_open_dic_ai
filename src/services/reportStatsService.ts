@@ -64,6 +64,22 @@ export interface RecentActivity {
     date: string;
 }
 
+export interface AIDailyUsageData {
+    date: string;
+    requestCount: number;
+    tokenCount: number;
+    maxDailyRequests: number;
+    maxDailyTokens: number;
+    requestPercent: number;
+    tokenPercent: number;
+}
+
+export interface AIDailyUsageReport {
+    days: number;
+    data: AIDailyUsageData[];
+    today: AIDailyUsageData | null;
+}
+
 export interface FullReport {
     overview: SystemOverview;
     termsOverTime: TimeSeriesData[];
@@ -74,6 +90,7 @@ export interface FullReport {
     topViewedTerms: TopViewedTerm[];
     usersByRole: UserByRole[];
     recentActivity: RecentActivity[];
+    aiRequestsDaily: AIDailyUsageReport;
 }
 
 const reportStatsService = {
@@ -111,6 +128,13 @@ const reportStatsService = {
             "/report-stats/contributions-over-time",
             { params: { months } }
         );
+        return res.data.data;
+    },
+
+    getAIRequestsDaily: async (days = 14): Promise<AIDailyUsageReport> => {
+        const res = await axiosInstance.get("/report-stats/ai-requests-daily", {
+            params: { days },
+        });
         return res.data.data;
     },
 

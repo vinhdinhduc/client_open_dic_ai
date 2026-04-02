@@ -14,6 +14,7 @@ export default function SettingsEmailPage() {
           <Mail size={28} />
           {t("emailConfigTitle")}
         </h1>
+        <p>{t("emailConfigSubtitle")}</p>
       </div>
       <AdminEmailSettings />
     </div>

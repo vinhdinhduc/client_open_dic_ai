@@ -58,6 +58,29 @@ class SystemConfigService {
         return response.data;
     }
 
+    async getEmailTemplates() {
+        const response = await axiosInstance.get("/users/email-templates");
+        return response.data;
+    }
+    async resetEmailTemplate(key: string) {
+        const response = await axiosInstance.delete(`/users/email-templates/${key}`);
+        return response.data;
+    }
+
+    async updateEmailTemplate(
+        key: string,
+        data: {
+            subject?: string;
+            title?: string;
+            accentColor?: string;
+            intro?: string;
+            ctaLabel?: string;
+            warningHtml?: string;
+        }
+    ) {
+        const response = await axiosInstance.put(`/users/email-templates/${key}`, data);
+        return response.data;
+    }
     /**
      * Cập nhật hoặc tạo mới cấu hình email
      * Sử dụng bulk endpoint với upsert để tự động tạo mới nếu chưa có
