@@ -31,6 +31,8 @@ import {
   Bot,
   Loader2,
   Users,
+  UserPlus,
+  UserPen,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axiosInstance from "@/lib/axios";
@@ -631,7 +633,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
           <div className="contributors-list">
             {term.createdBy && (
               <div className="contributor-item">
-                <UserIcon size={14} />
+                <UserPlus size={14} />
                 <Link
                   href={`/users/${term.createdBy._id}`}
                   className="contributor-name contributor-name--link"
@@ -644,7 +646,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
             {term.lastModifiedBy &&
               term.lastModifiedBy._id !== term.createdBy?._id && (
                 <div className="contributor-item">
-                  <Edit3 size={14} />
+                  <UserPen size={14} />
                   <Link
                     href={`/users/${term.lastModifiedBy._id}`}
                     className="contributor-name contributor-name--link"
