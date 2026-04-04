@@ -24,6 +24,8 @@ import "./admin-reputation.scss";
 
 export default function AdminReputationClient() {
   const t = useTranslations("reputationPage");
+  const utbStudentEmailRegex =
+    /^[a-zA-Z0-9]+\.k\d+[a-zA-Z]+(-[a-z])?@utb\.edu\.vn$/;
 
   const [activeTab, setActiveTab] = useState<
     "leaderboard" | "redemptions" | "adjust"
@@ -53,6 +55,18 @@ export default function AdminReputationClient() {
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [reviewNote, setReviewNote] = useState("");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const getBadgeLabelKey = (badge: string, email?: string) => {
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    if (
+      badge === "utb_verified" &&
+      normalizedEmail.endsWith("@utb.edu.vn") &&
+      !utbStudentEmailRegex.test(normalizedEmail)
+    ) {
+      return "badge_utb_teacher";
+    }
+    return `badge_${badge}`;
+  };
 
   const loadLeaderboard = useCallback(async () => {
     setLoading(true);
@@ -247,7 +261,7 @@ export default function AdminReputationClient() {
                     <td>
                       {entry.badges.map((b) => (
                         <span key={b} className="badge-small">
-                          {t(`badge_${b}` as any)}
+                          {t(getBadgeLabelKey(b, entry.user.email) as any)}
                         </span>
                       ))}
                     </td>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
@@ -58,6 +58,9 @@ export default function ReputationClient() {
   const [redeemPhone, setRedeemPhone] = useState("");
   const [redeeming, setRedeeming] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const normalizedEmail = (user?.email || "").trim().toLowerCase();
+  const utbStudentEmailRegex =
+    /^[a-zA-Z0-9]+\.k\d+[a-zA-Z]+(-[a-z])?@utb\.edu\.vn$/;
 
   const reputationFormula = t("policyFormula");
 
@@ -243,6 +246,31 @@ export default function ReputationClient() {
       setRedeeming(false);
     }
   };
+  const isUtbStudentEmail = useMemo(() => {
+    return utbStudentEmailRegex.test(normalizedEmail);
+  }, [normalizedEmail]);
+
+  const utbRoleLabel = useMemo(() => {
+    return isUtbStudentEmail ? t("utbStudent") : t("utbTeacher");
+  }, [isUtbStudentEmail, t]);
+
+  const verifyUtbLabel = useMemo(() => {
+    return isUtbStudentEmail ? t("verifyUtb") : t("verifyUTBTeacher");
+  }, [isUtbStudentEmail, t]);
+
+  const getBadgeLabelKey = useCallback(
+    (badge: string) => {
+      if (
+        badge === "utb_verified" &&
+        normalizedEmail.endsWith("@utb.edu.vn") &&
+        !utbStudentEmailRegex.test(normalizedEmail)
+      ) {
+        return "badge_utb_teacher";
+      }
+      return `badge_${badge}`;
+    },
+    [normalizedEmail],
+  );
 
   const handleDownloadCertificate = async (id: string) => {
     setDownloadingId(id);
@@ -528,7 +556,7 @@ export default function ReputationClient() {
                 <div className="badges-grid">
                   {reputation.badges.map((badge) => (
                     <span key={badge} className="badge-item">
-                      {t(`badge_${badge}`)}
+                      {t(getBadgeLabelKey(badge) as any)}
                     </span>
                   ))}
                 </div>
@@ -538,11 +566,11 @@ export default function ReputationClient() {
             {/* UTB */}
             <div className="overview-card">
               <h3>
-                <GraduationCap size={18} /> {t("utbStudent")}
+                <GraduationCap size={18} /> {utbRoleLabel}
               </h3>
               {reputation.isUtbStudent ? (
                 <p className="verified-text">
-                  <BadgeCheck size={16} /> {t("verified")}
+                  <BadgeCheck size={16} /> {utbRoleLabel} - {t("verified")}
                 </p>
               ) : (
                 <button
@@ -551,7 +579,7 @@ export default function ReputationClient() {
                   disabled={verifying}
                 >
                   {verifying ? <Loader2 className="spin" size={16} /> : null}
-                  {t("verifyUtb")}
+                  {verifyUtbLabel}
                 </button>
               )}
             </div>
@@ -839,14 +867,14 @@ export default function ReputationClient() {
             ) : (
               <div className="utb-required">
                 <GraduationCap size={48} />
-                <p>{t("utbStudent")}</p>
+                <p>{utbRoleLabel}</p>
                 <button
                   className="btn-verify"
                   onClick={handleVerifyUtb}
                   disabled={verifying}
                 >
                   {verifying ? <Loader2 className="spin" size={16} /> : null}
-                  {t("verifyUtb")}
+                  {verifyUtbLabel}
                 </button>
               </div>
             )}
