@@ -16,14 +16,14 @@ export interface Comment extends BaseEntity {
     replies?: Comment[];
 }
 
-// Create comment data
+// Dữ liệu tạo bình luận
 export interface CreateCommentData {
     termId: string;
     content: string;
     parentComment?: string;
 }
 
-// Update comment data
+// Dữ liệu cập nhật bình luận
 export interface UpdateCommentData {
     content?: string;
     status?: CommentStatus;
@@ -37,7 +37,7 @@ export interface GetCommentsParams {
     limit?: number;
 }
 
-// Paginated comments response
+// Phản hồi bình luận phân trang
 export interface PaginatedComments {
     comments: Comment[];
     pagination: {

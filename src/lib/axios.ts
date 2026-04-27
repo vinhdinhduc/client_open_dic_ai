@@ -28,7 +28,7 @@ const processQueue = (error: any, token: string | null = null) => {
     failedQueue = [];
 };
 
-// Request interceptor - Add token to header
+// Interceptor request: thêm token vào header
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("accessToken");
@@ -42,7 +42,7 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-// Response interceptor - Handle errors and auto-refresh token
+// Interceptor response: xử lý lỗi và tự động làm mới token
 axiosInstance.interceptors.response.use(
     (response) => {
         return response;
@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Helper: redirect to login once and show session toast (deduped)
+        // Hàm hỗ trợ: chỉ chuyển hướng về trang đăng nhập một lần và hiển thị toast phiên làm việc
         const redirectToLogin = () => {
             if (hasRedirected) return;
             hasRedirected = true;
@@ -65,15 +65,15 @@ axiosInstance.interceptors.response.use(
             }
         };
 
-        // Handle 401 Unauthorized - Try to refresh token
+        // Xử lý lỗi 401 Unauthorized - thử làm mới token
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (originalRequest.url?.includes('/auth/refresh-token')) {
-                // Refresh token itself failed, logout user
+                // Làm mới token thất bại, đăng xuất người dùng
                 redirectToLogin();
                 return Promise.reject(error);
             }
 
-            // Skip token refresh for auth endpoints (login, register, etc.)
+            // Bỏ qua làm mới token cho các endpoint xác thực (login, register, ...)
             if (
                 originalRequest.url?.includes('/auth/login') ||
                 originalRequest.url?.includes('/auth/register')
@@ -82,7 +82,7 @@ axiosInstance.interceptors.response.use(
             }
 
             if (isRefreshing) {
-                // Wait for the refresh to complete
+                // Chờ quá trình làm mới token hoàn tất
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
                 }).then(token => {
@@ -121,7 +121,7 @@ axiosInstance.interceptors.response.use(
                     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
                     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-                    // Reset redirect flag on successful token refresh
+                    // Đặt lại cờ chuyển hướng khi làm mới token thành công
                     hasRedirected = false;
                     processQueue(null, newAccessToken);
 
@@ -136,7 +136,7 @@ axiosInstance.interceptors.response.use(
             }
         }
 
-        // Handle other errors
+        // Xử lý các lỗi khác
         if (error.response) {
             const { status, data } = error.response;
 

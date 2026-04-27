@@ -2,7 +2,7 @@
 
 import { BaseEntity } from "./common.types";
 
-// Notification type
+// Loại thông báo
 export type NotificationType =
     | "contribution_approved"
     | "contribution_rejected"
@@ -11,7 +11,7 @@ export type NotificationType =
     | "system"
     | "welcome";
 
-// Notification interface
+// Kiểu dữ liệu thông báo
 export interface Notification extends BaseEntity {
     user: string;
     type: NotificationType;
@@ -22,7 +22,7 @@ export interface Notification extends BaseEntity {
     readAt?: string;
 }
 
-// Mark notification as read
+// Đánh dấu thông báo đã đọc
 export interface MarkNotificationReadData {
     notificationIds: string[];
 }
@@ -35,7 +35,7 @@ export interface GetNotificationsParams {
     limit?: number;
 }
 
-// Paginated notifications response
+// Phản hồi thông báo phân trang
 export interface PaginatedNotifications {
     notifications: Notification[];
     pagination: {

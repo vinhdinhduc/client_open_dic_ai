@@ -2,13 +2,13 @@ import axiosInstance from "@/lib/axios";
 import { ApiResponse } from "@/types/api.types";
 import { CategoryFormData } from "@/types/category.types";
 
-// Re-export for backward compatibility
+// Xuất lại để tương thích ngược
 export type { CategoryFormData } from "@/types/category.types";
 
-// Category interface cho service (với id thay vì _id từ API)
+// Kiểu dữ liệu danh mục cho service (với id thay vì _id từ API)
 export interface Category {
     id: string;
-    _id?: string; // For backward compatibility
+    _id?: string; // Để tương thích ngược
     name: string | {
         vi: string;
         en?: string;

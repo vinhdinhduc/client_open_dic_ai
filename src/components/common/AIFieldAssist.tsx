@@ -59,7 +59,7 @@ export default function AIFieldAssist({
   // Sync language khi prop thay đổi
   useEffect(() => {
     setSelectedLang(language);
-    // Reset kết quả khi đổi ngôn ngữ
+    // Đặt lại kết quả khi đổi ngôn ngữ
     setResult(null);
     setError(null);
   }, [language]);

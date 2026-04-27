@@ -120,7 +120,7 @@ class AIAgentService {
             return response.data.data.suggestions || [];
         } catch (error: any) {
             console.error('Get AI Suggestions Error:', error);
-            // Return empty suggestions if error
+            // Trả về gợi ý rỗng nếu có lỗi
             return [];
         }
     }

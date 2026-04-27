@@ -11,7 +11,7 @@ export default function EmailVerificationBanner() {
   const [isResending, setIsResending] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Only show banner if user is logged in, email is not verified, and not dismissed
+  // Chỉ hiển thị banner khi đã đăng nhập, email chưa xác thực và chưa tắt banner
   if (!user || (user as any).emailVerified || isDismissed) {
     return null;
   }

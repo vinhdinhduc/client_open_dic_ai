@@ -415,7 +415,7 @@ export default function AdminEmailSettings() {
         await systemConfigService.resetEmailTemplate(selectedTemplateKey);
       if (response.success) {
         toast.success(tt("auto.k081"));
-        // Update local state
+        // Cập nhật state cục bộ
         setTemplateForm({ ...selectedTemplate.default });
         setTemplates((prev) =>
           prev.map((t) =>

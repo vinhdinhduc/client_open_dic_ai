@@ -4,7 +4,7 @@ import { BaseEntity } from "./common.types";
 import { MultiLangText } from "./term.types";
 import { UserRef } from "./user.types";
 
-// Category interface
+// Kiểu dữ liệu danh mục
 export interface Category extends BaseEntity {
     name: MultiLangText;
     slug: string;
@@ -17,7 +17,7 @@ export interface Category extends BaseEntity {
     moderators?: UserRef[];
 }
 
-// Simplified Category for dropdowns/references
+// Category rút gọn cho dropdown/tham chiếu
 export interface CategoryRef {
     id: string;
     name: string | MultiLangText;
@@ -25,7 +25,7 @@ export interface CategoryRef {
     icon?: string;
 }
 
-// Category form data for create/update
+// Dữ liệu form danh mục cho tạo/cập nhật
 export interface CategoryFormData {
     name: {
         vi: string;

@@ -1,5 +1,5 @@
-// Admin Settings Components
-// Centralized exports for all admin settings components
+// Quản trị viên Settings Components
+// Xuất tập trung cho toàn bộ component cài đặt quản trị
 
 export { default as AdminAISettings } from "./AdminAISettings";
 export { default as AdminEmailSettings } from "./AdminEmailSettings";

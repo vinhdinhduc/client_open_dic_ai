@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, user } = useAuth();
 
-  // Form state
+  // Trạng thái biểu mẫu
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   const redirect =
     searchParams.get("returnUrl") || searchParams.get("redirect");
-  // Check if already logged in
+  // Kiểm tra nếu đã đăng nhập
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
       router.push("/admin");
@@ -47,7 +47,7 @@ export default function LoginPage() {
     }
   }, [router, isAuthenticated, user, redirect]);
 
-  // Handle input change
+  // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -55,14 +55,14 @@ export default function LoginPage() {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear error when user types
+    // Xóa lỗi khi người dùng nhập liệu
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
     setAlertMessage(null);
   };
 
-  // Validate form
+  // Kiểm tra hợp lệ biểu mẫu
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
 
@@ -82,7 +82,7 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submit
+  // Xử lý gửi biểu mẫu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

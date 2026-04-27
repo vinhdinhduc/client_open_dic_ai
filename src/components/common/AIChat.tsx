@@ -54,7 +54,7 @@ export default function AIChat({
         return;
       }
 
-      // If already cached, just show it
+      // Nếu đã có trong cache thì chỉ hiển thị lại
       if (cachedResponses.current[askLang]) {
         setResponse(cachedResponses.current[askLang]);
         return;
@@ -106,7 +106,7 @@ export default function AIChat({
     }
 
     try {
-      // Build multi-lang contribution data from all cached responses
+      // Tạo dữ liệu đóng góp đa ngôn ngữ từ toàn bộ phản hồi đã cache
       const langs: Record<
         string,
         {
@@ -128,7 +128,7 @@ export default function AIChat({
         }
       }
 
-      // Ensure current response is included
+      // Đảm bảo phản hồi hiện tại được đưa vào
       if (data.structured && !langs[data.language]) {
         langs[data.language] = {
           term: data.term || "",
@@ -153,7 +153,7 @@ export default function AIChat({
       console.error("Failed to save contribution data:", error);
       toast.error(t("errorSavingData") || "Failed to save data");
 
-      // Fallback: Chỉ truyền term qua URL
+      // Dự phòng: chỉ truyền term qua URL
       onClose();
       router.push(`/contribute?term=${encodeURIComponent(data.term)}`);
     }

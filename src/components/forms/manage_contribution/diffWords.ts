@@ -5,7 +5,7 @@ export type DiffPart = {
 }
 
 function tokenize(text: string): string[] {
-    // Keep whitespace tokens so spaces are preserved when merging adjacent parts
+    // Giữ token khoảng trắng để bảo toàn dấu cách khi gộp các phần liền kề
     return text.split(/(\s+)/).filter(token => token.length > 0);
 }
 export function diffWords(oldText: string, newText: string): DiffPart[] {

@@ -9,7 +9,7 @@ import contactService from "@/services/contactService";
 export default function AboutForms() {
   const t = useTranslations("aboutPage");
 
-  // Feedback form
+  // Biểu mẫu phản hồi
   const [feedbackData, setFeedbackData] = useState({
     name: "",
     email: "",
@@ -18,7 +18,7 @@ export default function AboutForms() {
   });
   const [feedbackLoading, setFeedbackLoading] = useState(false);
 
-  // Moderator form
+  // Biểu mẫu đăng ký moderator
   const [moderatorData, setModeratorData] = useState({
     name: "",
     email: "",

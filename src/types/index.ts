@@ -30,9 +30,9 @@ export * from "./comment.types";
 // Contribution types - Đóng góp
 export * from "./contribution.types";
 
-// Report types - Báo xấu
+// Các loại báo xấu - Báo xấu
 export * from "./report.types";
 
-// Notification types - Thông báo
+// Loại thông báos - Thông báo
 export * from "./notification.types";
 

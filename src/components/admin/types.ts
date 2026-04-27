@@ -11,7 +11,7 @@ export interface LoadingState {
     message?: string;
 }
 
-// Test Result
+// Kết quả kiểm tra
 export interface TestResult {
     success: boolean;
     message: string;
@@ -73,7 +73,7 @@ export interface SettingsSectionProps {
     children: React.ReactNode;
 }
 
-// Form Group Props
+// Thuộc tính Form Group
 export interface FormGroupProps {
     label: string;
     htmlFor?: string;
@@ -84,7 +84,7 @@ export interface FormGroupProps {
     children: React.ReactNode;
 }
 
-// API Response Types
+// Các kiểu phản hồi API
 export interface SettingsAPIResponse<T = any> {
     success: boolean;
     message?: string;
@@ -99,7 +99,7 @@ export type SettingsStatus = "idle" | "loading" | "saving" | "testing" | "error"
 export type AIProvider = "gemini" | "openai";
 export type EmailProvider = "gmail" | "outlook" | "smtp";
 
-// Settings Categories
+// Nhóm cài đặt
 export type SettingsCategory = "ai" | "email" | "rate-limit" | "general" | "security";
 
 // Settings Action Types
@@ -120,7 +120,7 @@ export interface SettingsState<T = any> {
     success: string | null;
 }
 
-// Time format options
+// Tùy chọn định dạng thời gian
 export interface TimeFormatOptions {
     showSeconds?: boolean;
     showMilliseconds?: boolean;

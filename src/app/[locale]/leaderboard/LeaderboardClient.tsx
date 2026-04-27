@@ -267,7 +267,7 @@ export default function LeaderboardClient() {
     if (activeTab === "reputation") loadReputationLeaderboard();
   }, [activeTab, loadReputationLeaderboard]);
 
-  // Reset page to 1 when filters change
+  // Đặt lại về trang 1 khi bộ lọc thay đổi
   const handleTermTypeChange = (type: TermLeaderboardType) => {
     setTermType(type);
     setTermsPage(1);

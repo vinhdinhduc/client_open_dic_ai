@@ -94,7 +94,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     detailedExplanation?: string;
     examples?: string[];
   } | null>(null);
-  // Client-side cache: store AI responses per language to avoid re-calling API
+  // Cache phía client: lưu phản hồi AI theo ngôn ngữ để tránh gọi API lại
   const [aiCache, setAiCache] = useState<
     Record<
       string,
@@ -106,7 +106,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     >
   >({});
 
-  // Load comments và check favorite khi mount
+  // Tải bình luận và kiểm tra yêu thích khi mount
   useEffect(() => {
     loadComments();
     if (isAuthenticated) {
@@ -135,7 +135,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     }
   };
 
-  // Helpers - use contentLang for dictionary content (independent from system language)
+  // Hàm hỗ trợ: dùng contentLang cho nội dung từ điển (độc lập với ngôn ngữ hệ thống)
   const getText = (
     multiLang: { vi?: string; en?: string; lo?: string } | undefined,
   ): string => {
@@ -149,7 +149,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     );
   };
 
-  // For UI elements, use system language
+  // Với thành phần UI, dùng ngôn ngữ hệ thống
   const getUIText = (
     multiLang: { vi?: string; en?: string; lo?: string } | undefined,
   ): string => {
@@ -179,7 +179,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     );
   };
 
-  // Handlers
+  // Các hàm xử lý
   const handleFavoriteToggle = async () => {
     if (!isAuthenticated) {
       toast.error(t("loginToFavorite"));
@@ -239,7 +239,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     setComments((prev) => [newComment, ...prev]);
   };
 
-  // AI Ask handler
+  // Hàm xử lý hỏi AI
   const handleAskAI = async (lang?: string) => {
     if (!isAuthenticated) {
       toast.error(t("loginToAskAI") || "Vui lòng đăng nhập để hỏi AI");
@@ -263,7 +263,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     const targetLang = lang || contentLang;
     setShowAiPanel(true);
 
-    // Check client-side cache first
+    // Kiểm tra cache phía client trước
     if (aiCache[targetLang]) {
       setAiResponse(aiCache[targetLang]);
       return;
@@ -284,7 +284,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
           examples: data.examples?.length ? data.examples : undefined,
         };
         setAiResponse(parsed);
-        // Save to local cache
+        // Lưu vào cache cục bộ
         setAiCache((prev) => ({ ...prev, [targetLang]: parsed }));
       }
     } catch (error: any) {
@@ -296,7 +296,7 @@ export default function TermDetailView({ term }: TermDetailViewProps) {
     }
   };
 
-  // Re-call AI when content language changes
+  // Gọi lại AI khi ngôn ngữ nội dung thay đổi
   useEffect(() => {
     if (showAiPanel) {
       handleAskAI(contentLang);

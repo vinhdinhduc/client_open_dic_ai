@@ -86,7 +86,7 @@ export function EditTermForm({
   const [isAISuggesting, setIsAISuggesting] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
-  // Form state
+  // Trạng thái biểu mẫu
   const [term, setTerm] = useState<MultiLangText>({ vi: "", en: "", lo: "" });
   const [definition, setDefinition] = useState<MultiLangText>({
     vi: "",
@@ -132,15 +132,15 @@ export function EditTermForm({
     RelatedTermOption[]
   >([]);
 
-  // Original data for comparison
+  // Dữ liệu gốc để so sánh
   const [originalData, setOriginalData] = useState<CreateTermData | null>(null);
 
-  // Fetch term data and categories
+  // Lấy dữ liệu thuật ngữ và danh mục
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch categories and term data in parallel
+        // Lấy danh mục và dữ liệu thuật ngữ song song
         const [categoriesResult, termData] = await Promise.all([
           categoryService.getCategories(),
           getTermById(termId),
@@ -150,7 +150,7 @@ export function EditTermForm({
         setLoadingCategories(false);
 
         if (termData) {
-          // Populate form with term data
+          // Điền dữ liệu thuật ngữ vào form
           setTerm({
             vi: termData.term?.vi || "",
             en: termData.term?.en || "",
@@ -184,7 +184,7 @@ export function EditTermForm({
           setTags(termData.tags || []);
           setStatus(termData.status || "approved");
 
-          // Load related terms
+          // Tải các thuật ngữ liên quan
           if (termData.relatedTerms && termData.relatedTerms.length > 0) {
             const ids = termData.relatedTerms.map((rt) => rt._id);
             setRelatedTermIds(ids);
@@ -193,7 +193,7 @@ export function EditTermForm({
             setInitialRelatedTermObjects(termData.relatedTerms);
           }
 
-          // Store original data for comparison
+          // Lưu dữ liệu gốc để so sánh
           setOriginalData({
             term: {
               vi: termData.term?.vi || "",
@@ -227,7 +227,7 @@ export function EditTermForm({
     fetchData();
   }, [termId, router, termsBasePath]);
 
-  // Debounced search for related terms
+  // Tìm kiếm thuật ngữ liên quan có debounce
   useEffect(() => {
     if (!relatedSearchInput.trim()) {
       setRelatedSearchResults([]);
@@ -252,7 +252,7 @@ export function EditTermForm({
           setShowRelatedDropdown(true);
         }
       } catch {
-        // ignore
+        // bỏ qua
       } finally {
         setRelatedSearchLoading(false);
       }
@@ -260,7 +260,7 @@ export function EditTermForm({
     return () => clearTimeout(timer);
   }, [relatedSearchInput, relatedTermIds, termId]);
 
-  // Handlers for multi-lang fields
+  // Hàm xử lý cho các trường đa ngôn ngữ
   const handleMultiLangChange = (
     setter: React.Dispatch<React.SetStateAction<MultiLangText>>,
     lang: LangKey,
@@ -287,7 +287,7 @@ export function EditTermForm({
     }
   };
 
-  // Tags handlers
+  // Hàm xử lý thẻ
   const handleAddTag = () => {
     const trimmedTag = tagInput.trim().toLowerCase();
     if (trimmedTag && !tags.includes(trimmedTag)) {
@@ -356,7 +356,7 @@ export function EditTermForm({
     }
   };
 
-  // Reset form to original data
+  // Đặt lại biểu mẫu to original data
   const handleReset = () => {
     if (originalData) {
       setTerm({
@@ -395,7 +395,7 @@ export function EditTermForm({
     }
   };
 
-  // Form validation
+  // Kiểm tra hợp lệ biểu mẫu
   const validateForm = (): boolean => {
     if (!categoryId) {
       toast.error(t("errorCategory"));
@@ -404,7 +404,7 @@ export function EditTermForm({
     return true;
   };
 
-  // Submit handler
+  // Hàm xử lý gửi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;

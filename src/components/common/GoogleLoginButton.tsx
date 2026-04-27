@@ -14,7 +14,7 @@ export default function GoogleLoginButton({
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
   const handleGoogleLogin = () => {
-    // Redirect to backend Passport.js OAuth endpoint
+    // Chuyển hướng tới endpoint OAuth của Passport.js ở backend
     window.location.href = `${API_URL}/auth/google/passport`;
   };
 

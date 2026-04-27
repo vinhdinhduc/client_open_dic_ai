@@ -183,7 +183,7 @@ export function cleanupExpiredData(): void {
                         }
                     }
                 } catch {
-                    // If parsing fails, remove the item
+                    // Nếu parse lỗi thì xóa mục này
                     sessionStorage.removeItem(key);
                     cleanedCount++;
                 }

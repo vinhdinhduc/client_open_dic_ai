@@ -15,7 +15,7 @@ export interface AIResponse {
     field?: string;
     relatedTerms?: string[];
     tags?: string[];
-    // Fallback field (khi structured = false)
+    // Trường fallback (khi structured = false)
     response?: string;
     // Metadata
     timestamp: Date;
@@ -135,7 +135,7 @@ class AIService {
         }
     }
 
-    // === Admin Methods ===
+    // === Các phương thức quản trị ===
 
     /**
      * Lấy cấu hình AI hiện tại (Admin only)

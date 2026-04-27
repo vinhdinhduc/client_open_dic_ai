@@ -36,7 +36,7 @@ export const EditUser: React.FC<EditUserProps> = ({
     preferredLanguage: "vi",
   });
 
-  // Populate form when user changes
+  // Điền biểu mẫu khi người dùng thay đổi
   useEffect(() => {
     if (user) {
       setFormData({

@@ -28,7 +28,7 @@ class ContactService {
         return response.data;
     }
 
-    // Admin
+    // Quản trị viên
     async getFeedbacks(params?: { status?: string; page?: number; limit?: number }) {
         const response = await axiosInstance.get(`${this.baseUrl}/feedback`, { params });
         return response.data;

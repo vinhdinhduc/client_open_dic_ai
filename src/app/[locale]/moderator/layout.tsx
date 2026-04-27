@@ -175,7 +175,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
     return () => clearInterval(interval);
   }, [isAuthenticated, user?.role]);
 
-  // Check moderator access
+  // Kiểm tra quyền truy cập moderator
   useEffect(() => {
     if (isLoading) return;
 
@@ -241,7 +241,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
 
   const getBadgeCount = (itemId: string): string | number => {
     const count = getRawBadgeCount(itemId);
-    // Format count: if > 99, show "99+"
+    // Định dạng số lượng: nếu > 99 thì hiển thị "99+"
     if (count > 99) {
       return "99+";
     }
@@ -253,7 +253,7 @@ export default function ModeratorLayout({ children }: AdminLayoutProps) {
     router.push("/login");
   };
 
-  // Show loading if not authorized
+  // Hiển thị loading nếu chưa được phân quyền
   if (!isAuthenticated || user?.role !== "moderator") {
     return (
       <div className="admin-loading">

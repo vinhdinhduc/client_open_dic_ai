@@ -112,7 +112,7 @@ export default function UsersPage() {
     });
   const [savingPermissions, setSavingPermissions] = useState(false);
 
-  // Close dropdown when clicking outside
+  // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -137,7 +137,7 @@ export default function UsersPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch categories once on mount
+  // Tải danh mục một lần khi mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -152,10 +152,10 @@ export default function UsersPage() {
     fetchCategories();
   }, []);
 
-  // Fetch users when page or filters change
+  // Tải người dùng khi đổi trang hoặc bộ lọc
   useEffect(() => {
     const fetchUsers = async () => {
-      // Chỉ set tableLoading nếu không phải lần load đầu tiên
+      // Chỉ set tableLoading nếu không phải lần tải đầu tiên
       if (!initialLoading) {
         setTableLoading(true);
       }
@@ -188,7 +188,7 @@ export default function UsersPage() {
     fetchUsers();
   }, [currentPage, roleFilter, statusFilter, debouncedSearch, itemsPerPage]);
 
-  // Reset to page 1 when filters change
+  // Đặt lại về trang 1 khi bộ lọc thay đổi
   useEffect(() => {
     setCurrentPage(1);
   }, [roleFilter, statusFilter, debouncedSearch, itemsPerPage]);
@@ -287,7 +287,7 @@ export default function UsersPage() {
       const link = document.createElement("a");
       link.href = url;
 
-      // Generate filename with current date
+      // Tạo tên tệp theo ngày hiện tại
       const now = new Date();
       const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
       link.download = `nguoi-dung-${dateStr}.xlsx`;
@@ -468,7 +468,7 @@ export default function UsersPage() {
     setShowAddModal(true);
   };
 
-  // Handle reset password
+  // Xử lý đặt lại mật khẩu
   const handleResetPassword = async () => {
     if (!selectedUser || !newPassword) return;
     if (newPassword !== confirmPassword) {
@@ -518,7 +518,7 @@ export default function UsersPage() {
     return { level: score, label: t("passwordVeryStrong"), color: "#16a34a" };
   };
 
-  // Handle resend verification email
+  // Xử lý gửi lại email xác thực
   const handleResendVerification = async (user: User) => {
     try {
       const res = await userService.resendVerificationEmail(user._id);
@@ -530,7 +530,7 @@ export default function UsersPage() {
     }
   };
 
-  // Handle batch update status
+  // Xử lý cập nhật trạng thái hàng loạt
   const handleBatchUpdateStatus = async () => {
     if (selectedUsers.length === 0) {
       toast.error(t("selectAtLeastOne"));
@@ -553,7 +553,7 @@ export default function UsersPage() {
     }
   };
 
-  // Handle view activity
+  // Xử lý xem hoạt động
   const handleViewActivity = async (user: User) => {
     setSelectedUser(user);
     setShowActivityModal(true);
@@ -592,7 +592,7 @@ export default function UsersPage() {
     }
   };
 
-  // Chỉ hiển thị full page loading khi load lần đầu
+  // Chỉ hiển thị loading toàn trang khi tải lần đầu
   if (initialLoading) {
     return (
       <div className="admin-loading">

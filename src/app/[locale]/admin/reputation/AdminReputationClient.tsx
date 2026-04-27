@@ -39,7 +39,7 @@ export default function AdminReputationClient() {
   const [rdStatusFilter, setRdStatusFilter] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Adjust form
+  // Biểu mẫu điều chỉnh
   const [adjustUserId, setAdjustUserId] = useState("");
   const [adjustUserName, setAdjustUserName] = useState("");
   const [userSearch, setUserSearch] = useState("");

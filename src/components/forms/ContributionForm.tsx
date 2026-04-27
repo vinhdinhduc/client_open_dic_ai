@@ -79,7 +79,7 @@ export default function ContributionForm() {
     contributorNote: "",
   });
 
-  // Load categories
+  // Tải danh mục
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -121,7 +121,7 @@ export default function ContributionForm() {
           if (entry.examples?.length) langExamples[lang] = entry.examples;
         }
 
-        // Merge examples across languages
+        // Gộp ví dụ giữa các ngôn ngữ
         const maxExamples = Math.max(
           ...Object.values(langExamples).map((e) => e.length),
           0,
@@ -150,7 +150,7 @@ export default function ContributionForm() {
 
         clearContributionData(decodeURIComponent(mlKey));
 
-        // Set active tab to first available language
+        // Đặt tab đang chọn là ngôn ngữ khả dụng đầu tiên
         const availableLangs = Object.keys(mlData.langs) as LanguageTab[];
         if (availableLangs.length > 0) {
           setCurrentLang(availableLangs[0]);

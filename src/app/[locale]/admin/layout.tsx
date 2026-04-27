@@ -63,7 +63,7 @@ interface MenuItem {
   children?: SubMenuItem[];
 }
 
-// Menu items cho Admin - sử dụng translation keys
+// Menu cho quản trị viên - sử dụng key dịch thuật
 const adminMenuItems: MenuItem[] = [
   {
     id: "dashboard",
@@ -229,7 +229,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return () => clearInterval(interval);
   }, [isAuthenticated, user?.role]);
 
-  // Check admin access
+  // Kiểm tra quyền truy cập quản trị viên
   useEffect(() => {
     if (isLoading) return;
 
@@ -297,7 +297,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     router.push("/login");
   };
 
-  // Show loading if not authorized
+  // Hiển thị loading nếu chưa được phân quyền
   if (
     !isAuthenticated ||
     (user?.role !== "admin" && user?.role !== "moderator")

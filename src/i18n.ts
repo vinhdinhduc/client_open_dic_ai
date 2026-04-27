@@ -11,7 +11,7 @@ export const defaultLocale = 'vi';
 export type Locale = typeof locales[number];
 
 export default getRequestConfig(async ({ locale }) => {
-  // Fallback to defaultLocale if locale is undefined
+  // Nếu locale không xác định thì dùng defaultLocale
   const safeLocale = locale && locales.includes(locale as Locale) ? locale : defaultLocale;
   
   return {

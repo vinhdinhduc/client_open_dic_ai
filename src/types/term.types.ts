@@ -37,7 +37,7 @@ export interface RelatedTerm {
     definition?: MultiLangText;
 }
 
-// Term Card Data (for list display)
+// Dữ liệu thẻ thuật ngữ (để hiển thị danh sách)
 export interface TermCard {
     _id: string;
     term: MultiLangText;
@@ -70,7 +70,7 @@ export interface Term extends BaseEntity {
     lastModifiedBy?: UserRef | null;
 }
 
-// Term form data for create/update
+// Dữ liệu form thuật ngữ cho tạo/cập nhật
 export interface TermFormData {
     term: MultiLangText;
     definition: MultiLangText;
@@ -94,7 +94,7 @@ export interface GetTermsParams {
     language?: string;
 }
 
-// Paginated terms response
+// Phản hồi thuật ngữ phân trang
 export interface PaginatedTerms {
     terms: Term[];
     pagination: {

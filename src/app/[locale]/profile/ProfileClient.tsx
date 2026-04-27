@@ -124,7 +124,7 @@ export default function ProfilePage() {
         rejected: rejectedRes.data?.pagination?.total || 0,
       });
     } catch {
-      // Silently fail for stats
+      // Bỏ qua lỗi thống kê một cách im lặng
     }
   };
 
@@ -195,7 +195,7 @@ export default function ProfilePage() {
           newPassword: "",
           confirmPassword: "",
         });
-        // Refresh profile to update hasPassword flag
+        // Làm mới hồ sơ để cập nhật cờ hasPassword
         await refreshProfile();
       }
     } catch {

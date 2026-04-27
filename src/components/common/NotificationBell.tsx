@@ -35,7 +35,7 @@ export default function NotificationBell({
     }
   }, []);
 
-  // Initial fetch and polling
+  // Tải dữ liệu ban đầu và polling định kỳ
   useEffect(() => {
     fetchNotifications();
 

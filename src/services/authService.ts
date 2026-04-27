@@ -165,7 +165,7 @@ export const authService = {
      * Đăng ký
      */
     register: async (userData: RegisterData): Promise<AuthResponse> => {
-        // Remove confirmPassword before sending to API
+        // Xóa confirmPassword trước khi gửi lên API
         const { confirmPassword, ...registerData } = userData;
 
         const response = await axiosInstance.post<AuthResponse>(

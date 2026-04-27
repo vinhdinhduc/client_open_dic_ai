@@ -34,7 +34,7 @@ export interface TermCardData {
   createdBy: User | null;
   viewCount: number;
   favoriteCount?: number;
-  favoritesCount?: number; // Alias for backward compatibility
+  favoritesCount?: number; // Alias để tương thích ngược
   commentCount?: number;
   status?: "pending" | "approved" | "rejected";
   isDeleted?: boolean;
@@ -74,7 +74,7 @@ export interface Comment {
   replies?: Comment[];
 }
 
-// Report types
+// Các loại báo xấu
 export interface ReportData {
   reason: 'incorrect' | 'spam' | 'inappropriate' | 'duplicate' | 'other';
   description?: string;
@@ -118,7 +118,7 @@ export interface GetTermsResponse {
   pagination: PaginationInfo;
 }
 
-// Stats cho admin
+// Thống kê cho quản trị viên
 export interface TermStats {
   total: number;
   approved: number;

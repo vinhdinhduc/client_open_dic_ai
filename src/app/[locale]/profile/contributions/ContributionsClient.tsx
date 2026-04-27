@@ -48,7 +48,7 @@ export default function MyContributionsPage() {
     rejected: 0,
   });
 
-  // Load stats once when authenticated
+  // Tải thống kê một lần khi đã xác thực
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       loadStats();
@@ -56,7 +56,7 @@ export default function MyContributionsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, authLoading]);
 
-  // Load contributions when filters change
+  // Tải đóng góp khi bộ lọc thay đổi
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       loadContributions();
@@ -66,7 +66,7 @@ export default function MyContributionsPage() {
 
   const loadStats = async () => {
     try {
-      // Load counts for each status in parallel
+      // Tải số lượng theo từng trạng thái theo cơ chế song song
       const [allRes, pendingRes, approvedRes, rejectedRes] = await Promise.all([
         contributionService.getMyContributions({ limit: 1 }),
         contributionService.getMyContributions({
@@ -174,7 +174,7 @@ export default function MyContributionsPage() {
     return category.name.vi || category.name.en || category.name.lo || "";
   };
 
-  // Show loading spinner while checking authentication
+  // Hiển thị spinner loading khi kiểm tra xác thực
   if (authLoading) {
     return (
       <Layout>
@@ -186,7 +186,7 @@ export default function MyContributionsPage() {
     );
   }
 
-  // Redirect to login if not authenticated
+  // Chuyển hướng đến trang đăng nhập nếu chưa xác thực
   if (!isAuthenticated) {
     router.push("/login?returnUrl=/profile/contributions");
     return null;

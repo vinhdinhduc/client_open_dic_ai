@@ -27,7 +27,7 @@ export interface SearchSuggestion {
   matchedField?: string;
 }
 
-//Get search suggestions
+// Lấy gợi ý tìm kiếm
 const getSearchSuggestions = async (keyword: string, language: string = "vi"): Promise<SearchSuggestion[]> => {
   try {
     const res = await axiosInstance.get<ApiResponse<{ suggestions: SearchSuggestion[] }>>('/terms/suggestions', {
@@ -221,7 +221,7 @@ const suggestEdit = async (data: SuggestEditData): Promise<boolean> => {
   }
 }
 
-// Toggle favorite
+// Bật/tắt yêu thích
 const toggleFavorite = async (termId: string): Promise<{ isFavorited: boolean }> => {
   try {
     const res = await axiosInstance.post<ApiResponse<{ isFavorited: boolean }>>(`/favorites/toggle`, {
@@ -316,7 +316,7 @@ const emptyTermTrash = async (): Promise<ApiResponse<{ deletedCount: number }>> 
   return res.data;
 }
 
-// Export options interface
+// Kiểu dữ liệu tùy chọn xuất
 export interface ExportTermsOptions {
   category?: string;
   status?: string;
@@ -346,7 +346,7 @@ const exportTermsToExcel = async (options: ExportTermsOptions = {}): Promise<voi
       responseType: 'blob',
     });
 
-    // Get filename from header or use default
+    // Lấy tên tệp từ header hoặc dùng mặc định
     const contentDisposition = response.headers['content-disposition'];
     let filename = 'thuat-ngu.xlsx';
     if (contentDisposition) {
@@ -356,7 +356,7 @@ const exportTermsToExcel = async (options: ExportTermsOptions = {}): Promise<voi
       }
     }
 
-    // Create blob and download
+    // Tạo blob và tải xuống
     const blob = new Blob([response.data], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
@@ -374,7 +374,7 @@ const exportTermsToExcel = async (options: ExportTermsOptions = {}): Promise<voi
   }
 }
 
-// Save search history
+// Lưu lịch sử tìm kiếm
 const saveSearchHistory = async (query: string, resultCount: number): Promise<void> => {
   try {
     await axiosInstance.post('/terms/search-history', {

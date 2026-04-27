@@ -77,7 +77,7 @@ import {
 } from "lucide-react";
 import "./CategoryFormModal.scss";
 
-// Icon list with Lucide React icons
+// Danh sách icon dùng Lucide React
 const iconList: { name: string; icon: LucideIcon }[] = [
   { name: "laptop", icon: Laptop },
   { name: "smartphone", icon: Smartphone },

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const { register, isAuthenticated } = useAuth();
 
-  // Form state
+  // Trạng thái biểu mẫu
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -40,7 +40,7 @@ export default function RegisterPage() {
     message: string;
   } | null>(null);
 
-  // Password strength calculation
+  // Tính độ mạnh mật khẩu
   const passwordStrength = useMemo(() => {
     const password = formData.password;
     if (!password) return { level: "", score: 0 };
@@ -69,14 +69,14 @@ export default function RegisterPage() {
     };
   }, [formData.password]);
 
-  // Check if already logged in
+  // Kiểm tra nếu đã đăng nhập
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/");
     }
   }, [router, isAuthenticated]);
 
-  // Handle input change
+  // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -84,14 +84,14 @@ export default function RegisterPage() {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear error when user types
+    // Xóa lỗi khi người dùng nhập liệu
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
     setAlertMessage(null);
   };
 
-  // Validate form
+  // Kiểm tra hợp lệ biểu mẫu
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
@@ -109,7 +109,7 @@ export default function RegisterPage() {
       newErrors.email = t("errorEmailInvalid");
     }
 
-    // Password validation
+    // Kiểm tra hợp lệ mật khẩu
     if (!formData.password) {
       newErrors.password = t("errorPasswordRequired");
     } else {
@@ -119,7 +119,7 @@ export default function RegisterPage() {
       }
     }
 
-    // Confirm password validation
+    // Kiểm tra hợp lệ xác nhận mật khẩu
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = t("errorConfirmPasswordRequired");
     } else if (formData.password !== formData.confirmPassword) {
@@ -135,7 +135,7 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submit
+  // Xử lý gửi biểu mẫu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -159,7 +159,7 @@ export default function RegisterPage() {
           message: t("checkEmailForVerification"),
         });
 
-        // Reset form
+        // Đặt lại biểu mẫu
         setFormData({
           fullName: "",
           email: "",

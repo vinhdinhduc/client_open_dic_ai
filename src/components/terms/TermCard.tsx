@@ -54,7 +54,7 @@ export default function TermCard({
 
     return toPlainText(definition);
   };
-  // Get category name by language
+  // Lấy tên danh mục theo ngôn ngữ
   const getCategoryName = (): string => {
     if (!term.category) return "";
     return (

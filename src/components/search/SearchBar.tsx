@@ -403,7 +403,7 @@ export default function SearchBar({
     inputRef.current?.focus();
   }, []);
 
-  // Focus handlers
+  // Hàm xử lý focus
   const handleFocus = useCallback(() => {
     setIsFocused(true);
     if (suggestions.length > 0) {

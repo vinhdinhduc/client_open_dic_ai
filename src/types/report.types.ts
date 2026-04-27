@@ -3,7 +3,7 @@ import { BaseEntity } from "./common.types";
 import { UserRef } from "./user.types";
 import { PaginationInfo } from "./api.types";
 
-// Report reason
+// Lý do báo xấu
 export type ReportReason =
     | "incorrect"
     | "spam"
@@ -11,7 +11,7 @@ export type ReportReason =
     | "duplicate"
     | "other";
 
-// Report status
+// Trạng thái báo xấu
 export type ReportStatus = "pending" | "resolved" | "rejected";
 
 // Report interface (chỉ hỗ trợ báo xấu thuật ngữ)
@@ -29,20 +29,20 @@ export interface Report extends BaseEntity {
     resolvedAt?: string;
 }
 
-// Create report data (chỉ cần targetId, reason, description)
+// Dữ liệu tạo báo cáo (chỉ cần targetId, reason, description)
 export interface CreateReportData {
     targetId: string;
     reason: ReportReason;
     description?: string;
 }
 
-// Simplified report data (for term detail page)
+// Dữ liệu báo cáo rút gọn (cho trang chi tiết thuật ngữ)
 export interface ReportTermData {
     reason: ReportReason;
     description?: string;
 }
 
-// Resolve report data
+// Dữ liệu xử lý báo xấu
 export interface ResolveReportData {
     status: "resolved" | "rejected";
     actionTaken?: "none" | "warning" | "edit" | "delete" | "ban_user";

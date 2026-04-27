@@ -157,7 +157,7 @@ export default function CommentsPage() {
     }
   };
 
-  // Delete comment
+  // Xóa bình luận
   const handleDelete = async () => {
     if (!selectedComment) return;
 

@@ -168,12 +168,12 @@ export default function ContributionsModerationPage({
     fetchContributions();
   }, [fetchContributions]);
 
-  // Reset to page 1 when filters change
+  // Đặt lại về trang 1 khi bộ lọc thay đổi
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, typeFilter]);
 
-  // Show confirm modal before approve
+  // Hiển thị modal xác nhận trước khi duyệt
   const handleApproveClick = () => {
     setConfirmAction("approve");
     setShowConfirmModal(true);
@@ -184,7 +184,7 @@ export default function ContributionsModerationPage({
     handleApproveClick();
   };
 
-  // Show confirm modal before reject
+  // Hiển thị modal xác nhận trước khi từ chối
   const handleRejectClick = () => {
     setConfirmAction("reject");
     setShowConfirmModal(true);

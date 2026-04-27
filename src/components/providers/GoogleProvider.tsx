@@ -11,7 +11,7 @@ interface GoogleProviderProps {
 
 export default function GoogleProvider({ children }: GoogleProviderProps) {
   if (!GOOGLE_CLIENT_ID) {
-    // If no Google Client ID configured, render children without the provider
+    // Nếu chưa cấu hình Google Client ID thì render children không dùng provider
     return <>{children}</>;
   }
 

@@ -91,7 +91,7 @@ export interface ContributionStats {
 
 export interface CreateContributionData {
     type: "new_term" | "edit_term";
-    targetTerm?: string; // ObjectId of existing term (for edit_term)
+    targetTerm?: string; // ObjectId của thuật ngữ hiện có (cho edit_term)
     term: {
         vi?: string;
         lo?: string;
@@ -160,7 +160,7 @@ export interface ModerateContributionData {
     overrideData?: ContributionOverrideData;
 }
 
-// Response type for getContributions - matches backend response
+// Kiểu phản hồi cho getContributions - khớp với backend
 export interface ContributionsResponse {
     contributions: Contribution[];
     pagination: {

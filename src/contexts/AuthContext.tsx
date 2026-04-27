@@ -49,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state on mount
+  // Khởi tạo trạng thái xác thực khi component mount
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (storedUser && token) {
           setUser(storedUser);
 
-          // Optionally verify token with backend
+          // Tùy chọn xác thực token với backend
           try {
             const response = await authService.getProfile();
             if (response.success && response.data) {
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               tokenUtils.setUser(response.data);
             }
           } catch (error) {
-            // Token invalid, clear auth
+            // Token không hợp lệ, xóa trạng thái xác thực
             console.error("Token verification failed:", error);
             tokenUtils.clearAuth();
             setUser(null);
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initAuth();
   }, []);
 
-  // Login function
+  // Hàm đăng nhập
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<boolean> => {
       try {
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (response.success && response.data) {
           setUser(response.data.user);
-          // Refresh profile to get latest data (contributionCount, etc.)
+          // Làm mới hồ sơ để lấy dữ liệu mới nhất (contributionCount, ...)
           try {
             const profile = await authService.getProfile();
             if (profile.success && profile.data) {
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               tokenUtils.setUser(profile.data);
             }
           } catch {
-            // Non-critical, user data from login response is still valid
+            // Không quan trọng, dữ liệu người dùng từ response đăng nhập vẫn hợp lệ
           }
           return true;
         }
@@ -202,7 +202,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     toast.success("Đăng xuất thành công");
   }, []);
 
-  // Update user locally
+  // Cập nhật thông tin người dùng trên client
   const updateUser = useCallback((userData: Partial<User>) => {
     setUser((prev) => {
       if (!prev) return null;
@@ -212,7 +212,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   }, []);
 
-  // Refresh profile from server
+  // Làm mới hồ sơ từ server
   const refreshProfile = useCallback(async () => {
     try {
       const response = await authService.getProfile();
@@ -258,7 +258,7 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
-// HOC for protected routes
+// HOC cho các route cần bảo vệ
 export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   options: { redirectTo?: string; requiredRole?: "admin" | "moderator" } = {},

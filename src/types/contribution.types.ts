@@ -27,7 +27,7 @@ export interface Contribution extends BaseEntity {
     reviewedAt?: string;
 }
 
-// Create contribution data (suggest edit)
+// Dữ liệu tạo đóng góp (đề xuất chỉnh sửa)
 export interface SuggestEditData {
     type: "edit_term";
     targetTerm: string;
@@ -41,7 +41,7 @@ export interface SuggestEditData {
     contributorNote?: string;
 }
 
-// Create contribution data (new term)
+// Dữ liệu tạo đóng góp (thuật ngữ mới)
 export interface NewTermContributionData {
     type: "new_term";
     term: MultiLangText;

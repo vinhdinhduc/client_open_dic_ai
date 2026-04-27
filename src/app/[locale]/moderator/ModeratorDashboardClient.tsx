@@ -161,13 +161,13 @@ export default function ModeratorDashboardPage() {
         });
       }
 
-      // Sort by date
+      // Sắp xếp theo ngày
       activities.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
       setRecentActivities(activities.slice(0, 8));
 
-      // Notifications
+      // Thông báo
       if (notificationsRes) {
         setNotifications(notificationsRes.notifications || []);
         setUnreadCount(notificationsRes.unreadCount || 0);

@@ -164,14 +164,14 @@ const iconMap: Record<string, LucideIcon> = {
   palette: Palette,
 };
 
-// Helper function to render icon
+// Hàm hỗ trợ render icon
 const renderIcon = (iconName: string | React.ReactNode, size: number = 24) => {
   if (typeof iconName === "string") {
     const IconComponent = iconMap[iconName];
     if (IconComponent) {
       return <IconComponent size={size} />;
     }
-    // Fallback for emoji or unknown icons
+    // Fallback cho emoji hoặc icon không xác định
     return <span style={{ fontSize: size }}>{iconName}</span>;
   }
   return iconName;
@@ -215,7 +215,7 @@ export default function CategoriesPage() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [deleteErrorMsg, setDeleteErrorMsg] = useState<string | null>(null);
 
-  // Form state
+  // Trạng thái biểu mẫu
   const [formData, setFormData] = useState({
     name: { vi: "", en: "", lo: "" },
     description: { vi: "", en: "", lo: "" },
@@ -223,7 +223,7 @@ export default function CategoriesPage() {
     isActive: true,
   });
 
-  // Slug generation helper
+  // Hàm hỗ trợ tạo slug
   const generateSlug = (text: string): string => {
     return text
       .toLowerCase()
@@ -274,7 +274,7 @@ export default function CategoriesPage() {
     fetchCategories();
   }, []);
 
-  // Filter categories
+  // Lọc danh mục
   const filteredCategories = categories.filter(
     (cat) =>
       cat.name.vi.toLowerCase().includes(searchQuery.toLowerCase()) ||

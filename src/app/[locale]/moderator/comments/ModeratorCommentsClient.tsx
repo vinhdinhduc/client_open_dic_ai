@@ -149,7 +149,7 @@ export default function ModeratorCommentsPage() {
     }
   };
 
-  // Delete comment
+  // Xóa bình luận
   const handleDelete = async () => {
     if (!selectedComment) return;
 

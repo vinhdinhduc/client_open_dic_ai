@@ -63,7 +63,7 @@ export function ExportModal({
         language,
       };
 
-      // If export with current filters
+      // Nếu xuất theo bộ lọc hiện tại
       if (exportType === "current") {
         if (currentFilters.category) {
           options.category = currentFilters.category;

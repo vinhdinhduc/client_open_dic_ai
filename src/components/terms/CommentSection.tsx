@@ -250,7 +250,7 @@ export default function CommentSection({
           </div>
         ) : comments.length > 0 ? (
           comments
-            .filter((c) => !c.parentComment) // Only top-level comments
+            .filter((c) => !c.parentComment) // Chỉ lấy bình luận cấp cao nhất
             .map((comment) => renderComment(comment))
         ) : (
           <div className="comment-list__empty">

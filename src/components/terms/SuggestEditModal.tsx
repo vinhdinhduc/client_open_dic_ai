@@ -65,7 +65,7 @@ export default function SuggestEditModal({
   };
   console.log("Check term form edit", term);
 
-  // Form state - pre-fill with existing data, overlay AI suggestions when provided
+  // Trạng thái form: điền sẵn dữ liệu hiện có, đè gợi ý AI khi được cung cấp
   const aiLang = aiContent?.lang as LangKey | undefined;
 
   const [termText, setTermText] = useState<MultiLangText>({

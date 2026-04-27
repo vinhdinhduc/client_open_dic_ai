@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
@@ -91,7 +91,7 @@ function ResetPasswordForm() {
     }
   };
 
-  // No token provided
+  // Không có token được cung cấp
   if (!token) {
     return (
       <div className="auth-page">

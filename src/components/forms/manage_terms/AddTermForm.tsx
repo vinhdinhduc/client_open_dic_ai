@@ -54,7 +54,7 @@ const PART_OF_SPEECH_KEYS = [
   { value: "abbreviation", labelKey: "abbreviation" },
 ] as const;
 
-// Helper function to get category name as string
+// Hàm hỗ trợ lấy tên danh mục dạng chuỗi
 const getCategoryName = (
   name: string | { vi: string; en?: string; lo?: string } | undefined,
 ): string => {
@@ -71,7 +71,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     ? "/moderator/terms"
     : "/admin/terms";
 
-  // Form state
+  // Trạng thái biểu mẫu
   const [term, setTerm] = useState<MultiLangText>({ vi: "", en: "", lo: "" });
   const [definition, setDefinition] = useState<MultiLangText>({
     vi: "",
@@ -127,7 +127,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     fetchCategories();
   }, []);
 
-  // Debounced search for related terms
+  // Tìm kiếm thuật ngữ liên quan có debounce
   useEffect(() => {
     if (!relatedSearchInput.trim()) {
       setRelatedSearchResults([]);
@@ -152,7 +152,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
           setShowRelatedDropdown(true);
         }
       } catch {
-        // ignore
+        // bỏ qua
       } finally {
         setRelatedSearchLoading(false);
       }
@@ -160,7 +160,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     return () => clearTimeout(timer);
   }, [relatedSearchInput, relatedTermIds]);
 
-  // Handlers for multi-lang fields
+  // Hàm xử lý cho các trường đa ngôn ngữ
   const handleMultiLangChange = (
     setter: React.Dispatch<React.SetStateAction<MultiLangText>>,
     lang: LangKey,
@@ -187,7 +187,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     }
   };
 
-  // Tags handlers
+  // Hàm xử lý thẻ
   const handleAddTag = () => {
     const trimmedTag = tagInput.trim().toLowerCase();
     if (trimmedTag && !tags.includes(trimmedTag)) {
@@ -256,7 +256,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     }
   };
 
-  // Form validation
+  // Kiểm tra hợp lệ biểu mẫu
   const validateForm = (): boolean => {
     if (!term.vi?.trim() && !term.en?.trim() && !term.lo?.trim()) {
       toast.error(t("errorAtLeastOneTerm"));
@@ -277,7 +277,7 @@ export function AddTermForm({ onSuccess, onCancel }: AddTermFormProps) {
     return true;
   };
 
-  // Submit handler
+  // Hàm xử lý gửi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;

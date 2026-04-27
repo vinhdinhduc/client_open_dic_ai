@@ -67,7 +67,7 @@ function EditedText({
 }
 
 // ─────────────────────────────────────────────
-//  Types & helpers
+//  Kiểu dữ liệu và hàm hỗ trợ
 // ─────────────────────────────────────────────
 
 interface DiffCompareViewProps {

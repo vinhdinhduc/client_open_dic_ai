@@ -39,7 +39,7 @@ export default function TermRow({
     setFavorited(isFavorited);
   }, [isFavorited]);
 
-  // Get text by language
+  // Lấy nội dung theo ngôn ngữ
   const getTermText = (): string => {
     return (
       term.term[currentLanguage] ||
@@ -61,7 +61,7 @@ export default function TermRow({
     return toPlainText(definition);
   };
 
-  // Get category name by language
+  // Lấy tên danh mục theo ngôn ngữ
   const getCategoryName = (): string => {
     if (!term.category) return "";
     return (

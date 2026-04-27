@@ -93,7 +93,7 @@ export default function ReportsModerationPage() {
     fetchStats();
   }, [fetchReports, fetchStats]);
 
-  // Reset to page 1 when filters change
+  // Đặt lại về trang 1 khi bộ lọc thay đổi
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter]);
@@ -260,7 +260,7 @@ export default function ReportsModerationPage() {
     return report.reporter?.fullName || t("anonymous");
   };
 
-  // Filter reports by search term (client-side)
+  // Lọc báo xấu theo từ khóa tìm kiếm (phía client)
   const filteredReports = reports.filter((report) => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();

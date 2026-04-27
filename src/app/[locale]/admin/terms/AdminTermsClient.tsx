@@ -47,10 +47,10 @@ import { ExportModal } from "@/components/forms/manage_terms/ExportModal";
 import "./terms.scss";
 import { useRouter } from "next/navigation";
 
-// Type alias cho admin page
+// Kiểu alias cho trang admin
 type Term = TermCardData;
 
-// Helper function to get category name as string
+// Hàm hỗ trợ lấy tên danh mục dạng chuỗi
 const getCategoryName = (
   name: string | { vi: string; en?: string; lo?: string } | undefined,
 ): string => {
@@ -306,7 +306,7 @@ export default function TermsPage({
     );
   };
 
-  // New: Handle selecting/deselecting individual term
+  // Mới: Xử lý chọn/bỏ chọn từng thuật ngữ
   const handleTermSelect = (termId: string, checked: boolean) => {
     const term = paginatedTerms.find((t) => t._id === termId);
     if (statusFilter === "pending" && term?.status !== "pending") {

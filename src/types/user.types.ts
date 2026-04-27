@@ -29,7 +29,7 @@ export interface User extends BaseEntity {
     hasPassword?: boolean;
 }
 
-// Simplified User for references (in comments, terms, etc.)
+// User rút gọn để tham chiếu (trong bình luận, thuật ngữ, ...)
 export interface UserRef {
     _id: string;
     fullName: string;
@@ -37,7 +37,7 @@ export interface UserRef {
     avatar?: string;
 }
 
-// Moderation permissions for moderators
+// Quyền kiểm duyệt dành cho moderator
 export interface ModerationPermissions {
     categories: string[];
     permissions: ("reports" | "suggestions" | "contributions" | "comments")[];
@@ -54,7 +54,7 @@ export interface GetUsersParams {
     sortOrder?: "asc" | "desc";
 }
 
-// Create user data
+// Dữ liệu tạo người dùng
 export interface CreateUserData {
     fullName: string;
     email: string;
@@ -64,7 +64,7 @@ export interface CreateUserData {
     preferredLanguage?: PreferredLanguage;
 }
 
-// Update user data
+// Dữ liệu cập nhật người dùng
 export interface UpdateUserData {
     fullName?: string;
     email?: string;
@@ -94,7 +94,7 @@ export interface UserStats {
     newThisMonth?: number;
 }
 
-// Paginated users response
+// Phản hồi người dùng phân trang
 export interface PaginatedUsers {
     users: User[];
     pagination: {
@@ -105,7 +105,7 @@ export interface PaginatedUsers {
     };
 }
 
-// For backward compatibility - alias
+// Alias để tương thích ngược
 export interface PaginatedData<T> {
     users?: T[];
     items?: T[];

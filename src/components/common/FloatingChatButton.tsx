@@ -548,7 +548,7 @@ export default function FloatingChatButton() {
 
       const parsed = parseStructuredSections(message.content);
       if (parsed.sections.length === 0) {
-        // Render plain content with markdown support
+        // Render nội dung thuần có hỗ trợ markdown
         return (
           <MarkdownRenderer
             content={message.content}
@@ -710,7 +710,7 @@ export default function FloatingChatButton() {
       setIsLoading(true);
 
       try {
-        // If user wants to contribute, fetch AI definition and prefill contribution form.
+        // Nếu người dùng muốn đóng góp, lấy định nghĩa từ AI và điền sẵn vào form đóng góp.
         const quickNavigation = detectQuickNavigation(currentInput);
         if (quickNavigation) {
           const assistantMessage: Message = {
@@ -811,7 +811,7 @@ export default function FloatingChatButton() {
               selected.term?.lo ||
               searchTerm;
 
-            // Get similar/related terms to display in chat
+            // Lấy các thuật ngữ tương tự/liên quan để hiển thị trong chat
             let similarTermsText = "";
             if (selected.relatedTerms && selected.relatedTerms.length > 0) {
               const similarTerms = selected.relatedTerms.slice(0, 5);
@@ -879,7 +879,7 @@ export default function FloatingChatButton() {
           return;
         }
 
-        // Call AI Agent service for natural, context-aware response.
+        // Gọi dịch vụ AI Agent để nhận phản hồi tự nhiên theo ngữ cảnh.
         const response = await aiAgentService.chatAssistant({
           query: currentInput,
           language: currentLanguage || "vi",
@@ -916,7 +916,7 @@ export default function FloatingChatButton() {
         console.error("Chat error:", error);
         toast.error(error.message || t("errorSending"));
 
-        // Add error message
+        // Thêm thông báo lỗi
         const errorMessage: Message = {
           id: (Date.now() + 2).toString(),
           role: "assistant",

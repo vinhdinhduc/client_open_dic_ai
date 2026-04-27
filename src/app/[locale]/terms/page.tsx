@@ -7,10 +7,10 @@ import "./Term.scss";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 
-// Force dynamic rendering - search results must always be fresh
+// Bắt buộc render động - kết quả tìm kiếm luôn phải mới nhất
 export const dynamic = "force-dynamic";
 
-// Generate metadata for SEO
+// Tạo metadata cho SEO
 export async function generateMetadata({
   params,
   searchParams,
@@ -57,7 +57,7 @@ async function SearchResultsServer({
   return <SearchResultsClient initialTerms={terms} query={query} />;
 }
 
-// Main page component with Suspense for streaming
+// Component trang chính dùng Suspense để tải từng phần
 export default async function SearchResultsPage({
   searchParams,
 }: {

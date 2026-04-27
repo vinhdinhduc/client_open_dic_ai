@@ -1,8 +1,8 @@
 
-// Supported languages
+// Ngôn ngữ hỗ trợ
 export type Language = "vi" | "en" | "lo";
 
-// Sort order
+// Thứ tự sắp xếp
 export type SortOrder = "asc" | "desc";
 
 // Status chung

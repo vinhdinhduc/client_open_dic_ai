@@ -49,7 +49,7 @@ export default function ImportPage() {
   const [showGuide, setShowGuide] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // Load categories
+  // Tải danh mục
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -121,7 +121,7 @@ export default function ImportPage() {
   };
 
   const importFile = async (fileItem: ImportFile) => {
-    // Update status to processing
+    // Cập nhật trạng thái sang đang xử lý
     setFiles((prev) =>
       prev.map((f) =>
         f.id === fileItem.id

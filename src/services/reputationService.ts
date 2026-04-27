@@ -167,7 +167,7 @@ const reputationService = {
         return response.data.data;
     },
 
-    // ===== Admin =====
+    // ===== Quản trị =====
 
     // Xem ĐUT của user cụ thể
     getUserReputation: async (userId: string): Promise<UserReputation> => {
@@ -196,7 +196,7 @@ const reputationService = {
         return response.data.data;
     },
 
-    // Tải PDF giấy xác nhận (đượng dùng cho user và admin)
+    // Tải PDF giấy xác nhận (được dùng cho user và admin)
     downloadCertificate: async (id: string, isAdmin = false): Promise<Blob> => {
         const url = isAdmin
             ? `/reputation/admin/redemptions/${id}/certificate`

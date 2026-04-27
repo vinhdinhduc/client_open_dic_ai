@@ -25,8 +25,8 @@ import aiService, { AIConfig } from "@/services/aiService";
 import "./AdminAISettings.scss";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Default prompts mirrored from aiService.js — kept in sync manually.
-// These are what the system uses when a custom prompt field is left empty.
+// Prompt mặc định được đồng bộ từ aiService.js và cập nhật thủ công.
+// Đây là các giá trị hệ thống dùng khi trường prompt tùy chỉnh để trống.
 // ─────────────────────────────────────────────────────────────────────────────
 const JSON_SCHEMA = `{
   "definition": "Định nghĩa ngắn gọn, chính xác (1-2 câu)",
@@ -261,7 +261,7 @@ type AISettingsText = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sub-component: Default Prompt Preview Panel
+// Thành phần con: Bảng xem trước Prompt mặc định
 // ─────────────────────────────────────────────────────────────────────────────
 interface DefaultPromptPanelProps {
   promptKey: keyof typeof DEFAULT_PROMPTS;
