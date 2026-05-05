@@ -86,6 +86,10 @@
             &--period {
                 margin-left: auto;
             }
+
+            &--time {
+                align-items: center;
+            }
         }
 
         .filter-btn {
@@ -118,6 +122,42 @@
                 padding: 3px $spacing-sm;
                 font-size: $font-xs;
             }
+        }
+
+        .custom-months {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+
+            select {
+                min-width: 140px;
+                padding: 7px 10px;
+                border: 1.5px solid var(--border-color);
+                border-radius: $radius-md;
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+                font-size: $font-sm;
+                cursor: pointer;
+                outline: none;
+
+                &:focus {
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+                }
+            }
+        }
+
+        .custom-arrow,
+        .custom-summary {
+            color: var(--text-secondary);
+            font-size: $font-xs;
+        }
+
+        .custom-summary {
+            font-weight: 600;
+            color: #667eea;
+            white-space: nowrap;
         }
     }
 

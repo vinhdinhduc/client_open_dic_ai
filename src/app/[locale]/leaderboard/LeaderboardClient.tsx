@@ -165,6 +165,12 @@ export default function LeaderboardClient() {
   const [termType, setTermType] = useState<TermLeaderboardType>("most_viewed");
   const [userType, setUserType] = useState<UserLeaderboardType>("most_liked");
   const [period, setPeriod] = useState<LeaderboardPeriod>("all_time");
+  // Time filter for Users tab: 'week' | 'month' | 'all' | 'custom'
+  const [timeRange, setTimeRange] = useState<
+    "week" | "month" | "all" | "custom"
+  >("month");
+  const [customFromMonth, setCustomFromMonth] = useState<string | null>(null); // format YYYY-MM
+  const [customToMonth, setCustomToMonth] = useState<string | null>(null);
 
   const [termsData, setTermsData] = useState<LeaderboardTerm[]>([]);
   const [usersData, setUsersData] = useState<LeaderboardUser[]>([]);
@@ -221,10 +227,36 @@ export default function LeaderboardClient() {
   const loadUsersLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
+      // compute from/to based on timeRange
+      let from: string | undefined;
+      let to: string | undefined;
+      const now = new Date();
+      if (timeRange === "week") {
+        const fromDate = new Date(now);
+        fromDate.setDate(now.getDate() - 7);
+        from = fromDate.toISOString().slice(0, 10);
+        to = now.toISOString().slice(0, 10);
+      } else if (timeRange === "month") {
+        const fromDate = new Date(now);
+        fromDate.setDate(now.getDate() - 30);
+        from = fromDate.toISOString().slice(0, 10);
+        to = now.toISOString().slice(0, 10);
+      } else if (timeRange === "custom" && customFromMonth && customToMonth) {
+        // customFromMonth/customToMonth are YYYY-MM
+        const [fy, fm] = customFromMonth.split("-").map(Number);
+        const [ty, tm] = customToMonth.split("-").map(Number);
+        const fromDate = new Date(fy, fm - 1, 1);
+        const toDate = new Date(ty, tm, 0); // last day of month
+        from = fromDate.toISOString().slice(0, 10);
+        to = toDate.toISOString().slice(0, 10);
+      }
+
       const res = await leaderboardService.getUsersLeaderboard(
         userType,
         usersPage,
         PAGE_SIZE,
+        from,
+        to,
       );
       if (res.success && res.data) {
         setUsersData(res.data.users);
@@ -235,7 +267,7 @@ export default function LeaderboardClient() {
     } finally {
       setLoading(false);
     }
-  }, [userType, usersPage, t]);
+  }, [userType, usersPage, timeRange, customFromMonth, customToMonth, t]);
 
   const loadReputationLeaderboard = useCallback(async () => {
     setLoading(true);
@@ -267,7 +299,6 @@ export default function LeaderboardClient() {
     if (activeTab === "reputation") loadReputationLeaderboard();
   }, [activeTab, loadReputationLeaderboard]);
 
-  // Đặt lại về trang 1 khi bộ lọc thay đổi
   const handleTermTypeChange = (type: TermLeaderboardType) => {
     setTermType(type);
     setTermsPage(1);
@@ -279,6 +310,51 @@ export default function LeaderboardClient() {
   const handleUserTypeChange = (type: UserLeaderboardType) => {
     setUserType(type);
     setUsersPage(1);
+  };
+
+  const monthsOptions = (() => {
+    const opts: { value: string; label: string }[] = [];
+    const now = new Date();
+    const startYear = Math.max(2020, now.getFullYear() - 5);
+    for (let y = startYear; y <= now.getFullYear(); y++) {
+      const maxMonth = y === now.getFullYear() ? now.getMonth() + 1 : 12;
+      for (let m = 1; m <= maxMonth; m++) {
+        const mm = m.toString().padStart(2, "0");
+        opts.push({ value: `${y}-${mm}`, label: `T${m}/${y}` });
+      }
+    }
+    return opts.reverse();
+  })();
+
+  const handleTimeRangeChange = (r: "week" | "month" | "all" | "custom") => {
+    setTimeRange(r);
+    setUsersPage(1);
+  };
+
+  const isFutureMonth = (ym: string) => {
+    const [y, m] = ym.split("-").map(Number);
+    const d = new Date(y, m - 1, 1);
+    const now = new Date();
+    return d > new Date(now.getFullYear(), now.getMonth(), 1);
+  };
+
+  const handleCustomFromMonthChange = (val: string) => {
+    if (isFutureMonth(val)) return toast.error(t("invalidFutureMonth"));
+    setCustomFromMonth(val);
+    // if to exists validate
+    if (customToMonth) {
+      if (val > customToMonth) return toast.error(t("invalidRange"));
+      setUsersPage(1);
+    }
+  };
+
+  const handleCustomToMonthChange = (val: string) => {
+    if (isFutureMonth(val)) return toast.error(t("invalidFutureMonth"));
+    setCustomToMonth(val);
+    if (customFromMonth) {
+      if (customFromMonth > val) return toast.error(t("invalidRange"));
+      setUsersPage(1);
+    }
   };
   const handleTabChange = (tab: MainTab) => {
     setActiveTab(tab);
@@ -471,6 +547,71 @@ export default function LeaderboardClient() {
                   <Eye size={16} />
                   {t("typeMostAttractive")}
                 </button>
+              </div>
+              {/* Time range filter (only visible for Users tab) */}
+              <div className="filter-group filter-group--time">
+                <button
+                  className={`filter-btn filter-btn--sm ${timeRange === "week" ? "filter-btn--active" : ""}`}
+                  onClick={() => handleTimeRangeChange("week")}
+                >
+                  {t("timeWeek")}
+                </button>
+                <button
+                  className={`filter-btn filter-btn--sm ${timeRange === "month" ? "filter-btn--active" : ""}`}
+                  onClick={() => handleTimeRangeChange("month")}
+                >
+                  {t("timeMonth")}
+                </button>
+                <button
+                  className={`filter-btn filter-btn--sm ${timeRange === "all" ? "filter-btn--active" : ""}`}
+                  onClick={() => handleTimeRangeChange("all")}
+                >
+                  {t("timeAll")}
+                </button>
+                <button
+                  className={`filter-btn filter-btn--sm ${timeRange === "custom" ? "filter-btn--active" : ""}`}
+                  onClick={() => handleTimeRangeChange("custom")}
+                >
+                  {t("timeCustom")}
+                </button>
+                {timeRange === "custom" && (
+                  <div className="custom-months">
+                    <select
+                      value={customFromMonth ?? ""}
+                      onChange={(e) =>
+                        handleCustomFromMonthChange(e.target.value)
+                      }
+                      aria-label={t("fromMonth")}
+                    >
+                      <option value="">{t("fromMonth")}</option>
+                      {monthsOptions.map((m) => (
+                        <option key={m.value} value={m.value}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="custom-arrow">→</span>
+                    <select
+                      value={customToMonth ?? ""}
+                      onChange={(e) =>
+                        handleCustomToMonthChange(e.target.value)
+                      }
+                      aria-label={t("toMonth")}
+                    >
+                      <option value="">{t("toMonth")}</option>
+                      {monthsOptions.map((m) => (
+                        <option key={m.value} value={m.value}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                    {customFromMonth &&
+                      customToMonth &&
+                      customFromMonth <= customToMonth && (
+                        <span className="custom-summary">{`${customFromMonth.split("-")[1]}/${customFromMonth.split("-")[0]} → ${customToMonth.split("-")[1]}/${customToMonth.split("-")[0]}`}</span>
+                      )}
+                  </div>
+                )}
               </div>
             </div>
 

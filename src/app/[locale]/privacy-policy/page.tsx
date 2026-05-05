@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import Header from "@/components/layouts/Header";
+import { Footer } from "@/components/layouts/Footer";
 import "./PrivacyPolicy.scss";
 
 type Props = {
@@ -21,11 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="legal-page">
-      <div className="legal-page__container">
-        <PrivacyPolicyClient />
+    <>
+      <Header />
+      <div className="legal-page">
+        <div className="legal-page__container">
+          <PrivacyPolicyClient />
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
 

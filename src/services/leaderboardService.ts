@@ -85,9 +85,14 @@ const leaderboardService = {
         type: UserLeaderboardType = "most_liked",
         page = 1,
         limit = 10,
+        from?: string,
+        to?: string,
     ): Promise<ApiResponse<{ users: LeaderboardUser[]; pagination: Pagination }>> => {
+        const params: any = { type, page, limit };
+        if (from) params.from = from;
+        if (to) params.to = to;
         const res = await axiosInstance.get("/leaderboard/users", {
-            params: { type, page, limit },
+            params,
         });
         return res.data;
     },
