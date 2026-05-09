@@ -106,8 +106,6 @@ export default function ContributionsModerationPage({
   });
 
   const openContributionModal = (contribution: Contribution) => {
-    console.log(contribution);
-
     setSelectedContribution(contribution);
     setApprovalDraft(createContributionDraft(contribution));
     setShowDetailModal(true);

@@ -51,8 +51,6 @@ export default function ContributionDetailPage() {
         params.id as string,
       );
 
-      console.log("Check res", response);
-
       if (response.success && response.data) {
         setContribution(response.data);
       }

@@ -280,7 +280,6 @@ export default function ModeratorDashboardPage() {
       console.error("Error marking all as read:", error);
     }
   };
-  console.log("Check recent activity", recentActivities);
 
   if (loading) {
     return (
@@ -301,9 +300,7 @@ export default function ModeratorDashboardPage() {
           </div>
           <div className="header-text">
             <h1>{t("title")}</h1>
-            <p>
-              {t("welcome", { name: user?.fullName || "" })}
-            </p>
+            <p>{t("welcome", { name: user?.fullName || "" })}</p>
           </div>
         </div>
         <div className="header-actions">
@@ -346,7 +343,9 @@ export default function ModeratorDashboardPage() {
             <span className="stat-card__value">
               {stats.pendingContributions}
             </span>
-            <span className="stat-card__label">{t("pendingContributions")}</span>
+            <span className="stat-card__label">
+              {t("pendingContributions")}
+            </span>
           </div>
           <Link
             href="/moderator/moderation/contributions"
@@ -394,7 +393,10 @@ export default function ModeratorDashboardPage() {
           <AlertTriangle size={20} />
           <span>
             {t("pendingAlert", {
-              count: stats.pendingContributions + stats.pendingReports + stats.pendingComments,
+              count:
+                stats.pendingContributions +
+                stats.pendingReports +
+                stats.pendingComments,
             })}
           </span>
           <div className="alert-actions">

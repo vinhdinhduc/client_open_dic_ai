@@ -63,7 +63,6 @@ export default function SuggestEditModal({
       cat.name?.[locale] || cat.name?.vi || cat.name?.en || cat.name?.lo || ""
     );
   };
-  console.log("Check term form edit", term);
 
   // Trạng thái form: điền sẵn dữ liệu hiện có, đè gợi ý AI khi được cung cấp
   const aiLang = aiContent?.lang as LangKey | undefined;
@@ -284,8 +283,6 @@ export default function SuggestEditModal({
 
     setSubmitting(true);
     try {
-      console.log("Check data send from client", data);
-
       await suggestEdit(data);
       toast.success(tEdit("success"));
       onClose();

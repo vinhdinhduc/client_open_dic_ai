@@ -553,6 +553,7 @@ export default function FloatingChatButton() {
           <MarkdownRenderer
             content={message.content}
             className="floating-chat-sidebar__plain-content"
+            compact
           />
         );
       }
@@ -563,6 +564,7 @@ export default function FloatingChatButton() {
             <MarkdownRenderer
               content={parsed.intro}
               className="floating-chat-sidebar__intro"
+              compact
             />
           )}
 
@@ -603,6 +605,7 @@ export default function FloatingChatButton() {
                                   content={item}
                                   inline
                                   className="floating-chat-sidebar__list-item-text"
+                                  compact
                                 />
                               );
                             }
@@ -625,6 +628,7 @@ export default function FloatingChatButton() {
                             content={item}
                             inline
                             className="floating-chat-sidebar__list-item-text"
+                            compact
                           />
                         )}
                       </li>
@@ -634,6 +638,7 @@ export default function FloatingChatButton() {
                   <MarkdownRenderer
                     content={section.value}
                     className="floating-chat-sidebar__section-text"
+                    compact
                   />
                 )}
               </div>

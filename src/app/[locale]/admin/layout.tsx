@@ -35,6 +35,7 @@ import {
   MessageCircle,
   Globe,
   Award,
+  Activity,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -141,6 +142,12 @@ const adminMenuItems: MenuItem[] = [
     label: "reputation",
     icon: Award,
     href: "/admin/reputation",
+  },
+  {
+    id: "audit-logs",
+    label: "auditLogs",
+    icon: Activity,
+    href: "/admin/audit-logs",
   },
   {
     id: "settings",

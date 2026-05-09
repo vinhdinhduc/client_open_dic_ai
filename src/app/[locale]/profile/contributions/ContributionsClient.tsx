@@ -107,7 +107,6 @@ export default function MyContributionsPage() {
       }
 
       const response = await contributionService.getMyContributions(params);
-      console.log("Check contribution my", response);
 
       if (response.success && response.data) {
         const contributionsArray = Array.isArray(response.data.contributions)

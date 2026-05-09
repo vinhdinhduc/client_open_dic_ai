@@ -63,7 +63,7 @@ export function saveContributionData(data: Omit<ContributionData, 'timestamp'>):
         sessionStorage.setItem(storageKey, JSON.stringify(dataWithTimestamp));
         return storageKey;
     } catch (error) {
-        console.error('❌ Failed to save contribution data:', error);
+        console.error(' Failed to save contribution data:', error);
         throw new Error('Storage quota exceeded or unavailable');
     }
 }
@@ -92,7 +92,7 @@ export function loadContributionData(storageKey: string): ContributionData | nul
 
         return cleanData(parsed);
     } catch (error) {
-        console.error('❌ Failed to load contribution data:', error);
+        console.error(' Failed to load contribution data:', error);
         return null;
     }
 }
@@ -105,7 +105,7 @@ export function clearContributionData(storageKey: string): void {
         sessionStorage.removeItem(storageKey);
 
     } catch (error) {
-        console.error('❌ Failed to clear contribution data:', error);
+        console.error(' Failed to clear contribution data:', error);
     }
 }
 
@@ -124,7 +124,7 @@ export function saveMultiLangContributionData(data: Omit<MultiLangContributionDa
         sessionStorage.setItem(storageKey, JSON.stringify(dataWithTimestamp));
         return storageKey;
     } catch (error) {
-        console.error('❌ Failed to save multi-lang contribution data:', error);
+        console.error(' Failed to save multi-lang contribution data:', error);
         throw new Error('Storage quota exceeded or unavailable');
     }
 }
@@ -155,7 +155,7 @@ export function loadMultiLangContributionData(storageKey: string): MultiLangCont
 
         return parsed;
     } catch (error) {
-        console.error('❌ Failed to load multi-lang contribution data:', error);
+        console.error(' Failed to load multi-lang contribution data:', error);
         return null;
     }
 }
@@ -192,7 +192,7 @@ export function cleanupExpiredData(): void {
 
         // Cleaned up expired items silently
     } catch (error) {
-        console.error('❌ Failed to cleanup expired data:', error);
+        console.error(' Failed to cleanup expired data:', error);
     }
 }
 
@@ -201,7 +201,7 @@ export function cleanupExpiredData(): void {
  */
 export function debugStoredData(): void {
     const keys = Object.keys(sessionStorage).filter(k => k.startsWith(STORAGE_PREFIX));
-    console.log('📦 Stored contribution data:', {
+    console.log(' Stored contribution data:', {
         count: keys.length,
         keys: keys,
         data: keys.map(k => ({

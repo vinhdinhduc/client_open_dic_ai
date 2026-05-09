@@ -914,7 +914,8 @@
     "vietnamese": "Tiếng Việt",
     "english": "English",
     "lao": "ພາສາລາວ",
-    "reputation": "Điểm uy tín"
+    "reputation": "Điểm uy tín",
+    "auditLogs": "Nhật ký kiểm tra"
   },
   "adminDashboard": {
     "title": "Bảng điều khiển",
@@ -2270,5 +2271,84 @@
     "infoAi": "Info Ai",
     "info429": "When reaching the limit, users will receive error code",
     "infoWarning": "Info Warning"
+  },
+  "auditLogs": {
+    "title": "Nhật ký kiểm tra",
+    "description": "Theo dõi tất cả hoạt động quản trị của hệ thống",
+    "filter": {
+      "date": "Ngày",
+      "action": "Hành vi",
+      "actorEmail": "Email người thực hiện",
+      "allActions": "Tất cả hành vi",
+      "enterEmail": "Nhập email...",
+      "search": "Tìm kiếm",
+      "reset": "Đặt lại",
+      "export": "Xuất CSV",
+      "exporting": "Đang xuất..."
+    },
+    "table": {
+      "time": "Thời gian",
+      "action": "Hành vi",
+      "actor": "Người thực hiện",
+      "resource": "Đối tượng",
+      "reason": "Lý do",
+      "status": "Trạng thái",
+      "clickDetail": "Click để xem chi tiết",
+      "noReason": "N/A",
+      "success": "Thành công",
+      "failed": "Thất bại",
+      "showing": "Hiển thị",
+      "of": "của",
+      "records": "bản ghi",
+      "loading": "Đang tải dữ liệu...",
+      "noData": "Không có dữ liệu",
+      "previous": "Trước",
+      "next": "Tiếp"
+    },
+    "modal": {
+      "overview": "Tổng quan",
+      "time": "Thời gian",
+      "actor": "Người thực hiện",
+      "resourceType": "Loại tài nguyên",
+      "resourceName": "Tên tài nguyên",
+      "status": "Trạng thái",
+      "reason": "Lý do",
+      "error": "Lỗi",
+      "ipAddress": "IP Address",
+      "changes": "Thay đổi",
+      "before": "Trước",
+      "after": "Sau",
+      "copy": "Sao chép",
+      "userAgent": "User Agent",
+      "close": "Đóng",
+      "success": "Thành công",
+      "failed": "Thất bại"
+    }
+    ,
+    "actions": {
+      "TERM_CREATE": "Tạo thuật ngữ",
+      "TERM_UPDATE": "Cập nhật thuật ngữ",
+      "TERM_DELETE": "Xóa thuật ngữ",
+      "TERM_APPROVE": "Duyệt thuật ngữ",
+      "TERM_REJECT": "Từ chối thuật ngữ",
+      "USER_CREATE": "Tạo người dùng",
+      "USER_UPDATE": "Cập nhật người dùng",
+      "USER_BAN": "Cấm người dùng",
+      "USER_LOCK": "Khóa người dùng",
+      "USER_UNBAN": "Hủy cấm người dùng",
+      "ROLE_CHANGE": "Thay đổi vai trò",
+      "REPORT_RESOLVED": "Báo cáo đã xử lý",
+      "REPORT_REJECTED": "Báo cáo bị từ chối",
+      "CONTRIBUTION_APPROVE": "Duyệt đóng góp",
+      "CONTRIBUTION_REJECT": "Từ chối đóng góp",
+      "COMMENT_DELETE": "Xóa bình luận",
+      "COMMENT_APPROVE": "Duyệt bình luận",
+      "COMMENT_REJECT": "Từ chối bình luận",
+      "LOGIN_FAILED": "Đăng nhập thất bại",
+      "LOGIN_SUCCESS": "Đăng nhập thành công",
+      "LOGOUT": "Đăng xuất",
+      "PASSWORD_CHANGE": "Đổi mật khẩu",
+      "EMAIL_VERIFY": "Xác thực email"
+    }
   }
 }

@@ -174,4 +174,6 @@ axiosInstance.interceptors.response.use(
     }
 );
 
+export const apiClient = axiosInstance;
+
 export default axiosInstance;

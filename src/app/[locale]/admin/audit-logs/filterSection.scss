@@ -1,0 +1,179 @@
+.filter-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+
+    .filter-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s ease;
+
+            &:hover {
+                border-color: var(--border-color-hover);
+            }
+
+            &:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+            }
+
+            &:disabled {
+                background: var(--bg-disabled);
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+
+            option {
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+        }
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 8px;
+        justify-self: end;
+        flex-wrap: wrap;
+
+        @media (max-width: 1024px) {
+            justify-self: start;
+        }
+
+        @media (max-width: 768px) {
+            grid-column: 1 / -1;
+            justify-self: auto;
+        }
+    }
+
+    .btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        min-width: 0;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+
+    .btn-search {
+        background: var(--primary-color);
+        color: white;
+
+        &:hover:not(:disabled) {
+            background: var(--primary-color-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+        }
+    }
+
+    .btn-reset {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+
+        &:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            border-color: var(--text-secondary);
+        }
+    }
+
+    .btn-export {
+        background: var(--success-color);
+        color: white;
+
+        &:hover:not(:disabled) {
+            background: var(--success-color-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(var(--success-color-rgb), 0.3);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+    .filter-section {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #262626;
+        --bg-tertiary: #333333;
+        --border-color: #404040;
+        --border-color-hover: #505050;
+        --text-primary: #e0e0e0;
+        --text-secondary: #a0a0a0;
+        --primary-color: #2563eb;
+        --primary-color-rgb: 37, 99, 235;
+        --primary-color-hover: #1d4ed8;
+        --success-color: #10b981;
+        --success-color-rgb: 16, 185, 129;
+        --success-color-hover: #059669;
+    }
+}
+
+/* Light mode */
+[data-theme="light"] {
+    .filter-section {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f9fafb;
+        --bg-tertiary: #f3f4f6;
+        --border-color: #e5e7eb;
+        --border-color-hover: #d1d5db;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --primary-color: #2563eb;
+        --primary-color-rgb: 37, 99, 235;
+        --primary-color-hover: #1d4ed8;
+        --success-color: #10b981;
+        --success-color-rgb: 16, 185, 129;
+        --success-color-hover: #059669;
+    }
+}

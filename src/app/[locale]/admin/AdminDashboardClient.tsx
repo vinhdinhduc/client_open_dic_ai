@@ -122,8 +122,6 @@ export default function AdminDashboard() {
 
   const pendingContributions = overview?.pendingContributions ?? 0;
 
-  console.log("Check overview", overview);
-
   const totalReports = overview?.totalReports ?? 0;
 
   return (

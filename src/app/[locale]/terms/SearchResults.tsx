@@ -58,9 +58,6 @@ export default function SearchResultsClient({
 
     return names.includes(q);
   });
-  console.log("isquery", isQueryMatchingAnyTerm);
-
-  console.log("Check term kq", terms);
 
   const showSuggestedSection = terms.length > 0 && !isQueryMatchingAnyTerm;
 
@@ -182,7 +179,6 @@ export default function SearchResultsClient({
   const handleCloseAIChat = () => {
     setShowAIChat(false);
   };
-  console.log(t("noExactMatch"));
   return (
     <div className="search-results-page">
       <div className="container">

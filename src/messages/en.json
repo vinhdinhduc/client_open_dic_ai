@@ -917,7 +917,8 @@
     "vietnamese": "Tiếng Việt",
     "english": "English",
     "lao": "ພາສາລາວ",
-    "reputation": "Reputation Points"
+    "reputation": "Reputation Points",
+    "auditLogs": "Audit Logs"
   },
   "adminDashboard": {
     "title": "Dashboard",
@@ -2273,5 +2274,84 @@
     "infoAi": "Info Ai",
     "info429": "When reaching the limit, users will receive error code",
     "infoWarning": "Info Warning"
+  },
+  "auditLogs": {
+    "title": "Audit Logs",
+    "description": "Track all system administration activities",
+    "filter": {
+      "date": "Date",
+      "action": "Action",
+      "actorEmail": "Actor Email",
+      "allActions": "All Actions",
+      "enterEmail": "Enter email...",
+      "search": "Search",
+      "reset": "Reset",
+      "export": "Export CSV",
+      "exporting": "Exporting..."
+    },
+    "table": {
+      "time": "Time",
+      "action": "Action",
+      "actor": "Actor",
+      "resource": "Resource",
+      "reason": "Reason",
+      "status": "Status",
+      "clickDetail": "Click to view details",
+      "noReason": "N/A",
+      "success": "Success",
+      "failed": "Failed",
+      "showing": "Showing",
+      "of": "of",
+      "records": "records",
+      "loading": "Loading data...",
+      "noData": "No data available",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "modal": {
+      "overview": "Overview",
+      "time": "Time",
+      "actor": "Actor",
+      "resourceType": "Resource Type",
+      "resourceName": "Resource Name",
+      "status": "Status",
+      "reason": "Reason",
+      "error": "Error",
+      "ipAddress": "IP Address",
+      "changes": "Changes",
+      "before": "Before",
+      "after": "After",
+      "copy": "Copy",
+      "userAgent": "User Agent",
+      "close": "Close",
+      "success": "Success",
+      "failed": "Failed"
+    }
+    ,
+    "actions": {
+      "TERM_CREATE": "Term created",
+      "TERM_UPDATE": "Term updated",
+      "TERM_DELETE": "Term deleted",
+      "TERM_APPROVE": "Term approved",
+      "TERM_REJECT": "Term rejected",
+      "USER_CREATE": "User created",
+      "USER_UPDATE": "User updated",
+      "USER_BAN": "User banned",
+      "USER_LOCK": "User locked",
+      "USER_UNBAN": "User unbanned",
+      "ROLE_CHANGE": "Role changed",
+      "REPORT_RESOLVED": "Report resolved",
+      "REPORT_REJECTED": "Report rejected",
+      "CONTRIBUTION_APPROVE": "Contribution approved",
+      "CONTRIBUTION_REJECT": "Contribution rejected",
+      "COMMENT_DELETE": "Comment deleted",
+      "COMMENT_APPROVE": "Comment approved",
+      "COMMENT_REJECT": "Comment rejected",
+      "LOGIN_FAILED": "Login failed",
+      "LOGIN_SUCCESS": "Login success",
+      "LOGOUT": "Logout",
+      "PASSWORD_CHANGE": "Password changed",
+      "EMAIL_VERIFY": "Email verified"
+    }
   }
 }

@@ -8,12 +8,14 @@ interface MarkdownRendererProps {
   content: string;
   className?: string;
   inline?: boolean;
+  compact?: boolean;
 }
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   className = "",
   inline = false,
+  compact = false,
 }) => {
   if (!content || typeof content !== "string") {
     return null;
@@ -33,12 +35,14 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   const customComponents = {
     p: ({ children }: { children: ReactNode }) => (
-      <p style={{ margin: "0.5rem 0", lineHeight: "1.5" }}>{children}</p>
+      <p style={{ margin: compact ? "0" : "0.5rem 0", lineHeight: "1.5" }}>
+        {children}
+      </p>
     ),
     ul: ({ children }: { children: ReactNode }) => (
       <ul
         style={{
-          margin: "0.5rem 0",
+          margin: compact ? "0.25rem 0" : "0.5rem 0",
           paddingLeft: "1.5rem",
           lineHeight: "1.6",
         }}
@@ -49,7 +53,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     ol: ({ children }: { children: ReactNode }) => (
       <ol
         style={{
-          margin: "0.5rem 0",
+          margin: compact ? "0.25rem 0" : "0.5rem 0",
           paddingLeft: "1.5rem",
           lineHeight: "1.6",
         }}
@@ -58,20 +62,38 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       </ol>
     ),
     li: ({ children }: { children: ReactNode }) => (
-      <li style={{ margin: "0.25rem 0" }}>{children}</li>
+      <li style={{ margin: compact ? "0.1rem 0" : "0.25rem 0" }}>{children}</li>
     ),
     h1: ({ children }: { children: ReactNode }) => (
-      <h1 style={{ fontSize: "1.5rem", margin: "0.5rem 0", fontWeight: 600 }}>
+      <h1
+        style={{
+          fontSize: "1.5rem",
+          margin: compact ? "0.25rem 0" : "0.5rem 0",
+          fontWeight: 600,
+        }}
+      >
         {children}
       </h1>
     ),
     h2: ({ children }: { children: ReactNode }) => (
-      <h2 style={{ fontSize: "1.25rem", margin: "0.5rem 0", fontWeight: 600 }}>
+      <h2
+        style={{
+          fontSize: "1.25rem",
+          margin: compact ? "0.25rem 0" : "0.5rem 0",
+          fontWeight: 600,
+        }}
+      >
         {children}
       </h2>
     ),
     h3: ({ children }: { children: ReactNode }) => (
-      <h3 style={{ fontSize: "1.1rem", margin: "0.5rem 0", fontWeight: 600 }}>
+      <h3
+        style={{
+          fontSize: "1.1rem",
+          margin: compact ? "0.25rem 0" : "0.5rem 0",
+          fontWeight: 600,
+        }}
+      >
         {children}
       </h3>
     ),

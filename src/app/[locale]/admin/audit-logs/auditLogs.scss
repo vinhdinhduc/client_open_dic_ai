@@ -1,0 +1,52 @@
+.audit-logs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+
+    @media (max-width: 768px) {
+        padding: 16px;
+        gap: 16px;
+    }
+}
+
+.audit-logs-header {
+    h1 {
+        margin: 0 0 8px 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+/* Color variables */
+[data-theme="dark"] {
+    .audit-logs-container {
+        --text-primary: #e0e0e0;
+        --text-secondary: #a0a0a0;
+    }
+}
+
+[data-theme="light"] {
+    .audit-logs-container {
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+    }
+}
