@@ -6,14 +6,16 @@ import { Search, RotateCcw, Download } from "lucide-react";
 import auditLogService from "@/services/auditLogService";
 import "./filterSection.scss";
 
+interface Filters {
+  date: string;
+  action: string;
+  actorEmail: string;
+}
+
 interface FilterSectionProps {
-  filters: {
-    date: string;
-    action: string;
-    actorEmail: string;
-  };
-  onFilterChange: (filters: Partial<typeof filters>) => void;
-  onSearch: (filters: Partial<typeof filters>) => void;
+  filters: Filters;
+  onFilterChange: (filters: Partial<Filters>) => void;
+  onSearch: (filters: Partial<Filters>) => void;
   onReset: () => void;
   isLoading: boolean;
 }
@@ -109,9 +111,7 @@ export default function FilterSection({
 
         {/* Actor Email */}
         <div className="filter-group">
-          <label htmlFor="email-filter">
-            {t("actorEmail")}
-          </label>
+          <label htmlFor="email-filter">{t("actorEmail")}</label>
           <input
             id="email-filter"
             type="email"
@@ -149,9 +149,7 @@ export default function FilterSection({
             className="btn btn-export"
           >
             <Download size={18} />
-            {isExporting
-              ? t("exporting")
-              : t("export")}
+            {isExporting ? t("exporting") : t("export")}
           </button>
         </div>
       </div>
