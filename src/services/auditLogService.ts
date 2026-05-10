@@ -8,6 +8,8 @@ interface GetAuditLogsParams {
     limit?: number;
 }
 
+const getTimezoneOffsetMinutes = () => new Date().getTimezoneOffset();
+
 interface AuditLog {
     _id: string;
     action: string;
@@ -59,6 +61,7 @@ const auditLogService = {
         if (params.actorEmail) queryParams.append("actorEmail", params.actorEmail);
         if (params.page) queryParams.append("page", params.page.toString());
         if (params.limit) queryParams.append("limit", params.limit.toString());
+        queryParams.append("timezoneOffsetMinutes", getTimezoneOffsetMinutes().toString());
 
         const response = await apiClient.get(
             `/admin/audit-logs?${queryParams.toString()}`
@@ -75,6 +78,7 @@ const auditLogService = {
         if (params.date) queryParams.append("date", params.date);
         if (params.action) queryParams.append("action", params.action);
         if (params.actorEmail) queryParams.append("actorEmail", params.actorEmail);
+        queryParams.append("timezoneOffsetMinutes", getTimezoneOffsetMinutes().toString());
 
         try {
             const response = await apiClient.post(

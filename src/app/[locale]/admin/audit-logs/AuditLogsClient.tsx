@@ -39,10 +39,17 @@ interface FilterState {
   actorEmail: string;
 }
 
+const getLocalDateInputValue = () => {
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+  return new Date(now.getTime() - offsetMs).toISOString().split("T")[0];
+};
+
 export default function AuditLogsClient() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
   const t = useTranslations("auditLogs");
+  const hasFetchedOnLoad = React.useRef(false);
   const [isSearching, setIsSearching] = useState(false);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [pagination, setPagination] = useState({
@@ -52,7 +59,7 @@ export default function AuditLogsClient() {
     totalPages: 1,
   });
   const [filters, setFilters] = useState<FilterState>({
-    date: new Date().toISOString().split("T")[0],
+    date: getLocalDateInputValue(),
     action: "",
     actorEmail: "",
   });
@@ -85,7 +92,6 @@ export default function AuditLogsClient() {
         };
 
         const data = await auditLogService.getAuditLogs(params as any);
-        console.log("Chekck audit log", data);
 
         setLogs(data.data?.data || []);
         setPagination({
@@ -103,9 +109,18 @@ export default function AuditLogsClient() {
     [filters],
   );
 
+  React.useEffect(() => {
+    if (isLoading) return;
+    if (!isAuthenticated || user?.role !== "admin") return;
+    if (hasFetchedOnLoad.current) return;
+
+    hasFetchedOnLoad.current = true;
+    handleSearch({}, 1);
+  }, [isLoading, isAuthenticated, user, handleSearch]);
+
   const handleReset = useCallback(() => {
     setFilters({
-      date: new Date().toISOString().split("T")[0],
+      date: getLocalDateInputValue(),
       action: "",
       actorEmail: "",
     });

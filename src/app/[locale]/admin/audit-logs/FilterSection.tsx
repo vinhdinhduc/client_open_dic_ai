@@ -26,12 +26,14 @@ const AUDIT_ACTIONS = [
   "TERM_REJECT",
   "USER_CREATE",
   "USER_UPDATE",
+  "USER_DELETE",
   "USER_BAN",
   "USER_LOCK",
   "USER_UNBAN",
   "ROLE_CHANGE",
   "REPORT_RESOLVED",
   "REPORT_REJECTED",
+  "REPORT_CREATE",
   "CONTRIBUTION_APPROVE",
   "CONTRIBUTION_REJECT",
   "COMMENT_DELETE",
@@ -75,7 +77,7 @@ export default function FilterSection({
       <div className="filter-controls">
         {/* Date Picker */}
         <div className="filter-group">
-          <label htmlFor="date-filter">{t("date", "Ngày")}</label>
+          <label htmlFor="date-filter">{t("date")}</label>
           <input
             id="date-filter"
             type="date"
@@ -88,7 +90,7 @@ export default function FilterSection({
 
         {/* Action Dropdown */}
         <div className="filter-group">
-          <label htmlFor="action-filter">{t("action", "Hành vi")}</label>
+          <label htmlFor="action-filter">{t("action")}</label>
           <select
             id="action-filter"
             value={filters.action}
@@ -96,7 +98,7 @@ export default function FilterSection({
             disabled={isLoading}
             className="filter-input"
           >
-            <option value="">{t("allActions", "Tất cả hành vi")}</option>
+            <option value="">{t("allActions")}</option>
             {AUDIT_ACTIONS.map((action) => (
               <option key={action} value={action}>
                 {ta(action) || action}
@@ -108,12 +110,12 @@ export default function FilterSection({
         {/* Actor Email */}
         <div className="filter-group">
           <label htmlFor="email-filter">
-            {t("actorEmail", "Email người thực hiện")}
+            {t("actorEmail")}
           </label>
           <input
             id="email-filter"
             type="email"
-            placeholder={t("enterEmail", "Nhập email...")}
+            placeholder={t("enterEmail")}
             value={filters.actorEmail}
             onChange={(e) => onFilterChange({ actorEmail: e.target.value })}
             disabled={isLoading}
@@ -129,7 +131,7 @@ export default function FilterSection({
             className="btn btn-search"
           >
             <Search size={18} />
-            {t("search", "Tìm kiếm")}
+            {t("search")}
           </button>
 
           <button
@@ -138,7 +140,7 @@ export default function FilterSection({
             className="btn btn-reset"
           >
             <RotateCcw size={18} />
-            {t("reset", "Đặt lại")}
+            {t("reset")}
           </button>
 
           <button
@@ -148,8 +150,8 @@ export default function FilterSection({
           >
             <Download size={18} />
             {isExporting
-              ? t("exporting", "Đang xuất...")
-              : t("export", "Xuất CSV")}
+              ? t("exporting")
+              : t("export")}
           </button>
         </div>
       </div>

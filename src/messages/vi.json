@@ -2304,7 +2304,25 @@
       "noData": "Không có dữ liệu",
       "previous": "Trước",
       "next": "Tiếp"
+      ,
+      "noResourceName": "Không có"
+      ,
+      "resources": {
+        "contribution": "Đóng góp",
+        "auth": "Xác thực",
+        "comment": "Bình luận",
+        "term": "Thuật ngữ",
+        "user": "Người dùng",
+        "report": "Báo xấu",
+        "contribution_bulk": "Nhiều đóng góp"
+      }
     },
+    "roles": {
+      "admin": "Quản trị viên",
+      "moderator": "Người kiểm duyệt",
+      "user": "Người dùng"
+    },
+    
     "modal": {
       "overview": "Tổng quan",
       "time": "Thời gian",
@@ -2333,9 +2351,11 @@
       "TERM_REJECT": "Từ chối thuật ngữ",
       "USER_CREATE": "Tạo người dùng",
       "USER_UPDATE": "Cập nhật người dùng",
+      "USER_DELETE": "Xóa người dùng",
       "USER_BAN": "Cấm người dùng",
       "USER_LOCK": "Khóa người dùng",
       "USER_UNBAN": "Hủy cấm người dùng",
+      "REPORT_CREATE": "Tạo báo xấu",
       "ROLE_CHANGE": "Thay đổi vai trò",
       "REPORT_RESOLVED": "Báo cáo đã xử lý",
       "REPORT_REJECTED": "Báo cáo bị từ chối",

@@ -1,14 +1,9 @@
-/**
- * Utility functions for managing AI-to-Contribution data transfer
- * Uses sessionStorage for optimal performance and avoiding URL length limits
- */
+
 
 const STORAGE_PREFIX = 'ai_contribution_';
-const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_AGE_MS = 5 * 60 * 1000;
 
-/**
- * Strip &nbsp; and other HTML entities from text
- */
+
 function cleanNbsp(value: string): string {
     return value.replace(/&nbsp;/gi, ' ').replace(/\u00A0/g, ' ');
 }
@@ -38,9 +33,8 @@ export interface ContributionData {
     timestamp: number;
 }
 
-/** Multi-language contribution data (one entry per language) */
 export interface MultiLangContributionData {
-    /** AI response cached per language key */
+
     langs: Record<string, Omit<ContributionData, 'timestamp' | 'language'>>;
     partOfSpeech?: string;
     relatedTerms?: string[];
@@ -48,10 +42,7 @@ export interface MultiLangContributionData {
     timestamp: number;
 }
 
-/**
- * Save contribution data to sessionStorage
- * @returns Storage key to be passed via URL
- */
+
 export function saveContributionData(data: Omit<ContributionData, 'timestamp'>): string {
     const storageKey = `${STORAGE_PREFIX}${Date.now()}`;
     const dataWithTimestamp: ContributionData = {
@@ -68,24 +59,20 @@ export function saveContributionData(data: Omit<ContributionData, 'timestamp'>):
     }
 }
 
-/**
- * Load contribution data from sessionStorage
- * @returns Data if valid and not expired, null otherwise
- */
+
 export function loadContributionData(storageKey: string): ContributionData | null {
     try {
         const storedData = sessionStorage.getItem(storageKey);
         if (!storedData) {
-            console.warn('⚠️ No data found for key:', storageKey);
+            console.warn(' No data found for key:', storageKey);
             return null;
         }
 
         const parsed: ContributionData = JSON.parse(storedData);
 
-        // Validate freshness
         const age = Date.now() - parsed.timestamp;
         if (age > MAX_AGE_MS) {
-            console.warn('⚠️ Contribution data expired');
+            console.warn(' Contribution data expired');
             sessionStorage.removeItem(storageKey);
             return null;
         }
@@ -97,9 +84,7 @@ export function loadContributionData(storageKey: string): ContributionData | nul
     }
 }
 
-/**
- * Remove contribution data after use
- */
+
 export function clearContributionData(storageKey: string): void {
     try {
         sessionStorage.removeItem(storageKey);
@@ -111,9 +96,7 @@ export function clearContributionData(storageKey: string): void {
 
 const ML_STORAGE_PREFIX = 'ai_ml_contribution_';
 
-/**
- * Save multi-lang contribution data to sessionStorage
- */
+
 export function saveMultiLangContributionData(data: Omit<MultiLangContributionData, 'timestamp'>): string {
     const storageKey = `${ML_STORAGE_PREFIX}${Date.now()}`;
     const dataWithTimestamp: MultiLangContributionData = {
@@ -129,9 +112,8 @@ export function saveMultiLangContributionData(data: Omit<MultiLangContributionDa
     }
 }
 
-/**
- * Load multi-lang contribution data from sessionStorage
- */
+
+
 export function loadMultiLangContributionData(storageKey: string): MultiLangContributionData | null {
     try {
         const storedData = sessionStorage.getItem(storageKey);
@@ -144,7 +126,7 @@ export function loadMultiLangContributionData(storageKey: string): MultiLangCont
             return null;
         }
 
-        // Clean nbsp from each language entry
+
         for (const lang of Object.keys(parsed.langs)) {
             const entry = parsed.langs[lang];
             entry.term = cleanNbsp(entry.term);
@@ -160,10 +142,7 @@ export function loadMultiLangContributionData(storageKey: string): MultiLangCont
     }
 }
 
-/**
- * Clean up all expired contribution data
- * Should be called on app initialization
- */
+
 export function cleanupExpiredData(): void {
     try {
         const keys = Object.keys(sessionStorage);
@@ -190,15 +169,13 @@ export function cleanupExpiredData(): void {
             }
         });
 
-        // Cleaned up expired items silently
+
     } catch (error) {
         console.error(' Failed to cleanup expired data:', error);
     }
 }
 
-/**
- * Get all stored contribution data (for debugging)
- */
+
 export function debugStoredData(): void {
     const keys = Object.keys(sessionStorage).filter(k => k.startsWith(STORAGE_PREFIX));
     console.log(' Stored contribution data:', {

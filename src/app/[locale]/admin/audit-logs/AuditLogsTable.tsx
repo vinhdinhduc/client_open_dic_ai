@@ -54,6 +54,7 @@ const ACTION_COLORS: Record<string, string> = {
   ROLE_CHANGE: "bg-purple",
   REPORT_RESOLVED: "bg-green",
   REPORT_REJECTED: "bg-orange",
+  REPORT_CREATE: "bg-blue",
   CONTRIBUTION_APPROVE: "bg-green",
   CONTRIBUTION_REJECT: "bg-orange",
   COMMENT_DELETE: "bg-red",
@@ -63,6 +64,7 @@ const ACTION_COLORS: Record<string, string> = {
   EMAIL_VERIFY: "bg-blue",
   USER_CREATE: "bg-blue",
   USER_UPDATE: "bg-cyan",
+  USER_DELETE: "bg-red",
   USER_UNBAN: "bg-green",
   COMMENT_APPROVE: "bg-green",
   COMMENT_REJECT: "bg-orange",
@@ -97,6 +99,35 @@ export default function AuditLogsTable({
 
   const getActionColor = (action: string) => {
     return ACTION_COLORS[action] || "bg-gray";
+  };
+
+  const getRoleLabel = (role?: string) => {
+    if (!role) return null;
+    try {
+      // try to translate role under auditLogs.roles (e.g. auditLogs.roles.admin)
+      const key = `roles.${role.toLowerCase()}`;
+      const label = t(key);
+      return label !== key ? label : role;
+    } catch (e) {
+      return role;
+    }
+  };
+
+  const getResourceLabel = (resourceType: string) => {
+    try {
+      const key = `resources.${resourceType}`;
+      const label = tTable(key);
+      return label !== key ? label : resourceType;
+    } catch (e) {
+      return resourceType;
+    }
+  };
+
+  const formatResourceName = (resourceType: string, resourceName?: string) => {
+    if (!resourceName) return null;
+    // For long names, truncate for table view
+    if (resourceName.length > 60) return resourceName.slice(0, 57) + "...";
+    return resourceName;
   };
 
   const renderEmptyState = () => {
@@ -158,27 +189,48 @@ export default function AuditLogsTable({
 
                   <td className="actor-cell">
                     <div className="actor-info">
-                      <span className="email">{log.actor.email}</span>
-                      {log.actor.role && (
-                        <span className="role">{log.actor.role}</span>
-                      )}
+                      <span className="name">
+                        {log.actor.fullName || log.actor.email}
+                      </span>
+                      <div className="meta">
+                        {log.actor.email && log.actor.fullName && (
+                          <span className="email muted">{log.actor.email}</span>
+                        )}
+                        {log.actor.role && (
+                          <span className="role">
+                            {getRoleLabel(log.actor.role)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
 
                   <td className="resource-cell">
                     <div className="resource-info">
-                      <span className="type">{log.resourceType}</span>
-                      {log.resourceName && (
-                        <span className="name">{log.resourceName}</span>
+                      <span className="type">
+                        {getResourceLabel(log.resourceType)}
+                      </span>
+                      {formatResourceName(
+                        log.resourceType,
+                        log.resourceName,
+                      ) ? (
+                        <span className="name">
+                          {formatResourceName(
+                            log.resourceType,
+                            log.resourceName,
+                          )}
+                        </span>
+                      ) : (
+                        <span className="name muted">
+                          {tTable("noResourceName")}
+                        </span>
                       )}
                     </div>
                   </td>
 
                   <td className="reason-cell">
                     {log.reason || (
-                      <span className="text-muted">
-                        {tTable("noReason")}
-                      </span>
+                      <span className="text-muted">{tTable("noReason")}</span>
                     )}
                   </td>
 
@@ -205,8 +257,8 @@ export default function AuditLogsTable({
       {pagination.totalPages > 1 && !isLoading && (
         <div className="pagination">
           <div className="pagination-info">
-            {tTable("showing")} {logs.length} {tTable("of")}{" "}
-            {pagination.total} {tTable("records")}
+            {tTable("showing")} {logs.length} {tTable("of")} {pagination.total}{" "}
+            {tTable("records")}
           </div>
 
           <div className="pagination-controls">

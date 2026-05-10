@@ -2307,6 +2307,17 @@
       "noData": "No data available",
       "previous": "Previous",
       "next": "Next"
+      ,
+      "noResourceName": "N/A",
+      "resources": {
+        "contribution": "Contribution",
+        "auth": "Authentication",
+        "comment": "Comment",
+        "term": "Term",
+        "user": "User",
+        "report": "Report",
+        "contribution_bulk": "Multiple Contributions"
+      }
     },
     "modal": {
       "overview": "Overview",
@@ -2328,6 +2339,11 @@
       "failed": "Failed"
     }
     ,
+    "roles": {
+      "admin": "Admin",
+      "moderator": "Moderator",
+      "user": "User"
+    },
     "actions": {
       "TERM_CREATE": "Term created",
       "TERM_UPDATE": "Term updated",
@@ -2336,9 +2352,11 @@
       "TERM_REJECT": "Term rejected",
       "USER_CREATE": "User created",
       "USER_UPDATE": "User updated",
+      "USER_DELETE": "User deleted",
       "USER_BAN": "User banned",
       "USER_LOCK": "User locked",
       "USER_UNBAN": "User unbanned",
+      "REPORT_CREATE": "Report created",
       "ROLE_CHANGE": "Role changed",
       "REPORT_RESOLVED": "Report resolved",
       "REPORT_REJECTED": "Report rejected",

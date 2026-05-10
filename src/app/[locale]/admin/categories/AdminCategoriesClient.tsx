@@ -771,7 +771,7 @@ export default function CategoriesPage() {
                         marginBottom: 6,
                       }}
                     >
-                      ⚠️ {t("cannotDelete")}
+                      {t("cannotDelete")}
                     </p>
                     <p style={{ color: "#9a3412", fontSize: 14 }}>
                       {deleteErrorMsg}

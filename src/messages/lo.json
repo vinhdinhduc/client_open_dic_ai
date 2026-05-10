@@ -2305,6 +2305,17 @@
       "noData": "ບໍ່ມີຂໍ້ມູນ",
       "previous": "ກ່ອນໜ້າ",
       "next": "ຖັດໄປ"
+      ,
+      "noResourceName": "N/A",
+      "resources": {
+        "contribution": "ການອະນຸມັດການມອບມາ",
+        "auth": "ການຢືນຢັນ",
+        "comment": "ຄໍາເຫັນ",
+        "term": "ຄຳສັບ",
+        "user": "ຜູ້ໃຊ້",
+        "report": "ການລາຍງານ",
+        "contribution_bulk": "ຫຼາຍການມອບມາ"
+      }
     },
     "modal": {
       "overview": "ພາບລວມ",
@@ -2326,6 +2337,11 @@
       "failed": "ບໍ່ສຳເລັດ"
     }
     ,
+    "roles": {
+      "admin": "ຜູ້ບໍລິຫານ",
+      "moderator": "ຜູ້ກວດສອບ",
+      "user": "ຜູ້ໃຊ້"
+    },
     "actions": {
       "TERM_CREATE": "Term created",
       "TERM_UPDATE": "Term updated",
@@ -2334,9 +2350,11 @@
       "TERM_REJECT": "Term rejected",
       "USER_CREATE": "User created",
       "USER_UPDATE": "User updated",
+      "USER_DELETE": "User deleted",
       "USER_BAN": "User banned",
       "USER_LOCK": "User locked",
       "USER_UNBAN": "User unbanned",
+      "REPORT_CREATE": "Report created",
       "ROLE_CHANGE": "Role changed",
       "REPORT_RESOLVED": "Report resolved",
       "REPORT_REJECTED": "Report rejected",
