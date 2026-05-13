@@ -49,7 +49,6 @@ export default function AuditLogsClient() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
   const t = useTranslations("auditLogs");
-  const hasFetchedOnLoad = React.useRef(false);
   const [isSearching, setIsSearching] = useState(false);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [pagination, setPagination] = useState({
@@ -59,6 +58,11 @@ export default function AuditLogsClient() {
     totalPages: 1,
   });
   const [filters, setFilters] = useState<FilterState>({
+    date: getLocalDateInputValue(),
+    action: "",
+    actorEmail: "",
+  });
+  const filtersRef = React.useRef<FilterState>({
     date: getLocalDateInputValue(),
     action: "",
     actorEmail: "",
@@ -73,20 +77,21 @@ export default function AuditLogsClient() {
   }, [isAuthenticated, isLoading, user, router]);
 
   const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setFilters((prev) => {
+      const next = { ...prev, ...newFilters };
+      filtersRef.current = next;
+      return next;
+    });
   }, []);
 
-  const handleSearch = useCallback(
-    async (newFilters: Partial<FilterState>, page = 1) => {
+  const fetchAuditLogs = useCallback(
+    async (activeFilters: FilterState, page = 1) => {
       setIsSearching(true);
       try {
-        const updatedFilters = { ...filters, ...newFilters };
-        setFilters(updatedFilters);
-
         const params = {
-          date: updatedFilters.date,
-          action: updatedFilters.action,
-          actorEmail: updatedFilters.actorEmail,
+          date: activeFilters.date,
+          action: activeFilters.action,
+          actorEmail: activeFilters.actorEmail,
           page,
           limit: 50,
         };
@@ -106,38 +111,47 @@ export default function AuditLogsClient() {
         setIsSearching(false);
       }
     },
-    [filters],
+    [],
+  );
+
+  const handleSearch = useCallback(
+    async (newFilters: Partial<FilterState>, page = 1) => {
+      const updatedFilters = { ...filtersRef.current, ...newFilters };
+      filtersRef.current = updatedFilters;
+      setFilters(updatedFilters);
+      await fetchAuditLogs(updatedFilters, page);
+    },
+    [fetchAuditLogs],
   );
 
   React.useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated || user?.role !== "admin") return;
-    if (hasFetchedOnLoad.current) return;
 
-    hasFetchedOnLoad.current = true;
-    handleSearch({}, 1);
-  }, [isLoading, isAuthenticated, user, handleSearch]);
+    const timeoutId = window.setTimeout(() => {
+      fetchAuditLogs(filtersRef.current, 1);
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isLoading, isAuthenticated, user, filters, fetchAuditLogs]);
 
   const handleReset = useCallback(() => {
-    setFilters({
+    const defaultFilters = {
       date: getLocalDateInputValue(),
       action: "",
       actorEmail: "",
-    });
-    setLogs([]);
-    setPagination({
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 1,
-    });
-  }, []);
+    };
+
+    filtersRef.current = defaultFilters;
+    setFilters(defaultFilters);
+    handleSearch(defaultFilters, 1);
+  }, [handleSearch]);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      handleSearch({}, newPage);
+      fetchAuditLogs(filtersRef.current, newPage);
     },
-    [handleSearch],
+    [fetchAuditLogs],
   );
 
   if (isLoading) {

@@ -38,6 +38,7 @@ const AUDIT_ACTIONS = [
   "REPORT_CREATE",
   "CONTRIBUTION_APPROVE",
   "CONTRIBUTION_REJECT",
+  "CONTRIBUTION_DELETE",
   "COMMENT_DELETE",
   "COMMENT_APPROVE",
   "COMMENT_REJECT",
@@ -58,6 +59,14 @@ export default function FilterSection({
   const t = useTranslations("auditLogs.filter");
   const ta = useTranslations("auditLogs.actions");
   const [isExporting, setIsExporting] = React.useState(false);
+
+  const getActionLabel = (action: string) => {
+    try {
+      return ta(action);
+    } catch (error) {
+      return action;
+    }
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -85,7 +94,6 @@ export default function FilterSection({
             type="date"
             value={filters.date}
             onChange={(e) => onFilterChange({ date: e.target.value })}
-            disabled={isLoading}
             className="filter-input"
           />
         </div>
@@ -97,13 +105,12 @@ export default function FilterSection({
             id="action-filter"
             value={filters.action}
             onChange={(e) => onFilterChange({ action: e.target.value })}
-            disabled={isLoading}
             className="filter-input"
           >
             <option value="">{t("allActions")}</option>
             {AUDIT_ACTIONS.map((action) => (
               <option key={action} value={action}>
-                {ta(action) || action}
+                {getActionLabel(action)}
               </option>
             ))}
           </select>
@@ -118,7 +125,6 @@ export default function FilterSection({
             placeholder={t("enterEmail")}
             value={filters.actorEmail}
             onChange={(e) => onFilterChange({ actorEmail: e.target.value })}
-            disabled={isLoading}
             className="filter-input"
           />
         </div>
@@ -126,7 +132,7 @@ export default function FilterSection({
         {/* Action Buttons */}
         <div className="filter-buttons">
           <button
-            onClick={() => onSearch({})}
+            onClick={() => onSearch(filters)}
             disabled={isLoading}
             className="btn btn-search"
           >

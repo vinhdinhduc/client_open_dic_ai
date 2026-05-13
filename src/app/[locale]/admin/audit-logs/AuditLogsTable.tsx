@@ -57,6 +57,7 @@ const ACTION_COLORS: Record<string, string> = {
   REPORT_CREATE: "bg-blue",
   CONTRIBUTION_APPROVE: "bg-green",
   CONTRIBUTION_REJECT: "bg-orange",
+  CONTRIBUTION_DELETE: "bg-red",
   COMMENT_DELETE: "bg-red",
   LOGIN_SUCCESS: "bg-gray",
   LOGIN_FAILED: "bg-red",
@@ -99,6 +100,14 @@ export default function AuditLogsTable({
 
   const getActionColor = (action: string) => {
     return ACTION_COLORS[action] || "bg-gray";
+  };
+
+  const getActionLabel = (action: string) => {
+    try {
+      return ta(action);
+    } catch (e) {
+      return action;
+    }
   };
 
   const getRoleLabel = (role?: string) => {
@@ -183,7 +192,7 @@ export default function AuditLogsTable({
                       className={`action-badge ${getActionColor(log.action)}`}
                       title={tTable("clickDetail")}
                     >
-                      {ta(log.action) || log.action}
+                      {getActionLabel(log.action)}
                     </button>
                   </td>
 
