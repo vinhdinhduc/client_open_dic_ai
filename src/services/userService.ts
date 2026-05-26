@@ -27,7 +27,7 @@ export const getUserById = async (id: string): Promise<ApiResponse<User>> => {
 };
 
 /**
- * Tạo người dùng mới (Admin)
+ * Tạo người dùng mới 
  */
 export const createUser = async (data: CreateUserData): Promise<ApiResponse<User>> => {
     const response = await axiosInstance.post('/users', data);

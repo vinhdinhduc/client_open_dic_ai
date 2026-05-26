@@ -548,7 +548,6 @@ export default function FloatingChatButton() {
 
       const parsed = parseStructuredSections(message.content);
       if (parsed.sections.length === 0) {
-        // Render nội dung thuần có hỗ trợ markdown
         return (
           <MarkdownRenderer
             content={message.content}
@@ -1084,7 +1083,6 @@ export default function FloatingChatButton() {
                 </div>
               )}
             </div>
-
             <div className="floating-chat-sidebar__input-area">
               <div className="floating-chat-sidebar__quick-prompts">
                 {quickPrompts.map((prompt, index) => (

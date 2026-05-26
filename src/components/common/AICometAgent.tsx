@@ -61,9 +61,6 @@ export default function AICometAgent({
     null,
   );
 
-  /**
-   * Tải đề xuất khi component mount hoặc context thay đổi
-   */
   useEffect(() => {
     const loadSuggestions = async () => {
       if (!isAuthenticated) {
@@ -89,12 +86,8 @@ export default function AICometAgent({
     loadSuggestions();
   }, [context, isAuthenticated, currentLanguage]);
 
-  /**
-   * Xử lý click vào một đề xuất
-   */
   const handleSuggestionClick = useCallback(
     async (suggestion: ActionSuggestion) => {
-      // Log feedback
       aiAgentService.provideFeedback({
         suggestionId: suggestion.id,
         userAction: "clicked",
@@ -124,7 +117,6 @@ export default function AICometAgent({
           );
           setIsOpen(false);
         } else if (action.type === "ask_ai") {
-          // Trigger AI chat modal in parent component
           window.dispatchEvent(
             new CustomEvent("openAIChat", {
               detail: {

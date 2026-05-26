@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/axios";
 
 interface GetAuditLogsParams {
-    date?: string; // YYYY-MM-DD
+    date?: string;
     action?: string;
     actorEmail?: string;
     page?: number;
