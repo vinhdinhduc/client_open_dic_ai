@@ -7,7 +7,6 @@ import "./Footer.scss";
 
 export function Footer() {
   const t = useTranslations();
-  const currentYear = new Date().getFullYear();
   const d = useTranslations("footer");
 
   return (
@@ -101,8 +100,9 @@ export function Footer() {
 
         <div className="footer-bottom">
           <p>
-            &copy; {currentYear} {t("common.appName")}. All rights reserved. Dev
-            by Đinh Đức Vình - K63ĐHCNTT-A -- Trường Đại học Tây Bắc.
+            {d("copyrightLine1")}
+            <br />
+            {d("copyrightLine2")}
           </p>
         </div>
       </div>

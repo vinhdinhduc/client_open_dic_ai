@@ -63,6 +63,7 @@
     "loginTitle": "Login to your account",
     "registerTitle": "Create new account",
     "registerSubtitle": "Register to start your learning journey",
+    "registerRestrictionNotice": "Registration is only available for university email addresses ending in @utb.edu.vn.",
     "goToLogin": "Go to login page",
     "emailPlaceholder": "Enter your email",
     "passwordPlaceholder": "Enter your password",
@@ -86,6 +87,7 @@
     "errorFullNameMin": "Full name must be at least 2 characters",
     "errorEmailRequired": "Please enter your email",
     "errorEmailInvalid": "Invalid email address",
+    "errorEmailDomainRestricted": "Only university email addresses ending in @utb.edu.vn are accepted",
     "errorPasswordRequired": "Please enter your password",
     "errorPasswordMin": "Password must be at least 6 characters",
     "errorConfirmPasswordRequired": "Please confirm your password",
@@ -236,7 +238,9 @@
     "faq": "FAQ",
     "fanpage": "UTB University Website",
     "descriptionBold": "UTB OpenDict is a multilingual open dictionary system developed by Tay Bac University.",
-    "descriptionText": "UTB OpenDict is a multilingual open dictionary system developed by Tay Bac University."
+    "descriptionText": "UTB OpenDict is a multilingual open dictionary system developed by Tay Bac University.",
+    "copyrightLine1": "© 2026 Tay Bac University.",
+    "copyrightLine2": "Developed by Đinh Đức Vình - K63 ĐH CNTT (A)."
   },
   "aiChat": {
     "assistant": "AI Assistant",

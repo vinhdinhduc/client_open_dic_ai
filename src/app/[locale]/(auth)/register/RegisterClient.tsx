@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import { validateEmail, validatePassword } from "@/services/authService";
@@ -14,6 +14,8 @@ export default function RegisterPage() {
   const t = useTranslations("auth");
   const router = useRouter();
   const { register, isAuthenticated } = useAuth();
+  const allowedSchoolEmailRegex = /@utb\.edu\.vn$/i;
+  const searchParams = useSearchParams();
 
   // Trạng thái biểu mẫu
   const [formData, setFormData] = useState({
@@ -76,6 +78,23 @@ export default function RegisterPage() {
     }
   }, [router, isAuthenticated]);
 
+  // Show friendly error when OAuth redirect includes error param
+  useEffect(() => {
+    try {
+      const err = searchParams?.get("error");
+      if (err) {
+        if (err === "domain_restricted") {
+          const msg = t("errorEmailDomainRestricted");
+          setAlertMessage({ type: "error", message: msg });
+        } else {
+          setAlertMessage({ type: "error", message: t("registerFailed") });
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [searchParams, t]);
+
   // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -103,10 +122,13 @@ export default function RegisterPage() {
     }
 
     // Email validation
-    if (!formData.email.trim()) {
+    const normalizedEmail = formData.email.trim().toLowerCase();
+    if (!normalizedEmail) {
       newErrors.email = t("errorEmailRequired");
-    } else if (!validateEmail(formData.email)) {
+    } else if (!validateEmail(normalizedEmail)) {
       newErrors.email = t("errorEmailInvalid");
+    } else if (!allowedSchoolEmailRegex.test(normalizedEmail)) {
+      newErrors.email = t("errorEmailDomainRestricted");
     }
 
     // Kiểm tra hợp lệ mật khẩu
@@ -208,6 +230,12 @@ export default function RegisterPage() {
           </div>
           <h1 className="auth-card__title">{t("registerTitle")}</h1>
           <p className="auth-card__subtitle">{t("registerSubtitle")}</p>
+          <p
+            className="auth-card__subtitle"
+            style={{ marginTop: "6px", fontSize: "0.95rem", fontWeight: 500 }}
+          >
+            {t("registerRestrictionNotice")}
+          </p>
         </div>
 
         {/* Body */}

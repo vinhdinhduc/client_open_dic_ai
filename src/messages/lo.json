@@ -63,6 +63,7 @@
     "loginTitle": "ເຂົ້າສູ່ລະບົບ",
     "registerTitle": "ສ້າງບັນຊີໃໝ່",
     "registerSubtitle": "ລົງທະບຽນເພື່ອເລີ່ມຕົ້ນການຮຽນຮູ້",
+    "registerRestrictionNotice": "ການລົງທະບຽນມີພຽງແຕ່ສຳລັບອີເມວມະຫາວິທະຍາໄລທີ່ມີທີ່ຢູ່ທີ່ສິ້ນທີ່ @utb.edu.vn.",
     "goToLogin": "ໄປໜ້າເຂົ້າສູ່ລະບົບ",
     "emailPlaceholder": "ປ້ອນອີເມວຂອງທ່ານ",
     "passwordPlaceholder": "ປ້ອນລະຫັດຜ່ານ",
@@ -86,6 +87,7 @@
     "errorFullNameMin": "ຊື່ຕ້ອງມີຢ່າງໜ້ອຍ 2 ຕົວອັກສອນ",
     "errorEmailRequired": "ກະລຸນາປ້ອນອີເມວ",
     "errorEmailInvalid": "ອີເມວບໍ່ຖືກຕ້ອງ",
+    "errorEmailDomainRestricted": "ມີພຽງແຕ່ອີເມວມະຫາວິທະຍາໄລທີ່ມີທີ່ຢູ່ສິ້ນທີ່ @utb.edu.vn ທີ່ຍອມຮັບ",
     "errorPasswordRequired": "ກະລຸນາປ້ອນລະຫັດຜ່ານ",
     "errorPasswordMin": "ລະຫັດຜ່ານຕ້ອງມີຢ່າງໜ້ອຍ 6 ຕົວອັກສອນ",
     "errorConfirmPasswordRequired": "ກະລຸນາຢືນຢັນລະຫັດຜ່ານ",
@@ -236,7 +238,9 @@
     "legal": "ກົດໜາຍ",
     "termsOfService": "ເງື່ອນໄຂການໃຊ້ງານ",
     "privacyPolicy": "ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ",
-    "fanpage": "ເວັບໄຊ ມ.ໄຕບັກ"
+    "fanpage": "ເວັບໄຊ ມ.ໄຕບັກ",
+    "copyrightLine1": "© 2026 ມະຫາວິທະຍາໄລໄຕບັກ.",
+    "copyrightLine2": "ພັດທະນາໂດຍ Đinh Đức Vình - K63 ວິສາຫະກິດຄອມພິວເຕີ (A)."
   },
   "aiChat": {
     "assistant": "ຜູ້ຊ່ວຍ AI",

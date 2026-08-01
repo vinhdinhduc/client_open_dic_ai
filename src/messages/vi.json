@@ -55,6 +55,7 @@
     "loginTitle": "Đăng nhập vào hệ thống",
     "registerTitle": "Tạo tài khoản mới",
     "registerSubtitle": "Đăng ký để bắt đầu hành trình học tập",
+    "registerRestrictionNotice": "Đăng ký chỉ dành cho email trường có đuôi @utb.edu.vn.",
     "goToLogin": "Đi đến trang đăng nhập",
     "emailPlaceholder": "Nhập email của bạn",
     "passwordPlaceholder": "Nhập mật khẩu",
@@ -78,6 +79,7 @@
     "errorFullNameMin": "Họ tên phải có ít nhất 2 ký tự",
     "errorEmailRequired": "Vui lòng nhập email",
     "errorEmailInvalid": "Email không hợp lệ",
+    "errorEmailDomainRestricted": "Chỉ chấp nhận email trường có đuôi @utb.edu.vn",
     "errorPasswordRequired": "Vui lòng nhập mật khẩu",
     "errorPasswordMin": "Mật khẩu phải có ít nhất 6 ký tự",
     "errorConfirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
@@ -237,7 +239,9 @@
     "faq": "Câu hỏi thường gặp",
     "fanpage": "Website Trường Đại học Tây Bắc",
     "descriptionBold": "UTB OpenDict là hệ thống từ điển mở đa ngôn ngữ do Trường Đại học Tây Bắc phát triển.",
-    "descriptionText": "Hệ thống giúp tra cứu thuật ngữ nhanh chóng từ nhiều bộ từ điển chuyên ngành. Hệ thống hỗ trợ ngôn ngữ Việt - Lào - Anh, tích hợp công nghệ trí tuệ nhân tạo (AI), được cập nhật liên tục và do cộng đồng đóng góp."
+    "descriptionText": "Hệ thống giúp tra cứu thuật ngữ nhanh chóng từ nhiều bộ từ điển chuyên ngành. Hệ thống hỗ trợ ngôn ngữ Việt - Lào - Anh, tích hợp công nghệ trí tuệ nhân tạo (AI), được cập nhật liên tục và do cộng đồng đóng góp.",
+    "copyrightLine1": "© 2026 Trường Đại học Tây Bắc.",
+    "copyrightLine2": "Phát triển bởi Đinh Đức Vình - K63 Đại học CNTT (A)."
   },
   "aiChat": {
     "assistant": "Trợ lý AI",
